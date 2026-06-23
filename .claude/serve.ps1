@@ -1,5 +1,5 @@
-# Minimal static file server for previewing TradeLens (serves ../files).
-$root = (Resolve-Path (Join-Path $PSScriptRoot '..\files')).Path
+# Minimal static file server for previewing TradeLens (serves repo root).
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add('http://localhost:8777/')
 $listener.Start()
