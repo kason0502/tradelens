@@ -5,7 +5,9 @@
       "Bash(git config *)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git commit -q -m 'Initial commit: TradeLens Pro trading dashboard *)"
+      "Bash(git commit -q -m 'Initial commit: TradeLens Pro trading dashboard *)",
+      "Bash(git rm *)",
+      "Bash(git commit -q -m 'Remove duplicate HTML and extracted zip *)"
     ]
   }
 }
