@@ -11,7 +11,8 @@
       "Bash(sed -n '853,2712p' index.html)",
       "Bash(node --check /tmp/tl_script.js)",
       "PowerShell($n=\\(Get-Command node -ErrorAction SilentlyContinue\\); if\\($n\\){$n.Source}else{\"no node\"}; $py=\\(Get-Command python -ErrorAction SilentlyContinue\\); if\\($py\\){\"python: \"+$py.Source}else{\"no python\"})",
-      "Bash(git commit -q -m 'Make entry/stop/TP structure-based and accurate *)"
+      "Bash(git commit -q -m 'Make entry/stop/TP structure-based and accurate *)",
+      "Bash(git commit -q -m 'Add AI strategy coach to the Backtest decision panel *)"
     ]
   }
 }

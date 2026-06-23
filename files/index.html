@@ -1378,6 +1378,8 @@ function renderBacktestArena(){
       <div class="bt-chartwrap"><canvas id="btCanvas"></canvas></div>
       <div id="btDecision">
         <div style="font-size:12px;color:var(--mu);margin:14px 0 8px;line-height:1.6">You're at the <b style="color:var(--tx)">decision point</b> (right edge). Reading the chart through the lens of <b style="color:${st.color}">${st.name}</b> — does the setup trigger? Take the strategy's trade, or pass.</div>
+        <div style="margin:0 0 10px"><button class="walk-ctrl ai" onclick="btAIStrategyHelp()">${aiReady()?'✨ AI: help me apply this strategy':'💡 Strategy help & levels'}</button></div>
+        <div id="btStratHelp"></div>
         <div class="bt-predict">
           ${st.bias==='long'
             ? `<button class="bt-pred-btn long" onclick="resolveBacktest('long')">▲ TAKE THE LONG<span class="sub">The setup triggers — price goes up</span></button>`
@@ -1554,6 +1556,37 @@ function resolveBacktest(call){
       <div id="btAIout"></div>
       <button class="bt-again" onclick="dealBacktest()">▶ Next Setup</button>
     </div>`;
+}
+
+// AI strategy coach BEFORE the guess — explains how to apply the assigned
+// strategy to the CURRENT (pre-decision) chart and whether it looks valid.
+// It only sees price up to the decision point, so it can't reveal the answer.
+async function btAIStrategyHelp(){
+  const s=btState;if(!s)return;
+  const out=document.getElementById('btStratHelp');if(!out)return;
+  const st=s.strat;
+  // Strategy's real structure-based levels from the visible pre-decision history.
+  let lvl=null;
+  try{const h=s.full.slice(Math.max(0,s.cutIdx-44),s.cutIdx+1);lvl=aiStrategyLevels(st.key,h.slice(-60));}catch(e){}
+  const levelHtml=lvl?`<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:11px;font-family:var(--mono);font-size:12px">
+      <span><b style="color:#4da6ff">Entry</b> $${lvl.entry.toFixed(2)}</span>
+      <span><b style="color:#ff4d4d">Stop</b> $${lvl.sl.toFixed(2)}</span>
+      <span><b style="color:#00d97e">TP1</b> $${lvl.tp1.toFixed(2)}</span>
+      <span><b style="color:#4dffa8">TP2</b> $${lvl.tp2.toFixed(2)}</span>
+    </div>`:'';
+  if(!aiReady()){
+    out.innerHTML=`<div class="lab-ai-card"><div class="lab-ai-head">${st.icon} How to apply ${st.name}</div>${st.brief}${levelHtml}<div class="lab-ai-foot">These are the strategy's structure-based levels on this chart. Connect Claude (✨ AI, top-right) for a live read of whether the setup looks valid here. Educational only.</div></div>`;
+    return;
+  }
+  out.innerHTML=`<div class="lab-ai-card"><span class="ai-spin"></span> Claude is reading the setup…</div>`;
+  const hist=s.full.slice(Math.max(0,s.cutIdx-20),s.cutIdx+1);
+  const recent=hist.map(d=>`${d.x}: O${d.o} H${d.h} L${d.l} C${d.c}`).join('\n');
+  try{
+    const sys='You are a trading coach helping a student decide whether an assigned strategy triggers on the chart in front of them. You can ONLY see price action up to the decision point — you do NOT know what happens next, so never predict the outcome or say what price will do. Explain what the strategy needs, point to what in this recent price action supports or argues against taking it, and remind them of the entry/stop/target plan. Conversational, flowing sentences, no headers, no bullet points, no markdown symbols. Under 130 words. Educational only.';
+    const usr=`Assigned strategy: ${st.name} (${st.bias}-only). What it needs: ${st.brief}\n\nTicker ${s.ticker}, ${s.tfLabel} bars. Plan levels from chart structure — entry $${lvl?lvl.entry.toFixed(2):'?'}, stop $${lvl?lvl.sl.toFixed(2):'?'}, targets $${lvl?lvl.tp1.toFixed(2):'?'} / $${lvl?lvl.tp2.toFixed(2):'?'}. Decision price $${s.decisionPrice.toFixed(2)}.\n\nRecent price action up to the decision point:\n${recent}\n\nReading this through the ${st.name} lens, what supports or argues against taking the trade here, and how should I manage it?`;
+    const ans=await callClaude(sys,usr,500);
+    out.innerHTML=`<div class="lab-ai-card"><div class="lab-ai-head">✨ ${st.name} — does it trigger here?</div>${fmtAI(ans)}${levelHtml}<div class="lab-ai-foot">Claude can't see the future — this is setup-reading coaching, not a prediction or financial advice.</div></div>`;
+  }catch(e){out.innerHTML=`<div class="lab-ai-card">AI help failed: ${e.message}</div>`;}
 }
 
 // AI walks through the trade on the backtest chart after the guess
