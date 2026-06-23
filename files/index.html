@@ -1654,59 +1654,125 @@ function renderPlaybook(){
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// ── STRATEGY LAB — animated walkthrough on a real chart ──────────────
+// ── STRATEGY ENGINE — real-structure entry / stop / targets ──────────
 // ══════════════════════════════════════════════════════════════════════
-// Each strategy computes real levels from a candle window and emits steps.
+// Each strategy anchors its levels to actual chart structure (swing highs/
+// lows, support/resistance, the 20-MA) and sizes its stop from ATR
+// (volatility), then normTrade() enforces correct ordering and a sane
+// minimum reward:risk. So the numbers are both structure-based AND follow
+// each strategy's own rules.
+
+// Average True Range over `period` bars — the stock's real volatility.
+function atr(d,period){
+  const n=Math.min(period||14,d.length-1);
+  if(n<1)return Math.max(0.01,(d[d.length-1].h-d[d.length-1].l)||d[d.length-1].c*0.01);
+  let sum=0;
+  for(let i=d.length-n;i<d.length;i++){
+    const cur=d[i],prev=d[i-1];
+    sum+=Math.max(cur.h-cur.l,Math.abs(cur.h-prev.c),Math.abs(cur.l-prev.c));
+  }
+  return Math.max(0.01,sum/n);
+}
+// Most recent confirmed swing pivot (high or low) — a real S/R level.
+function swingPivot(d,high){
+  const look=2;
+  for(let i=d.length-1-look;i>=look;i--){
+    let ok=true;
+    for(let j=i-look;j<=i+look;j++){
+      if(j===i)continue;
+      if(high&&d[j].h>=d[i].h){ok=false;break;}
+      if(!high&&d[j].l<=d[i].l){ok=false;break;}
+    }
+    if(ok)return high?d[i].h:d[i].l;
+  }
+  return null;
+}
+// Enforce: stop on the correct side, a real (>=~0.4 ATR) risk, and targets
+// at least 1.3R / 2.2R away in the trade direction (keeps structure target
+// if it's further). Guarantees sl<entry<tp1<tp2 for longs, reversed for shorts.
+function normTrade(dir,e,st,t1,t2,lv){
+  const a=lv.atr||Math.max(0.01,e*0.01);
+  e=+e;st=+st;t1=+t1;t2=+t2;
+  if(dir==='long'){
+    if(!(st<e))st=e-a*0.8;
+    let risk=e-st; if(risk<a*0.4){risk=a*0.9;st=e-risk;}
+    t1=Math.max(t1,e+risk*1.3);
+    t2=Math.max(t2,e+risk*2.2,t1+risk*0.6);
+  }else{
+    if(!(st>e))st=e+a*0.8;
+    let risk=st-e; if(risk<a*0.4){risk=a*0.9;st=e+risk;}
+    t1=Math.min(t1,e-risk*1.3);
+    t2=Math.min(t2,e-risk*2.2,t1-risk*0.6);
+  }
+  const r=v=>+v.toFixed(2);
+  return{entry:r(e),sl:r(st),tp1:r(t1),tp2:r(t2)};
+}
+
 const LAB_STRATEGIES=[
   {key:'pullback',name:'Trend Pullback Long',bias:'long',icon:'📈',color:'#00d97e',
    tag:'Buy a dip to support inside an uptrend',
-   compute:(d)=>{const lv=labLevels(d);const e=lv.support,st=Math.min(lv.lo,e*0.985),t1=Math.min(lv.resis,e+lv.range*0.5),t2=lv.resis+lv.range*0.2;
+   compute:(d)=>{const lv=labLevels(d);
+     const e=Math.min(lv.last,Math.max(lv.support,lv.sma20Val));      // buy the dip into support/20-MA
+     const st=Math.min(lv.support,lv.swLow)-lv.atr*0.5;               // below support, ATR buffer
+     const L=normTrade('long',e,st,lv.resis,lv.resis+lv.range*0.3,lv);
      return{dir:'long',steps:[
        {k:'zone',y:[lv.support,lv.sma20Val],c:'#00d97e',label:'Support / 20-MA zone',note:'In an uptrend, price pulls back into the rising 20-day average. This is where buyers tend to step back in.'},
-       {k:'entry',y:e,c:'#4da6ff',label:'Entry',note:`Buy near $${e.toFixed(2)} as the pullback stalls and a candle reclaims the prior high.`},
-       {k:'stop',y:st,c:'#ff4d4d',label:'Stop',note:`Protective stop at $${st.toFixed(2)} — just below support. If it breaks, the trend is in doubt.`},
-       {k:'tp',y:t1,c:'#00d97e',label:'Target 1',note:`First target $${t1.toFixed(2)} at prior resistance — scale out half.`},
-       {k:'tp',y:t2,c:'#4dffa8',label:'Target 2',note:`Runner to $${t2.toFixed(2)}, trailing the stop up under each higher low.`},
+       {k:'entry',y:L.entry,c:'#4da6ff',label:'Entry',note:`Buy near $${L.entry.toFixed(2)} as the pullback stalls and a candle reclaims the prior high.`},
+       {k:'stop',y:L.sl,c:'#ff4d4d',label:'Stop',note:`Protective stop at $${L.sl.toFixed(2)} — about half an ATR below support. If it breaks, the trend is in doubt.`},
+       {k:'tp',y:L.tp1,c:'#00d97e',label:'Target 1',note:`First target $${L.tp1.toFixed(2)} at prior resistance — scale out half.`},
+       {k:'tp',y:L.tp2,c:'#4dffa8',label:'Target 2',note:`Runner to $${L.tp2.toFixed(2)}, trailing the stop up under each higher low.`},
      ]};}},
   {key:'breakout',name:'Breakout Continuation',bias:'long',icon:'🚀',color:'#4da6ff',
    tag:'Enter long on a high-volume break of resistance',
-   compute:(d)=>{const lv=labLevels(d);const e=lv.resis,st=Math.max(lv.support,e*0.97),t1=e+lv.range*0.6,t2=e+lv.range;
+   compute:(d)=>{const lv=labLevels(d);
+     const e=lv.resis+lv.atr*0.15;                                    // trigger just above the ceiling
+     const st=lv.resis-lv.atr*1.0;                                    // back inside the range
+     const L=normTrade('long',e,st,e+lv.range*0.6,e+lv.range,lv);     // measured-move targets
      return{dir:'long',steps:[
        {k:'line',y:lv.resis,c:'#f0a500',label:'Resistance (ceiling)',note:`Price has been capped near $${lv.resis.toFixed(2)}. Volume dries up as it coils underneath.`},
-       {k:'entry',y:e,c:'#4da6ff',label:'Breakout entry',note:`Enter on a CLOSE above $${e.toFixed(2)} with a volume surge — not on the wick. Chasing is the trap.`},
-       {k:'stop',y:st,c:'#ff4d4d',label:'Stop',note:`Stop back inside the range at $${st.toFixed(2)}. A failed breakout = exit.`},
-       {k:'tp',y:t1,c:'#00d97e',label:'Target 1',note:`Partial at $${t1.toFixed(2)}.`},
-       {k:'tp',y:t2,c:'#4dffa8',label:'Measured target',note:`Project $${t2.toFixed(2)} = breakout level + the prior range height.`},
+       {k:'entry',y:L.entry,c:'#4da6ff',label:'Breakout entry',note:`Enter on a CLOSE above $${L.entry.toFixed(2)} with a volume surge — not on the wick. Chasing is the trap.`},
+       {k:'stop',y:L.sl,c:'#ff4d4d',label:'Stop',note:`Stop back inside the range at $${L.sl.toFixed(2)}. A failed breakout = exit.`},
+       {k:'tp',y:L.tp1,c:'#00d97e',label:'Target 1',note:`Partial at $${L.tp1.toFixed(2)}.`},
+       {k:'tp',y:L.tp2,c:'#4dffa8',label:'Measured target',note:`Project $${L.tp2.toFixed(2)} = breakout level + the prior range height.`},
      ]};}},
   {key:'breakdown',name:'Short the Breakdown',bias:'short',icon:'📉',color:'#ff4d4d',
    tag:'Sell weakness in a downtrend',
-   compute:(d)=>{const lv=labLevels(d);const e=lv.resis,st=e*1.015,t1=Math.max(lv.support,e-lv.range*0.5),t2=lv.support-lv.range*0.15;
+   compute:(d)=>{const lv=labLevels(d);
+     const e=Math.min(lv.resis,Math.max(lv.last,lv.sma20Val));        // short the bounce into resistance/20-MA
+     const st=Math.max(lv.resis,lv.swHigh)+lv.atr*0.5;                // above the bounce high, ATR buffer
+     const L=normTrade('short',e,st,lv.support,lv.support-lv.range*0.3,lv);
      return{dir:'short',steps:[
        {k:'zone',y:[lv.resis,lv.sma20Val],c:'#ff4d4d',label:'Resistance / 20-MA',note:'In a downtrend, price bounces back up into resistance / the falling 20-MA. Sellers wait there.'},
-       {k:'entry',y:e,c:'#a855f7',label:'Short entry',note:`Short near $${e.toFixed(2)} as the bounce stalls (long upper wicks, fading momentum) and rolls over.`},
-       {k:'stop',y:st,c:'#00d97e',label:'Stop',note:`Stop above the bounce high $${st.toFixed(2)} — if buyers reclaim it, the short is wrong.`},
-       {k:'tp',y:t1,c:'#ff4d4d',label:'Cover 1',note:`Cover half at support $${t1.toFixed(2)}.`},
-       {k:'tp',y:t2,c:'#ff8a8a',label:'Cover 2',note:`Final cover $${t2.toFixed(2)} — trail down under each lower high.`},
+       {k:'entry',y:L.entry,c:'#a855f7',label:'Short entry',note:`Short near $${L.entry.toFixed(2)} as the bounce stalls (long upper wicks, fading momentum) and rolls over.`},
+       {k:'stop',y:L.sl,c:'#00d97e',label:'Stop',note:`Stop above the bounce high $${L.sl.toFixed(2)} — if buyers reclaim it, the short is wrong.`},
+       {k:'tp',y:L.tp1,c:'#ff4d4d',label:'Cover 1',note:`Cover half at support $${L.tp1.toFixed(2)}.`},
+       {k:'tp',y:L.tp2,c:'#ff8a8a',label:'Cover 2',note:`Final cover $${L.tp2.toFixed(2)} — trail down under each lower high.`},
      ]};}},
   {key:'oversold',name:'Oversold Bounce',bias:'long',icon:'🪃',color:'#a855f7',
    tag:'Mean-reversion snap-back from RSI < 30',
-   compute:(d)=>{const lv=labLevels(d);const e=lv.lo*1.005,st=lv.lo*0.985,t1=lv.sma20Val,t2=lv.resis;
+   compute:(d)=>{const lv=labLevels(d);
+     const e=lv.last;                                                 // buy the reversal at/near current
+     const st=lv.lo-lv.atr*0.5;                                       // under the climax low
+     const L=normTrade('long',e,st,lv.sma20Val,lv.resis,lv);
      return{dir:'long',steps:[
        {k:'line',y:lv.lo,c:'#ff4d4d',label:'Climax low',note:`A sharp selloff drove RSI below 30 and price under the lower band, bottoming near $${lv.lo.toFixed(2)}.`},
-       {k:'entry',y:e,c:'#4da6ff',label:'Entry',note:`Buy the reversal candle (hammer / bullish engulfing) near $${e.toFixed(2)} or the break of its high.`},
-       {k:'stop',y:st,c:'#ff4d4d',label:'Stop',note:`Tight stop under the low $${st.toFixed(2)} — these are fast trades, respect it.`},
-       {k:'tp',y:t1,c:'#00d97e',label:'Target',note:`Aim for the 20-day average $${t1.toFixed(2)}. Don't overstay — it's a bounce, not a trend.`},
-       {k:'tp',y:t2,c:'#4dffa8',label:'Stretch',note:`If momentum is strong, the prior shelf $${t2.toFixed(2)}.`},
+       {k:'entry',y:L.entry,c:'#4da6ff',label:'Entry',note:`Buy the reversal candle (hammer / bullish engulfing) near $${L.entry.toFixed(2)} or the break of its high.`},
+       {k:'stop',y:L.sl,c:'#ff4d4d',label:'Stop',note:`Tight stop under the low $${L.sl.toFixed(2)} — these are fast trades, respect it.`},
+       {k:'tp',y:L.tp1,c:'#00d97e',label:'Target',note:`Aim for the 20-day average $${L.tp1.toFixed(2)}. Don't overstay — it's a bounce, not a trend.`},
+       {k:'tp',y:L.tp2,c:'#4dffa8',label:'Stretch',note:`If momentum is strong, the prior shelf $${L.tp2.toFixed(2)}.`},
      ]};}},
   {key:'rangefade',name:'Range Fade',bias:'short',icon:'↔️',color:'#f0a500',
    tag:'Sell the top of a sideways range',
-   compute:(d)=>{const lv=labLevels(d);const e=lv.resis,st=lv.resis*1.012,t1=(lv.resis+lv.support)/2,t2=lv.support;
+   compute:(d)=>{const lv=labLevels(d);
+     const e=lv.resis-lv.atr*0.1;                                     // fade just under the ceiling
+     const st=lv.resis+lv.atr*0.8;                                    // above the range high
+     const L=normTrade('short',e,st,(lv.resis+lv.support)/2,lv.support,lv);
      return{dir:'short',steps:[
        {k:'zone',y:[lv.resis,lv.lo],c:'#f0a500',label:'The range',note:`Price oscillates between floor $${lv.support.toFixed(2)} and ceiling $${lv.resis.toFixed(2)} with no trend.`},
-       {k:'entry',y:e,c:'#a855f7',label:'Fade entry',note:`Short near the ceiling $${e.toFixed(2)} as momentum fades (lower RSI peak than the last tag).`},
-       {k:'stop',y:st,c:'#00d97e',label:'Stop',note:`Stop just above the range high $${st.toFixed(2)}. A clean break flips this to a breakout long.`},
-       {k:'tp',y:t1,c:'#ff4d4d',label:'Mid',note:`Scale at the midpoint $${t1.toFixed(2)}.`},
-       {k:'tp',y:t2,c:'#ff8a8a',label:'Floor',note:`Target the range floor $${t2.toFixed(2)}. Exit there — don't expect a trend.`},
+       {k:'entry',y:L.entry,c:'#a855f7',label:'Fade entry',note:`Short near the ceiling $${L.entry.toFixed(2)} as momentum fades (lower RSI peak than the last tag).`},
+       {k:'stop',y:L.sl,c:'#00d97e',label:'Stop',note:`Stop just above the range high $${L.sl.toFixed(2)}. A clean break flips this to a breakout long.`},
+       {k:'tp',y:L.tp1,c:'#ff4d4d',label:'Mid',note:`Scale at the midpoint $${L.tp1.toFixed(2)}.`},
+       {k:'tp',y:L.tp2,c:'#ff8a8a',label:'Floor',note:`Target the range floor $${L.tp2.toFixed(2)}. Exit there — don't expect a trend.`},
      ]};}},
 ];
 function labLevels(d){
@@ -1718,7 +1784,10 @@ function labLevels(d){
   // support = lowest low of last ~15 bars (nearer-term)
   const support=recent.slice(-15).map(x=>x.l).reduce((m,v)=>v<m?v:m,Infinity);
   const range=Math.max(0.01,resis-lo);
-  return{resis,lo,support,sma20Val:sma20,range};
+  const last=cc[cc.length-1];
+  const a=atr(d,14);
+  const swHigh=swingPivot(recent,true),swLow=swingPivot(recent,false);
+  return{resis,lo,support,sma20Val:sma20,range,last,atr:a,swHigh:swHigh??resis,swLow:swLow??support};
 }
 
 // ══════════════════════════════════════════════════════════════════════
