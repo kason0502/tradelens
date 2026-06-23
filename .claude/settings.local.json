@@ -13,7 +13,10 @@
       "PowerShell($n=\\(Get-Command node -ErrorAction SilentlyContinue\\); if\\($n\\){$n.Source}else{\"no node\"}; $py=\\(Get-Command python -ErrorAction SilentlyContinue\\); if\\($py\\){\"python: \"+$py.Source}else{\"no python\"})",
       "Bash(git commit -q -m 'Make entry/stop/TP structure-based and accurate *)",
       "Bash(git commit -q -m 'Add AI strategy coach to the Backtest decision panel *)",
-      "Bash(git commit -q -m 'Make the main chart stream live *)"
+      "Bash(git commit -q -m 'Make the main chart stream live *)",
+      "PowerShell(foreach\\($c in 'php','ruby','npx','dotnet','go','caddy','http-server'\\){$x=Get-Command $c -ErrorAction SilentlyContinue; if\\($x\\){\"$c -> \"+$x.Source}}; \"done\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git commit -q -m 'Add local preview server for TradeLens *)"
     ]
   }
 }
