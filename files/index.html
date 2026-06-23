@@ -597,7 +597,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <div class="nav-tabs">
     <button class="ntab active" onclick="mainTab('dashboard',this)">Dashboard</button>
     <button class="ntab" onclick="mainTab('traders',this)">Pro Traders</button>
-    <button class="ntab" onclick="mainTab('lab',this)">Strategy Lab</button>
     <button class="ntab" onclick="mainTab('backtest',this)">Backtest</button>
     <button class="ntab" onclick="mainTab('performance',this)">My Performance</button>
     <button class="ntab" onclick="mainTab('ailab',this)">AI Lab</button>
@@ -738,28 +737,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       </div>
     </div>
 
-    <!-- STRATEGY LAB -->
-    <div class="tab-pane" id="tab-lab">
-      <div style="margin-bottom:18px">
-        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">Strategy Lab</div>
-        <div style="font-size:13px;color:var(--mu);line-height:1.6">Pick a strategy and watch it play out <b>step-by-step on a live chart</b> — entry, stop, and targets drawn in sequence with plain-English coaching. Then ask the AI to find a real ticker where this setup is live right now.</div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="pdot"></span>Choose a Strategy</div>
-        <div class="lab-strats" id="labStrats"></div>
-        <div class="lab-loadrow">
-          <input class="fi" id="labTicker" placeholder="Ticker (e.g. AAPL)" value="AAPL" style="margin:0;max-width:160px;font-family:var(--mono);font-weight:700;text-transform:uppercase"/>
-          <select class="fi" id="labTF" style="margin:0;max-width:150px">
-            <option value="1d" selected>Daily</option>
-            <option value="5m">5-min</option>
-            <option value="10m">10-min</option>
-          </select>
-          <button class="go-btn" id="labLoad">Load Chart →</button>
-        </div>
-      </div>
-      <div id="labArena"><div class="bt-empty">Pick a strategy above, then <b>Load Chart</b> to see it walked out on real price data.</div></div>
-    </div>
-
     <!-- MY PERFORMANCE -->
     <div class="tab-pane" id="tab-performance">
       <div style="margin-bottom:18px">
@@ -891,7 +868,6 @@ function mainTab(name,btn){
   if(name==='feedback')renderFeedbackTab();
   if(name==='traders')renderTraders(currentTraderFilter);
   if(name==='backtest')initBacktestTab();
-  if(name==='lab')initLabTab();
   if(name==='performance')renderPerformance();
   if(name==='ailab')renderAILearnStats();
 }
@@ -1882,159 +1858,6 @@ function renderAILearnStats(){
     <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard.</div></div>`;
 }
 
-
-let labState={stratKey:'pullback',series:null,plan:null,step:-1,timer:null,name:'',tf:'1d'};
-let labInited=false;
-function initLabTab(){
-  if(!labInited){
-    labInited=true;
-    renderLabStrats();
-    document.getElementById('labLoad').addEventListener('click',loadLabChart);
-    document.getElementById('labTicker').addEventListener('keydown',e=>{if(e.key==='Enter')loadLabChart();});
-  }
-}
-function renderLabStrats(){
-  const el=document.getElementById('labStrats');if(!el)return;
-  el.innerHTML=LAB_STRATEGIES.map(s=>`<button class="lab-strat${s.key===labState.stratKey?' active':''}" style="--sc:${s.color}" onclick="pickLabStrat('${s.key}')">
-    <span class="lab-strat-icon" style="background:${s.color}22;border:1px solid ${s.color}66">${s.icon}</span>
-    <span class="lab-strat-txt"><b>${s.name}</b><span class="pb-bias ${s.bias==='long'?'bull':'bear'}">${s.bias==='long'?'▲':'▼'}</span><br><span style="color:var(--mu);font-size:11px">${s.tag}</span></span>
-  </button>`).join('');
-}
-function pickLabStrat(key){labState.stratKey=key;renderLabStrats();if(labState.series)buildLabPlan();}
-
-async function loadLabChart(){
-  const ticker=(document.getElementById('labTicker').value||'AAPL').toUpperCase().trim();
-  const tf=document.getElementById('labTF').value;
-  const arena=document.getElementById('labArena');
-  arena.innerHTML=`<div class="bt-card"><div class="loading-state" style="padding:50px 20px"><div class="spinner-wrap"><div class="spinner"></div><div class="spinner-inner"></div></div><div class="loading-ticker">${ticker}</div><div class="loading-label">Loading chart…</div></div></div>`;
-  try{
-    let candles,name;
-    if(tf==='1d'){const q=await fetchQuote(ticker);candles=(q.h6m&&q.h6m.length>40)?q.h6m:q.h3m;name=q.name;}
-    else{const r=await fetchBacktestSeries(ticker,tf);candles=r.candles.slice(-90);name=r.name;}
-    if(!candles||candles.length<30)throw new Error('Not enough data.');
-    labState.series=candles;labState.name=name;labState.tf=tf;labState.ticker=ticker;
-    renderLabArena();
-    buildLabPlan();
-  }catch(err){
-    arena.innerHTML=`<div class="bt-card"><div class="error-state" style="margin:0">${err.message}<br><br><button class="retry-btn" onclick="loadLabChart()">↻ Retry</button></div></div>`;
-  }
-}
-function renderLabArena(){
-  const s=LAB_STRATEGIES.find(x=>x.key===labState.stratKey);
-  document.getElementById('labArena').innerHTML=`
-    <div class="bt-card">
-      <div class="bt-meta">
-        <span class="bt-sym">${labState.ticker}</span>
-        <span class="bt-tag">${labState.name}</span>
-        <span class="bt-tag">⏱ ${labState.tf==='1d'?'Daily':labState.tf}</span>
-        <span class="bt-tag" style="border-color:${s.color}66;color:${s.color}">${s.icon} ${s.name}</span>
-      </div>
-      <div class="bt-chartwrap"><canvas id="labCanvas"></canvas></div>
-      <div class="lab-controls">
-        <button class="walk-ctrl" onclick="labPlay()">▶ Play walkthrough</button>
-        <button class="walk-ctrl" onclick="labStep(1)">⏭ Next step</button>
-        <button class="walk-ctrl" onclick="labReset()">↻ Reset</button>
-        <button class="walk-ctrl" id="labAIbtn" onclick="labFindLive()" style="margin-left:auto">${aiReady()?'✨ Find this setup live':'✨ Find live (needs AI key)'}</button>
-      </div>
-      <div class="walk-note" id="labNote" style="border-left-color:${s.color}">Press <b>Play</b> to watch ${s.name} build step-by-step, or step through it manually.</div>
-      <div id="labAIout"></div>
-    </div>`;
-  requestAnimationFrame(()=>setTimeout(()=>drawLabChart(),60));
-}
-function buildLabPlan(){
-  const s=LAB_STRATEGIES.find(x=>x.key===labState.stratKey);
-  labState.plan=s.compute(labState.series);
-  labState.step=-1;
-  if(labState.timer){clearTimeout(labState.timer);labState.timer=null;}
-  const note=document.getElementById('labNote');
-  if(note){note.style.borderLeftColor=s.color;note.innerHTML=`Press <b>Play</b> to watch <b style="color:${s.color}">${s.name}</b> build step-by-step.`;}
-  drawLabChart();
-}
-function labPlay(){labState.step=-1;labStep(1,true);}
-function labStep(dir,auto){
-  if(!labState.plan)return;
-  if(labState.timer){clearTimeout(labState.timer);labState.timer=null;}
-  labState.step=Math.max(0,Math.min(labState.plan.steps.length-1,labState.step+dir));
-  const st=labState.plan.steps[labState.step];
-  const s=LAB_STRATEGIES.find(x=>x.key===labState.stratKey);
-  const note=document.getElementById('labNote');
-  if(note)note.innerHTML=`<b style="color:${st.c}">Step ${labState.step+1}/${labState.plan.steps.length} — ${st.label}.</b> ${st.note}`;
-  drawLabChart();
-  if(auto&&labState.step<labState.plan.steps.length-1){labState.timer=setTimeout(()=>labStep(1,true),2400);}
-}
-function labReset(){labState.step=-1;if(labState.timer){clearTimeout(labState.timer);labState.timer=null;}buildLabPlan();}
-
-function drawLabChart(){
-  const canvas=document.getElementById('labCanvas');if(!canvas||!labState.series)return;
-  const ctx=canvas.getContext('2d');
-  const DPR=window.devicePixelRatio||1,W=canvas.offsetWidth||canvas.parentElement.offsetWidth||800,H=300;
-  canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.scale(DPR,DPR);ctx.clearRect(0,0,W,H);
-  const data=labState.series.slice(-60);const n=data.length;
-  const PAD={t:14,r:60,b:26,l:10},cW=W-PAD.l-PAD.r,cH=H-PAD.t-PAD.b;
-  const arrMin=a=>a.reduce((m,v)=>v<m?v:m,Infinity),arrMax=a=>a.reduce((m,v)=>v>m?v:m,-Infinity);
-  const vals=[];data.forEach(d=>{vals.push(d.l,d.h);});
-  // include visible plan levels in range
-  if(labState.plan&&labState.step>=0){labState.plan.steps.slice(0,labState.step+1).forEach(st=>{(Array.isArray(st.y)?st.y:[st.y]).forEach(y=>vals.push(y));});}
-  const lo=arrMin(vals)*0.997,hi=arrMax(vals)*1.003,pRange=hi-lo||1;
-  const toY=p=>PAD.t+cH*(1-(p-lo)/pRange),toX=i=>PAD.l+(n>1?(i/(n-1))*cW:cW/2);
-  const barW=Math.max(2,Math.floor(cW/n*0.6));
-  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
-  for(let g=0;g<=4;g++){const y=PAD.t+(g/4)*cH;ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();}
-  ctx.fillStyle='#38384e';ctx.font=`10px 'SF Mono',monospace`;ctx.textAlign='left';
-  for(let g=0;g<=4;g++){const v=lo+pRange*(1-g/4);ctx.fillText('$'+v.toFixed(0),W-PAD.r+5,PAD.t+(g/4)*cH+3);}
-  data.forEach((d,i)=>{const x=toX(i),bull=d.c>=d.o,col=bull?'rgba(0,217,126,0.7)':'rgba(255,77,77,0.7)';
-    ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,toY(d.h));ctx.lineTo(x,toY(d.l));ctx.stroke();
-    const bT=Math.min(toY(d.o),toY(d.c)),bH=Math.max(1.5,Math.abs(toY(d.o)-toY(d.c)));ctx.fillStyle=col;ctx.fillRect(x-barW/2,bT,barW,bH);});
-  // draw plan steps revealed so far
-  if(labState.plan&&labState.step>=0){
-    labState.plan.steps.slice(0,labState.step+1).forEach((st,idx)=>{
-      const active=idx===labState.step;
-      if(st.k==='zone'&&Array.isArray(st.y)){
-        const y1=toY(Math.max(st.y[0],st.y[1])),y2=toY(Math.min(st.y[0],st.y[1]));
-        ctx.fillStyle=hexA(st.c,active?0.18:0.09);ctx.fillRect(PAD.l,y1,cW,y2-y1);
-        ctx.strokeStyle=hexA(st.c,active?0.7:0.35);ctx.lineWidth=1;ctx.setLineDash([4,3]);
-        ctx.strokeRect(PAD.l,y1,cW,y2-y1);ctx.setLineDash([]);
-      }else{
-        const y=toY(Array.isArray(st.y)?st.y[0]:st.y);
-        ctx.strokeStyle=hexA(st.c,active?1:0.55);ctx.lineWidth=active?2.4:1.4;ctx.setLineDash(active?[]:[5,4]);
-        ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();ctx.setLineDash([]);
-      }
-      // label pill
-      const ly=toY(Array.isArray(st.y)?Math.max(st.y[0],st.y[1]):st.y);
-      ctx.font=`bold 10px 'SF Mono',monospace`;const txt=st.label;const tw=ctx.measureText(txt).width;
-      ctx.fillStyle=hexA(st.c,active?0.95:0.45);ctx.fillRect(PAD.l,ly-9,tw+12,17);
-      ctx.fillStyle=active?'#04140d':'rgba(255,255,255,0.75)';ctx.textAlign='left';ctx.fillText(txt,PAD.l+6,ly+3);
-    });
-  }
-  ctx.fillStyle='#38384e';ctx.font=`10px 'SF Mono',monospace`;ctx.textAlign='center';
-  const step=Math.max(1,Math.floor(n/6));for(let i=0;i<n;i+=step){ctx.fillText(data[i].x,toX(i),H-PAD.b+15);}
-}
-function hexA(hex,a){const h=hex.replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return `rgba(${r},${g},${b},${a})`;}
-
-// AI: find a live ticker where this strategy is setting up right now
-async function labFindLive(){
-  const out=document.getElementById('labAIout');
-  const s=LAB_STRATEGIES.find(x=>x.key===labState.stratKey);
-  if(!aiReady()){out.innerHTML=`<div class="lab-ai-card">Add your Claude API key (✨ AI button, top-right) to have the AI scan for live ${s.name} setups with reasoning.</div>`;return;}
-  out.innerHTML=`<div class="lab-ai-card"><span class="ai-spin"></span> Claude is scanning popular tickers for a live <b>${s.name}</b> setup…</div>`;
-  // Pull quick snapshots of a watchlist to give Claude real data
-  const universe=['AAPL','MSFT','NVDA','AMZN','META','GOOG','TSLA','AMD','SPY','NFLX','COIN','AVGO'];
-  const snaps=[];
-  for(const t of universe){
-    try{const q=await fetchQuote(t);const a=analyze(t,q.price,q.pct,q.hi52,q.lo52,q.closes);
-      snaps.push(`${t}: price $${q.price.toFixed(2)}, RSI ${a.rsi}, trend ${a.s20s60>0?'up':'down'} (${a.s20s60.toFixed(1)}%), price vs SMA20 ${a.pvs20.toFixed(1)}%, BB%B ${a.bbPct}%, today ${q.pct.toFixed(1)}%, algo ${a.sentiment}`);
-    }catch(e){}
-    if(snaps.length>=8)break; // keep it quick/cheap
-  }
-  if(!snaps.length){out.innerHTML=`<div class="lab-ai-card">Couldn't load market data to scan right now — try again shortly.</div>`;return;}
-  try{
-    const sys='You are a trading scanner. Given live indicator snapshots and ONE strategy definition, pick the 1-3 tickers that best match that strategy RIGHT NOW. For each, give a one-sentence reason grounded in the data. Be honest if none are a clean fit. Never give financial advice or guarantees; this is educational. Format as short markdown with **TICKER** — reason.';
-    const usr=`Strategy: ${s.name} (${s.bias}). What it needs: ${s.tag}.\n\nLive snapshots:\n${snaps.join('\n')}\n\nWhich of these are setting up for this strategy now, and why?`;
-    const ans=await callClaude(sys,usr,700);
-    out.innerHTML=`<div class="lab-ai-card"><div class="lab-ai-head">✨ Live ${s.name} scan</div>${fmtAI(ans)}<div class="lab-ai-foot">Educational analysis from Claude on live data — not financial advice. Click a ticker above to load and study it.</div></div>`;
-  }catch(e){out.innerHTML=`<div class="lab-ai-card">AI scan failed: ${e.message}</div>`;}
-}
-
 // AI deep-read of a ticker's market direction (dashboard)
 async function aiMarketDirection(ticker){
   const out=document.getElementById('aiDirOut');if(!out)return;
@@ -2877,7 +2700,7 @@ function renderMoWl(){const el=document.getElementById('moWl');if(!el)return;el.
 document.getElementById('tickerRow').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');load(b.dataset.t);});
 document.getElementById('analyzeBtn').addEventListener('click',()=>{const v=document.getElementById('customInput').value.trim();if(!v)return;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));document.getElementById('customInput').value='';load(v);});
 document.getElementById('customInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('analyzeBtn').click();});
-window.addEventListener('resize',()=>{if(lastCanvasData){const{q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;setTimeout(()=>drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral),80);}if(btState&&document.getElementById('btCanvas')){setTimeout(()=>drawBacktestChart(btState.done,btState._overlay),80);}if(labState.series&&document.getElementById('labCanvas')){setTimeout(()=>drawLabChart(),80);}});
+window.addEventListener('resize',()=>{if(lastCanvasData){const{q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;setTimeout(()=>drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral),80);}if(btState&&document.getElementById('btCanvas')){setTimeout(()=>drawBacktestChart(btState.done,btState._overlay),80);}});
 
 // ── INIT ──────────────────────────────────────────────────────────────
 renderNews();

@@ -7,7 +7,10 @@
       "Bash(git add *)",
       "Bash(git commit -q -m 'Initial commit: TradeLens Pro trading dashboard *)",
       "Bash(git rm *)",
-      "Bash(git commit -q -m 'Remove duplicate HTML and extracted zip *)"
+      "Bash(git commit -q -m 'Remove duplicate HTML and extracted zip *)",
+      "Bash(sed -n '853,2712p' index.html)",
+      "Bash(node --check /tmp/tl_script.js)",
+      "PowerShell($n=\\(Get-Command node -ErrorAction SilentlyContinue\\); if\\($n\\){$n.Source}else{\"no node\"}; $py=\\(Get-Command python -ErrorAction SilentlyContinue\\); if\\($py\\){\"python: \"+$py.Source}else{\"no python\"})"
     ]
   }
 }
