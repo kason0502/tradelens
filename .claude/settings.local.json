@@ -16,7 +16,9 @@
       "Bash(git commit -q -m 'Make the main chart stream live *)",
       "PowerShell(foreach\\($c in 'php','ruby','npx','dotnet','go','caddy','http-server'\\){$x=Get-Command $c -ErrorAction SilentlyContinue; if\\($x\\){\"$c -> \"+$x.Source}}; \"done\")",
       "mcp__Claude_Preview__preview_start",
-      "Bash(git commit -q -m 'Add local preview server for TradeLens *)"
+      "Bash(git commit -q -m 'Add local preview server for TradeLens *)",
+      "Bash(cat /c/Users/donna/.claude/projects/C--Users-donna-Desktop-tradelens/memory/MEMORY.md 2>/dev/null || echo \"NO MEMORY.md\")",
+      "Bash(git commit -q -m 'Update local permission allowlist *)"
     ]
   }
 }
