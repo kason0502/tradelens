@@ -16,9 +16,9 @@
   --am:#f0a500;--ad:#2d1f00;--at:#ffc94d;
   --bl:#4da6ff;--bd:#091e3a;--bt:#99ccff;
   --pu:#a855f7;--pd:#1a0730;--pt:#cc99ff;
-  --radius:16px;--rsm:10px;--rxs:6px;
+  --radius:18px;--rsm:11px;--rxs:7px;
   --mono:'SF Mono','Fira Code','Cascadia Code',monospace;
-  --nav-h:66px;
+  --nav-h:70px;
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;line-height:1.5}
@@ -45,11 +45,12 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .logo-name b{color:var(--gr)}
 .logo-pro{font-size:8px;font-weight:900;letter-spacing:.1em;color:#00140c;background:linear-gradient(135deg,#00e589,#00b86e);padding:2px 5px;border-radius:4px;margin-left:1px;box-shadow:0 1px 4px rgba(0,217,126,.4)}
 .logo-sub{font-size:9.5px;font-weight:600;color:var(--fa);letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
-.nav-tabs{display:flex;gap:2px}
-.ntab{padding:7px 15px;border-radius:var(--rxs);border:none;background:transparent;color:var(--mu);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:-.01em;position:relative}
-.ntab:hover{color:var(--tx);background:var(--s3)}
-.ntab.active{background:var(--s3);color:var(--tx)}
-.ntab.active::after{content:'';position:absolute;left:14px;right:14px;bottom:2px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--gr),var(--bl));box-shadow:0 0 8px rgba(0,217,126,.5)}
+.nav-tabs{display:flex;align-items:center;gap:3px}
+.nav-sep{width:1px;height:20px;background:var(--b2);margin:0 9px;flex-shrink:0}
+.ntab{padding:8px 14px;border-radius:var(--rsm);border:none;background:transparent;color:var(--mu);font-size:13px;font-weight:600;cursor:pointer;transition:color .15s,background .15s;letter-spacing:-.01em;position:relative}
+.ntab:hover{color:var(--tx);background:rgba(255,255,255,0.04)}
+.ntab.active{color:var(--tx);font-weight:700}
+.ntab.active::after{content:'';position:absolute;left:14px;right:14px;bottom:-1px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--gr),var(--bl));box-shadow:0 0 8px rgba(0,217,126,.5)}
 .nav-right{display:flex;align-items:center;gap:8px}
 .live-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--gt);background:var(--gd);padding:4px 11px;border-radius:100px;border:1px solid rgba(0,217,126,.22);letter-spacing:.02em;transition:all .3s}
 .live-pill.live-flash{background:rgba(0,217,126,.3);box-shadow:0 0 14px rgba(0,217,126,.5);transform:scale(1.06)}
@@ -80,7 +81,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 @media(max-width:1200px){.page-wrap{grid-template-columns:0 1fr 0}}
 .sidebar{padding:20px 15px;border-right:1px solid var(--b1);overflow-y:auto;height:calc(100vh - var(--nav-h));position:sticky;top:var(--nav-h)}
 .sidebar-r{border-right:none;border-left:1px solid var(--b1)}
-.main-col{padding:30px 34px 90px;max-width:1180px;margin:0 auto;width:100%}
+.main-col{padding:40px 46px 110px;max-width:1240px;margin:0 auto;width:100%}
 
 /* ── NEWS SIDEBAR ── */
 .side-hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--fa);margin-bottom:14px;display:flex;align-items:center;gap:6px}
@@ -119,7 +120,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 #dteDesc{font-size:11px;color:var(--mu);margin-left:6px;font-style:italic}
 
 /* ── TICKER HEADER (big + mini chart) ── */
-.ticker-header{display:flex;align-items:center;gap:22px;margin-bottom:24px;flex-wrap:wrap;padding:26px 30px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);position:relative;overflow:hidden}
+.ticker-header{display:flex;align-items:center;gap:22px;margin-bottom:28px;flex-wrap:wrap;padding:30px 34px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);position:relative;overflow:hidden}
 .ticker-header::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gr),var(--bl),var(--pu));opacity:.8}
 .ticker-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(0,217,126,0.04),transparent 65%);pointer-events:none}
 .th-left{flex:1;min-width:0}
@@ -146,19 +147,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dir-sub{font-size:12px;color:var(--mu);line-height:1.65}
 
 /* ── METRICS ── */
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:22px}
-.metric{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rsm);padding:14px 16px;transition:all .2s;cursor:default}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin-bottom:28px}
+.metric{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rsm);padding:16px 18px;transition:all .2s;cursor:help}
 .metric:hover{border-color:rgba(0,217,126,.3);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.3),0 0 0 1px rgba(0,217,126,.15)}
 .metric-lbl{font-size:10px;color:var(--fa);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:5px}
 .metric-val{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--tx)}
 .g{color:var(--gt)}.r{color:var(--rt)}.a{color:var(--at)}.p{color:var(--pt)}
 
 /* ── TWO COL ── */
-.two-col{display:grid;grid-template-columns:1fr 340px;gap:22px}
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:26px}
 @media(max-width:900px){.two-col{grid-template-columns:1fr}}
 
 /* ── CARDS ── */
-.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:24px 26px;margin-bottom:18px;transition:border-color .2s,box-shadow .25s;position:relative}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:28px 30px;margin-bottom:22px;transition:border-color .2s,box-shadow .25s;position:relative}
 .card:last-child{margin-bottom:0}
 .card:hover{border-color:var(--b2);box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .card-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--fa);margin-bottom:15px;display:flex;align-items:center;gap:7px}
@@ -373,7 +374,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .zoom-btn:hover{color:var(--gt);border-color:rgba(0,217,126,.4)}
 
 /* ── INDICATORS ── */
-.ind-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--b1);font-size:12px}
+.ind-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--b1);font-size:12px;cursor:help}
 .ind-row:last-child{border-bottom:none;padding-bottom:0}.ind-row:first-child{padding-top:0}
 .ind-lbl{color:var(--mu)}.ind-val{font-weight:700;font-family:var(--mono)}
 
@@ -599,12 +600,14 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   </div>
   <div class="nav-tabs">
     <button class="ntab active" onclick="mainTab('dashboard',this)">Dashboard</button>
-    <button class="ntab" onclick="mainTab('traders',this)">Pro Traders</button>
-    <button class="ntab" onclick="mainTab('backtest',this)">Backtest</button>
-    <button class="ntab" onclick="mainTab('performance',this)">My Performance</button>
-    <button class="ntab" onclick="mainTab('ailab',this)">AI Lab</button>
-    <button class="ntab" onclick="mainTab('ai',this)">AI Chat</button>
     <button class="ntab" onclick="mainTab('screener',this)">Screener</button>
+    <button class="ntab" onclick="mainTab('traders',this)">Pro Traders</button>
+    <span class="nav-sep"></span>
+    <button class="ntab" onclick="mainTab('backtest',this)">Backtest</button>
+    <button class="ntab" onclick="mainTab('performance',this)">Performance</button>
+    <button class="ntab" onclick="mainTab('ailab',this)">AI Lab</button>
+    <span class="nav-sep"></span>
+    <button class="ntab" onclick="mainTab('ai',this)">AI Chat</button>
     <button class="ntab" onclick="mainTab('alerts',this)">Alerts</button>
     <button class="ntab" onclick="mainTab('feedback',this)">Feedback</button>
   </div>
@@ -2413,7 +2416,7 @@ function renderDash(ticker,q,a){
            <div class="setup-item si-sl"><div class="setup-label">Stop Loss</div><div class="setup-price">$${sl.toFixed(2)}</div><div class="setup-note">Exit if broken</div></div>
            <div class="setup-item si-tp"><div class="setup-label">Take Profits</div><div class="setup-price">$${tp1.toFixed(2)}</div><div class="setup-note">TP2: $${tp2.toFixed(2)}</div></div>`}
     </div>
-    <div class="rr-box"><div class="rr-num">1:${rr}</div><div class="rr-desc">${isShort?'Short':'Long'} R/R for <strong>${currentDTE.toUpperCase()}</strong>. Risk <strong>$${risk.toFixed(2)}</strong> to target <strong>$${reward.toFixed(2)}</strong>.</div></div>
+    <div class="rr-box" title="Reward-to-risk ratio. 1:3 means for every $1 you risk, you're aiming to make $3."><div class="rr-num">1:${rr}</div><div class="rr-desc">${isShort?'Short':'Long'} reward-to-risk for <strong>${currentDTE.toUpperCase()}</strong>. Risk <strong>$${risk.toFixed(2)}</strong> to target <strong>$${reward.toFixed(2)}</strong>.</div></div>
   </div>`:'';
 
   const sigHtml=a.signals.map(s=>`<div class="signal-item"><div class="sig-icon sig-${s.dir}">${s.dir==='bull'?'▲':s.dir==='bear'?'▼':'—'}</div><div class="sig-name">${s.name}</div><div class="sig-detail">${s.detail}</div><div class="sig-pts" style="color:${s.dir==='bull'?'var(--gt)':s.dir==='bear'?'var(--rt)':'var(--mu)'}">${s.pts}</div></div>`).join('');
@@ -2445,12 +2448,12 @@ function renderDash(ticker,q,a){
     </div>
     ${dirHtml}
     <div class="metrics d2">
-      <div class="metric"><div class="metric-lbl">Volume</div><div class="metric-val">${q.volFmt}</div></div>
-      <div class="metric"><div class="metric-lbl">52W High</div><div class="metric-val g">$${q.hi52.toFixed(2)}</div></div>
-      <div class="metric"><div class="metric-lbl">52W Low</div><div class="metric-val r">$${q.lo52.toFixed(2)}</div></div>
-      <div class="metric"><div class="metric-lbl">RSI (14)</div><div class="metric-val ${a.rsi>60?'g':a.rsi<40?'r':'a'}">${a.rsi}</div></div>
-      <div class="metric"><div class="metric-lbl">SMA 20</div><div class="metric-val">$${a.sma20}</div></div>
-      <div class="metric"><div class="metric-lbl">BB %B</div><div class="metric-val ${a.bbPct>75?'r':a.bbPct<25?'g':''}">${a.bbPct}%</div></div>
+      <div class="metric" title="Shares traded today — higher volume means stronger conviction behind the move."><div class="metric-lbl">Volume</div><div class="metric-val">${q.volFmt}</div></div>
+      <div class="metric" title="The highest price over the past year."><div class="metric-lbl">52-Week High</div><div class="metric-val g">$${q.hi52.toFixed(2)}</div></div>
+      <div class="metric" title="The lowest price over the past year."><div class="metric-lbl">52-Week Low</div><div class="metric-val r">$${q.lo52.toFixed(2)}</div></div>
+      <div class="metric" title="Momentum gauge (0–100). Above 70 = possibly overbought, below 30 = possibly oversold."><div class="metric-lbl">Momentum (RSI)</div><div class="metric-val ${a.rsi>60?'g':a.rsi<40?'r':'a'}">${a.rsi}</div></div>
+      <div class="metric" title="The average closing price over the last 20 days — a common trend reference."><div class="metric-lbl">20-Day Avg</div><div class="metric-val">$${a.sma20}</div></div>
+      <div class="metric" title="Where price sits within its normal range (Bollinger Bands). 100% = top of the range, 0% = bottom."><div class="metric-lbl">Range Position</div><div class="metric-val ${a.bbPct>75?'r':a.bbPct<25?'g':''}">${a.bbPct}%</div></div>
     </div>
     <div class="two-col">
       <div>
@@ -2508,19 +2511,19 @@ function renderDash(ticker,q,a){
       <div>
         <div class="card d2">
           <div class="card-title">Indicators</div>
-          <div class="ind-row"><span class="ind-lbl">RSI (14)</span><span class="ind-val" style="color:${a.rsi>60?'var(--gt)':a.rsi<40?'var(--rt)':'var(--at)'}">${a.rsi}${a.rsi>70?' · OB':a.rsi<30?' · OS':''}</span></div>
-          <div class="ind-row"><span class="ind-lbl">SMA 5</span><span class="ind-val">$${a.sma5}</span></div>
-          <div class="ind-row"><span class="ind-lbl">SMA 10</span><span class="ind-val">$${a.sma10}</span></div>
-          <div class="ind-row"><span class="ind-lbl">SMA 20</span><span class="ind-val">$${a.sma20}</span></div>
-          <div class="ind-row"><span class="ind-lbl">Price vs SMA20</span><span class="ind-val" style="color:${a.pvs20>0?'var(--gt)':'var(--rt)'}">${a.pvs20>0?'+':''}${a.pvs20.toFixed(2)}%</span></div>
-          <div class="ind-row"><span class="ind-lbl">Trend (SMA20/60)</span><span class="ind-val" style="color:${a.s20s60>0?'var(--gt)':'var(--rt)'}">${a.s20s60>0?'Uptrend ↑':'Downtrend ↓'}</span></div>
-          <div class="ind-row"><span class="ind-lbl">BB %B</span><span class="ind-val" style="color:${a.bbPct>80?'var(--rt)':a.bbPct<20?'var(--gt)':'var(--tx)'}">${a.bbPct}%</span></div>
-          <div class="ind-row"><span class="ind-lbl">BB Upper</span><span class="ind-val">$${a.bbU}</span></div>
-          <div class="ind-row"><span class="ind-lbl">20D Range</span><span class="ind-val">$${a.lo20}–$${a.hi20}</span></div>
-          <div class="ind-row"><span class="ind-lbl">5D Momentum</span><span class="ind-val" style="color:${a.momentum5>0?'var(--gt)':'var(--rt)'}">${a.momentum5>0?'+':''}${a.momentum5.toFixed(2)}%</span></div>
-          <div class="ind-row"><span class="ind-lbl">52W High</span><span class="ind-val g">$${q.hi52.toFixed(2)}</span></div>
-          <div class="ind-row"><span class="ind-lbl">52W Low</span><span class="ind-val r">$${q.lo52.toFixed(2)}</span></div>
-          <div class="ind-row"><span class="ind-lbl">Signal</span><span class="ind-val" style="color:${a.direction==='long'?'var(--gt)':a.direction==='short'?'var(--rt)':'var(--at)'}">${a.direction.toUpperCase()}</span></div>
+          <div class="ind-row" title="Relative Strength Index — momentum from 0 to 100. Above 70 = overbought (OB), below 30 = oversold (OS)."><span class="ind-lbl">Momentum (RSI)</span><span class="ind-val" style="color:${a.rsi>60?'var(--gt)':a.rsi<40?'var(--rt)':'var(--at)'}">${a.rsi}${a.rsi>70?' · OB':a.rsi<30?' · OS':''}</span></div>
+          <div class="ind-row" title="Average closing price over the last 5 days."><span class="ind-lbl">5-Day Avg</span><span class="ind-val">$${a.sma5}</span></div>
+          <div class="ind-row" title="Average closing price over the last 10 days."><span class="ind-lbl">10-Day Avg</span><span class="ind-val">$${a.sma10}</span></div>
+          <div class="ind-row" title="Average closing price over the last 20 days."><span class="ind-lbl">20-Day Avg</span><span class="ind-val">$${a.sma20}</span></div>
+          <div class="ind-row" title="How far the current price is above or below its 20-day average."><span class="ind-lbl">Price vs 20-Day Avg</span><span class="ind-val" style="color:${a.pvs20>0?'var(--gt)':'var(--rt)'}">${a.pvs20>0?'+':''}${a.pvs20.toFixed(2)}%</span></div>
+          <div class="ind-row" title="Overall trend: the 20-day average compared to the 60-day average. Up = bullish, down = bearish."><span class="ind-lbl">Trend</span><span class="ind-val" style="color:${a.s20s60>0?'var(--gt)':'var(--rt)'}">${a.s20s60>0?'Uptrend ↑':'Downtrend ↓'}</span></div>
+          <div class="ind-row" title="Where price sits within its normal range (Bollinger Bands). 100% = top, 0% = bottom."><span class="ind-lbl">Range Position</span><span class="ind-val" style="color:${a.bbPct>80?'var(--rt)':a.bbPct<20?'var(--gt)':'var(--tx)'}">${a.bbPct}%</span></div>
+          <div class="ind-row" title="The top of the normal price range (upper Bollinger Band)."><span class="ind-lbl">Range Top</span><span class="ind-val">$${a.bbU}</span></div>
+          <div class="ind-row" title="The highest and lowest price over the last 20 days."><span class="ind-lbl">20-Day Range</span><span class="ind-val">$${a.lo20}–$${a.hi20}</span></div>
+          <div class="ind-row" title="Price change over the last 5 days."><span class="ind-lbl">5-Day Momentum</span><span class="ind-val" style="color:${a.momentum5>0?'var(--gt)':'var(--rt)'}">${a.momentum5>0?'+':''}${a.momentum5.toFixed(2)}%</span></div>
+          <div class="ind-row" title="The highest price over the past year."><span class="ind-lbl">52-Week High</span><span class="ind-val g">$${q.hi52.toFixed(2)}</span></div>
+          <div class="ind-row" title="The lowest price over the past year."><span class="ind-lbl">52-Week Low</span><span class="ind-val r">$${q.lo52.toFixed(2)}</span></div>
+          <div class="ind-row" title="The overall call from the analysis: go long (buy), short (sell), or wait."><span class="ind-lbl">Signal</span><span class="ind-val" style="color:${a.direction==='long'?'var(--gt)':a.direction==='short'?'var(--rt)':'var(--at)'}">${a.direction.toUpperCase()}</span></div>
         </div>
         <div class="card d3"><div class="card-title">Strategies</div>${stratHtml}</div>
         <div class="card d4">
