@@ -232,6 +232,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .ll{display:inline-block;width:18px;height:2px;border-radius:1px}
 .chart-outer{position:relative;width:100%;background:var(--s2);border-radius:var(--rsm);border:1px solid var(--b1);overflow:hidden}
 .chart-outer canvas{display:block;width:100%!important;height:310px!important;cursor:crosshair}
+.live-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:#4da6ff;transform:translate(-50%,-50%);pointer-events:none;z-index:3;box-shadow:0 0 0 0 rgba(77,166,255,.6)}
+.live-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:rgba(77,166,255,.85);animation:livepulse 1.6s ease-out infinite}
+@keyframes livepulse{0%{transform:scale(.6);opacity:.85}70%{transform:scale(3.2);opacity:0}100%{opacity:0}}
 .chart-hint2{font-size:10px;color:var(--fa);text-align:center;margin-top:7px}
 .press-toggle{padding:5px 11px;border-radius:var(--rxs);border:1px solid var(--b2);background:var(--s2);color:var(--mu);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;font-family:var(--mono)}
 .press-tip{position:fixed;z-index:600;display:none;pointer-events:none;background:rgba(13,13,19,0.97);border:1px solid var(--b2);border-radius:8px;padding:8px 11px;font-size:11px;line-height:1.6;color:var(--tx);max-width:230px;box-shadow:0 8px 24px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
@@ -2176,6 +2179,31 @@ function drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral){
     drawCanvasChart._zonesXY=[];
   }
 
+  // ── LIVE CURRENT-PRICE MARKER (pulsing dot + price tag) ──
+  const curP=q&&q.price;
+  if(curP&&chartMode!=='volume'&&curP>=lo&&curP<=hi){
+    const cy=toY(curP),cx=toX(n-1);
+    const dirCol=sentiment==='bearish'?'#ff4d4d':sentiment==='bullish'?'#00d97e':'#4da6ff';
+    // faint current-price line across the chart
+    ctx.strokeStyle='rgba(236,237,242,0.16)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
+    ctx.beginPath();ctx.moveTo(PAD.l,cy);ctx.lineTo(W-PAD.r,cy);ctx.stroke();ctx.setLineDash([]);
+    // price tag on the right axis
+    const tag='$'+curP.toFixed(2);ctx.font=`bold 10px 'SF Mono','Fira Code',monospace`;
+    const tw=ctx.measureText(tag).width;
+    ctx.fillStyle=dirCol;ctx.fillRect(W-PAD.r+2,cy-8,tw+9,16);
+    ctx.fillStyle='#06060a';ctx.textAlign='left';ctx.fillText(tag,W-PAD.r+6,cy+3);
+    positionLiveDot(cx,cy);
+  }else{positionLiveDot(null);}
+
+}
+
+// Position (or hide) the pulsing live-price dot inside the chart container.
+function positionLiveDot(x,y){
+  const outer=document.querySelector('.chart-outer');if(!outer)return;
+  let dot=outer.querySelector('.live-dot');
+  if(x==null){if(dot)dot.style.display='none';return;}
+  if(!dot){dot=document.createElement('div');dot.className='live-dot';outer.appendChild(dot);}
+  dot.style.display='block';dot.style.left=x+'px';dot.style.top=y+'px';
 }
 
 function setupCanvasPan(){
@@ -2528,31 +2556,91 @@ function loadTicker(t){
   load(t);
 }
 
-// ── LIVE AUTO-REFRESH ─────────────────────────────────────────────────
-// Periodically re-fetches the current ticker so price + chart stay live.
+// ── LIVE STREAMING ────────────────────────────────────────────────────
+// Fast price-only polling makes the dashboard feel like it's streaming:
+// the price ticks, the live dot pulses, and the chart's current-price
+// marker follows. Every ~60s a heavier refresh updates the full analysis.
 let liveTimer=null;
-let LIVE_MS=60000; // refresh every 60s (markets data via free proxies — be gentle)
+let LIVE_MS=15000;        // poll the live price every 15s
+let streamCount=0;
 function startLiveRefresh(){
   if(liveTimer)clearInterval(liveTimer);
   liveTimer=setInterval(liveTick,LIVE_MS);
 }
+
+// Lightweight: latest price + previous close from a single intraday request.
+async function fetchLivePrice(ticker){
+  const iurl=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1m&range=1d`;
+  let idata=null;
+  for(const fn of buildAttempts(iurl)){
+    try{const txt=await fn();const c=extractChart(txt);if(c){idata=c;break;}}catch(e){}
+  }
+  const res=idata?.chart?.result?.[0];
+  if(!res)throw new Error('no live price');
+  const meta=res.meta;
+  const closes=(res.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null);
+  const price=meta.regularMarketPrice||closes[closes.length-1];
+  if(price==null)throw new Error('no live price');
+  const prev=meta.chartPreviousClose||meta.previousClose||closes[0]||price;
+  return{price:+price,prev:+prev};
+}
+
 async function liveTick(){
   // only refresh when the dashboard tab is visible and the page is focused
   const dash=document.getElementById('tab-dashboard');
   if(!dash||!dash.classList.contains('active'))return;
   if(document.hidden)return;
   if(!lastData)return;
+  const t=lastData.ticker;
+  streamCount++;
+  // Every ~60s: full refresh (indicators, analysis, strategy levels).
+  if(streamCount%4===0){
+    try{
+      const q=await fetchQuote(t);
+      const a=analyze(t,q.price,q.pct,q.hi52,q.lo52,q.closes);
+      const keepRange=chartRange,keepZoom=chartZoom,keepPan=chartPanOffset;
+      renderDash(t,q,a);
+      chartRange=keepRange;chartZoom=keepZoom;chartPanOffset=keepPan;
+      if(lastCanvasData){const{q:cq,entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;drawCanvasChart(cq,entry,sl,tp1,tp2,sentiment,isShort,isNeutral);}
+      flashLive();
+    }catch(e){/* silent — try again next tick */}
+    return;
+  }
+  // Otherwise: fast price-only stream update.
   try{
-    const t=lastData.ticker;
-    const q=await fetchQuote(t);
-    const a=analyze(t,q.price,q.pct,q.hi52,q.lo52,q.closes);
-    // Re-render dashboard with fresh data (preserves current chart range/zoom)
-    const keepRange=chartRange,keepZoom=chartZoom,keepPan=chartPanOffset;
-    renderDash(t,q,a);
-    chartRange=keepRange;chartZoom=keepZoom;chartPanOffset=keepPan;
-    if(lastCanvasData){const{q:cq,entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;drawCanvasChart(cq,entry,sl,tp1,tp2,sentiment,isShort,isNeutral);}
+    const lp=await fetchLivePrice(t);
+    const q=lastData.q;
+    const oldP=q.price;
+    q.price=lp.price;q.change=lp.price-lp.prev;q.pct=lp.prev?(q.change/lp.prev)*100:0;
+    // nudge the last intraday candle's close so the 1D line follows the tick
+    if(q.h1d&&q.h1d.length){const c=q.h1d[q.h1d.length-1];c.c=+lp.price.toFixed(2);if(lp.price>c.h)c.h=c.c;if(lp.price<c.l)c.l=c.c;}
+    tweenPrice(oldP,lp.price);
+    updateHeaderChange(q);
+    if(lastCanvasData){lastCanvasData.q=q;const{entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral);}
     flashLive();
-  }catch(e){/* silent — try again next tick */}
+  }catch(e){/* silent — markets may be closed or feed rate-limited */}
+}
+
+// Smoothly count the displayed price from its old value to the new tick.
+function tweenPrice(from,to){
+  const el=document.querySelector('.th-price');if(!el||from==null)return;
+  if(Math.abs(to-from)<0.005){el.textContent='$'+to.toFixed(2);return;}
+  const dur=600,t0=performance.now();
+  el.style.transition='color .3s';
+  el.style.color=to>from?'var(--gt)':'var(--rt)';
+  (function step(now){
+    const k=Math.min(1,(now-t0)/dur);
+    el.textContent='$'+(from+(to-from)*k).toFixed(2);
+    if(k<1)requestAnimationFrame(step);
+    else{el.textContent='$'+to.toFixed(2);setTimeout(()=>{el.style.color='';},450);}
+  })(performance.now());
+}
+// Update the change badge to match the latest streamed price.
+function updateHeaderChange(q){
+  const b=document.querySelector('.chg-badge');if(!b)return;
+  const up=q.change>=0;
+  b.className='chg-badge '+(up?'up':'down');
+  b.textContent=`${up?'+':''}${q.change.toFixed(2)} (${up?'+':''}${q.pct.toFixed(2)}%)`;
 }
 function flashLive(){
   const pill=document.querySelector('.live-pill');
