@@ -260,6 +260,38 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .ai-spin{display:inline-block;width:11px;height:11px;border:2px solid var(--b3);border-top-color:var(--bl);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:5px}
 .ai-analyze-btn{margin-top:14px;width:100%;padding:11px;border-radius:var(--rsm);border:1px solid rgba(77,166,255,.35);background:linear-gradient(135deg,rgba(77,166,255,.12),rgba(168,85,247,.1));color:var(--bt);font-size:13px;font-weight:800;cursor:pointer;transition:all .18s}
 .ai-analyze-btn:hover{border-color:var(--bl);box-shadow:0 4px 16px rgba(77,166,255,.2);transform:translateY(-1px)}
+/* Unified control + AI buttons (kill default white buttons) */
+.walk-ctrl{padding:9px 15px;border-radius:var(--rsm);border:1px solid var(--b2);background:var(--s3);color:var(--tx);font-size:12px;font-weight:700;cursor:pointer;transition:all .16s;display:inline-flex;align-items:center;gap:6px}
+.walk-ctrl:hover{border-color:var(--b3);background:var(--s4);transform:translateY(-1px)}
+.walk-ctrl.ai,.ai-btn{border:1px solid rgba(124,138,255,.4);background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(168,85,247,.14));color:#c7c9ff;font-weight:800}
+.walk-ctrl.ai:hover,.ai-btn:hover{border-color:#7c8aff;box-shadow:0 4px 18px rgba(124,138,255,.28);transform:translateY(-1px)}
+.ai-btn{padding:10px 16px;border-radius:var(--rsm);font-size:13px;cursor:pointer;transition:all .16s;display:inline-flex;align-items:center;gap:7px}
+.ai-btn.full{width:100%;justify-content:center}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+/* AI strategy pick panel (dashboard) */
+.aip-panel{margin-top:16px;padding:15px 16px;border-radius:var(--rsm);border:1px solid var(--ac,var(--b2));background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(168,85,247,.04));position:relative;overflow:hidden}
+.aip-panel::after{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--ac,var(--gr))}
+.aip-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.aip-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.aip-name{font-size:14px;font-weight:800;color:var(--tx)}
+.aip-sub{font-size:11px;color:var(--mu);margin-top:3px}
+.aip-think-toggle{font-size:12px;font-weight:700;color:var(--bt);cursor:pointer;user-select:none;padding:7px 0;display:flex;align-items:center;gap:6px}
+.aip-arrow{transition:transform .2s;font-size:10px}
+.aip-panel.open .aip-arrow{transform:rotate(180deg)}
+.aip-think{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.aip-panel.open .aip-think{max-height:500px}
+.aip-step{display:flex;gap:9px;padding:7px 0;font-size:12px;color:var(--mu);line-height:1.6;border-bottom:1px solid var(--b1)}
+.aip-step:last-child{border-bottom:none}
+.aip-step-n{width:20px;height:20px;border-radius:50%;color:#04140d;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.aip-note{font-size:11px;color:var(--fa);line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px solid var(--b1)}
+/* AI Lab */
+.ai-learn-barwrap{height:8px;background:var(--s3);border-radius:5px;overflow:hidden}
+.ai-learn-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--bl),var(--pu));border-radius:5px;transition:width .3s}
+.ai-learn-log{max-height:340px;overflow-y:auto}
+.ai-learn-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--b1);font-size:12px}
+.ai-learn-row:last-child{border-bottom:none}
+.ai-learn-tk{font-family:var(--mono);font-weight:900;min-width:56px}
+.ai-learn-row span:nth-child(2){flex:1;font-weight:700}
 /* ── PERFORMANCE ── */
 .perf-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--b1)}
 .perf-row:last-child{border-bottom:none}
@@ -565,6 +597,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <button class="ntab" onclick="mainTab('lab',this)">Strategy Lab</button>
     <button class="ntab" onclick="mainTab('backtest',this)">Backtest</button>
     <button class="ntab" onclick="mainTab('performance',this)">My Performance</button>
+    <button class="ntab" onclick="mainTab('ailab',this)">AI Lab</button>
     <button class="ntab" onclick="mainTab('ai',this)">AI Chat</button>
     <button class="ntab" onclick="mainTab('screener',this)">Screener</button>
     <button class="ntab" onclick="mainTab('alerts',this)">Alerts</button>
@@ -582,8 +615,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <!-- LEFT NEWS -->
   <div class="sidebar" id="sideL">
     <div class="side-hd">Market News</div>
-    <button class="side-ai-btn" onclick="aiNewsDigest()">✨ AI: summarize today</button>
-    <div id="newsDigest"></div>
     <div id="newsFeedLeft"></div>
   </div>
 
@@ -735,6 +766,29 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div id="perfBody"></div>
     </div>
 
+    <!-- AI LAB -->
+    <div class="tab-pane" id="tab-ailab">
+      <div style="margin-bottom:18px">
+        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">AI Lab — Self-Learning Engine</div>
+        <div style="font-size:13px;color:var(--mu);line-height:1.6">The AI picks strategies, <b>back-tests its own picks</b> on historical data, logs each win and loss, and adjusts how much it trusts each strategy. That learned confidence then shapes the <b>strategy pick, entry, stop, and targets</b> you see on the dashboard. Train it more to sharpen its edge.</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="pdot"></span>Train the AI</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+          <button class="ai-btn" id="aiTrain12" onclick="aiSelfBacktest(12)">▶ Run 12 self-tests</button>
+          <button class="ai-btn" id="aiTrain30" onclick="aiSelfBacktest(30)">▶▶ Run 30 (deeper)</button>
+          <button class="walk-ctrl" onclick="resetAIMemory()">↻ Reset memory</button>
+        </div>
+        <div class="ai-learn-barwrap"><div class="ai-learn-bar" id="aiLearnBar"></div></div>
+        <div style="font-size:11px;color:var(--fa);margin-top:6px">Each test: the AI reads a random historical chart, picks a strategy, takes the trade, then jumps forward to see if it worked — and updates its memory. Runs on real data; uses your AI connection where available.</div>
+      </div>
+      <div id="aiLearnStats"></div>
+      <div class="card">
+        <div class="card-title">Self-test log (most recent first)</div>
+        <div class="ai-learn-log" id="aiLearnLog"></div>
+      </div>
+    </div>
+
     <!-- AI CHAT -->
     <div class="tab-pane" id="tab-ai">
       <div style="margin-bottom:16px">
@@ -836,6 +890,7 @@ function mainTab(name,btn){
   if(name==='backtest')initBacktestTab();
   if(name==='lab')initLabTab();
   if(name==='performance')renderPerformance();
+  if(name==='ailab')renderAILearnStats();
 }
 
 // ── DTE CONFIG ────────────────────────────────────────────────────────
@@ -1630,6 +1685,144 @@ function labLevels(d){
   return{resis,lo,support,sma20Val:sma20,range};
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// ── AI SELF-LEARNING ENGINE ──────────────────────────────────────────
+// The AI picks strategies, backtests its own picks on history, logs the
+// outcomes, and adjusts a confidence weight per strategy over time. That
+// learned confidence then biases the home-page analysis + entry/stop/TP.
+// ══════════════════════════════════════════════════════════════════════
+const AI_MEMORY_KEY='tlpro_ai_memory_v1';
+let AI_MEMORY=loadAIMemory();
+function defaultMemory(){
+  const m={strats:{},trials:0,wins:0};
+  LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
+  return m;
+}
+function loadAIMemory(){
+  try{const raw=localStorage.getItem(AI_MEMORY_KEY);if(raw){const m=JSON.parse(raw);if(m&&m.strats)return m;}}catch(e){}
+  return defaultMemory();
+}
+function saveAIMemory(){try{localStorage.setItem(AI_MEMORY_KEY,JSON.stringify(AI_MEMORY));}catch(e){}}
+function stratConf(key){const s=AI_MEMORY.strats[key];if(!s)return 0.5;const n=s.wins+s.losses;if(n===0)return 0.5;
+  // Wilson-ish shrink toward 0.5 when sample is small
+  const raw=s.wins/n;return 0.5+(raw-0.5)*Math.min(1,n/12);}
+
+// Decide which strategy fits the current chart, by structure + learned confidence.
+function classifySetup(candles,a){
+  const lv=labLevels(candles);
+  const last=candles[candles.length-1].c;
+  const up=a.s20s60>0, rsi=+a.rsi;
+  const nearHigh=(lv.resis-last)/lv.range<0.12;
+  const nearLow=(last-lv.lo)/lv.range<0.15;
+  // candidate scores per strategy from structure
+  const cand={};
+  cand.pullback = (up?0.6:0.1) + (last<lv.sma20Val?0.25:0) + (rsi<55&&rsi>38?0.2:0);
+  cand.breakout = (up?0.45:0.1) + (nearHigh?0.45:0) + (rsi>55?0.15:0);
+  cand.breakdown= (!up?0.6:0.1) + (last>lv.sma20Val?0.2:0) + (rsi>45&&rsi<62?0.2:0);
+  cand.oversold = (rsi<32?0.7:rsi<40?0.3:0) + (nearLow?0.25:0);
+  cand.rangefade= (Math.abs(a.s20s60)<1.2?0.5:0.1) + (nearHigh?0.35:0) + (rsi>55?0.15:0);
+  // blend structure score with learned confidence
+  let best=null,bestScore=-1;
+  Object.keys(cand).forEach(k=>{
+    const conf=stratConf(k);
+    const score=cand[k]*(0.6+conf*0.8); // learned confidence amplifies/dampens
+    if(score>bestScore){bestScore=score;best=k;}
+  });
+  return{key:best,score:bestScore,structure:cand,levels:lv};
+}
+
+// Compute entry/stop/TPs for a chosen strategy from real chart structure.
+function aiStrategyLevels(key,candles){
+  const s=LAB_STRATEGIES.find(x=>x.key===key);
+  const plan=s.compute(candles);
+  // plan.steps contains kinds entry/stop/tp; pull the prices
+  const entry=plan.steps.find(p=>p.k==='entry');
+  const stop=plan.steps.find(p=>p.k==='stop');
+  const tps=plan.steps.filter(p=>p.k==='tp');
+  const px=v=>+(Array.isArray(v)?v[0]:v).toFixed(2);
+  return{
+    dir:plan.dir,
+    entry: entry?px(entry.y):px(candles[candles.length-1].c),
+    sl: stop?px(stop.y):0,
+    tp1: tps[0]?px(tps[0].y):0,
+    tp2: tps[1]?px(tps[1].y):(tps[0]?px(tps[0].y):0),
+    steps:plan.steps, name:s.name, color:s.color, icon:s.icon, key:s.key
+  };
+}
+
+// ── AI self-backtest: test the AI's OWN strategy picks on history ──
+let aiSelfBusy=false;
+async function aiSelfBacktest(rounds){
+  if(aiSelfBusy)return;aiSelfBusy=true;
+  rounds=rounds||12;
+  const universe=['AAPL','MSFT','NVDA','AMZN','META','GOOGL','TSLA','AMD','SPY','NFLX','AVGO','JPM'];
+  const log=document.getElementById('aiLearnLog');
+  const setBar=(done)=>{const pb=document.getElementById('aiLearnBar');if(pb)pb.style.width=Math.round(done/rounds*100)+'%';};
+  let did=0;
+  for(let i=0;i<rounds;i++){
+    const tk=universe[Math.floor(Math.random()*universe.length)];
+    try{
+      const q=await fetchQuote(tk);
+      const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
+      if(!full||full.length<70){continue;}
+      const hold=10;
+      const cut=Math.floor(50+Math.random()*(full.length-hold-52));
+      const histWin=full.slice(0,cut+1);
+      const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
+      const setup=classifySetup(histWin.slice(-60),a);
+      const lvl=aiStrategyLevels(setup.key,histWin.slice(-60));
+      const decisionPrice=full[cut].c;
+      const endPrice=full[Math.min(full.length-1,cut+hold)].c;
+      const changePct=((endPrice-decisionPrice)/decisionPrice)*100;
+      const dirRight=(lvl.dir==='long'&&changePct>=0)||(lvl.dir==='short'&&changePct<0);
+      const pnl=lvl.dir==='long'?changePct:-changePct;
+      // update memory
+      const mem=AI_MEMORY.strats[setup.key];
+      if(dirRight)mem.wins++;else mem.losses++;
+      mem.pnl+=pnl;mem.conf=stratConf(setup.key);
+      AI_MEMORY.trials++;if(dirRight)AI_MEMORY.wins++;
+      did++;setBar(did);
+      if(log){
+        const row=document.createElement('div');row.className='ai-learn-row';
+        row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.icon} ${lvl.name}</span><span class="bt-tag">${lvl.dir}</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'✓ WIN':'✗ LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
+        log.prepend(row);
+      }
+    }catch(e){/* skip failed fetches */}
+    await new Promise(r=>setTimeout(r,120));
+  }
+  saveAIMemory();
+  aiSelfBusy=false;
+  renderAILearnStats();
+  // refresh dashboard so new confidence affects the current ticker
+  if(lastData)load(lastData.ticker);
+}
+function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnStats();const log=document.getElementById('aiLearnLog');if(log)log.innerHTML='';if(lastData)load(lastData.ticker);}
+
+function renderAILearnStats(){
+  const el=document.getElementById('aiLearnStats');if(!el)return;
+  const acc=AI_MEMORY.trials?Math.round(AI_MEMORY.wins/AI_MEMORY.trials*100):0;
+  const rows=Object.entries(AI_MEMORY.strats).map(([k,s])=>{
+    const n=s.wins+s.losses,conf=Math.round(stratConf(k)*100);
+    const w=n?Math.round(s.wins/n*100):0;
+    const col=conf>=60?'var(--gr)':conf>=45?'var(--at)':'var(--rd)';
+    return `<div class="perf-row">
+      <div class="perf-row-name">${s.name}</div>
+      <div class="perf-bar"><div class="perf-bar-fill" style="width:${conf}%;background:${col}"></div></div>
+      <div class="perf-row-stat">conf ${conf}% · ${n} tests · <span class="${s.pnl>=0?'g':'r'}">${s.pnl>=0?'+':''}${s.pnl.toFixed(1)}%</span></div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`
+    <div class="bt-scoreboard">
+      <div class="bt-score"><div class="bt-score-val">${AI_MEMORY.trials}</div><div class="bt-score-lbl">Self-tests</div></div>
+      <div class="bt-score"><div class="bt-score-val" style="color:var(--at)">${acc}%</div><div class="bt-score-lbl">AI accuracy</div></div>
+      <div class="bt-score"><div class="bt-score-val g">${AI_MEMORY.wins}</div><div class="bt-score-lbl">Wins</div></div>
+      <div class="bt-score"><div class="bt-score-val r">${AI_MEMORY.trials-AI_MEMORY.wins}</div><div class="bt-score-lbl">Losses</div></div>
+    </div>
+    <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard.</div></div>`;
+}
+
+
 let labState={stratKey:'pullback',series:null,plan:null,step:-1,timer:null,name:'',tf:'1d'};
 let labInited=false;
 function initLabTab(){
@@ -1780,21 +1973,6 @@ async function labFindLive(){
     const ans=await callClaude(sys,usr,700);
     out.innerHTML=`<div class="lab-ai-card"><div class="lab-ai-head">✨ Live ${s.name} scan</div>${fmtAI(ans)}<div class="lab-ai-foot">Educational analysis from Claude on live data — not financial advice. Click a ticker above to load and study it.</div></div>`;
   }catch(e){out.innerHTML=`<div class="lab-ai-card">AI scan failed: ${e.message}</div>`;}
-}
-
-
-// AI: summarize the day's news into a market read
-async function aiNewsDigest(){
-  const out=document.getElementById('newsDigest');if(!out)return;
-  if(!aiReady()){out.innerHTML=`<div class="side-ai-card">Connect a Claude key (✨ AI, top-right) for a one-glance AI market digest.</div>`;return;}
-  out.innerHTML=`<div class="side-ai-card"><span class="ai-spin"></span> Summarizing…</div>`;
-  const headlines=NEWS.map(n=>`[${n.tag}] ${n.h} (${n.t.join(',')})`).join('\n');
-  try{
-    const ans=await callClaude(
-      'You are a market briefing writer. Given today\'s headlines with bullish/bearish tags, write a tight 3-sentence "what matters today" digest: the dominant theme, the main risk, and which sectors/tickers are in focus. Educational only. Plain text, no preamble.',
-      headlines, 280);
-    out.innerHTML=`<div class="side-ai-card"><div class="side-ai-head">✨ Today's read</div>${fmtAI(ans)}</div>`;
-  }catch(e){out.innerHTML=`<div class="side-ai-card">Digest failed: ${e.message}</div>`;}
 }
 
 // AI deep-read of a ticker's market direction (dashboard)
@@ -2114,18 +2292,58 @@ function togglePressure(btn){
 
 // ── RENDER DASHBOARD ──────────────────────────────────────────────────
 let lastData=null;
+
+// Renders the AI's chosen strategy, its learned confidence, reasoning, and levels.
+function aiPickPanelHtml(ticker,aiPick,isNeutral){
+  if(isNeutral||!aiPick)return '';
+  const conf=Math.round((aiPick.conf||0.5)*100);
+  const mem=AI_MEMORY.strats[aiPick.key]||{wins:0,losses:0};
+  const n=mem.wins+mem.losses;
+  const confColor=conf>=60?'var(--gt)':conf>=45?'var(--at)':'var(--rt)';
+  const steps=aiPick.steps.map((s,i)=>`<div class="aip-step"><span class="aip-step-n" style="background:${s.c}">${i+1}</span><div><b style="color:${s.c}">${s.label}</b> — ${s.note}</div></div>`).join('');
+  return `<div class="aip-panel" style="--ac:${aiPick.color}">
+    <div class="aip-head">
+      <span class="aip-icon" style="background:${aiPick.color}22;border:1px solid ${aiPick.color}66">${aiPick.icon}</span>
+      <div style="flex:1">
+        <div class="aip-name">AI strategy pick: <span style="color:${aiPick.color}">${aiPick.name}</span></div>
+        <div class="aip-sub">${aiPick.dir==='long'?'▲ Long bias':'▼ Short bias'} · learned confidence <b style="color:${confColor}">${conf}%</b> ${n>0?`<span style="color:var(--fa)">(${mem.wins}W/${mem.losses}L over ${n} self-tests)</span>`:'<span style="color:var(--fa)">(not yet trained)</span>'}</div>
+      </div>
+    </div>
+    <div class="aip-think-toggle" onclick="this.parentElement.classList.toggle('open')">🧠 Walk through the AI's thinking <span class="aip-arrow">▾</span></div>
+    <div class="aip-think">${steps}</div>
+    <div class="aip-note">These entry / stop / target levels below are set by this strategy applied to ${ticker}'s real structure — and weighted by what the AI has learned from back-testing itself. Train it more in the <b>AI Lab</b> to sharpen the picks.</div>
+  </div>`;
+}
+
 function renderDash(ticker,q,a){
   const info=DTE[currentDTE];
   const up=q.change>=0,isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
   let entry=0,sl=0,tp1=0,tp2=0;
-  if(!isNeutral){
-    const slP=info.sl/100,tp1P=info.tp1/100,tp2P=info.tp2/100;
-    entry=+(q.price*(isShort?1.002:0.9985)).toFixed(2);
-    sl=isShort?+(entry*(1+slP)).toFixed(2):+(entry*(1-slP)).toFixed(2);
-    tp1=isShort?+(entry*(1-tp1P)).toFixed(2):+(entry*(1+tp1P)).toFixed(2);
-    tp2=isShort?+(entry*(1-tp2P)).toFixed(2):+(entry*(1+tp2P)).toFixed(2);
+  // AI strategy pick — uses learned confidence to choose a setup and derive
+  // entry/stop/targets from real chart structure. Falls back to % model.
+  let aiPick=null;
+  const candForPick=(q.h6m&&q.h6m.length>40)?q.h6m:(q.h3m||[]);
+  if(candForPick.length>40){
+    try{
+      const setup=classifySetup(candForPick.slice(-60),a);
+      aiPick=aiStrategyLevels(setup.key,candForPick.slice(-60));
+      aiPick.conf=stratConf(setup.key);
+      aiPick.setupScore=setup.score;
+    }catch(e){aiPick=null;}
   }
-  lastData={ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral};
+  if(!isNeutral){
+    if(aiPick&&aiPick.entry&&aiPick.sl&&aiPick.tp1){
+      // Use the AI's structure-based levels
+      entry=aiPick.entry;sl=aiPick.sl;tp1=aiPick.tp1;tp2=aiPick.tp2||aiPick.tp1;
+    }else{
+      const slP=info.sl/100,tp1P=info.tp1/100,tp2P=info.tp2/100;
+      entry=+(q.price*(isShort?1.002:0.9985)).toFixed(2);
+      sl=isShort?+(entry*(1+slP)).toFixed(2):+(entry*(1-slP)).toFixed(2);
+      tp1=isShort?+(entry*(1-tp1P)).toFixed(2):+(entry*(1+tp1P)).toFixed(2);
+      tp2=isShort?+(entry*(1-tp2P)).toFixed(2):+(entry*(1+tp2P)).toFixed(2);
+    }
+  }
+  lastData={ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick};
   // Scale the logo by predicted-impact conviction: how far score sits from neutral (50)
   // plus today's move magnitude. Strong conviction → larger mark.
   const conviction=Math.min(1,(Math.abs(a.score-50)/42)*0.7+Math.min(1,Math.abs(q.pct)/4)*0.3);
@@ -2210,7 +2428,8 @@ function renderDash(ticker,q,a){
           <div class="sent-wrap"><div class="sent-bar"><div class="sent-fill" id="sentFill" style="background:${fc}"></div></div><div class="sent-pct" style="color:${fc}">${a.score}%</div></div>
           <div class="analysis-text">${a.reason}</div>
           <div class="sig-section"><div class="sig-title">Signal breakdown</div>${sigHtml}</div>
-          <button class="ai-analyze-btn" onclick="aiMarketDirection('${ticker}')">✨ AI deep-read of ${ticker}'s direction</button>
+          ${aiPickPanelHtml(ticker,aiPick,isNeutral)}
+          <button class="ai-btn full" style="margin-top:12px" onclick="aiMarketDirection('${ticker}')">✨ AI deep-read of ${ticker}</button>
           <div id="aiDirOut"></div>
         </div>
         ${setupHtml}
