@@ -763,7 +763,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <button class="walk-ctrl" onclick="resetAIMemory()">↻ Reset memory</button>
         </div>
         <div class="ai-learn-barwrap"><div class="ai-learn-bar" id="aiLearnBar"></div></div>
-        <div style="font-size:11px;color:var(--fa);margin-top:6px">Each test: the AI reads a random historical chart, picks a strategy, takes the trade, then jumps forward to see if it worked — and updates its memory. Runs on real data; uses your AI connection where available.</div>
+        <div id="aiLearnStatus" style="font-size:12px;color:var(--mu);margin-top:8px;min-height:16px"></div>
+        <div style="font-size:11px;color:var(--fa);margin-top:6px">Each test reads a random historical chart, picks a strategy, takes the trade, then jumps forward to see if it worked — and updates its memory. Runs on real market data, so it needs a working connection and takes a few seconds per test.</div>
       </div>
       <div id="aiLearnStats"></div>
       <div class="card">
@@ -1898,14 +1899,24 @@ async function aiSelfBacktest(rounds){
   rounds=rounds||12;
   const universe=['AAPL','MSFT','NVDA','AMZN','META','GOOGL','TSLA','AMD','SPY','NFLX','AVGO','JPM'];
   const log=document.getElementById('aiLearnLog');
-  const setBar=(done)=>{const pb=document.getElementById('aiLearnBar');if(pb)pb.style.width=Math.round(done/rounds*100)+'%';};
-  let did=0;
+  const bar=document.getElementById('aiLearnBar');
+  const status=document.getElementById('aiLearnStatus');
+  const b12=document.getElementById('aiTrain12'),b30=document.getElementById('aiTrain30');
+  const setStatus=t=>{if(status)status.innerHTML=t;};
+  const setBar=p=>{if(bar)bar.style.width=Math.round(p)+'%';};
+  // Immediate feedback so it never looks frozen.
+  if(b12){b12.disabled=true;b12.style.opacity='.55';}
+  if(b30){b30.disabled=true;b30.style.opacity='.55';}
+  setBar(0);
+  setStatus(`<span class="ai-spin"></span> Starting ${rounds} self-tests…`);
+  let did=0,fail=0;
   for(let i=0;i<rounds;i++){
     const tk=universe[Math.floor(Math.random()*universe.length)];
+    setStatus(`<span class="ai-spin"></span> Testing ${i+1} of ${rounds} on ${tk}… <span style="color:var(--fa)">(${did} done${fail?`, ${fail} skipped`:''})</span>`);
     try{
       const q=await fetchQuote(tk);
       const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
-      if(!full||full.length<70){continue;}
+      if(!full||full.length<70){fail++;continue;}
       const hold=10;
       const cut=Math.floor(50+Math.random()*(full.length-hold-52));
       const histWin=full.slice(0,cut+1);
@@ -1922,20 +1933,28 @@ async function aiSelfBacktest(rounds){
       if(dirRight)mem.wins++;else mem.losses++;
       mem.pnl+=pnl;mem.conf=stratConf(setup.key);
       AI_MEMORY.trials++;if(dirRight)AI_MEMORY.wins++;
-      did++;setBar(did);
+      did++;
       if(log){
         const row=document.createElement('div');row.className='ai-learn-row';
         row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.icon} ${lvl.name}</span><span class="bt-tag">${lvl.dir}</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'✓ WIN':'✗ LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
         log.prepend(row);
       }
-    }catch(e){/* skip failed fetches */}
+    }catch(e){fail++;}
+    setBar((i+1)/rounds*100);
     await new Promise(r=>setTimeout(r,120));
   }
   saveAIMemory();
   aiSelfBusy=false;
+  if(b12){b12.disabled=false;b12.style.opacity='';}
+  if(b30){b30.disabled=false;b30.style.opacity='';}
+  if(did===0){
+    setStatus(`<span style="color:var(--rt)">⚠ Couldn't load market data for any test.</span> The free data feed is likely rate-limited or markets data is briefly unavailable — wait a moment and try again.`);
+  }else{
+    setStatus(`✓ Done — ran ${did} test${did===1?'':'s'}${fail?` (${fail} skipped — data feed was busy)`:''}. Confidence updated below.`);
+  }
   renderAILearnStats();
   // refresh dashboard so new confidence affects the current ticker
-  if(lastData)load(lastData.ticker);
+  if(lastData&&did>0)load(lastData.ticker);
 }
 function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnStats();const log=document.getElementById('aiLearnLog');if(log)log.innerHTML='';if(lastData)load(lastData.ticker);}
 
