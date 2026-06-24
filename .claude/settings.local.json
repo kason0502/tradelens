@@ -22,7 +22,9 @@
       "Bash(git mv *)",
       "Bash(git commit -q -m 'Make repo deploy-ready for Vercel *)",
       "Bash(git commit -q -m 'Fix AI Lab training feedback *)",
-      "Bash(git commit -q -m 'Polish UI: roomier layout, organized nav, plainer labels *)"
+      "Bash(git commit -q -m 'Polish UI: roomier layout, organized nav, plainer labels *)",
+      "WebFetch(domain:tradelens.vip)",
+      "Bash(git commit -q -m 'Redesign: gold pro-terminal theme + TradingView primary chart *)"
     ]
   }
 }
