@@ -819,6 +819,36 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .wk-tile .v.g{color:var(--gt)}.wk-tile .v.r{color:var(--rt)}.wk-tile .v.a{color:var(--at)}
 .wk-chart .chart-head{margin-bottom:12px}
 .wk-chart .pro-chart-wrap{height:440px}
+
+/* ═══════════ FOCUS DASHBOARD (fc-) — one decision, lots of whitespace ═══════════ */
+.fc{max-width:900px;margin:0 auto;padding:24px 0 48px}
+.fc-id{font-size:13px;color:var(--ink3);margin-bottom:12px;letter-spacing:.01em}
+.fc-price-row{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:44px}
+.fc-sym{font-size:clamp(42px,6vw,62px);font-weight:800;letter-spacing:-.045em;font-family:var(--mono);line-height:1}
+.fc-price-row .th-price{font-size:clamp(26px,3.4vw,34px);font-weight:300;font-family:var(--mono);color:var(--tx)}
+.fc-price-row .chg-badge{font-size:15px;font-weight:700;padding:5px 13px;border-radius:9px}
+.fc-dte-pill{font-size:11px;font-weight:700;color:var(--ink3);background:var(--s2);border:1px solid var(--line);padding:7px 13px;border-radius:9px;align-self:center}
+.fc-verdict{margin-bottom:38px;max-width:600px}
+.fc-verdict-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.fc-bias{font-size:12px;font-weight:800;letter-spacing:.04em;padding:6px 13px;border-radius:9px;border:1px solid transparent}
+.fc-bias.long{color:var(--gt);background:rgba(38,194,129,.1);border-color:rgba(38,194,129,.3)}
+.fc-bias.short{color:var(--rt);background:rgba(240,68,90,.1);border-color:rgba(240,68,90,.3)}
+.fc-bias.neut{color:var(--at);background:rgba(240,165,0,.1);border-color:rgba(240,165,0,.28)}
+.fc-verdict-sub{font-size:13px;color:var(--ink3)}
+.fc-verdict-line{font-size:clamp(27px,3.8vw,38px);font-weight:700;letter-spacing:-.025em;line-height:1.12;margin-bottom:20px}
+.fc-conv{height:8px;border-radius:99px;background:var(--s3);overflow:hidden;max-width:460px}
+.fc-conv .sent-fill{height:100%;width:0;border-radius:99px;transition:width 1.1s cubic-bezier(.3,1,.4,1)}
+.fc-levels{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:600px;margin-bottom:48px}
+@media(max-width:540px){.fc-levels{grid-template-columns:1fr;gap:16px;max-width:340px}}
+.fc-lvl .k{font-size:11px;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase}
+.fc-lvl .v{font-size:clamp(24px,3.2vw,31px);font-weight:700;font-family:var(--mono);letter-spacing:-.02em;margin-top:8px}
+.fc-lvl.entry .v{color:var(--act)}.fc-lvl.risk .v{color:var(--rt)}.fc-lvl.rew .v{color:var(--gt)}
+.fc-chart{margin-bottom:52px}
+.fc-chart .chart-head{margin-bottom:14px}
+.fc-sec{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start}
+.fc-card{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 18px 50px -32px rgba(0,0,0,.9)}
+.fc-card-lbl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px}
+.fc-sec .span2{grid-column:1/-1}
 </style>
 </head>
 <body>
@@ -3191,25 +3221,34 @@ function renderDash(ticker,q,a){
     <span><span class="ll" style="background:${isShort?'#ff4d4d':'#00d97e'}"></span>TP1 $${tp1.toFixed(2)}</span>
     <span><span class="ll" style="background:${isShort?'#ff9a9a':'#4dffa8'}"></span>TP2 $${tp2.toFixed(2)}</span>`:'';
 
-  const tile=(k,v,c)=>`<div class="wk-tile"><div class="k">${k}</div><div class="v ${c||''}">${v}</div></div>`;
+  const convPct=isNeutral?Math.round(a.score):(isShort?100-a.score:a.score);
+  const verdictLine=isNeutral?`Mixed signals — wait for a cleaner setup.`:(isShort?`${convPct}% — take the short.`:`${convPct}% — take the long.`);
   document.getElementById('main').innerHTML=`
-    <div class="wk">
-      <!-- COMMAND HEADER -->
-      <div class="wk-head">
-        <div class="wk-id"><div class="wk-sym">${ticker}</div><div class="wk-name">${q.name}</div></div>
-        <div class="wk-quote">
-          <span class="th-price">$${q.price.toFixed(2)}</span>
-          <span class="chg-badge ${up?'up':'down'}">${up?'+':''}${q.change.toFixed(2)} (${up?'+':''}${q.pct.toFixed(2)}%)</span>
-          <canvas id="miniCanvas" width="150" height="62" style="display:block;width:140px;height:44px"></canvas>
-        </div>
-        <div class="wk-head-right">
-          ${isNeutral?`<span class="wk-bias-chip neut">No clear bias</span>`:`<span class="wk-bias-chip ${isShort?'short':'long'}">${isShort?'Short bias':'Long bias'}</span>`}
-          <span class="wk-dte-pill">${currentDTE.toUpperCase()} · ${info.title}</span>
-        </div>
+    <div class="fc">
+      <div class="fc-id">${q.name} · ${currentDTE.toUpperCase()} horizon</div>
+      <div class="fc-price-row">
+        <span class="fc-sym">${ticker}</span>
+        <span class="th-price">$${q.price.toFixed(2)}</span>
+        <span class="chg-badge ${up?'up':'down'}">${up?'+':''}${q.change.toFixed(2)} (${up?'+':''}${q.pct.toFixed(2)}%)</span>
+        <span class="fc-dte-pill">${info.title}</span>
       </div>
 
-      <!-- CHART (dominant) -->
-      <div class="wk-panel wk-chart">
+      <div class="fc-verdict">
+        <div class="fc-verdict-top">
+          <span class="fc-bias ${isNeutral?'neut':isShort?'short':'long'}">${isNeutral?'No clear bias':isShort?'Short bias':'Long bias'}</span>
+          <span class="fc-verdict-sub">AI conviction · ${cap(a.sentiment)} ${a.score}%</span>
+        </div>
+        <div class="fc-verdict-line">${verdictLine}</div>
+        <div class="fc-conv"><div class="sent-fill" id="sentFill" style="background:${fc}"></div></div>
+      </div>
+
+      ${isNeutral?'':`<div class="fc-levels">
+        <div class="fc-lvl entry"><div class="k">Entry</div><div class="v">$${entry.toFixed(2)}</div></div>
+        <div class="fc-lvl risk"><div class="k">${isShort?'Stop · cover':'Stop loss'}</div><div class="v">$${sl.toFixed(2)}</div></div>
+        <div class="fc-lvl rew"><div class="k">Target · 1 : ${rr}</div><div class="v">$${tp1.toFixed(2)}</div></div>
+      </div>${shortBox}`}
+
+      <div class="fc-chart">
         <div class="chart-head">
           <span class="wk-h-lbl">Chart · ${ticker}</span>
           <div class="chart-view-tabs">
@@ -3241,85 +3280,52 @@ function renderDash(ticker,q,a){
         </div>
       </div>
 
-      <!-- TRADE PLAN (elevated hero) -->
-      <div class="wk-panel wk-plan${isNeutral?'':' elevated'}">
-        <div class="wk-panel-h"><span class="wk-h-lbl">Trade Plan</span>${isNeutral?'':`<span class="wk-bias-chip sm ${isShort?'short':'long'}">${isShort?'SHORT':'LONG'}</span>`}</div>
-        ${isNeutral?`<div class="wk-empty">Signals are mixed — no high-quality setup right now. Watch <b>$${a.hi20}</b> for a breakout or <b>$${a.lo20}</b> for a breakdown. Patience is a position.</div>`:`
-        <div class="wk-levels">
-          <div class="wk-lvl entry"><div class="k">Entry</div><div class="v">$${entry.toFixed(2)}</div></div>
-          <div class="wk-lvl risk"><div class="k">${isShort?'Stop · cover':'Stop loss'}</div><div class="v">$${sl.toFixed(2)}</div></div>
-          <div class="wk-lvl rew"><div class="k">Target 1</div><div class="v">$${tp1.toFixed(2)}</div></div>
-          <div class="wk-lvl rew"><div class="k">Target 2</div><div class="v">$${tp2.toFixed(2)}</div></div>
+      <div class="fc-sec">
+        <div class="fc-card span2">
+          <div class="fc-card-lbl">Why · ${cap(a.sentiment)} ${a.score}%</div>
+          <div class="analysis-text">${a.reason}</div>
+          <div class="sig-section"><div class="sig-title">Signal breakdown</div>${sigHtml}</div>
         </div>
-        <div class="wk-rr"><div class="wk-rr-big">1 : ${rr}</div><div class="wk-rr-sub">Risk $${risk.toFixed(2)} → reward $${reward.toFixed(2)}<br>${currentDTE.toUpperCase()} · ${info.title}</div></div>
-        ${shortBox}`}
-      </div>
-
-      <!-- AI CONVICTION -->
-      <div class="wk-panel wk-ai">
-        <div class="wk-panel-h"><span class="wk-h-lbl">AI Conviction</span><span class="sent-badge ${sc}" style="margin:0">${cap(a.sentiment)} · ${a.score}%</span></div>
-        <div class="sent-wrap"><div class="sent-bar"><div class="sent-fill" id="sentFill" style="background:${fc}"></div></div><div class="sent-pct" style="color:${fc}">${a.score}%</div></div>
-        ${aiPickPanelHtml(ticker,aiPick,isNeutral)}
-        <button class="ai-btn full" style="margin-top:12px" onclick="aiMarketDirection('${ticker}')">Ask AI for a deep-read</button>
-        <div id="aiDirOut"></div>
-      </div>
-
-      <!-- METRIC TILES -->
-      <div class="wk-metrics">
-        ${tile('Volume',q.volFmt,'')}
-        ${tile('Momentum (RSI)',a.rsi,a.rsi>60?'g':a.rsi<40?'r':'a')}
-        ${tile('20-Day Avg','$'+a.sma20,'')}
-        ${tile('Range Position',a.bbPct+'%',a.bbPct>75?'r':a.bbPct<25?'g':'')}
-        ${tile('52-Week High','$'+q.hi52.toFixed(2),'g')}
-        ${tile('52-Week Low','$'+q.lo52.toFixed(2),'r')}
-      </div>
-
-      <!-- WHY -->
-      <div class="wk-panel wk-why">
-        <div class="wk-panel-h"><span class="wk-h-lbl">Why · ${cap(a.sentiment)} ${a.score}%</span></div>
-        <div class="analysis-text">${a.reason}</div>
-        <div class="sig-section"><div class="sig-title">Signal breakdown</div>${sigHtml}</div>
-      </div>
-
-      <!-- INDICATORS -->
-      <div class="wk-panel wk-ind">
-        <div class="wk-panel-h"><span class="wk-h-lbl">Indicators</span></div>
-        <div class="ind-row" title="RSI — momentum 0–100. >70 overbought, <30 oversold."><span class="ind-lbl">Momentum (RSI)</span><span class="ind-val" style="color:${a.rsi>60?'var(--gt)':a.rsi<40?'var(--rt)':'var(--at)'}">${a.rsi}${a.rsi>70?' · OB':a.rsi<30?' · OS':''}</span></div>
-        <div class="ind-row"><span class="ind-lbl">5 / 10 / 20-Day Avg</span><span class="ind-val">$${a.sma5} · $${a.sma10} · $${a.sma20}</span></div>
-        <div class="ind-row"><span class="ind-lbl">Price vs 20-Day Avg</span><span class="ind-val" style="color:${a.pvs20>0?'var(--gt)':'var(--rt)'}">${a.pvs20>0?'+':''}${a.pvs20.toFixed(2)}%</span></div>
-        <div class="ind-row"><span class="ind-lbl">Trend</span><span class="ind-val" style="color:${a.s20s60>0?'var(--gt)':'var(--rt)'}">${a.s20s60>0?'Uptrend ↑':'Downtrend ↓'}</span></div>
-        <div class="ind-row"><span class="ind-lbl">Range Position</span><span class="ind-val" style="color:${a.bbPct>80?'var(--rt)':a.bbPct<20?'var(--gt)':'var(--tx)'}">${a.bbPct}%</span></div>
-        <div class="ind-row"><span class="ind-lbl">20-Day Range</span><span class="ind-val">$${a.lo20}–$${a.hi20}</span></div>
-        <div class="ind-row"><span class="ind-lbl">5-Day Momentum</span><span class="ind-val" style="color:${a.momentum5>0?'var(--gt)':'var(--rt)'}">${a.momentum5>0?'+':''}${a.momentum5.toFixed(2)}%</span></div>
-        <div class="ind-row"><span class="ind-lbl">Signal</span><span class="ind-val" style="color:${a.direction==='long'?'var(--gt)':a.direction==='short'?'var(--rt)':'var(--at)'}">${a.direction.toUpperCase()}</span></div>
-      </div>
-
-      <!-- STRATEGIES -->
-      <div class="wk-panel wk-strat">
-        <div class="wk-panel-h"><span class="wk-h-lbl">Strategies in play</span></div>
-        ${stratHtml}
-      </div>
-
-      <!-- FEEDBACK -->
-      <div class="wk-panel wk-fb" id="fbBox">
-        <div class="wk-panel-h"><span class="wk-h-lbl">Rate this signal</span></div>
-        <div class="fb-row">
-          <button class="fb-btn" onclick="fbSel(this,'acc','sel-acc')">Accurate</button>
-          <button class="fb-btn" onclick="fbSel(this,'par','sel-par')">Partial</button>
-          <button class="fb-btn" onclick="fbSel(this,'ina','sel-ina')">Inaccurate</button>
+        <div class="fc-card">
+          <div class="fc-card-lbl">AI strategy &amp; read</div>
+          ${aiPickPanelHtml(ticker,aiPick,isNeutral)}
+          <button class="ai-btn full" style="margin-top:12px" onclick="aiMarketDirection('${ticker}')">Ask AI for a deep-read</button>
+          <div id="aiDirOut"></div>
         </div>
-        <div class="fb-out-row">
-          <button class="fb-ob" onclick="fbOut(this,'profit')">Profit</button>
-          <button class="fb-ob" onclick="fbOut(this,'loss')">Loss</button>
-          <button class="fb-ob" onclick="fbOut(this,'open')">Still open</button>
+        <div class="fc-card">
+          <div class="fc-card-lbl">Indicators</div>
+          <div class="ind-row"><span class="ind-lbl">Momentum (RSI)</span><span class="ind-val" style="color:${a.rsi>60?'var(--gt)':a.rsi<40?'var(--rt)':'var(--at)'}">${a.rsi}${a.rsi>70?' · OB':a.rsi<30?' · OS':''}</span></div>
+          <div class="ind-row"><span class="ind-lbl">5 / 10 / 20-Day Avg</span><span class="ind-val">$${a.sma5} · $${a.sma10} · $${a.sma20}</span></div>
+          <div class="ind-row"><span class="ind-lbl">Price vs 20-Day Avg</span><span class="ind-val" style="color:${a.pvs20>0?'var(--gt)':'var(--rt)'}">${a.pvs20>0?'+':''}${a.pvs20.toFixed(2)}%</span></div>
+          <div class="ind-row"><span class="ind-lbl">Trend</span><span class="ind-val" style="color:${a.s20s60>0?'var(--gt)':'var(--rt)'}">${a.s20s60>0?'Uptrend ↑':'Downtrend ↓'}</span></div>
+          <div class="ind-row"><span class="ind-lbl">Range Position</span><span class="ind-val" style="color:${a.bbPct>80?'var(--rt)':a.bbPct<20?'var(--gt)':'var(--tx)'}">${a.bbPct}%</span></div>
+          <div class="ind-row"><span class="ind-lbl">20-Day Range</span><span class="ind-val">$${a.lo20}–$${a.hi20}</span></div>
+          <div class="ind-row"><span class="ind-lbl">Volume · 52W range</span><span class="ind-val">${q.volFmt} · $${q.lo52.toFixed(0)}–$${q.hi52.toFixed(0)}</span></div>
         </div>
-        <textarea class="fb-ta" id="fbNote" placeholder="Optional notes on what you observed…"></textarea>
-        <button class="fb-submit" onclick="submitFB('${ticker}','${a.sentiment}','${currentDTE}',${a.score})">Submit &amp; update model</button>
+        <div class="fc-card">
+          <div class="fc-card-lbl">Strategies in play</div>
+          ${stratHtml}
+        </div>
+        <div class="fc-card" id="fbBox">
+          <div class="fc-card-lbl">Rate this signal</div>
+          <div class="fb-row">
+            <button class="fb-btn" onclick="fbSel(this,'acc','sel-acc')">Accurate</button>
+            <button class="fb-btn" onclick="fbSel(this,'par','sel-par')">Partial</button>
+            <button class="fb-btn" onclick="fbSel(this,'ina','sel-ina')">Inaccurate</button>
+          </div>
+          <div class="fb-out-row">
+            <button class="fb-ob" onclick="fbOut(this,'profit')">Profit</button>
+            <button class="fb-ob" onclick="fbOut(this,'loss')">Loss</button>
+            <button class="fb-ob" onclick="fbOut(this,'open')">Still open</button>
+          </div>
+          <textarea class="fb-ta" id="fbNote" placeholder="Optional notes on what you observed…"></textarea>
+          <button class="fb-submit" onclick="submitFB('${ticker}','${a.sentiment}','${currentDTE}',${a.score})">Submit &amp; update model</button>
+        </div>
       </div>
     </div>`;
 
   requestAnimationFrame(()=>{
-    setTimeout(()=>{const f=document.getElementById('sentFill');if(f)f.style.width=a.score+'%';},80);
+    setTimeout(()=>{const f=document.getElementById('sentFill');if(f)f.style.width=convPct+'%';},80);
     setTimeout(()=>{
       // Apply the selected chart view (Pro = TradingView, AI = our canvas).
       applyChartView(ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral);
