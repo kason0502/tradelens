@@ -158,8 +158,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 /* ── DIRECTION BANNER ── */
 .dir-banner{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:var(--rsm);margin-bottom:16px;border:1px solid transparent;position:relative;overflow:hidden}
 .dir-banner::after{content:none}
-.dir-banner.long{background:rgba(0,217,126,.06);border-color:rgba(0,217,126,.25);box-shadow:0 0 24px rgba(0,217,126,.08)}
-.dir-banner.short{background:rgba(255,77,77,.06);border-color:rgba(255,77,77,.25);box-shadow:0 0 24px rgba(255,77,77,.08)}
+.dir-banner{padding:18px 22px;border-radius:16px;margin-bottom:18px}
+.dir-banner.long{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.28);box-shadow:0 0 30px rgba(34,197,94,.08)}
+.dir-banner.short{background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.28);box-shadow:0 0 30px rgba(244,63,94,.08)}
 .dir-icon{font-size:24px;flex-shrink:0;margin-top:1px}
 .dir-title{font-size:15px;font-weight:800;margin-bottom:4px}
 .long .dir-title{color:var(--gt)}.short .dir-title{color:var(--rt)}
@@ -2968,24 +2969,24 @@ function renderDash(ticker,q,a){
       <div class="metric" title="Where price sits within its normal range (Bollinger Bands). 100% = top of the range, 0% = bottom."><div class="metric-lbl">Range Position</div><div class="metric-val ${a.bbPct>75?'r':a.bbPct<25?'g':''}">${a.bbPct}%</div></div>
     </div>
     <div class="two-col">
-      <div>
-        <div class="card d1">
-          <div class="card-title"><span class="pdot"></span>Analysis — ${ticker} · ${cap(a.sentiment)} ${a.score}%</div>
+      <div style="display:flex;flex-direction:column">
+        <div class="card d1" style="order:3">
+          <div class="card-title"><span class="pdot"></span>Why — ${ticker} · ${cap(a.sentiment)} ${a.score}%</div>
           <div class="sent-badge ${sc}">${cap(a.sentiment)}</div>
           <div class="sent-wrap"><div class="sent-bar"><div class="sent-fill" id="sentFill" style="background:${fc}"></div></div><div class="sent-pct" style="color:${fc}">${a.score}%</div></div>
           <div class="analysis-text">${a.reason}</div>
           <div class="sig-section"><div class="sig-title">Signal breakdown</div>${sigHtml}</div>
           ${aiPickPanelHtml(ticker,aiPick,isNeutral)}
-          <button class="ai-btn full" style="margin-top:12px" onclick="aiMarketDirection('${ticker}')">✨ AI deep-read of ${ticker}</button>
+          <button class="ai-btn full" style="margin-top:12px" onclick="aiMarketDirection('${ticker}')">Ask AI for a deep-read of ${ticker}</button>
           <div id="aiDirOut"></div>
         </div>
-        ${setupHtml}
-        <div class="card d3">
+        <div style="order:1">${setupHtml}</div>
+        <div class="card d3" style="order:2">
           <div class="chart-head">
             <div class="card-title" style="margin:0">Chart — ${ticker}</div>
             <div class="chart-view-tabs">
-              <button class="cvt-btn active" id="cvtPro" onclick="setChartView('pro')">📊 Pro Chart</button>
-              <button class="cvt-btn" id="cvtAI" onclick="setChartView('ai')">🎯 AI Levels</button>
+              <button class="cvt-btn active" id="cvtPro" onclick="setChartView('pro')">Pro Chart</button>
+              <button class="cvt-btn" id="cvtAI" onclick="setChartView('ai')">AI Levels</button>
             </div>
           </div>
           <div id="proChartWrap" class="pro-chart-wrap"><div id="tvChart"></div></div>
@@ -3013,8 +3014,8 @@ function renderDash(ticker,q,a){
           <div class="chart-hint2">🟢 green = buy pressure · 🔴 red = sell pressure · marker size = predicted impact · scroll/pinch/± to zoom · <span class="creset" onclick="resetChart()">Reset</span></div>
           </div>
         </div>
-        <div class="fb-box d4" id="fbBox">
-          <div class="fb-title">📊 Rate this signal — help the AI learn</div>
+        <div class="fb-box d4" id="fbBox" style="order:4">
+          <div class="fb-title">Rate this signal — help the AI learn</div>
           <div class="fb-row">
             <button class="fb-btn" onclick="fbSel(this,'acc','sel-acc')">✓ Accurate</button>
             <button class="fb-btn" onclick="fbSel(this,'par','sel-par')">~ Partial</button>
@@ -3047,10 +3048,6 @@ function renderDash(ticker,q,a){
           <div class="ind-row" title="The overall call from the analysis: go long (buy), short (sell), or wait."><span class="ind-lbl">Signal</span><span class="ind-val" style="color:${a.direction==='long'?'var(--gt)':a.direction==='short'?'var(--rt)':'var(--at)'}">${a.direction.toUpperCase()}</span></div>
         </div>
         <div class="card d3"><div class="card-title">Strategies</div>${stratHtml}</div>
-        <div class="card d4">
-          <div class="card-title">Watchlist</div>
-          ${['AAPL','TSLA','NVDA','SPY','MSFT','AMZN'].map(sym=>`<div class="wl-item" onclick="loadTicker('${sym}')"><div class="wl-left"><span class="wl-sym" style="${sym===ticker?'color:var(--gt)':''}">${sym}</span><span class="wl-name">${{AAPL:'Apple',TSLA:'Tesla',NVDA:'NVIDIA',SPY:'S&P 500',MSFT:'Microsoft',AMZN:'Amazon'}[sym]}</span></div><div class="wl-right"><div class="wl-price">—</div><div class="wl-chg up">—</div></div></div>`).join('')}
-        </div>
       </div>
     </div>`;
 

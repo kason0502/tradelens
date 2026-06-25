@@ -26,7 +26,8 @@
       "WebFetch(domain:tradelens.vip)",
       "Bash(git commit -q -m 'Redesign: gold pro-terminal theme + TradingView primary chart *)",
       "Bash(git commit -q -m 'Complete visual redesign: premium fintech SaaS + landing page *)",
-      "Bash(git commit -q -m 'Align app shell to landing aesthetic *)"
+      "Bash(git commit -q -m 'Align app shell to landing aesthetic *)",
+      "Bash(git commit -q -m 'Declutter dashboard into a trader reading order *)"
     ]
   }
 }
