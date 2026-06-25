@@ -116,6 +116,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .ntag-bull{background:var(--gd);color:var(--gt)}.ntag-bear{background:var(--rdd);color:var(--rt)}.ntag-neut{background:var(--s3);color:var(--mu)}
 .news-impact{font-size:10px;color:var(--mu);line-height:1.55}
 .nticker{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--s3);color:var(--mu);font-family:var(--mono)}
+/* News tab */
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.news-item{padding:22px;border-radius:16px;transition:transform .18s,border-color .18s,box-shadow .18s}
+.news-item:hover{transform:translateY(-3px);border-color:rgba(59,130,246,.28);box-shadow:0 18px 44px rgba(0,0,0,.4)}
+.news-item-top{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+.news-item .ntag{font-size:10px;padding:3px 10px;border-radius:100px;font-weight:700}
+.news-item .news-src{font-size:12px;color:var(--ink3);font-weight:600}
+.news-item-h{font-size:16.5px;font-weight:700;line-height:1.42;letter-spacing:-.01em;margin-bottom:11px;color:var(--ink)}
+.news-item-impact{font-size:13.5px;color:var(--ink2);line-height:1.65;margin-bottom:16px}
+.news-item-tk{display:flex;gap:7px;flex-wrap:wrap}
+.news-item .nticker{font-size:11px;padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--ink2)}
+.nticker.nclk{cursor:pointer;transition:all .14s}
+.nticker.nclk:hover{border-color:rgba(59,130,246,.5);color:var(--act)}
 
 /* ── TAB SYSTEM ── */
 .tab-pane{display:none}.tab-pane.active{display:block}
@@ -1114,6 +1127,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <div class="nav-tabs">
     <button class="ntab active" onclick="mainTab('dashboard',this)">Dashboard</button>
     <button class="ntab" onclick="mainTab('screener',this)">Screener</button>
+    <button class="ntab" onclick="mainTab('news',this)">News</button>
     <button class="ntab" onclick="mainTab('traders',this)">Pro Traders</button>
     <span class="nav-sep"></span>
     <button class="ntab" onclick="mainTab('backtest',this)">Backtest</button>
@@ -1185,6 +1199,14 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div class="loading-steps"><div class="ls"></div><div class="ls"></div><div class="ls"></div></div>
         </div>
       </div>
+    </div>
+
+    <!-- NEWS -->
+    <div class="tab-pane" id="tab-news">
+      <div style="margin-bottom:8px;font-size:26px;font-weight:800;letter-spacing:-.03em">Market News</div>
+      <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:8px;max-width:640px">Macro and single-name headlines with a plain-English read on what each could mean for price. Click a ticker to analyze it on the dashboard.</div>
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:24px">Illustrative sample feed — a live newswire can be wired in with a data provider key.</div>
+      <div class="news-grid" id="newsTabFeed"></div>
     </div>
 
     <!-- PRO TRADERS -->
@@ -1385,6 +1407,7 @@ function mainTab(name,btn){
   document.getElementById('tab-'+name).classList.add('active');
   if(btn)btn.classList.add('active');
   if(name==='screener')runScan('bullish',document.querySelector('.scan-card'));
+  if(name==='news')renderNewsTab();
   if(name==='feedback')renderFeedbackTab();
   if(name==='traders')renderTraders(currentTraderFilter);
   if(name==='backtest')initBacktestTab();
@@ -1748,7 +1771,7 @@ function drawMiniChart(history,sentiment){
 
 // ── MAIN CANVAS CANDLESTICK CHART ─────────────────────────────────────
 let chartMode='candle',chartRange='3m',chartPanOffset=0,chartZoom=1;
-let chartView='pro';   // 'pro' = TradingView, 'ai' = our analysis canvas
+let chartView='ai';   // 'ai' = our annotated canvas (setup + S/R drawn), 'pro' = TradingView
 let lastCanvasData=null;
 let showPressure=true;       // toggle for pressure zones
 
@@ -1806,7 +1829,10 @@ function detectPressureZones(data){
 // ══════════════════════════════════════════════════════════════════════
 let btState=null;
 let btScore={played:0,correct:0,pnl:0};
-let btHistory=[];  // per-trade log for performance review
+const BT_HIST_KEY='tlpro_bt_history_v1';
+function loadBtHistory(){try{const r=localStorage.getItem(BT_HIST_KEY);if(r){const a=JSON.parse(r);if(Array.isArray(a))return a;}}catch(e){}return [];}
+function saveBtHistory(){try{localStorage.setItem(BT_HIST_KEY,JSON.stringify(btHistory.slice(-200)));}catch(e){}}
+let btHistory=loadBtHistory();  // per-trade log for performance review (persisted)
 let btInited=false;
 
 // Strategies the engine assigns. Each knows its bias and how to "apply" it.
@@ -2042,7 +2068,7 @@ function resolveBacktest(call){
     verdictIcon=correct?'✅':'❌';
   }
   btScore.played++;if(correct)btScore.correct++;btScore.pnl+=tradePnl;
-  btHistory.push({ticker:s.ticker,strat:st.name,stratKey:st.key,bias:stratDir,tf:s.tf,took,correct,pnl:tradePnl,changePct,when:Date.now()});
+  btHistory.push({ticker:s.ticker,strat:st.name,stratKey:st.key,bias:stratDir,tf:s.tf,took,correct,pnl:tradePnl,changePct,when:Date.now()});saveBtHistory();
   // peak excursions
   let maxUp=0,maxDn=0;
   s.future.forEach(d=>{const u=((d.h-s.decisionPrice)/s.decisionPrice)*100;const dn=((d.l-s.decisionPrice)/s.decisionPrice)*100;if(u>maxUp)maxUp=u;if(dn<maxDn)maxDn=dn;});
@@ -2353,12 +2379,12 @@ function labLevels(d){
 const AI_MEMORY_KEY='tlpro_ai_memory_v1';
 let AI_MEMORY=loadAIMemory();
 function defaultMemory(){
-  const m={strats:{},trials:0,wins:0};
+  const m={strats:{},trials:0,wins:0,log:[]};
   LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
   return m;
 }
 function loadAIMemory(){
-  try{const raw=localStorage.getItem(AI_MEMORY_KEY);if(raw){const m=JSON.parse(raw);if(m&&m.strats)return m;}}catch(e){}
+  try{const raw=localStorage.getItem(AI_MEMORY_KEY);if(raw){const m=JSON.parse(raw);if(m&&m.strats){if(!Array.isArray(m.log))m.log=[];return m;}}}catch(e){}
   return defaultMemory();
 }
 function saveAIMemory(){try{localStorage.setItem(AI_MEMORY_KEY,JSON.stringify(AI_MEMORY));}catch(e){}}
@@ -2451,9 +2477,12 @@ async function aiSelfBacktest(rounds){
       mem.pnl+=pnl;mem.conf=stratConf(setup.key);
       AI_MEMORY.trials++;if(dirRight)AI_MEMORY.wins++;
       did++;
+      // persist this self-test so the history survives reloads
+      AI_MEMORY.log.unshift({tk,name:lvl.name,dir:lvl.dir,color:lvl.color,win:dirRight,pnl:+pnl.toFixed(1)});
+      if(AI_MEMORY.log.length>40)AI_MEMORY.log.length=40;
       if(log){
         const row=document.createElement('div');row.className='ai-learn-row';
-        row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.icon} ${lvl.name}</span><span class="bt-tag">${lvl.dir}</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'✓ WIN':'✗ LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
+        row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.name}</span><span class="bt-tag">${lvl.dir}</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'WIN':'LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
         log.prepend(row);
       }
     }catch(e){fail++;}
@@ -2496,7 +2525,15 @@ function renderAILearnStats(){
       <div class="bt-score"><div class="bt-score-val r">${AI_MEMORY.trials-AI_MEMORY.wins}</div><div class="bt-score-lbl">Losses</div></div>
     </div>
     <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard.</div></div>`;
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. This memory is <b>saved on this device</b> and keeps building every time you train it.</div></div>`;
+  renderAILearnLog();
+}
+// Render the persisted self-test history (survives reloads).
+function renderAILearnLog(){
+  const log=document.getElementById('aiLearnLog');if(!log)return;
+  const items=AI_MEMORY.log||[];
+  if(!items.length){log.innerHTML=`<div class="bt-empty" style="padding:16px">No self-tests recorded yet — run a batch above and the AI's learning history will accumulate here.</div>`;return;}
+  log.innerHTML=items.map(e=>`<div class="ai-learn-row"><span class="ai-learn-tk">${e.tk}</span><span style="color:${e.color||'var(--bt)'}">${e.name}</span><span class="bt-tag">${e.dir}</span><span class="${e.win?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${e.win?'WIN':'LOSS'} ${e.pnl>=0?'+':''}${e.pnl}%</span></div>`).join('');
 }
 
 // AI deep-read of a ticker's market direction (dashboard)
@@ -2658,6 +2695,20 @@ function drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral){
       ctx.fillStyle=bull?'rgba(0,217,126,0.5)':'rgba(255,77,77,0.5)';
       ctx.fillRect(x-barW/2,H-PAD.b-bH,barW,bH);
     });
+  }
+  // Support / resistance structure (drawn under the trade levels)
+  if(chartMode!=='volume'){
+    try{
+      const sr=labLevels(data);
+      [{p:sr.resis,t:'Resistance'},{p:sr.support,t:'Support'}].forEach(s=>{
+        if(!isFinite(s.p)||s.p<lo||s.p>hi)return;
+        const y=toY(s.p);
+        ctx.strokeStyle='rgba(255,255,255,0.16)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
+        ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='rgba(174,185,202,0.72)';ctx.font=`9px 'SF Mono','Fira Code',monospace`;ctx.textAlign='left';
+        ctx.fillText(s.t+' $'+s.p.toFixed(2),PAD.l+4,y-4);
+      });
+    }catch(e){}
   }
   // Level lines
   if(!isNeutral&&chartMode!=='volume'){
@@ -2986,12 +3037,12 @@ function renderDash(ticker,q,a){
           <div class="chart-head">
             <div class="card-title" style="margin:0">Chart — ${ticker}</div>
             <div class="chart-view-tabs">
-              <button class="cvt-btn active" id="cvtPro" onclick="setChartView('pro')">Pro Chart</button>
-              <button class="cvt-btn" id="cvtAI" onclick="setChartView('ai')">AI Levels</button>
+              <button class="cvt-btn active" id="cvtAI" onclick="setChartView('ai')">Setup &amp; Levels</button>
+              <button class="cvt-btn" id="cvtPro" onclick="setChartView('pro')">Pro Chart</button>
             </div>
           </div>
-          <div id="proChartWrap" class="pro-chart-wrap"><div id="tvChart"></div></div>
-          <div id="aiChartWrap" style="display:none">
+          <div id="proChartWrap" class="pro-chart-wrap" style="display:none"><div id="tvChart"></div></div>
+          <div id="aiChartWrap">
           <div class="chart-controls">
             <button class="ct-btn active" onclick="setChartMode('candle',this)">Candles</button>
             <button class="ct-btn" onclick="setChartMode('line',this)">Line</button>
@@ -3398,9 +3449,15 @@ const SECTOR_NEWS=[
 function renderNews(){
   const tag=t=>`<span class="ntag ${t==='bull'?'ntag-bull':t==='bear'?'ntag-bear':'ntag-neut'}">${t==='bull'?'↑':t==='bear'?'↓':'→'}</span>`;
   const r=(el,data)=>{el.innerHTML=data.map(n=>`<div class="news-card"><div class="news-head">${n.h}</div><div class="news-meta">${tag(n.tag)}<span class="news-src">${n.src}</span>${n.t.map(x=>`<span class="nticker">${x}</span>`).join('')}</div><div class="news-impact">${n.impact}</div></div>`).join('');};
-  r(document.getElementById('newsFeedLeft'),NEWS);
-  r(document.getElementById('newsFeedRight'),SECTOR_NEWS);
+  if(document.getElementById('newsFeedLeft'))r(document.getElementById('newsFeedLeft'),NEWS);
+  if(document.getElementById('newsFeedRight'))r(document.getElementById('newsFeedRight'),SECTOR_NEWS);
 }
+function renderNewsTab(){
+  const el=document.getElementById('newsTabFeed');if(!el)return;
+  const lbl=t=>t==='bull'?'Bullish':t==='bear'?'Bearish':'Neutral';
+  el.innerHTML=[...NEWS,...SECTOR_NEWS].map(n=>`<div class="news-item glass"><div class="news-item-top"><span class="ntag ${n.tag==='bull'?'ntag-bull':n.tag==='bear'?'ntag-bear':'ntag-neut'}">${lbl(n.tag)}</span><span class="news-src">${n.src}</span></div><div class="news-item-h">${n.h}</div><div class="news-item-impact">${n.impact}</div><div class="news-item-tk">${n.t.map(x=>`<span class="nticker nclk" onclick="newsOpen('${x}')">${x}</span>`).join('')}</div></div>`).join('');
+}
+function newsOpen(sym){mainTab('dashboard',document.querySelector('.ntab'));loadTicker(sym);}
 
 // ── SCREENER ──────────────────────────────────────────────────────────
 const SCAN_DATA={
