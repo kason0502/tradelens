@@ -767,6 +767,58 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .sentm{height:8px;border-radius:5px;background:linear-gradient(90deg,var(--rd),#3a3a3e 50%,var(--gr));position:relative;margin-top:20px}
 .sentm>i{position:absolute;top:-5px;width:3px;height:18px;border-radius:2px;background:#fff;box-shadow:0 0 0 2px var(--s1)}
 .sentm-row{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink3);margin-top:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+
+/* ═══════════ DASHBOARD WORKSPACE (wk-) — asymmetric trading terminal ═══════════ */
+.wk{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;
+  grid-template-areas:
+    "head head head head head head head head head head head head"
+    "chart chart chart chart chart chart chart chart plan plan plan plan"
+    "chart chart chart chart chart chart chart chart ai ai ai ai"
+    "metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics"
+    "why why why why why why why ind ind ind ind ind"
+    "strat strat strat strat strat strat strat fb fb fb fb fb";}
+@media(max-width:1040px){.wk{grid-template-columns:1fr;grid-template-areas:"head" "chart" "plan" "ai" "metrics" "why" "ind" "strat" "fb"}}
+.wk>.wk-head{grid-area:head}.wk-chart{grid-area:chart}.wk-plan{grid-area:plan}.wk-ai{grid-area:ai}
+.wk-metrics{grid-area:metrics}.wk-why{grid-area:why}.wk-ind{grid-area:ind}.wk-strat{grid-area:strat}.wk-fb{grid-area:fb}
+.wk-panel{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px 22px;position:relative;box-shadow:0 18px 50px -30px rgba(0,0,0,.9);transition:border-color .2s,transform .2s}
+.wk-panel:hover{border-color:rgba(255,255,255,.13)}
+.wk-panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.wk-h-lbl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+/* command header */
+.wk-head{display:flex;align-items:center;justify-content:space-between;gap:18px 28px;flex-wrap:wrap;padding:18px 24px;background:var(--s1);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px -30px rgba(0,0,0,.9)}
+.wk-id{display:flex;align-items:baseline;gap:13px;min-width:0}
+.wk-sym{font-size:32px;font-weight:800;letter-spacing:-.04em;font-family:var(--mono);line-height:1}
+.wk-name{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wk-quote{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.wk-quote .th-price{font-size:30px;font-weight:300;font-family:var(--mono);letter-spacing:-.02em;color:var(--tx)}
+.wk-head-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wk-bias-chip{font-size:12px;font-weight:800;letter-spacing:.04em;padding:7px 14px;border-radius:9px;border:1px solid transparent}
+.wk-bias-chip.long{color:var(--gt);background:rgba(38,194,129,.1);border-color:rgba(38,194,129,.3)}
+.wk-bias-chip.short{color:var(--rt);background:rgba(240,68,90,.1);border-color:rgba(240,68,90,.3)}
+.wk-bias-chip.neut{color:var(--at);background:rgba(240,165,0,.1);border-color:rgba(240,165,0,.28)}
+.wk-bias-chip.sm{font-size:10.5px;padding:4px 10px}
+.wk-dte-pill{font-size:11px;font-weight:700;color:var(--ink3);background:var(--s3);border:1px solid var(--line);padding:7px 12px;border-radius:9px}
+/* trade plan — the elevated hero panel */
+.wk-plan.elevated{background:linear-gradient(180deg,rgba(47,129,247,.05),transparent 60%),var(--s1);box-shadow:0 0 0 1px rgba(47,129,247,.16),0 26px 60px -34px rgba(47,129,247,.5)}
+.wk-levels{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wk-lvl{background:var(--s2);border:1px solid var(--line);border-radius:11px;padding:13px 14px}
+.wk-lvl .k{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);font-weight:700}
+.wk-lvl .v{font-family:var(--mono);font-size:21px;font-weight:800;margin-top:6px;letter-spacing:-.02em}
+.wk-lvl.entry .v{color:var(--act)}.wk-lvl.risk .v{color:var(--rt)}.wk-lvl.rew .v{color:var(--gt)}
+.wk-rr{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}
+.wk-rr-big{font-size:30px;font-weight:800;font-family:var(--mono);letter-spacing:-.02em}
+.wk-rr-sub{font-size:11.5px;color:var(--ink3);line-height:1.55;text-align:right}
+.wk-empty{font-size:13.5px;color:var(--ink2);line-height:1.7;padding:8px 0}
+/* metric tiles */
+.wk-metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+@media(max-width:760px){.wk-metrics{grid-template-columns:repeat(3,1fr)}}
+.wk-tile{background:var(--s1);border:1px solid var(--line);border-radius:13px;padding:15px 16px;transition:border-color .18s,transform .18s;cursor:default}
+.wk-tile:hover{border-color:rgba(255,255,255,.14);transform:translateY(-2px)}
+.wk-tile .k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700}
+.wk-tile .v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:8px}
+.wk-tile .v.g{color:var(--gt)}.wk-tile .v.r{color:var(--rt)}.wk-tile .v.a{color:var(--at)}
+.wk-chart .chart-head{margin-bottom:12px}
+.wk-chart .pro-chart-wrap{height:440px}
 </style>
 </head>
 <body>
@@ -3095,7 +3147,7 @@ function renderDash(ticker,q,a){
   if(lm){
     lm.style.width=logoSize+'px';lm.style.height=logoSize+'px';
     const glow=0.28+conviction*0.4;
-    lm.style.boxShadow=`0 0 0 1px rgba(0,217,126,${0.3+conviction*0.3}),0 6px ${18+conviction*16}px rgba(0,217,126,${glow}),inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -2px 6px rgba(0,0,0,0.18)`;
+    lm.style.boxShadow=`0 0 0 1px rgba(47,129,247,${0.3+conviction*0.3}),0 6px ${18+conviction*16}px rgba(47,129,247,${glow}),inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -2px 6px rgba(0,0,0,0.18)`;
     lm.title=`Conviction: ${Math.round(conviction*100)}% — ${conviction>0.66?'high impact expected':conviction>0.33?'moderate impact':'low impact / range-bound'}`;
   }
   const risk=Math.abs(entry-sl),reward=Math.abs(tp1-entry);
@@ -3139,53 +3191,34 @@ function renderDash(ticker,q,a){
     <span><span class="ll" style="background:${isShort?'#ff4d4d':'#00d97e'}"></span>TP1 $${tp1.toFixed(2)}</span>
     <span><span class="ll" style="background:${isShort?'#ff9a9a':'#4dffa8'}"></span>TP2 $${tp2.toFixed(2)}</span>`:'';
 
+  const tile=(k,v,c)=>`<div class="wk-tile"><div class="k">${k}</div><div class="v ${c||''}">${v}</div></div>`;
   document.getElementById('main').innerHTML=`
-    <div class="ticker-header d1">
-      <div class="th-left">
-        <div class="th-sym">${ticker}</div>
-        <div class="th-name">${q.name}</div>
-        <div class="th-price-row">
+    <div class="wk">
+      <!-- COMMAND HEADER -->
+      <div class="wk-head">
+        <div class="wk-id"><div class="wk-sym">${ticker}</div><div class="wk-name">${q.name}</div></div>
+        <div class="wk-quote">
           <span class="th-price">$${q.price.toFixed(2)}</span>
           <span class="chg-badge ${up?'up':'down'}">${up?'+':''}${q.change.toFixed(2)} (${up?'+':''}${q.pct.toFixed(2)}%)</span>
-          <span class="th-dte-pill">${currentDTE.toUpperCase()}</span>
+          <canvas id="miniCanvas" width="150" height="62" style="display:block;width:140px;height:44px"></canvas>
+        </div>
+        <div class="wk-head-right">
+          ${isNeutral?`<span class="wk-bias-chip neut">No clear bias</span>`:`<span class="wk-bias-chip ${isShort?'short':'long'}">${isShort?'Short bias':'Long bias'}</span>`}
+          <span class="wk-dte-pill">${currentDTE.toUpperCase()} · ${info.title}</span>
         </div>
       </div>
-      <div class="mini-chart-wrap">
-        <canvas id="miniCanvas" width="150" height="62" style="display:block;width:150px;height:62px"></canvas>
-      </div>
-    </div>
-    ${dirHtml}
-    <div class="metrics d2">
-      <div class="metric" title="Shares traded today — higher volume means stronger conviction behind the move."><div class="metric-lbl">Volume</div><div class="metric-val">${q.volFmt}</div></div>
-      <div class="metric" title="The highest price over the past year."><div class="metric-lbl">52-Week High</div><div class="metric-val g">$${q.hi52.toFixed(2)}</div></div>
-      <div class="metric" title="The lowest price over the past year."><div class="metric-lbl">52-Week Low</div><div class="metric-val r">$${q.lo52.toFixed(2)}</div></div>
-      <div class="metric" title="Momentum gauge (0–100). Above 70 = possibly overbought, below 30 = possibly oversold."><div class="metric-lbl">Momentum (RSI)</div><div class="metric-val ${a.rsi>60?'g':a.rsi<40?'r':'a'}">${a.rsi}</div></div>
-      <div class="metric" title="The average closing price over the last 20 days — a common trend reference."><div class="metric-lbl">20-Day Avg</div><div class="metric-val">$${a.sma20}</div></div>
-      <div class="metric" title="Where price sits within its normal range (Bollinger Bands). 100% = top of the range, 0% = bottom."><div class="metric-lbl">Range Position</div><div class="metric-val ${a.bbPct>75?'r':a.bbPct<25?'g':''}">${a.bbPct}%</div></div>
-    </div>
-    <div class="two-col">
-      <div style="display:flex;flex-direction:column">
-        <div class="card d1" style="order:3">
-          <div class="card-title"><span class="pdot"></span>Why — ${ticker} · ${cap(a.sentiment)} ${a.score}%</div>
-          <div class="sent-badge ${sc}">${cap(a.sentiment)}</div>
-          <div class="sent-wrap"><div class="sent-bar"><div class="sent-fill" id="sentFill" style="background:${fc}"></div></div><div class="sent-pct" style="color:${fc}">${a.score}%</div></div>
-          <div class="analysis-text">${a.reason}</div>
-          <div class="sig-section"><div class="sig-title">Signal breakdown</div>${sigHtml}</div>
-          ${aiPickPanelHtml(ticker,aiPick,isNeutral)}
-          <button class="ai-btn full" style="margin-top:12px" onclick="aiMarketDirection('${ticker}')">Ask AI for a deep-read of ${ticker}</button>
-          <div id="aiDirOut"></div>
-        </div>
-        <div style="order:1">${setupHtml}</div>
-        <div class="card d3" style="order:2">
-          <div class="chart-head">
-            <div class="card-title" style="margin:0">Chart — ${ticker}</div>
-            <div class="chart-view-tabs">
-              <button class="cvt-btn active" id="cvtAI" onclick="setChartView('ai')">Setup &amp; Levels</button>
-              <button class="cvt-btn" id="cvtPro" onclick="setChartView('pro')">Pro Chart</button>
-            </div>
+
+      <!-- CHART (dominant) -->
+      <div class="wk-panel wk-chart">
+        <div class="chart-head">
+          <span class="wk-h-lbl">Chart · ${ticker}</span>
+          <div class="chart-view-tabs">
+            <button class="cvt-btn active" id="cvtAI" onclick="setChartView('ai')">Setup &amp; Levels</button>
+            <button class="cvt-btn" id="cvtPro" onclick="setChartView('pro')">Pro Chart</button>
           </div>
-          <div id="proChartWrap" class="pro-chart-wrap" style="display:none"><div id="tvChart"></div></div>
-          <div id="aiChartWrap">
+        </div>
+        <div id="proChartWrap" class="pro-chart-wrap" style="display:none"><div id="tvChart"></div></div>
+        <div id="aiChartWrap">
           <div class="chart-controls">
             <button class="ct-btn active" onclick="setChartMode('candle',this)">Candles</button>
             <button class="ct-btn" onclick="setChartMode('line',this)">Line</button>
@@ -3203,46 +3236,85 @@ function renderDash(ticker,q,a){
             <span class="chart-hint">Drag to pan · scroll to zoom</span>
           </div>
           <div class="chart-legend">${legendHtml}</div>
-          <div class="chart-outer">
-            <canvas id="mainCanvas" style="display:block;width:100%;height:310px"></canvas>
-          </div>
+          <div class="chart-outer"><canvas id="mainCanvas" style="display:block;width:100%;height:310px"></canvas></div>
           <div class="chart-hint2">Green marks buy pressure, red marks sell pressure; marker size reflects predicted impact. Scroll or pinch to zoom · <span class="creset" onclick="resetChart()">Reset</span></div>
-          </div>
-        </div>
-        <div class="fb-box d4" id="fbBox" style="order:4">
-          <div class="fb-title">Rate this signal — help the AI learn</div>
-          <div class="fb-row">
-            <button class="fb-btn" onclick="fbSel(this,'acc','sel-acc')">✓ Accurate</button>
-            <button class="fb-btn" onclick="fbSel(this,'par','sel-par')">~ Partial</button>
-            <button class="fb-btn" onclick="fbSel(this,'ina','sel-ina')">✗ Inaccurate</button>
-          </div>
-          <div class="fb-out-row">
-            <button class="fb-ob" onclick="fbOut(this,'profit')">Profit</button>
-            <button class="fb-ob" onclick="fbOut(this,'loss')">Loss</button>
-            <button class="fb-ob" onclick="fbOut(this,'open')">Still open</button>
-          </div>
-          <textarea class="fb-ta" id="fbNote" placeholder="Optional notes on what you observed…"></textarea>
-          <button class="fb-submit" onclick="submitFB('${ticker}','${a.sentiment}','${currentDTE}',${a.score})">Submit & Update Model</button>
         </div>
       </div>
-      <div>
-        <div class="card d2">
-          <div class="card-title">Indicators</div>
-          <div class="ind-row" title="Relative Strength Index — momentum from 0 to 100. Above 70 = overbought (OB), below 30 = oversold (OS)."><span class="ind-lbl">Momentum (RSI)</span><span class="ind-val" style="color:${a.rsi>60?'var(--gt)':a.rsi<40?'var(--rt)':'var(--at)'}">${a.rsi}${a.rsi>70?' · OB':a.rsi<30?' · OS':''}</span></div>
-          <div class="ind-row" title="Average closing price over the last 5 days."><span class="ind-lbl">5-Day Avg</span><span class="ind-val">$${a.sma5}</span></div>
-          <div class="ind-row" title="Average closing price over the last 10 days."><span class="ind-lbl">10-Day Avg</span><span class="ind-val">$${a.sma10}</span></div>
-          <div class="ind-row" title="Average closing price over the last 20 days."><span class="ind-lbl">20-Day Avg</span><span class="ind-val">$${a.sma20}</span></div>
-          <div class="ind-row" title="How far the current price is above or below its 20-day average."><span class="ind-lbl">Price vs 20-Day Avg</span><span class="ind-val" style="color:${a.pvs20>0?'var(--gt)':'var(--rt)'}">${a.pvs20>0?'+':''}${a.pvs20.toFixed(2)}%</span></div>
-          <div class="ind-row" title="Overall trend: the 20-day average compared to the 60-day average. Up = bullish, down = bearish."><span class="ind-lbl">Trend</span><span class="ind-val" style="color:${a.s20s60>0?'var(--gt)':'var(--rt)'}">${a.s20s60>0?'Uptrend ↑':'Downtrend ↓'}</span></div>
-          <div class="ind-row" title="Where price sits within its normal range (Bollinger Bands). 100% = top, 0% = bottom."><span class="ind-lbl">Range Position</span><span class="ind-val" style="color:${a.bbPct>80?'var(--rt)':a.bbPct<20?'var(--gt)':'var(--tx)'}">${a.bbPct}%</span></div>
-          <div class="ind-row" title="The top of the normal price range (upper Bollinger Band)."><span class="ind-lbl">Range Top</span><span class="ind-val">$${a.bbU}</span></div>
-          <div class="ind-row" title="The highest and lowest price over the last 20 days."><span class="ind-lbl">20-Day Range</span><span class="ind-val">$${a.lo20}–$${a.hi20}</span></div>
-          <div class="ind-row" title="Price change over the last 5 days."><span class="ind-lbl">5-Day Momentum</span><span class="ind-val" style="color:${a.momentum5>0?'var(--gt)':'var(--rt)'}">${a.momentum5>0?'+':''}${a.momentum5.toFixed(2)}%</span></div>
-          <div class="ind-row" title="The highest price over the past year."><span class="ind-lbl">52-Week High</span><span class="ind-val g">$${q.hi52.toFixed(2)}</span></div>
-          <div class="ind-row" title="The lowest price over the past year."><span class="ind-lbl">52-Week Low</span><span class="ind-val r">$${q.lo52.toFixed(2)}</span></div>
-          <div class="ind-row" title="The overall call from the analysis: go long (buy), short (sell), or wait."><span class="ind-lbl">Signal</span><span class="ind-val" style="color:${a.direction==='long'?'var(--gt)':a.direction==='short'?'var(--rt)':'var(--at)'}">${a.direction.toUpperCase()}</span></div>
+
+      <!-- TRADE PLAN (elevated hero) -->
+      <div class="wk-panel wk-plan${isNeutral?'':' elevated'}">
+        <div class="wk-panel-h"><span class="wk-h-lbl">Trade Plan</span>${isNeutral?'':`<span class="wk-bias-chip sm ${isShort?'short':'long'}">${isShort?'SHORT':'LONG'}</span>`}</div>
+        ${isNeutral?`<div class="wk-empty">Signals are mixed — no high-quality setup right now. Watch <b>$${a.hi20}</b> for a breakout or <b>$${a.lo20}</b> for a breakdown. Patience is a position.</div>`:`
+        <div class="wk-levels">
+          <div class="wk-lvl entry"><div class="k">Entry</div><div class="v">$${entry.toFixed(2)}</div></div>
+          <div class="wk-lvl risk"><div class="k">${isShort?'Stop · cover':'Stop loss'}</div><div class="v">$${sl.toFixed(2)}</div></div>
+          <div class="wk-lvl rew"><div class="k">Target 1</div><div class="v">$${tp1.toFixed(2)}</div></div>
+          <div class="wk-lvl rew"><div class="k">Target 2</div><div class="v">$${tp2.toFixed(2)}</div></div>
         </div>
-        <div class="card d3"><div class="card-title">Strategies</div>${stratHtml}</div>
+        <div class="wk-rr"><div class="wk-rr-big">1 : ${rr}</div><div class="wk-rr-sub">Risk $${risk.toFixed(2)} → reward $${reward.toFixed(2)}<br>${currentDTE.toUpperCase()} · ${info.title}</div></div>
+        ${shortBox}`}
+      </div>
+
+      <!-- AI CONVICTION -->
+      <div class="wk-panel wk-ai">
+        <div class="wk-panel-h"><span class="wk-h-lbl">AI Conviction</span><span class="sent-badge ${sc}" style="margin:0">${cap(a.sentiment)} · ${a.score}%</span></div>
+        <div class="sent-wrap"><div class="sent-bar"><div class="sent-fill" id="sentFill" style="background:${fc}"></div></div><div class="sent-pct" style="color:${fc}">${a.score}%</div></div>
+        ${aiPickPanelHtml(ticker,aiPick,isNeutral)}
+        <button class="ai-btn full" style="margin-top:12px" onclick="aiMarketDirection('${ticker}')">Ask AI for a deep-read</button>
+        <div id="aiDirOut"></div>
+      </div>
+
+      <!-- METRIC TILES -->
+      <div class="wk-metrics">
+        ${tile('Volume',q.volFmt,'')}
+        ${tile('Momentum (RSI)',a.rsi,a.rsi>60?'g':a.rsi<40?'r':'a')}
+        ${tile('20-Day Avg','$'+a.sma20,'')}
+        ${tile('Range Position',a.bbPct+'%',a.bbPct>75?'r':a.bbPct<25?'g':'')}
+        ${tile('52-Week High','$'+q.hi52.toFixed(2),'g')}
+        ${tile('52-Week Low','$'+q.lo52.toFixed(2),'r')}
+      </div>
+
+      <!-- WHY -->
+      <div class="wk-panel wk-why">
+        <div class="wk-panel-h"><span class="wk-h-lbl">Why · ${cap(a.sentiment)} ${a.score}%</span></div>
+        <div class="analysis-text">${a.reason}</div>
+        <div class="sig-section"><div class="sig-title">Signal breakdown</div>${sigHtml}</div>
+      </div>
+
+      <!-- INDICATORS -->
+      <div class="wk-panel wk-ind">
+        <div class="wk-panel-h"><span class="wk-h-lbl">Indicators</span></div>
+        <div class="ind-row" title="RSI — momentum 0–100. >70 overbought, <30 oversold."><span class="ind-lbl">Momentum (RSI)</span><span class="ind-val" style="color:${a.rsi>60?'var(--gt)':a.rsi<40?'var(--rt)':'var(--at)'}">${a.rsi}${a.rsi>70?' · OB':a.rsi<30?' · OS':''}</span></div>
+        <div class="ind-row"><span class="ind-lbl">5 / 10 / 20-Day Avg</span><span class="ind-val">$${a.sma5} · $${a.sma10} · $${a.sma20}</span></div>
+        <div class="ind-row"><span class="ind-lbl">Price vs 20-Day Avg</span><span class="ind-val" style="color:${a.pvs20>0?'var(--gt)':'var(--rt)'}">${a.pvs20>0?'+':''}${a.pvs20.toFixed(2)}%</span></div>
+        <div class="ind-row"><span class="ind-lbl">Trend</span><span class="ind-val" style="color:${a.s20s60>0?'var(--gt)':'var(--rt)'}">${a.s20s60>0?'Uptrend ↑':'Downtrend ↓'}</span></div>
+        <div class="ind-row"><span class="ind-lbl">Range Position</span><span class="ind-val" style="color:${a.bbPct>80?'var(--rt)':a.bbPct<20?'var(--gt)':'var(--tx)'}">${a.bbPct}%</span></div>
+        <div class="ind-row"><span class="ind-lbl">20-Day Range</span><span class="ind-val">$${a.lo20}–$${a.hi20}</span></div>
+        <div class="ind-row"><span class="ind-lbl">5-Day Momentum</span><span class="ind-val" style="color:${a.momentum5>0?'var(--gt)':'var(--rt)'}">${a.momentum5>0?'+':''}${a.momentum5.toFixed(2)}%</span></div>
+        <div class="ind-row"><span class="ind-lbl">Signal</span><span class="ind-val" style="color:${a.direction==='long'?'var(--gt)':a.direction==='short'?'var(--rt)':'var(--at)'}">${a.direction.toUpperCase()}</span></div>
+      </div>
+
+      <!-- STRATEGIES -->
+      <div class="wk-panel wk-strat">
+        <div class="wk-panel-h"><span class="wk-h-lbl">Strategies in play</span></div>
+        ${stratHtml}
+      </div>
+
+      <!-- FEEDBACK -->
+      <div class="wk-panel wk-fb" id="fbBox">
+        <div class="wk-panel-h"><span class="wk-h-lbl">Rate this signal</span></div>
+        <div class="fb-row">
+          <button class="fb-btn" onclick="fbSel(this,'acc','sel-acc')">Accurate</button>
+          <button class="fb-btn" onclick="fbSel(this,'par','sel-par')">Partial</button>
+          <button class="fb-btn" onclick="fbSel(this,'ina','sel-ina')">Inaccurate</button>
+        </div>
+        <div class="fb-out-row">
+          <button class="fb-ob" onclick="fbOut(this,'profit')">Profit</button>
+          <button class="fb-ob" onclick="fbOut(this,'loss')">Loss</button>
+          <button class="fb-ob" onclick="fbOut(this,'open')">Still open</button>
+        </div>
+        <textarea class="fb-ta" id="fbNote" placeholder="Optional notes on what you observed…"></textarea>
+        <button class="fb-submit" onclick="submitFB('${ticker}','${a.sentiment}','${currentDTE}',${a.score})">Submit &amp; update model</button>
       </div>
     </div>`;
 
