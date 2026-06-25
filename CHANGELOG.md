@@ -3,7 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
-## 2026-06-25
+## 2026-06-25 (session 2)
+- **News tab** — added a `News` nav tab + glass news grid (macro + sector headlines with plain-English impact), labeled as an illustrative sample feed; tickers are clickable → load on dashboard. (`renderNewsTab`, `newsOpen`)
+- **Draw the setup on the chart** — the annotated **AI Levels** canvas ("Setup & Levels") is now the **default** chart view (TradingView = toggle), and `drawCanvasChart` draws labeled **support/resistance** lines under the entry/stop/TP. (Note: can't draw on the TradingView free embed — sandboxed iframe.)
+- **Persistent AI Lab learning** — self-test history saved in `AI_MEMORY.log` (localStorage) and re-rendered on load (`renderAILearnLog`); backtest track record `btHistory` persisted (`BT_HIST_KEY`). Learned confidence already feeds dashboard level weighting via `classifySetup`/`stratConf`; now it accumulates across sessions.
+- **Serious tone pass** — calmed landing motion (no card bob, less 3D tilt, lower orb opacity, de-animated primary button); app de-arcaded: "Directional bias — Long/Short" instead of "⬆ BULLISH GO LONG", emoji stripped from chart controls / pressure toggle / feedback.
+
+## 2026-06-25 (session 1)
 - **Declutter dashboard into a trader reading order** — main view now leads with the actionable content (price → verdict → trade plan → chart → "Why" analysis → feedback) via flex `order`; removed the redundant Watchlist card; de-emoji'd chart toggle / AI buttons; direction banner moved to the new palette. (`5f8c879`)
 - **Align app shell to landing** — glass nav (blurred charcoal, gradient-underline tabs, bigger calm labels), ghost-glass nav buttons with line icons (no emoji), emerald LIVE pill; dropped the 3-column layout to a single focused 1180px column (sidebars hidden); glassy command controls; slim glass "Connect AI" strip replacing the unstyled banner. (`3c98e24`)
 - Added permanent project docs: `PROJECT_CONTEXT.md`, `ARCHITECTURE.md`, `DESIGN_SYSTEM.md`, `TODO.md`, `CHANGELOG.md`, and `CLAUDE.md` (instructs future sessions to keep them current).

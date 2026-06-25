@@ -30,7 +30,8 @@
       "Bash(git commit -q -m 'Declutter dashboard into a trader reading order *)",
       "Bash(git commit -q -m 'Add permanent project docs + CLAUDE.md working agreement *)",
       "Bash(git commit -q -m 'Make landing + app feel serious, not game-like *)",
-      "Bash(git commit -q -m 'Add News tab, draw setup+S/R on chart, persist AI learning *)"
+      "Bash(git commit -q -m 'Add News tab, draw setup+S/R on chart, persist AI learning *)",
+      "Bash(git commit *)"
     ]
   }
 }

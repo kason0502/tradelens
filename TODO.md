@@ -1,12 +1,14 @@
 # TradeLens Pro — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-25
+> Last updated: 2026-06-25 (session 2)
 
 ## Now / next (highest value)
-- [ ] **Kill level redundancy on the dashboard.** Entry/stop/TP currently appear in the direction banner *and* the trade-setup card *and* the chart legend. Pick ONE source of truth (the setup card) and trim the rest.
-- [ ] **Polish the inner tabs** to match the landing/shell. Screener, Backtest, AI Lab, Pro Traders, Feedback still use denser legacy styling and some emoji (feedback box 💰📉⏳, chart controls 🕯📈📊⦿). They inherit the blue tokens but aren't hand-polished.
-- [ ] **Consolidate the metrics strip vs the Indicators card** — RSI / 20-day avg / range position / 52w hi-lo are shown in both. Keep one quick-glance set + one detail set without duplication.
+- [ ] **Kill level redundancy on the dashboard.** Entry/stop/TP still appear in the direction banner *and* the trade-setup card *and* the chart legend. Pick ONE source of truth (the setup card) and trim the rest.
+- [ ] **Polish the inner tabs** to match the landing/shell. Screener, Backtest, AI Lab, Pro Traders, Feedback still use denser legacy styling. Remaining emoji: strategy icons (📈🚀📉🪃↔️) in LAB_STRATEGIES/PLAYBOOK; some tab section headers use inline styles.
+- [ ] **Consolidate the metrics strip vs the Indicators card** — RSI / 20-day avg / range position / 52w hi-lo are shown in both.
+- [ ] **Live news** — News tab is currently a static sample feed; wire a real newswire (needs a provider API key). Make this clear stays until then.
+- [ ] **AI auto-learning** — consider auto-running a few self-tests on first load (or a background trickle) so confidence builds without the user manually training. Persistence is done; auto-train is not.
 
 ## Soon
 - [ ] **Nav consolidation:** 9 top tabs → ~4 primary (Terminal · Screener · Backtest · AI Lab) + a "More" menu and a utility cluster (Account/Alerts/AI key). Fold Pro Traders / AI Chat / Feedback.
