@@ -4,7 +4,9 @@
 > Last updated: 2026-06-25 (session 3)
 
 ## Now / next (highest value)
-- [ ] **Apply the new workspace look to the inner tabs.** The main Dashboard view was rebuilt as the `.wk` terminal workspace; Screener / Backtest / AI Lab / Pro Traders / News / Feedback still use the older `.card` styling and don't match the new panel system yet.
+- [ ] **Copilot polish.** Each answer card mounts its own TradingView iframe — cap the thread (e.g. keep last ~5) or lazy-mount to limit weight. Consider: persist conversation, voice of follow-ups, and when a Claude key is connected, lead with a natural-language answer (not just the rule-based verdict). Tick numbers are large by design (1 tick = $0.01) — confirm the user wants ticks vs points/$ distance.
+- [ ] **Dead code:** legacy `renderDash`/`.wk`/`.fc` and the old ticker-row/dte-row CSS are now unused — safe to prune later.
+- [ ] **Apply a consistent look to the inner tabs.** The main Dashboard view was rebuilt as the `.wk` terminal workspace; Screener / Backtest / AI Lab / Pro Traders / News / Feedback still use the older `.card` styling and don't match the new panel system yet.
 - [ ] **Bring the rest of the landing to black-minimal.** Hero + design tokens are done, but the other sections still use the older gradient/glow styling: feature rows (`.lx-feat` gradient icon tiles), metrics band (`.lx-band` blue radial), steps (`.lx-step` gradient numerals), pricing (`.lx-plan.hot` blue glow), and the final CTA (`.lx-final` big gradient slab). Flatten to dark surfaces + thin borders + single accent so every section matches the new hero.
 - [ ] **Deploy the shared-learning backend** — code is ready (`api/learn.js`); follow `DEPLOY_BACKEND.md` (push to GitHub → Vercel → add KV). Until then it's local-only.
 - [ ] **Kill level redundancy on the dashboard.** Entry/stop/TP still appear in the direction banner *and* the trade-setup card *and* the chart chips. Pick ONE source of truth.

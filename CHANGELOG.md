@@ -3,6 +3,10 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-25 (session 5)
+- **Dashboard is now an AI Copilot (conversational).** Replaced the workspace/Focus render with a chat: `askCopilot(text)` resolves a ticker from the question, runs the live analysis, and appends an answer card — verdict, an embedded **TradingView** chart, and **entry/stop/target as ticks** up/down from current price (price as a small subtitle), R/R in ticks, rationale, and follow-up chips (`cpExplainStop`, `cpBacktest`, `cpAIdeep`, compare). `loadTicker` now routes into the conversation; legacy `renderDash`/`load` are guarded/disabled (no `#main`). Functions: `cpInit/cpSend/cpChip/cpSetHorizon/resolveTicker/mountTVInto`.
+- (Earlier this session) explored 3 + 3 dashboard concepts as visual mockups; user chose Focus, then AI Copilot.
+
 ## 2026-06-25 (session 4)
 - **Rebuilt the dashboard (post-launch) from scratch** as an asymmetric trading-terminal workspace (`.wk` namespace in `renderDash`). 12-col grid: command header → dominant chart (spans 2 rows) + elevated Trade Plan + AI Conviction → metric tiles → Why / Indicators / Strategies / Feedback. Premium dark panels, thin borders, depth shadows, accent-ringed plan, hover lift. All functional IDs preserved.
 
