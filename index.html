@@ -849,6 +849,41 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fc-card{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 18px 50px -32px rgba(0,0,0,.9)}
 .fc-card-lbl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px}
 .fc-sec .span2{grid-column:1/-1}
+
+/* ═══════════ AI COPILOT (cp-) — conversational dashboard ═══════════ */
+.cp{max-width:840px;margin:0 auto;min-height:64vh;display:flex;flex-direction:column}
+.cp-thread{flex:1;display:flex;flex-direction:column;gap:18px;padding:10px 0 24px}
+.cp-user{align-self:flex-end;max-width:82%;background:var(--acd);color:var(--act);border:1px solid rgba(47,129,247,.25);border-radius:14px;padding:10px 15px;font-size:14px;line-height:1.5}
+.cp-ai{align-self:stretch}
+.cp-card{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 18px 50px -32px rgba(0,0,0,.9)}
+.cp-ai-tag{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink3);margin-bottom:13px;flex-wrap:wrap}
+.cp-ai-tag .sym{font-family:var(--mono);color:var(--ink2);font-weight:500}
+.cp-verdict{font-size:clamp(20px,2.6vw,27px);font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-bottom:16px}
+.cp-tv{height:340px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--s2);margin-bottom:16px}
+.cp-tv>div{height:100%;width:100%}
+.cp-levels{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cp-lvl{border:1px solid var(--line);border-radius:11px;padding:11px 15px;min-width:104px;background:var(--s2)}
+.cp-lvl .k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700}
+.cp-lvl .v{font-family:var(--mono);font-size:19px;font-weight:800;margin-top:6px;letter-spacing:-.01em}
+.cp-lvl .px{font-family:var(--mono);font-size:10.5px;color:var(--ink3);margin-top:3px}
+.cp-lvl.entry .v{color:var(--act)}.cp-lvl.risk .v{color:var(--rt)}.cp-lvl.rew .v{color:var(--gt)}
+.cp-rr{font-size:12.5px;color:var(--ink3);font-family:var(--mono);margin-bottom:14px}
+.cp-rationale{font-size:13.5px;color:var(--ink2);line-height:1.7}
+.cp-followups{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.cp-fu{font-size:13px;border:1px solid var(--line2);border-radius:99px;padding:7px 14px;color:var(--ink2);background:transparent;cursor:pointer;transition:all .15s;font-family:inherit}
+.cp-fu:hover{border-color:rgba(47,129,247,.5);color:var(--act)}
+.cp-load{display:flex;align-items:center;gap:10px;color:var(--ink3);font-size:13.5px}
+.cp-bar{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 72%,transparent);padding:14px 0 18px;z-index:5}
+.cp-suggest{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.cp-chip{font-size:12.5px;border:1px solid var(--line);border-radius:99px;padding:6px 13px;color:var(--ink2);background:var(--s1);cursor:pointer;font-family:inherit;transition:all .15s}
+.cp-chip:hover{border-color:rgba(47,129,247,.5);color:var(--act)}
+.cp-input{display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--line2);border-radius:14px;padding:8px 8px 8px 12px}
+.cp-input:focus-within{border-color:rgba(47,129,247,.55)}
+.cp-horizon{background:var(--s2);border:1px solid var(--line);color:var(--ink2);border-radius:9px;padding:8px 9px;font-size:12px;font-family:var(--mono);outline:none;cursor:pointer}
+.cp-input input{flex:1;background:transparent;border:none;outline:none;color:var(--tx);font-size:14.5px;font-family:inherit;min-width:0}
+.cp-input input::placeholder{color:var(--ink3)}
+.cp-send{width:38px;height:38px;border-radius:10px;border:none;background:var(--ac);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.cp-send:hover{background:#3f8ef9}
 </style>
 </head>
 <body>
@@ -1347,38 +1382,23 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 
     <!-- DASHBOARD -->
     <div class="tab-pane active" id="tab-dashboard">
-      <div class="ticker-row" id="tickerRow">
-        <button class="tbtn active" data-t="AAPL">AAPL</button>
-        <button class="tbtn" data-t="TSLA">TSLA</button>
-        <button class="tbtn" data-t="NVDA">NVDA</button>
-        <button class="tbtn" data-t="SPY">SPY</button>
-        <button class="tbtn" data-t="MSFT">MSFT</button>
-        <button class="tbtn" data-t="AMZN">AMZN</button>
-        <button class="tbtn" data-t="META">META</button>
-        <button class="tbtn" data-t="AMD">AMD</button>
-        <button class="tbtn" data-t="GOOG">GOOG</button>
-        <button class="tbtn" data-t="NFLX">NFLX</button>
-        <button class="tbtn" data-t="COIN">COIN</button>
-      </div>
-      <div class="search-row">
-        <input class="ticker-input" id="customInput" type="text" placeholder="Enter any symbol…" maxlength="8" autocomplete="off"/>
-        <button class="go-btn" id="analyzeBtn">Analyze ↗</button>
-      </div>
-      <div class="dte-row">
-        <span class="dte-lbl">Horizon:</span>
-        <button class="dte-btn active" data-dte="0dte" onclick="setDTE(this)">0DTE</button>
-        <button class="dte-btn" data-dte="1w" onclick="setDTE(this)">1W</button>
-        <button class="dte-btn" data-dte="1m" onclick="setDTE(this)">1M</button>
-        <button class="dte-btn" data-dte="3m" onclick="setDTE(this)">3M</button>
-        <button class="dte-btn" data-dte="6m" onclick="setDTE(this)">6M</button>
-        <button class="dte-btn" data-dte="1y" onclick="setDTE(this)">1Y</button>
-        <span id="dteDesc">Same-day · scalp</span>
-      </div>
-      <div id="main">
-        <div class="loading-state">
-          <div class="spinner-wrap"><div class="spinner"></div><div class="spinner-inner"></div></div>
-          <div class="loading-ticker">AAPL</div><div class="loading-label">Fetching live data…</div>
-          <div class="loading-steps"><div class="ls"></div><div class="ls"></div><div class="ls"></div></div>
+      <div class="cp">
+        <div class="cp-thread" id="cpThread"></div>
+        <div class="cp-bar">
+          <div class="cp-suggest">
+            <button class="cp-chip" onclick="cpChip('AAPL')">AAPL</button>
+            <button class="cp-chip" onclick="cpChip('Is NVDA a buy?')">Is NVDA a buy?</button>
+            <button class="cp-chip" onclick="cpChip('Is TSLA a short?')">Is TSLA a short?</button>
+            <button class="cp-chip" onclick="cpChip('COIN')">COIN</button>
+            <button class="cp-chip" onclick="cpChip('SPY')">SPY</button>
+          </div>
+          <div class="cp-input">
+            <select class="cp-horizon" id="cpHorizon" onchange="cpSetHorizon(this.value)" aria-label="Horizon">
+              <option value="0dte">0DTE</option><option value="1w">1W</option><option value="1m" selected>1M</option><option value="3m">3M</option><option value="6m">6M</option><option value="1y">1Y</option>
+            </select>
+            <input id="cpInput" type="text" placeholder="Ask about any ticker, setup, or strategy…" autocomplete="off" onkeydown="if(event.key==='Enter')cpSend()"/>
+            <button class="cp-send" onclick="cpSend()" aria-label="Send">↑</button>
+          </div>
         </div>
       </div>
     </div>
@@ -3390,6 +3410,7 @@ function mountTV(ticker){
 // ── LOAD ──────────────────────────────────────────────────────────────
 async function load(ticker){
   ticker=ticker.toUpperCase().trim();if(!ticker)return;
+  if(!document.getElementById('main'))return;  // dashboard is now the Copilot — legacy renderer disabled
   chartPanOffset=0;chartZoom=1;chartRange=DTE[currentDTE].defRange||'3m';
   document.getElementById('main').innerHTML=`<div class="loading-state"><div class="spinner-wrap"><div class="spinner"></div><div class="spinner-inner"></div></div><div class="loading-ticker">${ticker}</div><div class="loading-label">Fetching live market data…</div><div class="loading-steps"><div class="ls"></div><div class="ls"></div><div class="ls"></div></div></div>`;
   let lastErr;
@@ -3410,9 +3431,114 @@ async function load(ticker){
   document.getElementById('main').innerHTML=`<div class="error-state"><strong>Could not load ${ticker}</strong><br><br>${lastErr?.message||'Data feed unavailable.'}<br><br>Public market-data proxies can be intermittent. Give it a moment and retry.<br><br><button class="retry-btn" onclick="loadTicker('${ticker}')">↻ Retry</button></div>`;
 }
 function loadTicker(t){
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
-  const b=document.querySelector(`.tbtn[data-t="${t}"]`);if(b)b.classList.add('active');
-  load(t);
+  // route any "open this ticker" into the Copilot conversation
+  mainTab('dashboard',document.querySelector('.ntab'));
+  appendUserBubble(t.toUpperCase());
+  askCopilot(t);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── AI COPILOT — conversational dashboard ────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+let cpN=0;
+const CP_STOP=new Set(['IS','A','AN','THE','BUY','SELL','SELLING','BUYING','SHORT','LONG','NOW','SHOULD','WOULD','COULD','I','OF','FOR','TO','RIGHT','WHAT','WHATS','ABOUT','ME','ON','DO','DOES','YOU','THINK','GOOD','BAD','OR','AND','AT','IN','IT','GET','CAN','MY','IF','WHY','HOW','THERE','THIS','THAT','SETUP','TRADE','STOP','ENTRY','TARGET','ASK','AI','VS','COMPARE','LOOK','LOOKS','LIKE','READ','TICK','TICKS','UP','DOWN','PRICE']);
+function resolveTicker(text){
+  const words=(text||'').toUpperCase().match(/[A-Z]+/g)||[];
+  for(const w of words){if(w.length>=1&&w.length<=5&&!CP_STOP.has(w))return w;}
+  return lastData?lastData.ticker:null;
+}
+function cpThreadEl(){return document.getElementById('cpThread');}
+function cpScroll(){const t=cpThreadEl();if(!t)return;const last=t.lastElementChild;if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function appendUserBubble(txt){const t=cpThreadEl();if(!t)return;const d=document.createElement('div');d.className='cp-user';d.textContent=txt;t.appendChild(d);cpScroll();}
+function cpSend(){const inp=document.getElementById('cpInput');if(!inp)return;const txt=(inp.value||'').trim();if(!txt)return;inp.value='';appendUserBubble(txt);askCopilot(txt);}
+function cpChip(txt){const inp=document.getElementById('cpInput');if(inp)inp.value='';appendUserBubble(txt);askCopilot(txt);}
+function cpSetHorizon(v){currentDTE=v;const d=DTE[v];const dd=document.getElementById('dteDesc');if(dd)dd.textContent=d.label;if(lastData){appendUserBubble('Re-read on '+v.toUpperCase()+' horizon');askCopilot(lastData.ticker);}}
+function cpInit(){
+  const t=cpThreadEl();if(!t)return;
+  const card=document.createElement('div');card.className='cp-ai';
+  card.innerHTML=`<div class="cp-card"><div class="cp-ai-tag"><i class="ai-spark">✦</i> TradeLens AI</div><div class="cp-rationale">Ask me about any ticker — like <b>"is AAPL a buy?"</b> or just <b>NVDA</b>. I'll read the live structure and give you a verdict, a real chart, and the entry / stop / target in ticks.</div></div>`;
+  t.appendChild(card);
+  appendUserBubble('Is AAPL a buy right now?');
+  askCopilot('AAPL');
+}
+function mountTVInto(id,ticker){
+  const el=document.getElementById(id);if(!el)return;
+  if(typeof TradingView==='undefined'){el.innerHTML='<div style="padding:42px 20px;text-align:center;color:var(--ink3);font-size:13px">TradingView chart unavailable (offline or blocked).</div>';return;}
+  try{new TradingView.widget({autosize:true,symbol:ticker,interval:'D',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',toolbar_bg:'#0c0c0e',enable_publishing:false,allow_symbol_change:false,hide_side_toolbar:true,hide_legend:false,withdateranges:false,details:false,container_id:id});}
+  catch(e){el.innerHTML='<div style="padding:42px 20px;text-align:center;color:var(--ink3);font-size:13px">TradingView chart unavailable right now.</div>';}
+}
+async function askCopilot(text){
+  const t=cpThreadEl();if(!t)return;
+  const ticker=resolveTicker(text);
+  const card=document.createElement('div');card.className='cp-ai';
+  card.innerHTML=`<div class="cp-card"><div class="cp-load"><span class="ai-spin"></span> Reading ${ticker||'the market'}…</div></div>`;
+  t.appendChild(card);cpScroll();
+  if(!ticker){card.innerHTML=`<div class="cp-card"><div class="cp-rationale">I couldn't spot a ticker in that. Try a symbol like <b>AAPL</b>, or a question like <b>"is NVDA a buy?"</b></div></div>`;return;}
+  try{
+    const q=await fetchQuote(ticker);
+    const a=analyze(ticker,q.price,q.pct,q.hi52,q.lo52,q.closes);
+    const isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
+    let entry=0,sl=0,tp1=0,tp2=0,aiPick=null;
+    const cand=(q.h6m&&q.h6m.length>40)?q.h6m:(q.h3m||[]);
+    if(cand.length>40){try{const setup=classifySetup(cand.slice(-60),a);aiPick=aiStrategyLevels(setup.key,cand.slice(-60));aiPick.conf=stratConf(setup.key);}catch(e){aiPick=null;}}
+    if(!isNeutral){
+      if(aiPick&&aiPick.entry&&aiPick.sl&&aiPick.tp1){entry=aiPick.entry;sl=aiPick.sl;tp1=aiPick.tp1;tp2=aiPick.tp2||aiPick.tp1;}
+      else{const info=DTE[currentDTE],slP=info.sl/100,tp1P=info.tp1/100,tp2P=info.tp2/100;entry=+(q.price*(isShort?1.002:0.9985)).toFixed(2);sl=isShort?+(entry*(1+slP)).toFixed(2):+(entry*(1-slP)).toFixed(2);tp1=isShort?+(entry*(1-tp1P)).toFixed(2):+(entry*(1+tp1P)).toFixed(2);tp2=isShort?+(entry*(1-tp2P)).toFixed(2):+(entry*(1+tp2P)).toFixed(2);}
+    }
+    lastData={ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick};
+    const up=q.change>=0;
+    const convPct=isNeutral?Math.round(a.score):(isShort?100-a.score:a.score);
+    const verdict=isNeutral?`No clear edge on ${ticker} — I'd wait.`:`Yes — a ${convPct}% ${isShort?'short':'long'} setup on ${ticker}.`;
+    const tk=l=>{const n=Math.round((l-q.price)/0.01);return (n>=0?'+':'−')+Math.abs(n).toLocaleString();};
+    const riskT=Math.round(Math.abs(entry-sl)/0.01),rewT=Math.round(Math.abs(tp1-entry)/0.01);
+    const rr=riskT>0?(rewT/riskT).toFixed(1):'–';
+    const tvId='cptv'+(++cpN);
+    const levelsHtml=isNeutral?'':`<div class="cp-levels">
+        <div class="cp-lvl entry"><div class="k">Entry</div><div class="v">${tk(entry)}</div><div class="px">ticks · $${entry.toFixed(2)}</div></div>
+        <div class="cp-lvl risk"><div class="k">${isShort?'Stop · cover':'Stop'}</div><div class="v">${tk(sl)}</div><div class="px">ticks · $${sl.toFixed(2)}</div></div>
+        <div class="cp-lvl rew"><div class="k">Target</div><div class="v">${tk(tp1)}</div><div class="px">ticks · $${tp1.toFixed(2)}</div></div>
+      </div><div class="cp-rr">From current price, in ticks (1 tick = $0.01) · R:R 1 : ${rr} · risk ${riskT.toLocaleString()} ticks → reward ${rewT.toLocaleString()} ticks</div>`;
+    const rationale=`${a.reason}${aiPick&&!isNeutral?` Strongest learned strategy here is <b>${aiPick.name}</b> (${Math.round((aiPick.conf||0.5)*100)}% confidence).`:''}`;
+    const other=ticker==='NVDA'?'AAPL':'NVDA';
+    card.innerHTML=`<div class="cp-card">
+      <div class="cp-ai-tag"><i class="ai-spark">✦</i> TradeLens AI · <span class="sym">${ticker}</span> $${q.price.toFixed(2)} <span style="color:${up?'var(--gt)':'var(--rt)'}">${up?'+':''}${q.pct.toFixed(2)}%</span></div>
+      <div class="cp-verdict">${verdict}</div>
+      <div class="cp-tv" id="${tvId}"></div>
+      ${levelsHtml}
+      <div class="cp-rationale">${rationale}</div>
+      <div class="cp-followups">
+        ${isNeutral?'':`<button class="cp-fu" onclick="cpExplainStop()">Why is the stop there?</button>`}
+        <button class="cp-fu" onclick="cpBacktest('${ticker}')">Backtest this setup</button>
+        <button class="cp-fu" onclick="cpAIdeep('${ticker}')">Deeper AI read ↗</button>
+        <button class="cp-fu" onclick="cpChip('Compare ${ticker} to ${other}')">Compare to ${other}</button>
+      </div>
+    </div>`;
+    mountTVInto(tvId,ticker);
+    cpScroll();
+  }catch(e){
+    card.innerHTML=`<div class="cp-card"><div class="cp-rationale">Couldn't load <b>${ticker}</b> right now — the public market-data feed may be busy. <button class="cp-fu" onclick="cpChip('${ticker}')" style="margin-top:8px">Try again</button></div></div>`;
+  }
+}
+function cpAppendNote(html){const t=cpThreadEl();if(!t)return null;const c=document.createElement('div');c.className='cp-ai';c.innerHTML=`<div class="cp-card">${html}</div>`;t.appendChild(c);cpScroll();return c;}
+function cpExplainStop(){
+  if(!lastData||lastData.isNeutral){cpAppendNote('<div class="cp-rationale">There\'s no active setup to place a stop on right now.</div>');return;}
+  const d=lastData,n=Math.round(Math.abs(d.entry-d.sl)/0.01);
+  cpAppendNote(`<div class="cp-ai-tag"><i class="ai-spark">✦</i> TradeLens AI</div><div class="cp-rationale">The stop sits about <b>${n.toLocaleString()} ticks</b> from entry, just beyond the nearest swing ${d.isShort?'high':'low'} plus a volatility (ATR) buffer. That's the level where the read is wrong: if price trades through it, the structure that justified the trade has broken, so you're out — small loss, no hoping.</div>`);
+}
+function cpBacktest(ticker){
+  const b=[...document.querySelectorAll('.ntab')].find(x=>x.textContent.trim()==='Backtest');
+  if(b)mainTab('backtest',b);
+  const ti=document.getElementById('btTicker');if(ti)ti.value=ticker;
+}
+async function cpAIdeep(ticker){
+  if(!lastData||lastData.ticker!==ticker){await askCopilot(ticker);}
+  if(!aiReady()){cpAppendNote('<div class="cp-rationale">Connect a Claude API key (✨ AI, top-right) and I\'ll give a full natural-language deep-read of the setup, the bull and bear case, and the level that decides it.</div>');return;}
+  const note=cpAppendNote('<div class="cp-load"><span class="ai-spin"></span> Claude is reading the setup…</div>');
+  try{
+    const sys='You are a trading mentor. Given an indicator snapshot, give a concise, balanced read: the bull case, the bear case, the one level that decides it, and which way the data leans. Conversational, flowing sentences, no headers or bullet points or markdown symbols. Under 130 words. Educational only.';
+    const ans=await callClaude(sys,marketSnapshot(ticker,lastData.q,lastData.a),600);
+    if(note)note.innerHTML=`<div class="cp-card"><div class="cp-ai-tag"><i class="ai-spark">✦</i> Claude · deep read of ${ticker}</div><div class="cp-rationale">${fmtAI(ans)}</div></div>`;
+  }catch(e){if(note)note.innerHTML=`<div class="cp-card"><div class="cp-rationale">AI read failed: ${e.message}</div></div>`;}
 }
 
 // ── LIVE STREAMING ────────────────────────────────────────────────────
@@ -3740,9 +3866,7 @@ function renderFeedbackTab(){
 function renderMoWl(){const el=document.getElementById('moWl');if(!el)return;el.innerHTML=[{s:'AAPL',n:'Apple',p:213.55,c:.86},{s:'TSLA',n:'Tesla',p:248.23,c:-1.65},{s:'NVDA',n:'NVIDIA',p:131.38,c:2.53},{s:'SPY',n:'S&P 500',p:587.41,c:.16}].map(w=>`<div class="wl-item" onclick="closeMo('moAcct');loadTicker('${w.s}')"><div class="wl-left"><span class="wl-sym">${w.s}</span><span class="wl-name">${w.n}</span></div><div class="wl-right"><div class="wl-price">$${w.p.toFixed(2)}</div><div class="wl-chg ${w.c>=0?'up':'down'}">${w.c>=0?'+':''}${w.c.toFixed(2)}%</div></div></div>`).join('');}
 
 // ── EVENTS ────────────────────────────────────────────────────────────
-document.getElementById('tickerRow').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');load(b.dataset.t);});
-document.getElementById('analyzeBtn').addEventListener('click',()=>{const v=document.getElementById('customInput').value.trim();if(!v)return;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));document.getElementById('customInput').value='';load(v);});
-document.getElementById('customInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('analyzeBtn').click();});
+// (the dashboard is now the AI Copilot — its input is wired inline)
 window.addEventListener('resize',()=>{if(lastCanvasData){const{q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;setTimeout(()=>drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral),80);}if(btState&&document.getElementById('btCanvas')){setTimeout(()=>drawBacktestChart(btState.done,btState._overlay),80);}});
 
 // ── INIT ──────────────────────────────────────────────────────────────
@@ -3751,8 +3875,7 @@ runScan('bullish',null);
 renderTraders('all');
 updateAIBadge();
 probeProxy();
-load('AAPL');
-startLiveRefresh();
+cpInit();
 syncSharedMemory();  // pull pooled cross-user learning if the backend is live
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
