@@ -1,7 +1,7 @@
 # TradeLens Pro — Project Context
 
 > Living doc. Update at the end of any session that changes scope, status, or direction.
-> Last updated: 2026-06-25
+> Last updated: 2026-06-25 (session 5)
 
 ## What this is
 TradeLens Pro is a **single-file** web app (`index.html`, no build step, no framework) that combines:
@@ -13,11 +13,13 @@ It pulls **real market data**, derives structure-based trade plans (entry / stop
 ## Who it's for
 Serious independent retail traders. Voice/feel: precise, institutional, trustworthy, data-driven — not flashy marketing.
 
-## Current state (2026-06-25)
-- Fully working single page. Landing + dashboard both live.
-- Visual language: **premium fintech glass** — charcoal + electric blue/cyan/purple. Landing is bespoke/editorial; the app shell has been aligned to it.
-- Main dashboard chart = embedded **TradingView** widget (with an "AI Levels" custom-canvas toggle).
-- Repo is git-tracked (`main`), **no remote yet**. Deploy-ready for Vercel (`index.html` at root, `.vercelignore` excludes `.claude`).
+## Current state (2026-06-25, session 5)
+- Fully working single page. Landing + app both live.
+- Visual language: **Bloomberg/terminal minimal** — pure black (`#050505`), dark-gray surfaces, white type, ONE accent (`#2f81f7`); no big gradients/glowing blobs. (Evolved from an earlier blue/cyan/purple glass look, and before that a gold theme.) Landing hero is a realistic terminal **bento** (candles/watchlist/volume profile/AI probability/etc.).
+- **The dashboard (post-launch) is now an AI Copilot** — a conversation. Ask in plain language ("is NVDA a buy?") → an answer card with a verdict, an embedded **TradingView** chart, and entry/stop/target shown **as ticks** up/down from current price (1 tick = $0.01; price as subtitle), R/R in ticks, rationale, and follow-up chips. The dashboard went through several rebuilds this session (terminal workspace → Focus → Copilot); Copilot is current. Legacy `renderDash`/`load` are disabled (guarded on missing `#main`).
+- **Shared cross-user learning** exists: `api/learn.js` (Vercel serverless + KV) pools the AI's self-test learning across all users; falls back to per-device localStorage when not deployed (`DEPLOY_BACKEND.md`).
+- Other tabs: Screener, News (sample feed), Pro Traders, Backtest, Performance, AI Lab (persistent learning), AI Chat, Alerts, Feedback — still on older `.card` styling.
+- Repo is git-tracked (`main`), **no remote yet**. Deploy-ready for Vercel (`index.html` at root, `api/` serverless, `.vercelignore` excludes `.claude` + `*.md`).
 
 ## How to run / preview
 - No Node/Python on this machine. Use the bundled static server:
@@ -27,9 +29,10 @@ Serious independent retail traders. Voice/feel: precise, institutional, trustwor
 
 ## Key product decisions
 - **Real data only** — never simulate/fake prices. If a feed fails, show an honest error.
-- **Green/red are reserved for up/down (P&L) only.** Brand/UI accent is electric blue. (Earlier a gold "pro-terminal" theme existed; it was replaced.)
-- **AI is optional.** Works on a built-in rule engine without a key; richer with a Claude API key.
-- Levels come from **real chart structure + ATR**, never arbitrary percentages.
+- **One accent (`#2f81f7`), used sparingly.** Green/red are reserved for up/down (P&L) only. No big gradients or glowing blobs.
+- **AI is optional.** Works on a built-in rule engine without a key; richer with a Claude API key. Self-test learning is **pooled across users** when the backend is deployed.
+- Levels come from **real chart structure + ATR**, never arbitrary percentages — and in the Copilot they're shown **as ticks** (distance from current price), per user preference, not absolute prices.
+- Charts in the Copilot are the **real TradingView** widget (user preference over the custom canvas).
 
 ## Known constraints / gotchas
 - Free CORS proxies (corsproxy.io, allorigins, codetabs, etc.) are flaky / rate-limited; failures are silent-with-retry by design.
