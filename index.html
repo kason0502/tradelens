@@ -2488,6 +2488,33 @@ function loadAIMemory(){
   return defaultMemory();
 }
 function saveAIMemory(){try{localStorage.setItem(AI_MEMORY_KEY,JSON.stringify(AI_MEMORY));}catch(e){}}
+
+// ── SHARED (cross-user) LEARNING ──────────────────────────────────────
+// If the /api/learn backend is deployed, learning is pooled across ALL
+// users; otherwise it falls back to this device's localStorage.
+const SHARED_URL='/api/learn';
+let SHARED_OK=false;
+function mergeShared(m){
+  if(!m||!m.strats)return;
+  SHARED_OK=true;
+  Object.keys(m.strats).forEach(k=>{
+    if(!AI_MEMORY.strats[k])AI_MEMORY.strats[k]={name:k,bias:'',wins:0,losses:0,pnl:0,conf:0.5};
+    const s=m.strats[k];
+    AI_MEMORY.strats[k].wins=s.wins||0;AI_MEMORY.strats[k].losses=s.losses||0;AI_MEMORY.strats[k].pnl=s.pnl||0;
+    AI_MEMORY.strats[k].conf=stratConf(k);
+  });
+  AI_MEMORY.trials=m.trials||0;AI_MEMORY.wins=m.wins||0;
+  if(Array.isArray(m.log))AI_MEMORY.log=m.log;
+  saveAIMemory();
+  const lab=document.getElementById('tab-ailab');
+  if(lab&&lab.classList.contains('active'))renderAILearnStats();
+}
+async function syncSharedMemory(){
+  try{const r=await fetch(SHARED_URL,{cache:'no-store'});if(!r.ok)return;const m=await r.json();mergeShared(m);}catch(e){}
+}
+async function postShared(d){
+  try{const r=await fetch(SHARED_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(r.ok){const m=await r.json();mergeShared(m);}}catch(e){}
+}
 function stratConf(key){const s=AI_MEMORY.strats[key];if(!s)return 0.5;const n=s.wins+s.losses;if(n===0)return 0.5;
   // Wilson-ish shrink toward 0.5 when sample is small
   const raw=s.wins/n;return 0.5+(raw-0.5)*Math.min(1,n/12);}
@@ -2580,6 +2607,8 @@ async function aiSelfBacktest(rounds){
       // persist this self-test so the history survives reloads
       AI_MEMORY.log.unshift({tk,name:lvl.name,dir:lvl.dir,color:lvl.color,win:dirRight,pnl:+pnl.toFixed(1)});
       if(AI_MEMORY.log.length>40)AI_MEMORY.log.length=40;
+      // contribute to the pooled cross-user model (if the backend is live)
+      if(SHARED_OK)postShared({key:setup.key,win:dirRight,pnl:+pnl.toFixed(1),tk,name:lvl.name,dir:lvl.dir});
       if(log){
         const row=document.createElement('div');row.className='ai-learn-row';
         row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.name}</span><span class="bt-tag">${lvl.dir}</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'WIN':'LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
@@ -2625,7 +2654,7 @@ function renderAILearnStats(){
       <div class="bt-score"><div class="bt-score-val r">${AI_MEMORY.trials-AI_MEMORY.wins}</div><div class="bt-score-lbl">Losses</div></div>
     </div>
     <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. This memory is <b>saved on this device</b> and keeps building every time you train it.</div></div>`;
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses TradeLens — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>`;
   renderAILearnLog();
 }
 // Render the persisted self-test history (survives reloads).
@@ -3646,6 +3675,7 @@ updateAIBadge();
 probeProxy();
 load('AAPL');
 startLiveRefresh();
+syncSharedMemory();  // pull pooled cross-user learning if the backend is live
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
 function launchApp(){
