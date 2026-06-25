@@ -538,277 +538,495 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .d3{animation:fadeInUp .4s .14s ease both}.d4{animation:fadeInUp .4s .19s ease both}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
 @media(max-width:640px){nav{padding:0 12px}.main-col{padding:14px 12px 50px}.setup-grid{grid-template-columns:1fr}.th-sym{font-size:28px}.th-price{font-size:24px}.nav-tabs{display:none}.mini-chart-wrap{display:none}}
-/* ══════════════════════ LANDING PAGE ══════════════════════ */
-#landing{position:fixed;inset:0;z-index:1000;overflow-y:auto;overflow-x:hidden;background:var(--bg);color:var(--tx)}
-.lp-wrap{max-width:1180px;margin:0 auto;padding:0 24px}
-/* nav */
-.lp-nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 30px;backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);background:rgba(11,15,20,.62);border-bottom:1px solid var(--b1)}
-.lp-nav-links{display:flex;gap:32px;align-items:center}
-.lp-nav-links a{color:var(--mu);font-size:14px;font-weight:600;text-decoration:none;transition:color .15s;cursor:pointer}
-.lp-nav-links a:hover{color:var(--tx)}
-@media(max-width:820px){.lp-nav-links{display:none}}
-/* hero */
-.lp-hero{position:relative;text-align:center;padding:96px 24px 40px;overflow:hidden}
-.lp-hero-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:760px;height:460px;max-width:96vw;background:radial-gradient(circle,rgba(59,130,246,.22),rgba(139,92,246,.10) 45%,transparent 66%);filter:blur(46px);z-index:0;pointer-events:none;animation:floatGlow 11s ease-in-out infinite}
-.lp-hero>*{position:relative;z-index:1}
-.lp-eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 17px;border-radius:100px;border:1px solid var(--b2);background:rgba(255,255,255,.03);font-size:12.5px;font-weight:600;color:var(--bt);margin-bottom:28px}
-.lp-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy)}
-.lp-h1{font-size:clamp(38px,6.2vw,70px);font-weight:800;letter-spacing:-.04em;line-height:1.03;margin:0 auto 24px;max-width:940px}
-.lp-sub{font-size:clamp(15px,1.7vw,19px);color:var(--mu);line-height:1.7;max-width:640px;margin:0 auto 38px}
-.lp-hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
-.lp-btn-lg{padding:15px 34px;font-size:15.5px}
-.lp-trust{font-size:13px;color:var(--fa);margin-top:10px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
-.lp-trust span{display:inline-flex;align-items:center;gap:7px}
-.lp-trust svg{width:15px;height:15px;stroke:var(--gr)}
-/* hero visual — stylized dashboard preview */
-.lp-hero-visual{margin:60px auto 0;max-width:1000px;border-radius:20px;border:1px solid var(--b2);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));box-shadow:0 50px 130px rgba(0,0,0,.62),0 0 0 1px rgba(59,130,246,.10),0 0 90px rgba(59,130,246,.14);overflow:hidden}
-.lp-mock-bar{display:flex;align-items:center;gap:8px;padding:13px 18px;border-bottom:1px solid var(--b1);background:rgba(255,255,255,.02)}
-.lp-mock-dot{width:11px;height:11px;border-radius:50%}
-.lp-mock-body{display:grid;grid-template-columns:1fr 230px;gap:16px;padding:20px}
-@media(max-width:640px){.lp-mock-body{grid-template-columns:1fr}}
-.lp-mock-chart{border:1px solid var(--b1);border-radius:14px;background:rgba(255,255,255,.015);padding:16px;min-height:230px;display:flex;flex-direction:column}
-.lp-mock-row{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
-.lp-mock-sym{font-size:22px;font-weight:800;letter-spacing:-.02em}
-.lp-mock-px{font-family:var(--mono);font-size:18px;color:var(--tx)}
-.lp-mock-chg{font-size:12px;font-weight:700;color:var(--gt);background:var(--gd);padding:3px 9px;border-radius:6px}
-.lp-mock-side{display:flex;flex-direction:column;gap:12px}
-.lp-mock-pill{padding:13px 15px;border-radius:12px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.06)}
-.lp-mock-pill .t{font-size:12px;font-weight:800;color:var(--gt);letter-spacing:.03em}
-.lp-mock-pill .s{font-size:11px;color:var(--mu);margin-top:4px;line-height:1.5}
-.lp-mock-lvls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.lp-mock-lvl{border:1px solid var(--b1);border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.015)}
-.lp-mock-lvl .k{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--fa)}
-.lp-mock-lvl .v{font-family:var(--mono);font-size:14px;font-weight:700;margin-top:3px}
-/* generic section */
-.lp-section{padding:88px 24px;position:relative}
-.lp-section-head{text-align:center;max-width:700px;margin:0 auto 56px}
-.lp-kicker{font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:14px}
-.lp-h2{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1.08;margin-bottom:16px}
-.lp-section-sub{font-size:16px;color:var(--mu);line-height:1.7}
-/* stats */
-.lp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:1000px;margin:0 auto}
-@media(max-width:760px){.lp-stats{grid-template-columns:repeat(2,1fr)}}
-.lp-stat{padding:30px 22px;text-align:center;border-radius:18px}
-.lp-stat-num{font-size:clamp(30px,4vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1}
-.lp-stat-lbl{font-size:13px;color:var(--mu);margin-top:11px;line-height:1.5}
-/* features */
-.lp-features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1140px;margin:0 auto}
-@media(max-width:960px){.lp-features-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){.lp-features-grid{grid-template-columns:1fr}}
-.lp-feat{padding:30px 28px;border-radius:18px;transition:transform .2s,border-color .2s,box-shadow .2s}
-.lp-feat:hover{transform:translateY(-5px);border-color:rgba(59,130,246,.32);box-shadow:0 24px 60px rgba(0,0,0,.42),0 0 44px rgba(59,130,246,.09)}
-.lp-feat-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(139,92,246,.16));border:1px solid rgba(59,130,246,.28)}
-.lp-feat-icon svg{width:23px;height:23px;stroke:var(--cy);fill:none;stroke-width:1.8}
-.lp-feat h3{font-size:18px;font-weight:700;margin-bottom:11px;letter-spacing:-.02em}
-.lp-feat p{font-size:14px;color:var(--mu);line-height:1.7}
-/* pricing */
-.lp-pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1040px;margin:0 auto;align-items:stretch}
-@media(max-width:880px){.lp-pricing-grid{grid-template-columns:1fr;max-width:430px}}
-.lp-price{padding:34px 30px;border-radius:20px;display:flex;flex-direction:column;position:relative}
-.lp-price.feat{border-color:rgba(59,130,246,.42);box-shadow:0 0 0 1px rgba(59,130,246,.22),0 36px 80px rgba(59,130,246,.14)}
-.lp-price-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);padding:5px 16px;border-radius:100px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--grad2);white-space:nowrap}
-.lp-price-name{font-size:15px;font-weight:700;color:var(--bt)}
-.lp-price-amt{font-size:46px;font-weight:800;letter-spacing:-.03em;margin:14px 0 4px;line-height:1}
-.lp-price-amt span{font-size:15px;color:var(--mu);font-weight:600;letter-spacing:0}
-.lp-price-desc{font-size:13.5px;color:var(--mu);line-height:1.6;margin-bottom:24px;min-height:38px}
-.lp-price-feats{list-style:none;margin:0 0 28px;padding:0;flex:1}
-.lp-price-feats li{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--tx);padding:8px 0}
-.lp-price-feats li svg{width:16px;height:16px;stroke:var(--cy);fill:none;stroke-width:2.2;flex-shrink:0;margin-top:3px}
-.lp-price-cta{padding:13px;border-radius:12px;font-size:14px;font-weight:700;text-align:center;width:100%}
-/* footer */
-.lp-footer{border-top:1px solid var(--b1);padding:58px 30px 42px;margin-top:30px}
-.lp-footer-grid{display:flex;justify-content:space-between;gap:48px;flex-wrap:wrap;max-width:1100px;margin:0 auto 40px}
-.lp-foot-brand{max-width:280px}
-.lp-foot-brand p{font-size:13.5px;color:var(--mu);line-height:1.7;margin-top:14px}
-.lp-foot-col h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--fa);margin-bottom:15px}
-.lp-foot-col a{display:block;color:var(--mu);font-size:14px;text-decoration:none;margin-bottom:11px;transition:color .15s;cursor:pointer}
-.lp-foot-col a:hover{color:var(--tx)}
-.lp-foot-bottom{max-width:1100px;margin:0 auto;padding-top:26px;border-top:1px solid var(--b1);font-size:12.5px;color:var(--fa);text-align:center;line-height:1.8}
+
+/* ═══════════════════════════════════════════════════════════════
+   LANDING — premium fintech composition (lx- namespace)
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#eff3fb;--ink2:#aeb9ca;--ink3:#6f7a8c;
+  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.13);
+  --em:#34d399;
+  --g-text:linear-gradient(100deg,#9ec5ff 0%,#67e8f9 48%,#c4b5fd 100%);
+  --g-fill:linear-gradient(120deg,#3b82f6,#22d3ee,#8b5cf6);
+  --halo:0 40px 90px -28px rgba(59,130,246,.55);
+}
+#landing{position:fixed;inset:0;z-index:1000;overflow-y:auto;overflow-x:hidden;background:var(--bg);color:var(--ink);scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+#landing *{box-sizing:border-box}
+.lx{max-width:1200px;margin:0 auto;padding:0 32px}
+@media(max-width:680px){.lx{padding:0 22px}}
+.lx-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.lx-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%);mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%)}
+.lx-orb{position:absolute;border-radius:50%;filter:blur(72px);will-change:transform;opacity:.55}
+.lx-orb.a{width:640px;height:640px;background:radial-gradient(circle,rgba(59,130,246,.55),transparent 64%);top:-200px;left:-140px;animation:orbA 24s ease-in-out infinite}
+.lx-orb.b{width:560px;height:560px;background:radial-gradient(circle,rgba(139,92,246,.45),transparent 64%);top:4%;right:-180px;animation:orbB 28s ease-in-out infinite}
+.lx-orb.c{width:520px;height:520px;background:radial-gradient(circle,rgba(34,211,238,.3),transparent 64%);top:62%;left:34%;animation:orbC 32s ease-in-out infinite}
+@keyframes orbA{50%{transform:translate(60px,80px) scale(1.12)}}
+@keyframes orbB{50%{transform:translate(-70px,60px) scale(1.1)}}
+@keyframes orbC{50%{transform:translate(40px,-70px) scale(1.15)}}
+#landing>*{position:relative;z-index:1}
+.lx-reveal{opacity:0;transform:translateY(28px);transition:opacity .85s cubic-bezier(.2,.6,.25,1),transform .85s cubic-bezier(.2,.6,.25,1)}
+.lx-reveal.in{opacity:1;transform:none}
+.lx-reveal.l{transform:translateX(-44px)}.lx-reveal.r{transform:translateX(44px)}
+.lx-reveal.l.in,.lx-reveal.r.in{transform:none}
+@media(prefers-reduced-motion:reduce){.lx-reveal{opacity:1!important;transform:none!important;transition:none}}
+.lx-grad{background:var(--g-text);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lx-eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--bt)}
+.lx-eyebrow::before{content:'';width:22px;height:1px;background:linear-gradient(90deg,var(--cy),transparent)}
+.lx-btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;font-weight:700;font-size:15px;padding:14px 26px;border-radius:14px;text-decoration:none;transition:transform .2s cubic-bezier(.2,.6,.25,1),box-shadow .2s;font-family:inherit}
+.lx-btn.primary{color:#04101f;background:linear-gradient(120deg,#7cc4ff,#67e8f9,#b6a6ff);background-size:200% 100%;box-shadow:0 10px 30px -6px rgba(59,130,246,.6),inset 0 1px 0 rgba(255,255,255,.5)}
+.lx-btn.primary:hover{transform:translateY(-2px);background-position:100% 0;box-shadow:0 18px 44px -8px rgba(59,130,246,.75),inset 0 1px 0 rgba(255,255,255,.5)}
+.lx-btn.ghost{color:var(--ink);background:rgba(255,255,255,.04);border:1px solid var(--line2);backdrop-filter:blur(10px)}
+.lx-btn.ghost:hover{transform:translateY(-2px);border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.1)}
+.lx-btn.lg{font-size:16px;padding:17px 34px}
+.lx-nav{position:sticky;top:0;z-index:30;transition:background .3s,border-color .3s}
+.lx-nav-in{display:flex;align-items:center;justify-content:space-between;height:76px;max-width:1200px;margin:0 auto;padding:0 32px}
+.lx-nav.scrolled{background:rgba(11,15,20,.72);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border-bottom:1px solid var(--line)}
+.lx-nav-links{display:flex;align-items:center;gap:34px}
+.lx-nav-links a{color:var(--ink2);font-size:14.5px;font-weight:600;text-decoration:none;cursor:pointer;transition:color .15s}
+.lx-nav-links a:hover{color:var(--ink)}
+@media(max-width:860px){.lx-nav-links .nl{display:none}}
+.lx-hero{position:relative;padding:64px 0 90px}
+.lx-hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:40px;align-items:center}
+@media(max-width:980px){.lx-hero-grid{grid-template-columns:1fr;gap:54px}}
+.lx-status{display:inline-flex;align-items:center;gap:10px;padding:7px 15px;border-radius:100px;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:30px}
+.lx-status b{color:var(--em)}
+.lx-status .pulse{width:8px;height:8px;border-radius:50%;background:var(--em);box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.lx-h1{font-size:clamp(46px,7vw,86px);font-weight:800;letter-spacing:-.05em;line-height:.96;margin:0 0 26px}
+.lx-lead{font-size:clamp(16px,1.5vw,20px);color:var(--ink2);line-height:1.65;max-width:540px;margin:0 0 36px}
+.lx-hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px}
+.lx-microstats{display:flex;gap:38px;flex-wrap:wrap}
+.lx-micro .n{font-size:26px;font-weight:800;letter-spacing:-.03em;font-family:var(--mono)}
+.lx-micro .l{font-size:12.5px;color:var(--ink3);margin-top:4px}
+.lx-micro+.lx-micro{border-left:1px solid var(--line);padding-left:38px}
+.lx-stage{position:relative;perspective:1600px;min-height:440px}
+.lx-stage-halo{position:absolute;inset:-6% -4% -10% -4%;background:radial-gradient(60% 60% at 60% 40%,rgba(59,130,246,.32),transparent 65%);filter:blur(30px);z-index:0}
+.lx-panel{position:relative;z-index:1;border-radius:20px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(22,30,46,.86),rgba(13,19,30,.92));backdrop-filter:blur(20px);box-shadow:0 50px 120px -30px rgba(0,0,0,.8),var(--halo);transform:rotateY(-13deg) rotateX(6deg) rotateZ(1deg);transform-style:preserve-3d;overflow:hidden;will-change:transform}
+.lx-panel-top{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.lx-dot{width:10px;height:10px;border-radius:50%}
+.lx-panel-tag{margin-left:8px;font-size:11px;color:var(--ink3);font-family:var(--mono)}
+.lx-panel-body{padding:18px}
+.lx-pr{display:flex;align-items:baseline;gap:11px;margin-bottom:12px}
+.lx-pr .sym{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.lx-pr .px{font-family:var(--mono);font-size:16px;color:var(--ink)}
+.lx-pr .chg{font-size:11px;font-weight:700;color:var(--gt);background:rgba(34,197,94,.14);padding:3px 8px;border-radius:6px}
+.lx-chart{position:relative;width:100%;height:172px}
+.lx-chart svg{width:100%;height:100%;display:block}
+.lx-draw{stroke-dasharray:2000;stroke-dashoffset:2000}
+.in .lx-draw{animation:draw 2s cubic-bezier(.4,0,.2,1) .2s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.lx-cand{transform-origin:bottom;transform:scaleY(0)}
+.in .lx-cand{animation:candUp .5s cubic-bezier(.3,1.2,.5,1) forwards}
+@keyframes candUp{to{transform:scaleY(1)}}
+.lx-float{position:absolute;z-index:2;border-radius:15px;border:1px solid var(--line2);background:rgba(17,24,38,.82);backdrop-filter:blur(16px);box-shadow:0 24px 60px -16px rgba(0,0,0,.7);padding:13px 16px;will-change:transform}
+.lx-float.sig{top:7%;left:-7%;animation:floaty 6s ease-in-out infinite}
+.lx-float.tick{bottom:5%;right:-5%;animation:floaty 7s ease-in-out infinite reverse}
+@keyframes floaty{50%{transform:translateY(-12px)}}
+.lx-float .k{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.lx-float .v{font-size:18px;font-weight:800;margin-top:3px;font-family:var(--mono)}
+.lx-trust{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,255,255,.012)}
+.lx-trust-in{display:flex;align-items:center;justify-content:center;gap:14px 40px;flex-wrap:wrap;padding:26px 0}
+.lx-trust span{font-size:13px;color:var(--ink3);font-weight:600;letter-spacing:.04em;display:inline-flex;align-items:center;gap:9px}
+.lx-trust .src{font-family:var(--mono);color:var(--ink2)}
+.lx-trust .sep{width:4px;height:4px;border-radius:50%;background:var(--ink3);opacity:.5}
+.lx-sec{padding:120px 0}
+.lx-kicker{font-size:12.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:20px}
+.lx-h2{font-size:clamp(32px,4.6vw,56px);font-weight:800;letter-spacing:-.04em;line-height:1.02}
+.lx-sub{font-size:17px;color:var(--ink2);line-height:1.7}
+.lx-statement{padding:120px 0;position:relative}
+.lx-quote{font-size:clamp(32px,5.4vw,68px);font-weight:800;letter-spacing:-.045em;line-height:1.04;max-width:980px}
+.lx-quote .dim{color:var(--ink3)}
+.lx-statement-note{margin-top:40px;display:flex;gap:14px;align-items:flex-start;max-width:440px;margin-left:auto}
+.lx-statement-note .bar{width:3px;align-self:stretch;border-radius:3px;background:var(--g-fill)}
+.lx-statement-note p{font-size:15px;color:var(--ink2);line-height:1.7}
+.lx-row{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;padding:64px 0}
+.lx-row.flip .lx-row-media{order:2}
+@media(max-width:920px){.lx-row{grid-template-columns:1fr;gap:36px}.lx-row.flip .lx-row-media{order:0}}
+.lx-row-text .lx-h3{font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-.035em;line-height:1.08;margin:16px 0 18px}
+.lx-row-text p{font-size:16.5px;color:var(--ink2);line-height:1.75;margin-bottom:24px}
+.lx-bullets{display:flex;flex-direction:column;gap:14px}
+.lx-bullet{display:flex;gap:13px;align-items:flex-start;font-size:15px;color:var(--ink)}
+.lx-bullet .ic{width:30px;height:30px;flex-shrink:0;border-radius:9px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(59,130,246,.22),rgba(139,92,246,.16));border:1px solid rgba(59,130,246,.3)}
+.lx-bullet .ic svg{width:15px;height:15px;stroke:var(--cy);fill:none;stroke-width:2}
+.lx-bullet b{font-weight:700}.lx-bullet span{color:var(--ink2)}
+.lx-media{position:relative;border-radius:20px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(20,28,42,.7),rgba(12,18,28,.85));box-shadow:0 40px 100px -30px rgba(0,0,0,.7);overflow:hidden}
+.lx-media::after{content:'';position:absolute;inset:0;background:radial-gradient(80% 60% at 80% 0%,rgba(59,130,246,.12),transparent 60%);pointer-events:none}
+.lx-media-h{display:flex;align-items:center;gap:7px;padding:11px 15px;border-bottom:1px solid var(--line)}
+.lx-media-b{padding:20px}
+.lx-levels{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.lx-lv{border:1px solid var(--line);border-radius:11px;padding:12px;background:rgba(255,255,255,.02)}
+.lx-lv .k{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.lx-lv .v{font-family:var(--mono);font-size:15px;font-weight:700;margin-top:5px}
+.lx-bars{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.lx-barrow{display:grid;grid-template-columns:130px 1fr 44px;gap:12px;align-items:center;font-size:13px}
+.lx-barrow .nm{color:var(--ink2)}
+.lx-bartrack{height:8px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
+.lx-barfill{height:100%;border-radius:6px;width:0;background:linear-gradient(90deg,#3b82f6,#22d3ee);transition:width 1.4s cubic-bezier(.3,1,.4,1)}
+.in .lx-barfill{width:var(--w)}
+.lx-barrow .pc{font-family:var(--mono);font-weight:700;text-align:right;color:var(--cy)}
+.lx-scrub{margin-top:18px}
+.lx-scrubtrack{height:6px;border-radius:6px;background:rgba(255,255,255,.06);position:relative;margin:10px 0 6px}
+.lx-scrubfill{position:absolute;inset:0 60% 0 0;border-radius:6px;background:var(--g-fill)}
+.lx-scrubknob{position:absolute;left:40%;top:50%;width:16px;height:16px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(0,0,0,.5)}
+.lx-verdict{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;font-weight:700;color:var(--gt);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);padding:7px 13px;border-radius:9px}
+.lx-band{position:relative;padding:96px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(8,12,20,.6),rgba(11,15,20,.2)),radial-gradient(60% 120% at 50% 0%,rgba(59,130,246,.12),transparent 60%);overflow:hidden}
+.lx-band-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center}
+@media(max-width:900px){.lx-band-grid{grid-template-columns:1fr;gap:44px}}
+.lx-bigstats{display:grid;grid-template-columns:1fr 1fr;gap:32px 44px}
+.lx-bigstat .n{font-size:clamp(38px,5vw,58px);font-weight:800;letter-spacing:-.04em;line-height:1;font-family:var(--mono)}
+.lx-bigstat .l{font-size:14px;color:var(--ink2);margin-top:10px;line-height:1.5}
+.lx-viz{border-radius:18px;border:1px solid var(--line2);background:rgba(10,15,24,.6);backdrop-filter:blur(14px);padding:18px;box-shadow:var(--shadow)}
+.lx-viz svg{width:100%;height:200px;display:block}
+.lx-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:64px}
+@media(max-width:840px){.lx-steps{grid-template-columns:1fr;gap:18px}}
+.lx-step{position:relative;padding:36px 28px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.018);overflow:hidden}
+.lx-step .no{font-size:84px;font-weight:800;letter-spacing:-.05em;line-height:.8;background:var(--g-text);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:.22;position:absolute;top:14px;right:18px}
+.lx-step h4{font-size:19px;font-weight:700;margin:0 0 10px;letter-spacing:-.02em}
+.lx-step p{font-size:14.5px;color:var(--ink2);line-height:1.65}
+.lx-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:end;margin-top:64px}
+@media(max-width:900px){.lx-prices{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto}}
+.lx-plan{border-radius:20px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));backdrop-filter:blur(14px);padding:34px 30px;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s,border-color .25s}
+.lx-plan:hover{transform:translateY(-4px);border-color:rgba(59,130,246,.3)}
+.lx-plan.hot{position:relative;padding:46px 32px;border-color:rgba(59,130,246,.45);background:linear-gradient(180deg,rgba(59,130,246,.12),rgba(139,92,246,.05));box-shadow:0 0 0 1px rgba(59,130,246,.3),0 50px 110px -30px rgba(59,130,246,.5)}
+.lx-plan.hot::before{content:'Most Popular';position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#04101f;background:linear-gradient(120deg,#7cc4ff,#b6a6ff);padding:6px 18px;border-radius:100px;white-space:nowrap}
+.lx-plan .pname{font-size:15px;font-weight:700;color:var(--bt)}
+.lx-plan .pamt{font-size:50px;font-weight:800;letter-spacing:-.04em;margin:14px 0 4px;line-height:1}
+.lx-plan .pamt small{font-size:15px;color:var(--ink3);font-weight:600;letter-spacing:0}
+.lx-plan .pdesc{font-size:13.5px;color:var(--ink2);line-height:1.6;margin-bottom:24px;min-height:38px}
+.lx-plan ul{list-style:none;margin:0 0 28px;padding:0;flex:1}
+.lx-plan li{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;padding:9px 0;color:var(--ink)}
+.lx-plan li svg{width:17px;height:17px;stroke:var(--cy);fill:none;stroke-width:2.4;flex-shrink:0;margin-top:2px}
+.lx-plan .lx-btn{width:100%;justify-content:center}
+.lx-final{position:relative;margin:60px auto 0;max-width:1140px;border-radius:30px;border:1px solid var(--line2);overflow:hidden;background:linear-gradient(130deg,rgba(59,130,246,.18),rgba(139,92,246,.12) 60%,rgba(34,211,238,.1));text-align:center;padding:88px 32px}
+.lx-final::before{content:'';position:absolute;inset:0;background:radial-gradient(60% 120% at 50% 0%,rgba(124,196,255,.3),transparent 60%);pointer-events:none}
+.lx-final h2{font-size:clamp(34px,5vw,62px);font-weight:800;letter-spacing:-.045em;line-height:1.02;margin:0 auto 20px;max-width:760px}
+.lx-final p{font-size:17px;color:var(--ink2);max-width:520px;margin:0 auto 36px;line-height:1.6}
+.lx-footer{padding:72px 0 44px;border-top:1px solid var(--line);margin-top:120px;position:relative;overflow:hidden}
+.lx-footmark{position:absolute;left:0;right:0;bottom:-34px;text-align:center;font-size:clamp(80px,18vw,230px);font-weight:800;letter-spacing:-.05em;color:rgba(255,255,255,.022);pointer-events:none;line-height:1;white-space:nowrap}
+.lx-foot-grid{display:flex;justify-content:space-between;gap:48px;flex-wrap:wrap;margin-bottom:46px}
+.lx-foot-brand{max-width:300px}
+.lx-foot-brand p{font-size:14px;color:var(--ink2);line-height:1.7;margin-top:16px}
+.lx-foot-col h5{font-size:11.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:16px}
+.lx-foot-col a{display:block;color:var(--ink2);font-size:14.5px;text-decoration:none;margin-bottom:12px;cursor:pointer;transition:color .15s}
+.lx-foot-col a:hover{color:var(--ink)}
+.lx-foot-bottom{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:26px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink3)}
 </style>
 </head>
 <body>
 <div class="particles" id="particles"></div>
 
-<!-- ══════════════════ LANDING PAGE ══════════════════ -->
+<!-- ═══════════════════ LANDING ═══════════════════ -->
 <div id="landing">
-  <nav class="lp-nav">
-    <div class="logo-wrap" onclick="lpScroll('lp-top')">
-      <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L10 11l4 3 6-8"/><path d="M16 6h4v4"/></svg></div>
-      <div class="logo-text"><div class="logo-name">Trade<b>Lens</b><span class="logo-pro">PRO</span></div><div class="logo-sub">Trading Intelligence</div></div>
+  <div class="lx-bg"><div class="lx-bg-grid"></div><div class="lx-orb a"></div><div class="lx-orb b"></div><div class="lx-orb c"></div></div>
+
+  <!-- NAV -->
+  <header class="lx-nav" id="lxNav">
+    <div class="lx-nav-in">
+      <div class="logo-wrap" onclick="lpScroll('lxTop')" style="cursor:pointer">
+        <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L10 11l4 3 6-8"/><path d="M16 6h4v4"/></svg></div>
+        <div class="logo-text"><div class="logo-name">Trade<b>Lens</b><span class="logo-pro">PRO</span></div><div class="logo-sub">Trading Intelligence</div></div>
+      </div>
+      <nav class="lx-nav-links">
+        <a class="nl" onclick="lpScroll('lxFeatures')">Platform</a>
+        <a class="nl" onclick="lpScroll('lxMetrics')">Performance</a>
+        <a class="nl" onclick="lpScroll('lxPricing')">Pricing</a>
+        <a class="lx-btn primary" style="padding:10px 20px;font-size:14px" onclick="launchApp()">Launch App →</a>
+      </nav>
     </div>
-    <div class="lp-nav-links">
-      <a onclick="lpScroll('features')">Features</a>
-      <a onclick="lpScroll('stats')">Platform</a>
-      <a onclick="lpScroll('pricing')">Pricing</a>
-      <a class="btn-grad" style="padding:9px 20px;font-size:13.5px" onclick="launchApp()">Launch App →</a>
-    </div>
-  </nav>
+  </header>
 
   <!-- HERO -->
-  <section class="lp-hero" id="lp-top">
-    <div class="lp-hero-glow"></div>
-    <div class="lp-eyebrow"><span class="dot"></span> AI-Powered Market Intelligence</div>
-    <h1 class="lp-h1">Trade with <span class="grad-text">institutional-grade</span> clarity.</h1>
-    <p class="lp-sub">TradeLens fuses real-time market data, AI strategy analysis, and professional charting into one precise, data-driven workspace — built for serious traders, not spectators.</p>
-    <div class="lp-hero-cta">
-      <button class="btn-grad lp-btn-lg" onclick="launchApp()">Launch the Platform →</button>
-      <button class="btn-ghost lp-btn-lg" onclick="lpScroll('features')">Explore Features</button>
+  <section class="lx-hero" id="lxTop">
+    <div class="lx lx-hero-grid">
+      <div class="lx-hero-text lx-reveal in">
+        <div class="lx-status"><span class="pulse"></span> <b>Live</b>&nbsp;·&nbsp;markets streaming in real time</div>
+        <h1 class="lx-h1">Precision is the<br>only <span class="lx-grad">edge</span> that<br>compounds.</h1>
+        <p class="lx-lead">TradeLens turns raw market data into structure-based trade plans — entry, stop and targets derived from real swing levels and volatility, not vibes. An institutional workflow, in one screen.</p>
+        <div class="lx-hero-cta">
+          <button class="lx-btn primary lg" onclick="launchApp()">Launch the Platform →</button>
+          <button class="lx-btn ghost lg" onclick="lpScroll('lxFeatures')">▦ See it work</button>
+        </div>
+        <div class="lx-microstats">
+          <div class="lx-micro"><div class="n"><span class="lx-count" data-to="12400" data-suffix="+">0</span></div><div class="l">Setups analyzed</div></div>
+          <div class="lx-micro"><div class="n"><span class="lx-count" data-to="5">0</span> strategies</div><div class="l">ATR-precise levels</div></div>
+          <div class="lx-micro"><div class="n">&lt;<span class="lx-count" data-to="15">0</span>s</div><div class="l">Live refresh</div></div>
+        </div>
+      </div>
+      <div class="lx-stage lx-reveal r in" id="lxStage">
+        <div class="lx-stage-halo"></div>
+        <div class="lx-panel" id="lxHeroPanel">
+          <div class="lx-panel-top"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:#22c55e"></span><span class="lx-panel-tag">tradelens · AAPL · 1D</span></div>
+          <div class="lx-panel-body">
+            <div class="lx-pr"><span class="sym">AAPL</span><span class="px">$294.30</span><span class="chg">▲ 1.42%</span></div>
+            <div class="lx-chart">
+              <svg viewBox="0 0 520 172" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="lxAF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(59,130,246,.34)"/><stop offset="1" stop-color="rgba(59,130,246,0)"/></linearGradient>
+                  <linearGradient id="lxLN" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+                </defs>
+                <line x1="0" y1="52" x2="520" y2="52" stroke="rgba(34,197,94,.4)" stroke-width="1" stroke-dasharray="4 4"/>
+                <line x1="0" y1="120" x2="520" y2="120" stroke="rgba(244,63,94,.4)" stroke-width="1" stroke-dasharray="4 4"/>
+                <path d="M0,150 C40,140 70,156 110,128 C150,100 180,116 220,92 C260,70 300,102 340,74 C380,52 420,62 460,40 C492,26 510,32 520,26 L520,172 L0,172 Z" fill="url(#lxAF)"/>
+                <path class="lx-draw" d="M0,150 C40,140 70,156 110,128 C150,100 180,116 220,92 C260,70 300,102 340,74 C380,52 420,62 460,40 C492,26 510,32 520,26" fill="none" stroke="url(#lxLN)" stroke-width="2.6" stroke-linecap="round"/>
+                <circle cx="520" cy="26" r="4.5" fill="#22d3ee"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="lx-float sig"><div class="k">AI signal</div><div class="v" style="color:var(--gt)">▲ Long · 88%</div></div>
+        <div class="lx-float tick"><div class="k">R / R</div><div class="v">1 : 3.6</div></div>
+      </div>
     </div>
-    <div class="lp-trust">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Real-time market data</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> No credit card required</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Educational use</span>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <div class="lx-trust">
+    <div class="lx lx-trust-in">
+      <span>Real-time data from</span>
+      <span class="src">NYSE</span><span class="sep"></span>
+      <span class="src">NASDAQ</span><span class="sep"></span>
+      <span class="src">Yahoo Finance</span><span class="sep"></span>
+      <span class="src">TradingView</span><span class="sep"></span>
+      <span class="src">Stooq</span>
+    </div>
+  </div>
+
+  <!-- EDITORIAL STATEMENT -->
+  <section class="lx-statement">
+    <div class="lx">
+      <h2 class="lx-quote lx-reveal">Markets don't reward <span class="dim">emotion.</span><br>They reward <span class="lx-grad">precision,</span> repeated.</h2>
+      <div class="lx-statement-note lx-reveal r"><div class="bar"></div><p>Most retail traders lose to their own impulses — chasing, hoping, freezing. TradeLens removes the guesswork: every read is grounded in real structure and risk, so you act on a plan instead of a feeling.</p></div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE — alternating rows -->
+  <section class="lx-sec" id="lxFeatures" style="padding-bottom:40px">
+    <div class="lx">
+      <div class="lx-reveal" style="max-width:620px"><div class="lx-kicker lx-grad">The Platform</div><h2 class="lx-h2">An institutional workflow,<br>without the institution.</h2></div>
     </div>
 
-    <!-- stylized dashboard preview -->
-    <div class="lp-hero-visual reveal">
-      <div class="lp-mock-bar">
-        <span class="lp-mock-dot" style="background:#f43f5e"></span>
-        <span class="lp-mock-dot" style="background:#f0a500"></span>
-        <span class="lp-mock-dot" style="background:#22c55e"></span>
-        <span style="margin-left:12px;font-size:12px;color:var(--fa);font-family:var(--mono)">tradelens — AAPL · live</span>
-      </div>
-      <div class="lp-mock-body">
-        <div class="lp-mock-chart">
-          <div class="lp-mock-row"><span class="lp-mock-sym">AAPL</span><span class="lp-mock-px">$294.30</span><span class="lp-mock-chg">▲ 1.42%</span></div>
-          <svg viewBox="0 0 520 180" preserveAspectRatio="none" style="width:100%;flex:1;margin-top:6px">
-            <defs>
-              <linearGradient id="lpFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(59,130,246,.34)"/><stop offset="100%" stop-color="rgba(59,130,246,0)"/></linearGradient>
-              <linearGradient id="lpLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
-            </defs>
-            <path d="M0,140 C40,130 70,150 110,120 C150,92 180,110 220,86 C260,64 300,98 340,70 C380,46 420,58 460,34 C490,20 510,28 520,22 L520,180 L0,180 Z" fill="url(#lpFill)"/>
-            <path d="M0,140 C40,130 70,150 110,120 C150,92 180,110 220,86 C260,64 300,98 340,70 C380,46 420,58 460,34 C490,20 510,28 520,22" fill="none" stroke="url(#lpLine)" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="520" cy="22" r="4" fill="#22d3ee"/>
-          </svg>
+    <!-- row 1: strategy engine -->
+    <div class="lx lx-row">
+      <div class="lx-row-text lx-reveal l">
+        <div class="lx-eyebrow">Strategy Engine</div>
+        <h3 class="lx-h3">Plans built from structure, not from a hunch.</h3>
+        <p>Five structure-aware strategies read the chart in front of them, pick the one that fits, then derive entry, stop and targets from real swing levels and ATR volatility — with a reward-to-risk that always makes sense.</p>
+        <div class="lx-bullets">
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Real levels.</b> <span>Support, resistance and swings — not round percentages.</span></div></div>
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Volatility-aware stops.</b> <span>Sized from ATR so they breathe with the market.</span></div></div>
         </div>
-        <div class="lp-mock-side">
-          <div class="lp-mock-pill"><div class="t">▲ BULLISH — GO LONG</div><div class="s">Momentum aligned. Buy the pullback into support.</div></div>
-          <div class="lp-mock-lvls">
-            <div class="lp-mock-lvl"><div class="k">Entry</div><div class="v" style="color:var(--bt)">$293.08</div></div>
-            <div class="lp-mock-lvl"><div class="k">Stop</div><div class="v" style="color:var(--rt)">$283.45</div></div>
-            <div class="lp-mock-lvl"><div class="k">Target 1</div><div class="v" style="color:var(--gt)">$317.40</div></div>
-            <div class="lp-mock-lvl"><div class="k">Target 2</div><div class="v" style="color:var(--gt)">$333.10</div></div>
+      </div>
+      <div class="lx-row-media lx-reveal r">
+        <div class="lx-media">
+          <div class="lx-media-h"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:#22c55e"></span><span class="lx-panel-tag">Trade Setup · NVDA</span></div>
+          <div class="lx-media-b">
+            <div class="lx-pr"><span class="sym">NVDA</span><span class="px">$131.50</span><span class="chg">▲ 2.1%</span></div>
+            <div class="lx-chart" style="height:150px">
+              <svg viewBox="0 0 520 150" preserveAspectRatio="none">
+                <line x1="0" y1="44" x2="520" y2="44" stroke="rgba(34,197,94,.45)" stroke-width="1" stroke-dasharray="5 4"/>
+                <line x1="0" y1="78" x2="520" y2="78" stroke="rgba(59,130,246,.5)" stroke-width="1" stroke-dasharray="5 4"/>
+                <line x1="0" y1="116" x2="520" y2="116" stroke="rgba(244,63,94,.45)" stroke-width="1" stroke-dasharray="5 4"/>
+                <g>
+                  <rect class="lx-cand" style="animation-delay:.05s" x="40" y="70" width="7" height="34" fill="#22c55e"/>
+                  <rect class="lx-cand" style="animation-delay:.1s" x="95" y="60" width="7" height="40" fill="#22c55e"/>
+                  <rect class="lx-cand" style="animation-delay:.15s" x="150" y="78" width="7" height="26" fill="#f43f5e"/>
+                  <rect class="lx-cand" style="animation-delay:.2s" x="205" y="56" width="7" height="44" fill="#22c55e"/>
+                  <rect class="lx-cand" style="animation-delay:.25s" x="260" y="64" width="7" height="30" fill="#22c55e"/>
+                  <rect class="lx-cand" style="animation-delay:.3s" x="315" y="48" width="7" height="40" fill="#22c55e"/>
+                  <rect class="lx-cand" style="animation-delay:.35s" x="370" y="40" width="7" height="34" fill="#22c55e"/>
+                  <rect class="lx-cand" style="animation-delay:.4s" x="425" y="34" width="7" height="30" fill="#22c55e"/>
+                </g>
+              </svg>
+            </div>
+            <div class="lx-levels">
+              <div class="lx-lv"><div class="k">Entry</div><div class="v" style="color:var(--bt)">$131.50</div></div>
+              <div class="lx-lv"><div class="k">Stop</div><div class="v" style="color:var(--rt)">$124.00</div></div>
+              <div class="lx-lv"><div class="k">Target 1</div><div class="v" style="color:var(--gt)">$155.00</div></div>
+              <div class="lx-lv"><div class="k">Target 2</div><div class="v" style="color:var(--gt)">$165.00</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- row 2: backtesting (flipped) -->
+    <div class="lx lx-row flip">
+      <div class="lx-row-media lx-reveal l">
+        <div class="lx-media">
+          <div class="lx-media-h"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:#22c55e"></span><span class="lx-panel-tag">Backtest · replay</span></div>
+          <div class="lx-media-b">
+            <div class="lx-chart" style="height:130px">
+              <svg viewBox="0 0 520 130" preserveAspectRatio="none">
+                <defs><linearGradient id="lxBT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(139,92,246,.3)"/><stop offset="1" stop-color="rgba(139,92,246,0)"/></linearGradient></defs>
+                <rect x="312" y="0" width="208" height="130" fill="rgba(59,130,246,.05)"/>
+                <path d="M0,96 C50,86 80,104 120,80 C160,56 200,90 240,70 C280,52 300,66 312,60" fill="none" stroke="#8b5cf6" stroke-width="2.4"/>
+                <path class="lx-draw" d="M312,60 C350,48 390,70 430,44 C470,20 500,30 520,22" fill="none" stroke="#22d3ee" stroke-width="2.4" stroke-dasharray="6 5"/>
+                <line x1="312" y1="0" x2="312" y2="130" stroke="rgba(255,255,255,.25)" stroke-width="1.5" stroke-dasharray="3 3"/>
+              </svg>
+            </div>
+            <div class="lx-scrub">
+              <div class="lx-scrubtrack"><div class="lx-scrubfill"></div><div class="lx-scrubknob"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);font-family:var(--mono)">decision point<span>+10 bars →</span></div>
+            </div>
+            <div class="lx-verdict"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Correct call · +4.8%</div>
+          </div>
+        </div>
+      </div>
+      <div class="lx-row-text lx-reveal r">
+        <div class="lx-eyebrow">Backtesting</div>
+        <h3 class="lx-h3">Rehearse the read before the money's real.</h3>
+        <p>Practice on real historical charts with zero risk. Make your call at the decision point, then watch what actually happened next — with an AI coach explaining what to learn from every trade.</p>
+        <div class="lx-bullets">
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Skill, scored.</b> <span>Track accuracy by strategy, direction and timeframe.</span></div></div>
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Coached.</b> <span>An AI mentor walks every trade, bar by bar.</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- row 3: self-learning AI -->
+    <div class="lx lx-row">
+      <div class="lx-row-text lx-reveal l">
+        <div class="lx-eyebrow">Self-Learning Engine</div>
+        <h3 class="lx-h3">An edge that sharpens itself.</h3>
+        <p>The engine back-tests its own picks across years of history, logs every win and loss, and continuously re-weights how much it trusts each strategy — so the levels on your screen get smarter the more it runs.</p>
+        <div class="lx-bullets">
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Earned confidence.</b> <span>Weighting is learned from results, not assumed.</span></div></div>
+        </div>
+      </div>
+      <div class="lx-row-media lx-reveal r">
+        <div class="lx-media">
+          <div class="lx-media-h"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:#22c55e"></span><span class="lx-panel-tag">AI Lab · learned confidence</span></div>
+          <div class="lx-media-b">
+            <div class="lx-bars">
+              <div class="lx-barrow"><span class="nm">Trend Pullback</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:84%"></div></div><span class="pc">84%</span></div>
+              <div class="lx-barrow"><span class="nm">Breakout</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:71%"></div></div><span class="pc">71%</span></div>
+              <div class="lx-barrow"><span class="nm">Oversold Bounce</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:63%"></div></div><span class="pc">63%</span></div>
+              <div class="lx-barrow"><span class="nm">Range Fade</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:58%"></div></div><span class="pc">58%</span></div>
+              <div class="lx-barrow"><span class="nm">Breakdown</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:49%"></div></div><span class="pc">49%</span></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- STATS -->
-  <section class="lp-section" id="stats">
-    <div class="lp-stats">
-      <div class="lp-stat glass reveal"><div class="lp-stat-num grad-text">Real-time</div><div class="lp-stat-lbl">Live streaming quotes &amp; charts</div></div>
-      <div class="lp-stat glass reveal" style="animation-delay:.06s"><div class="lp-stat-num grad-text">5</div><div class="lp-stat-lbl">AI strategies with ATR-precise levels</div></div>
-      <div class="lp-stat glass reveal" style="animation-delay:.12s"><div class="lp-stat-num grad-text">Any</div><div class="lp-stat-lbl">US ticker, analyzed on demand</div></div>
-      <div class="lp-stat glass reveal" style="animation-delay:.18s"><div class="lp-stat-num grad-text">$0</div><div class="lp-stat-lbl">To start — no card required</div></div>
+  <!-- METRICS BAND -->
+  <section class="lx-band" id="lxMetrics">
+    <div class="lx lx-band-grid">
+      <div class="lx-reveal l">
+        <div class="lx-kicker lx-grad">By the numbers</div>
+        <h2 class="lx-h2" style="margin-bottom:40px">Built to keep<br>you in sync<br>with the tape.</h2>
+        <div class="lx-bigstats">
+          <div class="lx-bigstat"><div class="n lx-grad"><span class="lx-count" data-to="12400" data-suffix="+">0</span></div><div class="l">Historical setups the AI has tested on itself</div></div>
+          <div class="lx-bigstat"><div class="n">&lt;<span class="lx-count" data-to="15">0</span>s</div><div class="l">Between live price refreshes on the dashboard</div></div>
+          <div class="lx-bigstat"><div class="n"><span class="lx-count" data-to="5">0</span></div><div class="l">Structure-aware strategies, each self-scored</div></div>
+          <div class="lx-bigstat"><div class="n"><span class="lx-count" data-to="100">0</span>%</div><div class="l">Real market data — never simulated or faked</div></div>
+        </div>
+      </div>
+      <div class="lx-viz lx-reveal r">
+        <svg viewBox="0 0 480 200" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="lxV1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,211,238,.35)"/><stop offset="1" stop-color="rgba(34,211,238,0)"/></linearGradient>
+            <linearGradient id="lxV2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(139,92,246,.28)"/><stop offset="1" stop-color="rgba(139,92,246,0)"/></linearGradient>
+          </defs>
+          <path d="M0,150 C60,140 90,120 140,124 C190,128 220,96 270,92 C320,88 360,64 410,58 C450,53 470,48 480,46 L480,200 L0,200 Z" fill="url(#lxV2)"/>
+          <path d="M0,168 C60,162 90,150 140,150 C190,150 230,128 280,126 C330,124 370,104 420,98 C455,94 470,92 480,90 L480,200 L0,200 Z" fill="url(#lxV1)"/>
+          <path class="lx-draw" d="M0,150 C60,140 90,120 140,124 C190,128 220,96 270,92 C320,88 360,64 410,58 C450,53 470,48 480,46" fill="none" stroke="#8b5cf6" stroke-width="2.4"/>
+          <path class="lx-draw" style="animation-delay:.35s" d="M0,168 C60,162 90,150 140,150 C190,150 230,128 280,126 C330,124 370,104 420,98 C455,94 470,92 480,90" fill="none" stroke="#22d3ee" stroke-width="2.4"/>
+        </svg>
+        <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:11px;color:var(--ink3);font-family:var(--mono)"><span>● strategy edge</span><span>● win rate</span></div>
+      </div>
     </div>
   </section>
 
-  <!-- FEATURES -->
-  <section class="lp-section" id="features">
-    <div class="lp-section-head">
-      <div class="lp-kicker grad-text">The Platform</div>
-      <h2 class="lp-h2">Everything a serious trader needs, in one place.</h2>
-      <p class="lp-section-sub">No tab-hopping between five tools. TradeLens brings data, analysis, charting, and practice into a single cohesive workspace.</p>
-    </div>
-    <div class="lp-features-grid">
-      <div class="lp-feat glass reveal">
-        <div class="lp-feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg></div>
-        <h3>AI Strategy Engine</h3><p>Five structure-aware strategies pick the setup that fits the chart, then derive entry, stop, and targets from real swing levels and ATR volatility — never arbitrary percentages.</p>
-      </div>
-      <div class="lp-feat glass reveal" style="animation-delay:.05s">
-        <div class="lp-feat-icon"><svg viewBox="0 0 24 24"><path d="M4 18L10 11l4 3 6-8"/><path d="M16 6h4v4"/></svg></div>
-        <h3>Institutional Charting</h3><p>Full professional charts on the dashboard — every timeframe, indicator, and drawing tool — streaming live, with your AI entry/stop/target levels one click away.</p>
-      </div>
-      <div class="lp-feat glass reveal" style="animation-delay:.1s">
-        <div class="lp-feat-icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
-        <h3>Live Market Data</h3><p>Real prices, not delayed snapshots. The tape ticks, the current-price marker follows, and your read stays in sync with the market in real time.</p>
-      </div>
-      <div class="lp-feat glass reveal">
-        <div class="lp-feat-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/></svg></div>
-        <h3>Risk-Free Backtesting</h3><p>Practice reading setups on real historical charts with zero capital at risk — and get AI coaching on each decision before you ever place a trade.</p>
-      </div>
-      <div class="lp-feat glass reveal" style="animation-delay:.05s">
-        <div class="lp-feat-icon"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></div>
-        <h3>Self-Learning AI</h3><p>The engine back-tests its own picks across history, logs every win and loss, and continuously adjusts how much it trusts each strategy — sharpening the levels you see.</p>
-      </div>
-      <div class="lp-feat glass reveal" style="animation-delay:.1s">
-        <div class="lp-feat-icon"><svg viewBox="0 0 24 24"><path d="M4 5h13a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5z"/><path d="M8 9h7M8 13h7M8 17h4"/></svg></div>
-        <h3>Market Intelligence</h3><p>Live news with impact reads, high-conviction pro-trader calls, and a screener that surfaces the setups forming across the market right now.</p>
+  <!-- HOW IT WORKS -->
+  <section class="lx-sec">
+    <div class="lx">
+      <div class="lx-reveal" style="max-width:560px"><div class="lx-kicker lx-grad">How it works</div><h2 class="lx-h2">From symbol to plan in seconds.</h2></div>
+      <div class="lx-steps">
+        <div class="lx-step lx-reveal"><div class="no">01</div><h4>Pull any ticker</h4><p>Type a symbol and TradeLens pulls live price, structure and volatility — and renders a professional chart instantly.</p></div>
+        <div class="lx-step lx-reveal" style="transition-delay:.08s"><div class="no">02</div><h4>Read the setup</h4><p>The engine picks the fitting strategy and lays out entry, stop and targets with a clear reward-to-risk you can act on.</p></div>
+        <div class="lx-step lx-reveal" style="transition-delay:.16s"><div class="no">03</div><h4>Act with conviction</h4><p>Practice it risk-free, get an AI read on the context, and step into the trade knowing exactly where you're wrong.</p></div>
       </div>
     </div>
   </section>
 
   <!-- PRICING -->
-  <section class="lp-section" id="pricing">
-    <div class="lp-section-head">
-      <div class="lp-kicker grad-text">Pricing</div>
-      <h2 class="lp-h2">Start free. Scale when you're ready.</h2>
-      <p class="lp-section-sub">The full analysis platform is free forever. Add real AI and institutional features as your trading grows.</p>
-    </div>
-    <div class="lp-pricing-grid">
-      <div class="lp-price glass reveal">
-        <div class="lp-price-name">Starter</div>
-        <div class="lp-price-amt">$0<span> / forever</span></div>
-        <div class="lp-price-desc">Everything you need to read the market with precision.</div>
-        <ul class="lp-price-feats">
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Real-time dashboard &amp; pro charts</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> 5 AI strategies with entry/stop/TP</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Risk-free backtesting</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Market news &amp; screener</li>
-        </ul>
-        <button class="btn-ghost lp-price-cta" onclick="launchApp()">Launch App</button>
-      </div>
-      <div class="lp-price glass feat reveal" style="animation-delay:.06s">
-        <div class="lp-price-badge">Most Popular</div>
-        <div class="lp-price-name">Pro</div>
-        <div class="lp-price-amt">$29<span> / mo</span></div>
-        <div class="lp-price-desc">Real Claude AI working across the entire platform.</div>
-        <ul class="lp-price-feats">
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Starter</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI deep-reads of any ticker</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Self-learning AI engine</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI trade coach &amp; performance review</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom price alerts</li>
-        </ul>
-        <button class="btn-grad lp-price-cta" onclick="launchApp()">Launch App</button>
-      </div>
-      <div class="lp-price glass reveal" style="animation-delay:.12s">
-        <div class="lp-price-name">Institutional</div>
-        <div class="lp-price-amt">$99<span> / mo</span></div>
-        <div class="lp-price-desc">For desks and operators who run on data.</div>
-        <ul class="lp-price-feats">
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Pro</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Multi-watchlist &amp; priority data</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Server-side AI — no per-user key</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom strategy tuning</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Priority support</li>
-        </ul>
-        <button class="btn-ghost lp-price-cta" onclick="launchApp()">Launch App</button>
+  <section class="lx-sec" id="lxPricing" style="padding-top:40px">
+    <div class="lx">
+      <div class="lx-reveal" style="text-align:center;max-width:640px;margin:0 auto"><div class="lx-kicker lx-grad">Pricing</div><h2 class="lx-h2">Start free. Scale when it pays for itself.</h2></div>
+      <div class="lx-prices">
+        <div class="lx-plan lx-reveal">
+          <div class="pname">Starter</div><div class="pamt">$0<small> / forever</small></div>
+          <div class="pdesc">Everything you need to read the market with precision.</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Real-time dashboard &amp; pro charts</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> 5 AI strategies with entry/stop/TP</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Risk-free backtesting</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> News &amp; screener</li>
+          </ul>
+          <button class="lx-btn ghost" onclick="launchApp()">Launch App</button>
+        </div>
+        <div class="lx-plan hot lx-reveal" style="transition-delay:.08s">
+          <div class="pname">Pro</div><div class="pamt">$29<small> / mo</small></div>
+          <div class="pdesc">Real Claude AI working across the whole platform.</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Starter</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI deep-reads of any ticker</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Self-learning AI engine</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI coach &amp; performance review</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom price alerts</li>
+          </ul>
+          <button class="lx-btn primary" onclick="launchApp()">Launch App</button>
+        </div>
+        <div class="lx-plan lx-reveal" style="transition-delay:.16s">
+          <div class="pname">Institutional</div><div class="pamt">$99<small> / mo</small></div>
+          <div class="pdesc">For desks and operators who run on data.</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Pro</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Multi-watchlist &amp; priority data</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Server-side AI — no per-user key</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom strategy tuning</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Priority support</li>
+          </ul>
+          <button class="lx-btn ghost" onclick="launchApp()">Launch App</button>
+        </div>
       </div>
     </div>
   </section>
 
+  <!-- FINAL CTA -->
+  <section class="lx" style="padding-bottom:40px">
+    <div class="lx-final lx-reveal">
+      <h2>Stop trading on feeling.<br>Start trading on <span class="lx-grad">structure.</span></h2>
+      <p>The full analysis platform is free, forever. No card, no setup — just open it and read your first chart.</p>
+      <button class="lx-btn primary lg" onclick="launchApp()">Launch TradeLens →</button>
+    </div>
+  </section>
+
   <!-- FOOTER -->
-  <footer class="lp-footer">
-    <div class="lp-footer-grid">
-      <div class="lp-foot-brand">
+  <footer class="lx-footer">
+    <div class="lx-footmark">TRADELENS</div>
+    <div class="lx lx-foot-grid">
+      <div class="lx-foot-brand">
         <div class="logo-wrap" style="cursor:default">
           <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L10 11l4 3 6-8"/><path d="M16 6h4v4"/></svg></div>
           <div class="logo-text"><div class="logo-name">Trade<b>Lens</b></div><div class="logo-sub">Trading Intelligence</div></div>
         </div>
         <p>Precision market analysis and AI strategy tools for serious, independent traders.</p>
       </div>
-      <div class="lp-foot-col"><h4>Product</h4><a onclick="lpScroll('features')">Features</a><a onclick="lpScroll('pricing')">Pricing</a><a onclick="launchApp()">Charts</a><a onclick="launchApp()">Backtesting</a></div>
-      <div class="lp-foot-col"><h4>Platform</h4><a onclick="launchApp()">Dashboard</a><a onclick="launchApp()">AI Lab</a><a onclick="launchApp()">Screener</a><a onclick="launchApp()">Pro Traders</a></div>
-      <div class="lp-foot-col"><h4>Company</h4><a onclick="lpScroll('lp-top')">About</a><a onclick="lpScroll('pricing')">Plans</a><a href="#">Contact</a><a href="#">Disclaimer</a></div>
+      <div class="lx-foot-col"><h5>Platform</h5><a onclick="launchApp()">Dashboard</a><a onclick="launchApp()">Charts</a><a onclick="launchApp()">Backtesting</a><a onclick="launchApp()">AI Lab</a></div>
+      <div class="lx-foot-col"><h5>Explore</h5><a onclick="lpScroll('lxFeatures')">Features</a><a onclick="lpScroll('lxMetrics')">Performance</a><a onclick="lpScroll('lxPricing')">Pricing</a></div>
+      <div class="lx-foot-col"><h5>Company</h5><a onclick="lpScroll('lxTop')">About</a><a href="#">Contact</a><a href="#">Disclaimer</a></div>
     </div>
-    <div class="lp-foot-bottom">
-      © 2026 TradeLens. Educational market-analysis tool — not financial advice. Markets involve risk; do your own research.
+    <div class="lx lx-foot-bottom">
+      <span>© 2026 TradeLens — educational market analysis, not financial advice.</span>
+      <span>Markets involve risk. Do your own research.</span>
     </div>
   </footer>
 </div>
-<!-- ════════════════ END LANDING PAGE ════════════════ -->
+<!-- ═════════════════ END LANDING ═════════════════ -->
+
 
 <!-- Account Modal -->
 <div class="mo" id="moAcct">
@@ -3264,15 +3482,55 @@ startLiveRefresh();
 function launchApp(){
   const l=document.getElementById('landing');if(l)l.style.display='none';
   window.scrollTo(0,0);
-  // the dashboard chart may have been sized while hidden — redraw it
   if(lastData){try{const{ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral}=lastData;applyChartView(ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral);}catch(e){}}
 }
-function showLanding(){const l=document.getElementById('landing');if(l){l.style.display='block';l.scrollTop=0;replayReveals();}}
+function showLanding(){const l=document.getElementById('landing');if(l){l.style.display='block';l.scrollTop=0;lxObserve();}}
 function lpScroll(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 
-// Re-play the entrance animations whenever the landing is shown again.
-function replayReveals(){
-  document.querySelectorAll('#landing .reveal').forEach(el=>{el.style.animation='none';void el.offsetWidth;el.style.animation='';});
+// ── LANDING MOTION ────────────────────────────────────────────────────
+const lxLanding=document.getElementById('landing');
+// Count-up numbers once their container is revealed.
+function lxMaybeCount(scope){
+  if(!scope.querySelectorAll)return;
+  scope.querySelectorAll('.lx-count:not([data-done])').forEach(el=>{
+    el.setAttribute('data-done','1');
+    const to=+el.getAttribute('data-to')||0,suf=el.getAttribute('data-suffix')||'';
+    const dur=1200,t0=performance.now();
+    (function tick(now){
+      const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);
+      el.textContent=Math.round(to*e).toLocaleString()+(k>=1?suf:'');
+      if(k<1)requestAnimationFrame(tick);else el.textContent=to.toLocaleString()+suf;
+    })(performance.now());
+  });
+}
+let lxIO=null;
+function lxReveal(el){el.classList.add('in');lxMaybeCount(el);}
+function lxObserve(){
+  if(!lxLanding)return;
+  const els=lxLanding.querySelectorAll('.lx-reveal:not(.in)');
+  if('IntersectionObserver' in window){
+    if(!lxIO)lxIO=new IntersectionObserver((ents)=>{
+      ents.forEach(e=>{if(e.isIntersecting){lxReveal(e.target);lxIO.unobserve(e.target);}});
+    },{root:null,rootMargin:'0px 0px -8% 0px',threshold:0.05});
+    els.forEach(el=>lxIO.observe(el));
+  }else{els.forEach(lxReveal);}
+  // Hero is always on-screen — count immediately.
+  lxLanding.querySelectorAll('.lx-reveal.in').forEach(lxMaybeCount);
+}
+if(lxLanding){
+  lxObserve();
+  // Safety net: if the observer never fired at all, just show everything.
+  setTimeout(()=>{ if(!lxLanding.querySelector('.lx-reveal.in:not(.lx-hero-text):not(.lx-stage)')){lxLanding.querySelectorAll('.lx-reveal').forEach(lxReveal);} },2600);
+  // Nav background on scroll.
+  lxLanding.addEventListener('scroll',()=>{const n=document.getElementById('lxNav');if(n)n.classList.toggle('scrolled',lxLanding.scrollTop>20);},{passive:true});
+  // Hero parallax on pointer move.
+  const stage=document.getElementById('lxStage'),panel=document.getElementById('lxHeroPanel');
+  lxLanding.addEventListener('pointermove',e=>{
+    if(!panel)return;
+    const cx=(e.clientX/window.innerWidth-0.5),cy=(e.clientY/window.innerHeight-0.5);
+    panel.style.transform=`rotateY(${-13+cx*6}deg) rotateX(${6-cy*6}deg) rotateZ(1deg) translate(${cx*10}px,${cy*8}px)`;
+    stage.querySelectorAll('.lx-float').forEach((f,i)=>{f.style.transform=`translate(${cx*(i?-18:14)}px,${cy*(i?16:-12)}px)`;});
+  });
 }
 </script>
 </body>
