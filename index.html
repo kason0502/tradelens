@@ -129,8 +129,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .ticker-input{flex:1;max-width:300px;padding:13px 18px;border-radius:13px;border:1px solid var(--line2);background:rgba(255,255,255,.03);color:var(--ink);font-size:14px;font-family:var(--mono);font-weight:700;letter-spacing:.05em;outline:none;transition:border-color .15s,box-shadow .15s}
 .ticker-input::placeholder{color:var(--fa);font-weight:400}
 .ticker-input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
-.go-btn{padding:11px 24px;border-radius:var(--rsm);border:none;background:linear-gradient(120deg,#3b82f6,#22d3ee,#8b5cf6,#3b82f6);background-size:300% 100%;animation:gradShift 7s ease infinite;color:#fff;font-size:14px;font-weight:800;cursor:pointer;transition:transform .16s,box-shadow .16s;box-shadow:0 6px 22px rgba(59,130,246,.3)}
-.go-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(59,130,246,.5)}
+.go-btn{padding:11px 24px;border-radius:var(--rsm);border:none;background:var(--ac);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:transform .16s,box-shadow .16s,background .16s;box-shadow:0 6px 18px rgba(59,130,246,.28)}
+.go-btn:hover{transform:translateY(-1px);background:#4f8ff7;box-shadow:0 10px 26px rgba(59,130,246,.42)}
 
 /* ── DTE ROW ── */
 .dte-row{display:flex;gap:7px;align-items:center;margin-bottom:28px;flex-wrap:wrap;padding:14px 18px;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px}
@@ -159,12 +159,14 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dir-banner{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:var(--rsm);margin-bottom:16px;border:1px solid transparent;position:relative;overflow:hidden}
 .dir-banner::after{content:none}
 .dir-banner{padding:18px 22px;border-radius:16px;margin-bottom:18px}
-.dir-banner.long{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.28);box-shadow:0 0 30px rgba(34,197,94,.08)}
-.dir-banner.short{background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.28);box-shadow:0 0 30px rgba(244,63,94,.08)}
+.dir-banner.long{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.22)}
+.dir-banner.short{background:rgba(244,63,94,.05);border-color:rgba(244,63,94,.22)}
+.dir-mark{width:4px;align-self:stretch;border-radius:3px;flex-shrink:0}
+.long .dir-mark{background:var(--gr)}.short .dir-mark{background:var(--rd)}
 .dir-icon{font-size:24px;flex-shrink:0;margin-top:1px}
-.dir-title{font-size:15px;font-weight:800;margin-bottom:4px}
+.dir-title{font-size:14px;font-weight:700;margin-bottom:5px;letter-spacing:.01em}
 .long .dir-title{color:var(--gt)}.short .dir-title{color:var(--rt)}
-.dir-sub{font-size:12px;color:var(--mu);line-height:1.65}
+.dir-sub{font-size:12.5px;color:var(--ink2);line-height:1.65;font-family:var(--mono)}
 
 /* ── METRICS ── */
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:14px;margin-bottom:24px}
@@ -557,7 +559,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 @media(max-width:680px){.lx{padding:0 22px}}
 .lx-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .lx-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%);mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%)}
-.lx-orb{position:absolute;border-radius:50%;filter:blur(72px);will-change:transform;opacity:.55}
+.lx-orb{position:absolute;border-radius:50%;filter:blur(80px);will-change:transform;opacity:.3}
 .lx-orb.a{width:640px;height:640px;background:radial-gradient(circle,rgba(59,130,246,.55),transparent 64%);top:-200px;left:-140px;animation:orbA 24s ease-in-out infinite}
 .lx-orb.b{width:560px;height:560px;background:radial-gradient(circle,rgba(139,92,246,.45),transparent 64%);top:4%;right:-180px;animation:orbB 28s ease-in-out infinite}
 .lx-orb.c{width:520px;height:520px;background:radial-gradient(circle,rgba(34,211,238,.3),transparent 64%);top:62%;left:34%;animation:orbC 32s ease-in-out infinite}
@@ -602,7 +604,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lx-micro+.lx-micro{border-left:1px solid var(--line);padding-left:38px}
 .lx-stage{position:relative;perspective:1600px;min-height:440px}
 .lx-stage-halo{position:absolute;inset:-6% -4% -10% -4%;background:radial-gradient(60% 60% at 60% 40%,rgba(59,130,246,.32),transparent 65%);filter:blur(30px);z-index:0}
-.lx-panel{position:relative;z-index:1;border-radius:20px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(22,30,46,.86),rgba(13,19,30,.92));backdrop-filter:blur(20px);box-shadow:0 50px 120px -30px rgba(0,0,0,.8),var(--halo);transform:rotateY(-13deg) rotateX(6deg) rotateZ(1deg);transform-style:preserve-3d;overflow:hidden;will-change:transform}
+.lx-panel{position:relative;z-index:1;border-radius:20px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(22,30,46,.86),rgba(13,19,30,.92));backdrop-filter:blur(20px);box-shadow:0 50px 120px -34px rgba(0,0,0,.78),0 30px 70px -34px rgba(59,130,246,.3);transform:rotateY(-6deg) rotateX(3deg);transform-style:preserve-3d;overflow:hidden;will-change:transform}
 .lx-panel-top{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line)}
 .lx-dot{width:10px;height:10px;border-radius:50%}
 .lx-panel-tag{margin-left:8px;font-size:11px;color:var(--ink3);font-family:var(--mono)}
@@ -620,9 +622,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .in .lx-cand{animation:candUp .5s cubic-bezier(.3,1.2,.5,1) forwards}
 @keyframes candUp{to{transform:scaleY(1)}}
 .lx-float{position:absolute;z-index:2;border-radius:15px;border:1px solid var(--line2);background:rgba(17,24,38,.82);backdrop-filter:blur(16px);box-shadow:0 24px 60px -16px rgba(0,0,0,.7);padding:13px 16px;will-change:transform}
-.lx-float.sig{top:7%;left:-7%;animation:floaty 6s ease-in-out infinite}
-.lx-float.tick{bottom:5%;right:-5%;animation:floaty 7s ease-in-out infinite reverse}
-@keyframes floaty{50%{transform:translateY(-12px)}}
+.lx-float.sig{top:7%;left:-6%}
+.lx-float.tick{bottom:5%;right:-4%}
 .lx-float .k{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
 .lx-float .v{font-size:18px;font-weight:800;margin-top:3px;font-family:var(--mono)}
 .lx-trust{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,255,255,.012)}
@@ -2834,7 +2835,7 @@ function startChartAnim(){
 }
 function togglePressure(btn){
   showPressure=!showPressure;
-  if(btn){btn.classList.toggle('active',showPressure);btn.textContent=showPressure?'⦿ Pressure Zones: ON':'○ Pressure Zones: OFF';}
+  if(btn){btn.classList.toggle('active',showPressure);btn.textContent=showPressure?'Pressure zones · on':'Pressure zones · off';}
   redrawChart();
 }
 
@@ -2911,8 +2912,8 @@ function renderDash(ticker,q,a){
   const fc2=f=>f==='high'?'fh':f==='medium'?'fm':'fl';
 
   const dirHtml=!isNeutral?(isShort
-    ?`<div class="dir-banner short d1"><div class="dir-icon">⬇</div><div><div class="dir-title">BEARISH — GO SHORT</div><div class="dir-sub">Short sell near $${entry.toFixed(2)}. Cover at $${tp1.toFixed(2)} (TP1) and $${tp2.toFixed(2)} (TP2). Stop if price climbs above $${sl.toFixed(2)}.</div></div></div>`
-    :`<div class="dir-banner long d1"><div class="dir-icon">⬆</div><div><div class="dir-title">BULLISH — GO LONG</div><div class="dir-sub">Buy near $${entry.toFixed(2)}. Targets: $${tp1.toFixed(2)} then $${tp2.toFixed(2)}. Stop below $${sl.toFixed(2)}.</div></div></div>`):'';
+    ?`<div class="dir-banner short d1"><div class="dir-mark"></div><div><div class="dir-title">Directional bias — Short</div><div class="dir-sub">Entry near $${entry.toFixed(2)}. Targets $${tp1.toFixed(2)} / $${tp2.toFixed(2)}. Invalidation above $${sl.toFixed(2)}.</div></div></div>`
+    :`<div class="dir-banner long d1"><div class="dir-mark"></div><div><div class="dir-title">Directional bias — Long</div><div class="dir-sub">Entry near $${entry.toFixed(2)}. Targets $${tp1.toFixed(2)} / $${tp2.toFixed(2)}. Invalidation below $${sl.toFixed(2)}.</div></div></div>`):'';
 
   const shortBox=isShort?`<div class="short-box"><strong>How to short ${ticker}:</strong><br>• Short sell in margin account at $${entry.toFixed(2)}, buy back at target<br>• Buy put options expiring ${currentDTE==='0dte'?'today':currentDTE==='1w'?'this week':currentDTE==='1m'?'next month':currentDTE}<br>• Bear put spread: buy $${entry.toFixed(2)} put, sell $${tp2.toFixed(2)} put (reduces cost)<br>• Stop: close short if price breaks above $${sl.toFixed(2)}</div>`:'';
 
@@ -2992,9 +2993,9 @@ function renderDash(ticker,q,a){
           <div id="proChartWrap" class="pro-chart-wrap"><div id="tvChart"></div></div>
           <div id="aiChartWrap" style="display:none">
           <div class="chart-controls">
-            <button class="ct-btn active" onclick="setChartMode('candle',this)">🕯 Candle</button>
-            <button class="ct-btn" onclick="setChartMode('line',this)">📈 Line</button>
-            <button class="ct-btn" onclick="setChartMode('volume',this)">📊 Volume</button>
+            <button class="ct-btn active" onclick="setChartMode('candle',this)">Candles</button>
+            <button class="ct-btn" onclick="setChartMode('line',this)">Line</button>
+            <button class="ct-btn" onclick="setChartMode('volume',this)">Volume</button>
             <div class="chart-sep"></div>
             <button class="cr-btn${chartRange==='1d'?' active':''}" onclick="setChartRange('1d',this)">1D · 1m</button>
             <button class="cr-btn${chartRange==='1m'?' active':''}" onclick="setChartRange('1m',this)">1M</button>
@@ -3004,14 +3005,14 @@ function renderDash(ticker,q,a){
             <div class="chart-sep"></div>
             <button class="zoom-btn" onclick="zoomChart(-1)" title="Zoom in">＋</button>
             <button class="zoom-btn" onclick="zoomChart(1)" title="Zoom out">－</button>
-            <button class="press-toggle${showPressure?' active':''}" onclick="togglePressure(this)">${showPressure?'⦿ Pressure Zones: ON':'○ Pressure Zones: OFF'}</button>
+            <button class="press-toggle${showPressure?' active':''}" onclick="togglePressure(this)">${showPressure?'Pressure zones · on':'Pressure zones · off'}</button>
             <span class="chart-hint">Drag to pan · scroll to zoom</span>
           </div>
           <div class="chart-legend">${legendHtml}</div>
           <div class="chart-outer">
             <canvas id="mainCanvas" style="display:block;width:100%;height:310px"></canvas>
           </div>
-          <div class="chart-hint2">🟢 green = buy pressure · 🔴 red = sell pressure · marker size = predicted impact · scroll/pinch/± to zoom · <span class="creset" onclick="resetChart()">Reset</span></div>
+          <div class="chart-hint2">Green marks buy pressure, red marks sell pressure; marker size reflects predicted impact. Scroll or pinch to zoom · <span class="creset" onclick="resetChart()">Reset</span></div>
           </div>
         </div>
         <div class="fb-box d4" id="fbBox" style="order:4">
@@ -3022,9 +3023,9 @@ function renderDash(ticker,q,a){
             <button class="fb-btn" onclick="fbSel(this,'ina','sel-ina')">✗ Inaccurate</button>
           </div>
           <div class="fb-out-row">
-            <button class="fb-ob" onclick="fbOut(this,'profit')">💰 Profit</button>
-            <button class="fb-ob" onclick="fbOut(this,'loss')">📉 Loss</button>
-            <button class="fb-ob" onclick="fbOut(this,'open')">⏳ Still Open</button>
+            <button class="fb-ob" onclick="fbOut(this,'profit')">Profit</button>
+            <button class="fb-ob" onclick="fbOut(this,'loss')">Loss</button>
+            <button class="fb-ob" onclick="fbOut(this,'open')">Still open</button>
           </div>
           <textarea class="fb-ta" id="fbNote" placeholder="Optional notes on what you observed…"></textarea>
           <button class="fb-submit" onclick="submitFB('${ticker}','${a.sentiment}','${currentDTE}',${a.score})">Submit & Update Model</button>
