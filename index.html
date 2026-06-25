@@ -9,23 +9,22 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0B0F14;--bg2:#0d1320;--s1:#111722;--s2:#151d2b;--s3:#1c2636;--s4:#243044;
-  --b1:rgba(255,255,255,0.06);--b2:rgba(255,255,255,0.10);--b3:rgba(255,255,255,0.16);
-  --tx:#e8edf4;--mu:#8a97a8;--fa:#566173;
-  --gr:#22c55e;--gd:#062518;--gt:#4ade80;
-  --rd:#f43f5e;--rdd:#2a0a13;--rt:#fb7185;
+  --bg:#050505;--bg2:#08080a;--s1:#0c0c0e;--s2:#121214;--s3:#191a1d;--s4:#222328;
+  --b1:rgba(255,255,255,0.05);--b2:rgba(255,255,255,0.09);--b3:rgba(255,255,255,0.14);
+  --tx:#f3f4f6;--mu:#888c95;--fa:#52545c;
+  --gr:#26c281;--gd:#08251a;--gt:#3ee098;
+  --rd:#f0445a;--rdd:#2a0a12;--rt:#fb7185;
   --am:#f0a500;--ad:#2d1f00;--at:#ffc94d;
-  --bl:#3b82f6;--bd:#0a1830;--bt:#93c5fd;
-  --pu:#8b5cf6;--pd:#160b30;--pt:#c4b5fd;
-  /* electric blue = primary accent; cyan + purple are gradient partners.
-     green & red are reserved for up/down only. */
-  --ac:#3b82f6;--cy:#22d3ee;--pp:#8b5cf6;--act:#93c5fd;--acd:#0c1a30;
-  --grad:linear-gradient(135deg,#3b82f6 0%,#22d3ee 52%,#8b5cf6 108%);
-  --grad2:linear-gradient(135deg,#22d3ee,#3b82f6);
-  --glass:rgba(255,255,255,0.035);
-  --glow:0 0 0 1px rgba(59,130,246,.16),0 10px 44px rgba(59,130,246,.10);
-  --shadow:0 14px 44px rgba(0,0,0,.46);
-  --radius:18px;--rsm:13px;--rxs:8px;
+  --bl:#2f81f7;--bd:#091628;--bt:#7db3ff;
+  --pu:#2f81f7;--pd:#091628;--pt:#7db3ff;
+  /* ONE accent (blue). green & red are reserved for up/down only.
+     Color is used sparingly, to direct attention. */
+  --ac:#2f81f7;--cy:#2f81f7;--pp:#2f81f7;--act:#7db3ff;--acd:#0a1626;
+  --grad:#2f81f7;--grad2:#2f81f7;
+  --glass:rgba(255,255,255,0.022);
+  --glow:0 0 0 1px rgba(47,129,247,.14);
+  --shadow:0 18px 44px rgba(0,0,0,.5);
+  --radius:16px;--rsm:11px;--rxs:7px;
   --mono:'SF Mono','Fira Code','Cascadia Code',ui-monospace,monospace;
   --nav-h:64px;
 }
@@ -33,8 +32,8 @@ html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;line-height:1.5}
 /* Subtle grid, masked to fade toward the edges. */
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 35%,transparent 82%);mask-image:radial-gradient(ellipse at 50% 0%,#000 35%,transparent 82%)}
-/* Ambient blue / purple / cyan glows. */
-body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(58% 48% at 12% -2%,rgba(59,130,246,0.12),transparent 60%),radial-gradient(50% 50% at 102% 26%,rgba(139,92,246,0.10),transparent 62%),radial-gradient(42% 42% at 84% 104%,rgba(34,211,238,0.07),transparent 60%)}
+/* Single, very faint top glow — no oversized blobs. */
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(70% 40% at 50% -8%,rgba(47,129,247,0.06),transparent 60%)}
 .particles{display:none}
 .particle{display:none}
 
@@ -559,12 +558,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
    LANDING — premium fintech composition (lx- namespace)
    ═══════════════════════════════════════════════════════════════ */
 :root{
-  --ink:#eff3fb;--ink2:#aeb9ca;--ink3:#6f7a8c;
-  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.13);
-  --em:#34d399;
-  --g-text:linear-gradient(100deg,#9ec5ff 0%,#67e8f9 48%,#c4b5fd 100%);
-  --g-fill:linear-gradient(120deg,#3b82f6,#22d3ee,#8b5cf6);
-  --halo:0 40px 90px -28px rgba(59,130,246,.55);
+  --ink:#f3f4f6;--ink2:#a6abb5;--ink3:#6a6d76;
+  --line:rgba(255,255,255,.06);--line2:rgba(255,255,255,.11);
+  --em:#26c281;
+  --g-text:#2f81f7;--g-fill:#2f81f7;
+  --halo:0 30px 70px -34px rgba(0,0,0,.72);
 }
 #landing{position:fixed;inset:0;z-index:1000;overflow-y:auto;overflow-x:hidden;background:var(--bg);color:var(--ink);scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
 #landing *{box-sizing:border-box}
@@ -572,7 +570,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 @media(max-width:680px){.lx{padding:0 22px}}
 .lx-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .lx-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%);mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%)}
-.lx-orb{position:absolute;border-radius:50%;filter:blur(80px);will-change:transform;opacity:.3}
+.lx-orb{display:none}
 .lx-orb.a{width:640px;height:640px;background:radial-gradient(circle,rgba(59,130,246,.55),transparent 64%);top:-200px;left:-140px;animation:orbA 24s ease-in-out infinite}
 .lx-orb.b{width:560px;height:560px;background:radial-gradient(circle,rgba(139,92,246,.45),transparent 64%);top:4%;right:-180px;animation:orbB 28s ease-in-out infinite}
 .lx-orb.c{width:520px;height:520px;background:radial-gradient(circle,rgba(34,211,238,.3),transparent 64%);top:62%;left:34%;animation:orbC 32s ease-in-out infinite}
@@ -589,8 +587,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lx-eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--bt)}
 .lx-eyebrow::before{content:'';width:22px;height:1px;background:linear-gradient(90deg,var(--cy),transparent)}
 .lx-btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;font-weight:700;font-size:15px;padding:14px 26px;border-radius:14px;text-decoration:none;transition:transform .2s cubic-bezier(.2,.6,.25,1),box-shadow .2s;font-family:inherit}
-.lx-btn.primary{color:#04101f;background:linear-gradient(120deg,#7cc4ff,#67e8f9,#b6a6ff);background-size:200% 100%;box-shadow:0 10px 30px -6px rgba(59,130,246,.6),inset 0 1px 0 rgba(255,255,255,.5)}
-.lx-btn.primary:hover{transform:translateY(-2px);background-position:100% 0;box-shadow:0 18px 44px -8px rgba(59,130,246,.75),inset 0 1px 0 rgba(255,255,255,.5)}
+.lx-btn.primary{color:#fff;background:var(--ac);box-shadow:0 8px 22px -8px rgba(47,129,247,.55)}
+.lx-btn.primary:hover{transform:translateY(-1px);background:#3f8ef9;box-shadow:0 14px 30px -10px rgba(47,129,247,.65)}
 .lx-btn.ghost{color:var(--ink);background:rgba(255,255,255,.04);border:1px solid var(--line2);backdrop-filter:blur(10px)}
 .lx-btn.ghost:hover{transform:translateY(-2px);border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.1)}
 .lx-btn.lg{font-size:16px;padding:17px 34px}
@@ -2696,38 +2694,52 @@ function drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral){
       ctx.fillRect(x-barW/2,H-PAD.b-bH,barW,bH);
     });
   }
-  // Support / resistance structure (drawn under the trade levels)
+  // ── TRADE SETUP overlay: risk/reward zones, S/R, readable level chips ──
   if(chartMode!=='volume'){
+    const xL=PAD.l,xR=W-PAD.r;
+    const C={en:'59,130,246',up:'34,197,94',dn:'244,63,94'};
+    // Faint risk (entry→stop) and reward (entry→TP2) zones
+    if(!isNeutral&&isFinite(entry)){
+      const yE=toY(entry),ySL=toY(sl),yT=toY(tp2);
+      ctx.fillStyle=`rgba(${C.dn},0.05)`;ctx.fillRect(xL,Math.min(yE,ySL),xR-xL,Math.abs(ySL-yE));
+      ctx.fillStyle=`rgba(${C.up},0.05)`;ctx.fillRect(xL,Math.min(yE,yT),xR-xL,Math.abs(yT-yE));
+    }
+    // Support / resistance — subtle, labeled on the left
     try{
       const sr=labLevels(data);
       [{p:sr.resis,t:'Resistance'},{p:sr.support,t:'Support'}].forEach(s=>{
         if(!isFinite(s.p)||s.p<lo||s.p>hi)return;
         const y=toY(s.p);
-        ctx.strokeStyle='rgba(255,255,255,0.16)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
-        ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();ctx.setLineDash([]);
-        ctx.fillStyle='rgba(174,185,202,0.72)';ctx.font=`9px 'SF Mono','Fira Code',monospace`;ctx.textAlign='left';
-        ctx.fillText(s.t+' $'+s.p.toFixed(2),PAD.l+4,y-4);
+        ctx.strokeStyle='rgba(255,255,255,0.13)';ctx.lineWidth=1;ctx.setLineDash([2,5]);
+        ctx.beginPath();ctx.moveTo(xL,y);ctx.lineTo(xR,y);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='rgba(174,185,202,0.6)';ctx.font="10px 'SF Mono','Fira Code',monospace";ctx.textAlign='left';
+        ctx.fillText(s.t,xL+5,y-5);
       });
     }catch(e){}
-  }
-  // Level lines
-  if(!isNeutral&&chartMode!=='volume'){
-    const lvls=[
-      {p:entry,c:'rgba(77,166,255,0.75)',lbl:'Entry $'+entry.toFixed(2)},
-      {p:sl,c:isShort?'rgba(0,217,126,0.75)':'rgba(255,77,77,0.75)',lbl:(isShort?'Cover':'Stop')+' $'+sl.toFixed(2)},
-      {p:tp1,c:isShort?'rgba(255,77,77,0.75)':'rgba(0,217,126,0.75)',lbl:'TP1 $'+tp1.toFixed(2)},
-      {p:tp2,c:isShort?'rgba(255,140,140,0.6)':'rgba(77,255,175,0.6)',lbl:'TP2 $'+tp2.toFixed(2)},
-    ];
-    lvls.forEach(lv=>{
-      if(lv.p<lo||lv.p>hi)return;
-      const y=toY(lv.p);
-      ctx.strokeStyle=lv.c;ctx.lineWidth=1;ctx.setLineDash([6,4]);
-      ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle=lv.c;ctx.font=`10px 'SF Mono','Fira Code',monospace`;ctx.textAlign='left';
-      ctx.fillText(lv.lbl,W-PAD.r+5,y+3);
-    });
-    ctx.setLineDash([]);
+    // Entry / stop / targets — dashed lines + dodged price chips on the right
+    if(!isNeutral&&isFinite(entry)){
+      const lvls=[
+        {p:entry,rgb:C.en,tag:'ENTRY'},
+        {p:sl,rgb:isShort?C.up:C.dn,tag:'STOP'},
+        {p:tp1,rgb:isShort?C.dn:C.up,tag:'TP1'},
+        {p:tp2,rgb:isShort?C.dn:C.up,tag:'TP2'},
+      ].filter(l=>isFinite(l.p)&&l.p>=lo&&l.p<=hi).map(l=>({...l,y:toY(l.p)}));
+      lvls.forEach(l=>{
+        ctx.strokeStyle=`rgba(${l.rgb},0.85)`;ctx.lineWidth=1.4;ctx.setLineDash([5,4]);
+        ctx.beginPath();ctx.moveTo(xL,l.y);ctx.lineTo(xR,l.y);ctx.stroke();ctx.setLineDash([]);
+      });
+      const order=[...lvls].sort((a,b)=>a.y-b.y);
+      order.forEach((l,i)=>{l.cy=l.y;if(i>0&&l.cy-order[i-1].cy<16)l.cy=order[i-1].cy+16;});
+      order.forEach(l=>{l.cy=Math.max(PAD.t+9,Math.min(H-PAD.b-9,l.cy));});
+      ctx.font="bold 10px 'SF Mono','Fira Code',monospace";ctx.textAlign='right';
+      order.forEach(l=>{
+        const txt=`${l.tag} ${l.p.toFixed(2)}`;
+        const w=ctx.measureText(txt).width+14;
+        if(Math.abs(l.cy-l.y)>1){ctx.strokeStyle=`rgba(${l.rgb},0.5)`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xR-1,l.y);ctx.lineTo(xR-1,l.cy);ctx.stroke();}
+        ctx.fillStyle=`rgba(${l.rgb},0.95)`;ctx.fillRect(xR-w,l.cy-8,w,16);
+        ctx.fillStyle='#050505';ctx.fillText(txt,xR-7,l.cy+3.5);
+      });
+    }
   }
   // X date labels
   ctx.fillStyle='#38384e';ctx.font=`10px 'SF Mono','Fira Code',monospace`;ctx.textAlign='center';
