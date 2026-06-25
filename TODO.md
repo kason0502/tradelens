@@ -1,14 +1,16 @@
 # TradeLens Pro — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-25 (session 2)
+> Last updated: 2026-06-25 (session 3)
 
 ## Now / next (highest value)
-- [ ] **Kill level redundancy on the dashboard.** Entry/stop/TP still appear in the direction banner *and* the trade-setup card *and* the chart legend. Pick ONE source of truth (the setup card) and trim the rest.
-- [ ] **Polish the inner tabs** to match the landing/shell. Screener, Backtest, AI Lab, Pro Traders, Feedback still use denser legacy styling. Remaining emoji: strategy icons (📈🚀📉🪃↔️) in LAB_STRATEGIES/PLAYBOOK; some tab section headers use inline styles.
-- [ ] **Consolidate the metrics strip vs the Indicators card** — RSI / 20-day avg / range position / 52w hi-lo are shown in both.
-- [ ] **Live news** — News tab is currently a static sample feed; wire a real newswire (needs a provider API key). Make this clear stays until then.
-- [ ] **AI auto-learning** — consider auto-running a few self-tests on first load (or a background trickle) so confidence builds without the user manually training. Persistence is done; auto-train is not.
+- [ ] **Bring the rest of the landing to black-minimal.** Hero + design tokens are done, but the other sections still use the older gradient/glow styling: feature rows (`.lx-feat` gradient icon tiles), metrics band (`.lx-band` blue radial), steps (`.lx-step` gradient numerals), pricing (`.lx-plan.hot` blue glow), and the final CTA (`.lx-final` big gradient slab). Flatten to dark surfaces + thin borders + single accent so every section matches the new hero.
+- [ ] **Deploy the shared-learning backend** — code is ready (`api/learn.js`); follow `DEPLOY_BACKEND.md` (push to GitHub → Vercel → add KV). Until then it's local-only.
+- [ ] **Kill level redundancy on the dashboard.** Entry/stop/TP still appear in the direction banner *and* the trade-setup card *and* the chart chips. Pick ONE source of truth.
+- [ ] **Polish the inner tabs** to black-minimal (Screener, Backtest, AI Lab, Pro Traders, Feedback still use denser legacy styling; strategy icons 📈🚀📉🪃↔️ remain in LAB_STRATEGIES/PLAYBOOK).
+- [ ] **Consolidate the metrics strip vs the Indicators card** (duplicated values).
+- [ ] **Live news** — News tab is a static sample feed; wire a real newswire (needs a provider API key).
+- [ ] **AI auto-learning** — optional background trickle of self-tests so confidence builds without manual training (persistence + sharing are done; auto-train is not).
 
 ## Soon
 - [ ] **Nav consolidation:** 9 top tabs → ~4 primary (Terminal · Screener · Backtest · AI Lab) + a "More" menu and a utility cluster (Account/Alerts/AI key). Fold Pro Traders / AI Chat / Feedback.

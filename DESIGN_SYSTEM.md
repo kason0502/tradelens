@@ -3,31 +3,29 @@
 > Living doc. Update when tokens, components, or visual conventions change.
 > Last updated: 2026-06-25
 
-Aesthetic: **premium fintech / institutional**, dark glass. Charcoal base, electric blue→cyan→purple gradients, frosted glass, soft glows, generous spacing, oversized type on the landing. Calm and trustworthy, not flashy.
+Aesthetic: **Bloomberg/terminal minimal** — pure black, data-first, professional. Mostly black with dark-gray surfaces, white type, ONE accent used sparingly to direct attention. No big gradients, no glowing blobs, no decorative graphics. Huge bold headlines, lots of whitespace, 8px rhythm.
 
 ## Color tokens (CSS vars in `:root`)
 | Token | Value | Use |
 |---|---|---|
-| `--bg` | `#0B0F14` | page background |
-| `--s1..s4` | `#111722 … #243044` | raised surfaces |
-| `--ink / --ink2 / --ink3` | `#eff3fb / #aeb9ca / #6f7a8c` | text / muted / faint |
-| `--ac` | `#3b82f6` | **primary brand/UI accent (electric blue)** |
-| `--cy` | `#22d3ee` | cyan (gradient + icon strokes) |
-| `--pp` | `#8b5cf6` | purple (gradient) |
-| `--act` | `#93c5fd` | light blue text |
+| `--bg` | `#050505` | page background (near-black) |
+| `--s1..s4` | `#0c0c0e … #222328` | dark-gray surfaces |
+| `--ink / --ink2 / --ink3` | `#f3f4f6 / #a6abb5 / #6a6d76` | text / muted / faint |
+| `--ac` | `#2f81f7` | **the single accent (blue)** — use only to direct attention |
+| `--cy` / `--pp` | = `--ac` | collapsed to the single accent (legacy names) |
+| `--act` | `#7db3ff` | lighter accent text |
 | `--gr / --gt` | `#22c55e / #4ade80` | **UP / profit only** |
 | `--rd / --rt` | `#f43f5e / #fb7185` | **DOWN / loss only** |
 | `--em` | `#34d399` | "live"/online status dot |
 | `--line / --line2` | white @ 6% / 13% | hairline borders |
 
 ### Gradients & effects
-- `--grad` / `--g-fill`: `linear-gradient(135deg,#3b82f6,#22d3ee,#8b5cf6)` — primary gradient.
-- `--g-text`: blue→cyan→violet for gradient text (`.lx-grad`, `.grad-text`).
-- `--grad2`: `linear-gradient(135deg,#22d3ee,#3b82f6)`.
-- `--glass`: `rgba(255,255,255,.035)` + `backdrop-filter:blur(16-20px)`.
-- `--glow`, `--shadow`, `--halo`: soft blue glow + deep soft shadows (never harsh).
+- `--grad`, `--grad2`, `--g-fill`, `--g-text` = the **solid accent** now (gradients were removed for the black-minimal direction). `.lx-grad`/`.grad-text` therefore render solid accent text.
+- `--glass`: `rgba(255,255,255,.022)` + subtle `backdrop-filter` — glass only where it adds depth.
+- `--glow`/`--halo`: reduced to near-flat soft shadows (no colored glow blobs). `--shadow`: deep soft black shadow.
+- Background: faint masked grid + ONE very subtle top glow (`body::after`). The `.lx-orb` glowing blobs are `display:none`.
 
-### **Rule:** green/red mean direction (up/down, profit/loss) ONLY. Everything brand/interactive is blue/cyan/purple. Don't tint UI chrome green.
+### **Rules:** ONE accent only — use it sparingly to direct attention. green/red mean direction (up/down, P&L) ONLY. No big gradients, no glowing blobs, no decorative/AI/stock graphics. Realism (terminal panels, real data shapes) over decoration.
 
 ## Spacing & shape
 - Radius: `--radius:18px`, `--rsm:13px`, `--rxs:8px` (cards 16–20px). Landing media/panels 20px.

@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-25 (session 3)
+- **Cross-user shared learning** — `api/learn.js` (Vercel serverless + KV/Upstash) pools the AI's self-test learning across ALL users. Client syncs on load (`syncSharedMemory`), posts each test (`postShared`), merges pooled model into `AI_MEMORY` so dashboard confidence reflects everyone; falls back to localStorage when the backend isn't deployed (`SHARED_OK`). Setup in `DEPLOY_BACKEND.md`.
+- **Readable level chart** — rewrote the AI Levels overlay: faint risk/reward zones, labeled support/resistance, and dodged color-coded price chips (entry/stop/TP1/TP2) so the setup reads instantly.
+- **Black-minimal Bloomberg design system** — pure black (`#050505`), dark-gray surfaces, white type, ONE accent (`#2f81f7`). Collapsed the blue/cyan/purple gradients to the single accent, removed glowing orbs / ambient blobs (one faint top glow), solid buttons, tighter radii.
+- **Realistic terminal hero** — replaced the tilted glass panel + floating cards with a data-first bento: candlestick chart (with entry/stop/target lines), watchlist, volume profile, AI probability, setup score, risk/reward, market sentiment.
+
 ## 2026-06-25 (session 2)
 - **News tab** — added a `News` nav tab + glass news grid (macro + sector headlines with plain-English impact), labeled as an illustrative sample feed; tickers are clickable → load on dashboard. (`renderNewsTab`, `newsOpen`)
 - **Draw the setup on the chart** — the annotated **AI Levels** canvas ("Setup & Levels") is now the **default** chart view (TradingView = toggle), and `drawCanvasChart` draws labeled **support/resistance** lines under the entry/stop/TP. (Note: can't draw on the TradingView free embed — sandboxed iframe.)

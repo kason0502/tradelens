@@ -58,6 +58,13 @@ Everything lives in **`index.html`** (~3,500 lines): one `<style>` block, the la
 ## Dashboard render
 - `renderDash(ticker,q,a)` builds the whole terminal. Reading order (via flex `order` on the left column): **trade plan (setup) → chart → "Why" (analysis/signals/AI pick) → feedback**; right column = indicators + strategies. Globals: `lastData`, `lastCanvasData`, `currentDTE`, `DTE` config.
 
+## Shared (cross-user) AI learning — `api/learn.js`
+- Vercel serverless function backed by Vercel KV/Upstash (REST via `fetch`, no npm deps). `GET` returns pooled `{strats,trials,wins,log}`; `POST {key,win,pnl,tk,name,dir}` merges one self-test. Key `tlpro:shared_memory_v1`. Returns 503 if KV env vars absent.
+- Client (`index.html`): `syncSharedMemory()` (on load) + `postShared()` (per self-test) + `mergeShared()` fold the pooled model into `AI_MEMORY` so `stratConf`/`classifySetup` reflect everyone. `SHARED_OK` flag; silent fallback to localStorage when the backend isn't deployed. See `DEPLOY_BACKEND.md`.
+
+## Landing — hero is a terminal bento (`.lx-bento` / `.tp` panels)
+- The hero is a data-first bento grid (no decorative graphics): candlestick chart (inline SVG with entry/stop/target lines), watchlist, volume profile, AI probability, setup score, risk/reward, market sentiment. The old `.lx-stage`/`.lx-panel`/`.lx-float` tilted-panel hero is removed (CSS may linger, unused).
+
 ## Landing motion (lx-)
 - `lxObserve()` — IntersectionObserver (root:null) adds `.in` to `.lx-reveal` on scroll; old-browser + safety-net fallback guarantees visibility.
 - `lxMaybeCount()` — count-up numbers (`.lx-count[data-to]`). Nav solidifies on scroll; hero panel parallax on pointermove. `lpScroll(id)` smooth-scrolls.
