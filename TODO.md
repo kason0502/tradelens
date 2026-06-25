@@ -4,6 +4,7 @@
 > Last updated: 2026-06-25 (session 3)
 
 ## Now / next (highest value)
+- [ ] **Apply the new workspace look to the inner tabs.** The main Dashboard view was rebuilt as the `.wk` terminal workspace; Screener / Backtest / AI Lab / Pro Traders / News / Feedback still use the older `.card` styling and don't match the new panel system yet.
 - [ ] **Bring the rest of the landing to black-minimal.** Hero + design tokens are done, but the other sections still use the older gradient/glow styling: feature rows (`.lx-feat` gradient icon tiles), metrics band (`.lx-band` blue radial), steps (`.lx-step` gradient numerals), pricing (`.lx-plan.hot` blue glow), and the final CTA (`.lx-final` big gradient slab). Flatten to dark surfaces + thin borders + single accent so every section matches the new hero.
 - [ ] **Deploy the shared-learning backend** — code is ready (`api/learn.js`); follow `DEPLOY_BACKEND.md` (push to GitHub → Vercel → add KV). Until then it's local-only.
 - [ ] **Kill level redundancy on the dashboard.** Entry/stop/TP still appear in the direction banner *and* the trade-setup card *and* the chart chips. Pick ONE source of truth.

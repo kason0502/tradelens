@@ -3,6 +3,9 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-25 (session 4)
+- **Rebuilt the dashboard (post-launch) from scratch** as an asymmetric trading-terminal workspace (`.wk` namespace in `renderDash`). 12-col grid: command header → dominant chart (spans 2 rows) + elevated Trade Plan + AI Conviction → metric tiles → Why / Indicators / Strategies / Feedback. Premium dark panels, thin borders, depth shadows, accent-ringed plan, hover lift. All functional IDs preserved.
+
 ## 2026-06-25 (session 3)
 - **Cross-user shared learning** — `api/learn.js` (Vercel serverless + KV/Upstash) pools the AI's self-test learning across ALL users. Client syncs on load (`syncSharedMemory`), posts each test (`postShared`), merges pooled model into `AI_MEMORY` so dashboard confidence reflects everyone; falls back to localStorage when the backend isn't deployed (`SHARED_OK`). Setup in `DEPLOY_BACKEND.md`.
 - **Readable level chart** — rewrote the AI Levels overlay: faint risk/reward zones, labeled support/resistance, and dodged color-coded price chips (entry/stop/TP1/TP2) so the setup reads instantly.
