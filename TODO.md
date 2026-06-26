@@ -12,6 +12,10 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Done (session 16e — real strategy charts + verdict removed)
+- [x] **Strategy charts use real data** — `loadRealStrategyChart`/`annotatedChartHTML` draw the setup on a ticker's actual chart with labeled support/resistance/20-MA/entry/stop/targets + swing markers + thought process; ticker editable; schematic kept as fallback.
+- [x] **Removed "Would AI take this trade?"** verdict (a bearish read is a valid short).
+
 ## Done (session 16d — AI coach / human-mentor read)
 - [x] **Mentor narration + "Would AI take it?" verdict + Bull-vs-Bear + conviction checklist** in the dashboard AI-read panel (`coachRead`/`coachReadHTML`), all from the real engine.
 - [x] **Condition-aware indicator tooltips** on the Key-metrics tiles.

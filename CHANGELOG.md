@@ -3,6 +3,10 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16e) — strategy charts on REAL data + dropped the trade verdict
+- **Strategy tab now draws each setup on a ticker's real chart.** `loadRealStrategyChart(ticker,key,elId)` fetches real daily candles (`fetchQuote`), derives structure (`labLevels`: support/resistance/20-MA/swing pivots) + the strategy's entry/stop/targets (`aiStrategyLevels`), and `annotatedChartHTML` draws the real price line + dashed 20-day average with **labeled level lines** (Resistance/Support/Entry/Stop/Target 1·2) and on-chart **swing-high/low markers**, followed by the strategy's numbered **thought process** (real prices). Today's focus auto-loads it for SPY; weekday cards load it on demand; **ticker is editable**. Falls back to the schematic (`strategyChartBlock`) only if data fails.
+- **Removed "Would AI take this trade?"** from the AI-read panel — a bearish read is a valid short, so a single take/skip verdict was misleading. Kept the mentor narration, Bull-vs-Bear and conviction checklist.
+
 ## 2026-06-26 (session 16d) — AI coach: talks through the chart like a mentor
 - **The AI-read panel now reads like a human coach** (`coachRead`/`coachReadHTML`, rebuilt `dashConv`). All from the real engine — no fabricated news/flow:
   - **Mentor narration** — a timestamped notebook of short plain-English sentences (trend, location in range, RSI, MACD, MA structure, and a concrete "I would / wouldn't…" action line).

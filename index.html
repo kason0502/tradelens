@@ -4134,7 +4134,6 @@ async function renderDash(text){
         </div>
         <div class="mood-beast ${sentClass}">${isNeutral?'':(isShort?BEAR_SVG:BULL_SVG)}</div>
       </div>
-      ${CR.verdict}
       <div class="ins-head">Coach's read <span style="font-weight:500;color:var(--ink3);font-family:var(--mono);font-size:11px">${CR.now}</span></div>
       <div style="margin-bottom:15px">${CR.notebook}</div>
       ${CR.debate}
@@ -4589,12 +4588,13 @@ function renderStrategy(){
       <div style="display:grid;gap:7px;margin-bottom:18px">
         ${d.dos.map(t=>`<div style="display:flex;gap:9px;font-size:12.5px;color:var(--ink2);line-height:1.5"><span style="color:var(--act);flex-shrink:0">▸</span><span>${t}</span></div>`).join('')}
       </div>
-      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">How this setup looks on a chart</div>
-      ${strategyChartBlock(STRAT_DKEY[dow])}
+      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">This setup on a real chart — support, resistance, entry, stop &amp; targets</div>
+      <div id="stratRealChart"><div class="mv-empty" style="padding:18px"><span class="ai-spin"></span> Loading a real chart…</div></div>
       <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:18px 0 10px">Live candidates for a ${STRAT_TYPE_LABEL[d.type]} setup</div>
       <div id="stratTodayCand"><div class="mv-empty" style="padding:16px"><span class="ai-spin"></span> Scanning live market…</div></div>
     </div>`;
     loadStratCandidates(d.type,'stratTodayCand');
+    loadRealStrategyChart('SPY',STRAT_DKEY[dow],'stratRealChart');
   }
   // ── EVENT CALENDAR ──
   const eEl=document.getElementById('stratEvents');
@@ -4627,8 +4627,11 @@ function renderStrategy(){
         <div class="pb-body"><div class="pb-inner">
           <div style="font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:12px">${d.theme}</div>
           <div style="display:grid;gap:6px;margin-bottom:14px">${d.dos.map(t=>`<div style="display:flex;gap:9px;font-size:12px;color:var(--ink2);line-height:1.5"><span style="color:var(--act)">▸</span><span>${t}</span></div>`).join('')}</div>
-          <div style="margin-bottom:14px">${strategyChartBlock(STRAT_DKEY[i])}</div>
-          <button class="mv-tgl" onclick="loadStratCandidates('${d.type}','sdc${i}')">Find live ${STRAT_TYPE_LABEL[d.type]} candidates</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+            <button class="mv-tgl" onclick="loadRealStrategyChart('SPY','${STRAT_DKEY[i]}','sdrc${i}')">Show this setup on a real chart</button>
+            <button class="mv-tgl" onclick="loadStratCandidates('${d.type}','sdc${i}')">Find live ${STRAT_TYPE_LABEL[d.type]} candidates</button>
+          </div>
+          <div id="sdrc${i}" style="margin-bottom:12px"></div>
           <div id="sdc${i}" style="margin-top:12px"></div>
         </div></div>
       </div>`;}).join('')}
@@ -4661,6 +4664,78 @@ async function loadStratCandidates(type,elId){
         <span style="font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:7px;background:${bB};color:${bC};white-space:nowrap">${verdict}</span>
       </button>`;}).join('')+`<div style="font-size:10.5px;color:var(--ink3);margin-top:2px">Real-time structure scan across the most liquid names · click any to open it on the dashboard.</div>`;
   }catch(e){window.__userFetch=0;el.innerHTML=`<div class="mv-empty" style="padding:16px">Couldn't load live candidates right now — the data feed may be busy.</div>`;}
+}
+// ── REAL annotated strategy chart: the setup on a ticker's actual data ──
+// Fetches real daily candles, derives structure (support/resistance/20-MA/
+// swing pivots) + the strategy's entry/stop/targets, and draws them on the
+// real price line with labels + the strategy's thought process.
+async function loadRealStrategyChart(ticker,key,elId){
+  ticker=(ticker||'SPY').toUpperCase().replace(/[^A-Z]/g,'')||'SPY';
+  const el=document.getElementById(elId); if(!el)return;
+  el.innerHTML=`<div class="mv-empty" style="padding:18px"><span class="ai-spin"></span> Loading ${ticker}'s real chart…</div>`;
+  window.__userFetch=Date.now();
+  try{
+    const q=await fetchQuote(ticker);
+    window.__userFetch=0;
+    let full=(q.h1y&&q.h1y.length>60)?q.h1y:(q.h6m||q.h3m||[]);
+    full=full.map(c=>({o:+(c.o!=null?c.o:c.c),h:+(c.h!=null?c.h:c.c),l:+(c.l!=null?c.l:c.c),c:+c.c})).filter(c=>isFinite(c.c));
+    if(full.length<40){el.innerHTML=`<div class="mv-empty" style="padding:18px">Not enough chart data for ${ticker} right now — try another symbol.</div>`;return;}
+    const candles=full.slice(-120);
+    const lv=labLevels(candles);
+    let lvls=null;try{lvls=aiStrategyLevels(key,candles);}catch(e){lvls=null;}
+    el.innerHTML=annotatedChartHTML(ticker,key,candles,lv,lvls,elId);
+  }catch(e){window.__userFetch=0;el.innerHTML=`<div class="mv-empty" style="padding:16px">Couldn't load ${ticker} — the data feed may be busy. Showing the schematic instead.</div>`+strategyChartBlock(key);}
+}
+function annotatedChartHTML(ticker,key,candles,lv,lvls,elId){
+  const mono='ui-monospace,Menlo,Consolas,monospace';
+  const closes=candles.map(c=>+c.c), n=closes.length, last=closes[n-1];
+  const levels=[{v:lv.resis,col:'#f0a500',lab:'Resistance',dash:'4 3'},{v:lv.support,col:'#22c55e',lab:'Support',dash:'4 3'}];
+  if(lvls&&isFinite(lvls.entry)){
+    levels.push({v:lvls.entry,col:'#2f81f7',lab:'Entry',dash:'0'});
+    if(isFinite(lvls.sl))levels.push({v:lvls.sl,col:'#f43f5e',lab:'Stop',dash:'4 3'});
+    if(isFinite(lvls.tp1))levels.push({v:lvls.tp1,col:'#4ade80',lab:'Target 1',dash:'2 3'});
+    if(lvls.tp2&&Math.abs(lvls.tp2-lvls.tp1)>0.01)levels.push({v:lvls.tp2,col:'#4ade80',lab:'Target 2',dash:'2 3'});
+  }
+  const allV=closes.concat(levels.map(l=>l.v).filter(v=>isFinite(v)));
+  let mn=Math.min(...allV),mx=Math.max(...allV);const pad=(mx-mn)*0.06||1;mn-=pad;mx+=pad;
+  const W=760,H=340,padL=14,padR=132,padT=16,padB=30,pw=W-padL-padR,ph=H-padT-padB;
+  const X=i=>padL+(n<=1?0:i/(n-1)*pw), Y=v=>padT+(1-(v-mn)/((mx-mn)||1))*ph;
+  const pline=closes.map((c,i)=>`${X(i).toFixed(1)},${Y(c).toFixed(1)}`).join(' ');
+  const sma=[];for(let i=0;i<n;i++){if(i<19){sma.push(null);continue;}let s=0;for(let j=i-19;j<=i;j++)s+=closes[j];sma.push(s/20);}
+  const smaPath=sma.map((v,i)=>v==null?null:`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).filter(Boolean).join(' ');
+  let idxHi=0,idxLo=0;candles.forEach((c,i)=>{if(c.h>candles[idxHi].h)idxHi=i;if(c.l<candles[idxLo].l)idxLo=i;});
+  const lvLines=levels.map(l=>`<line x1="${padL}" y1="${Y(l.v).toFixed(1)}" x2="${W-padR}" y2="${Y(l.v).toFixed(1)}" stroke="${l.col}" stroke-width="1.3"${l.dash!=='0'?` stroke-dasharray="${l.dash}"`:''} opacity=".92"/>`).join('');
+  const sorted=levels.map(l=>({col:l.col,lab:l.lab,v:l.v,y:Y(l.v)})).sort((a,b)=>a.y-b.y);
+  for(let i=1;i<sorted.length;i++){if(sorted[i].y-sorted[i-1].y<13)sorted[i].y=sorted[i-1].y+13;}
+  const lvLabels=sorted.map(l=>`<text x="${W-padR+7}" y="${(l.y+4).toFixed(1)}" fill="${l.col}" font-size="11.5" font-family="${mono}" font-weight="700">${l.lab} $${(+l.v).toFixed(2)}</text>`).join('');
+  const svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="${ticker} ${key} setup on real data">
+    <rect x="${padL}" y="${padT}" width="${pw}" height="${ph}" fill="none" stroke="var(--line)" stroke-width="1"/>
+    ${lvLines}
+    ${smaPath?`<polyline points="${smaPath}" fill="none" stroke="var(--ink3)" stroke-width="1.3" stroke-dasharray="5 3" opacity=".7"/>`:''}
+    <polyline points="${pline}" fill="none" stroke="var(--ink)" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(idxHi).toFixed(1)}" cy="${Y(candles[idxHi].h).toFixed(1)}" r="3.5" fill="#f0a500"/>
+    <text x="${X(idxHi).toFixed(1)}" y="${(Y(candles[idxHi].h)-7).toFixed(1)}" fill="#f0a500" font-size="10.5" font-family="${mono}" text-anchor="middle">swing high</text>
+    <circle cx="${X(idxLo).toFixed(1)}" cy="${Y(candles[idxLo].l).toFixed(1)}" r="3.5" fill="#22c55e"/>
+    <text x="${X(idxLo).toFixed(1)}" y="${(Y(candles[idxLo].l)+15).toFixed(1)}" fill="#22c55e" font-size="10.5" font-family="${mono}" text-anchor="middle">swing low</text>
+    <circle cx="${X(n-1).toFixed(1)}" cy="${Y(last).toFixed(1)}" r="4" fill="#2f81f7" stroke="var(--bg)" stroke-width="1.5"/>
+    ${lvLabels}
+    <text x="${padL+2}" y="${H-10}" fill="var(--ink3)" font-size="10.5" font-family="${mono}">${ticker} · ${n} sessions · last $${last.toFixed(2)}</text>
+    <text x="${W-padR}" y="${H-10}" fill="var(--ink3)" font-size="10.5" font-family="${mono}" text-anchor="end">grey dashed = 20-day avg</text>
+  </svg>`;
+  const steps=((lvls&&lvls.steps)||[]).filter(s=>['zone','line','entry','stop','tp'].includes(s.k));
+  const notes=steps.map((s,i)=>`<div style="display:flex;gap:9px;font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:6px"><span style="color:var(--act);font-weight:800;flex-shrink:0">${i+1}</span><span><b style="color:var(--ink)">${s.label}.</b> ${s.note}</span></div>`).join('');
+  const sname=(LAB_STRATEGIES.find(x=>x.key===key)||{}).name||key;
+  const inId='rcTk_'+elId;
+  return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)">${sname} · real chart</span>
+      <span style="flex:1"></span>
+      <input id="${inId}" value="${ticker}" maxlength="6" spellcheck="false" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')" onkeydown="if(event.key==='Enter')loadRealStrategyChart(this.value,'${key}','${elId}')" style="width:84px;background:var(--s2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--mono);font-weight:700;font-size:12px;padding:6px 9px" aria-label="Ticker"/>
+      <button class="mv-tgl" onclick="loadRealStrategyChart(document.getElementById('${inId}').value,'${key}','${elId}')">Show</button>
+    </div>
+    ${svg}
+    <div style="font-size:11.5px;color:var(--ink3);margin:12px 0 6px;font-weight:700">The thought process, on ${ticker}'s real structure:</div>
+    ${notes||'<div style="font-size:11.5px;color:var(--ink3)">Structure read unavailable for this name right now.</div>'}
+    <div style="font-size:10.5px;color:var(--ink3);margin-top:9px">Real daily data · levels from actual swing highs/lows, the 20-day average and ATR volatility. Educational — not a recommendation to trade ${ticker}.</div>`;
 }
 
 // ── SELF-GRADING TRADE JOURNAL ────────────────────────────────────────
@@ -4876,23 +4951,18 @@ function coachRead(L){
   return{conv,rr,call,callNote,lines,factors:F,bull,bear,winner};
 }
 function coachReadHTML(L){
-  const c=coachRead(L),isShort=L.isShort,isNeutral=L.isNeutral;
+  const c=coachRead(L);
   const now=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  const callCol=c.call==='YES'?'var(--gt)':c.call==='NO'?'var(--rt)':'var(--at)';
   const mk={yes:['var(--gt)','✓'],no:['var(--rt)','✕'],mid:['var(--at)','~']};
   const chk=c.factors.map(f=>{const[col,sym]=mk[f.s];return`<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:${col};font-weight:800;width:13px;text-align:center">${sym}</span><span style="color:var(--ink2);flex:1">${f.k}</span><span style="color:var(--ink3);font-family:var(--mono);font-size:11px">${f.n}</span></div>`;}).join('');
   const notebook=c.lines.map(t=>`<div style="display:flex;gap:9px;font-size:13px;color:var(--ink);line-height:1.55;margin-bottom:7px"><span style="color:var(--ac);flex-shrink:0">·</span><span>${t}</span></div>`).join('');
-  const verdict=`<div style="display:flex;align-items:center;gap:14px;background:var(--s2);border:1px solid ${callCol};border-radius:13px;padding:13px 16px;margin-bottom:15px">
-    <div style="text-align:center;min-width:70px"><div style="font-size:25px;font-weight:900;letter-spacing:-.02em;color:${callCol}">${c.call}</div><div style="font-size:9px;font-weight:800;letter-spacing:.05em;color:var(--ink3);text-transform:uppercase">would AI take it</div></div>
-    <div style="flex:1;font-size:12.5px;color:var(--ink2);line-height:1.5">${c.callNote}<div style="margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink3)">conviction ${c.conv}% · ${isNeutral?'no setup':'R:R 1 : '+c.rr.toFixed(1)}</div></div>
-  </div>`;
   const sideCol=(arr,col,label)=>`<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:800;color:${col};margin-bottom:6px">${label}</div>${arr.slice(0,3).map(t=>`<div style="font-size:11.5px;color:var(--ink2);line-height:1.45;margin-bottom:5px">• ${t}</div>`).join('')}</div>`;
   const wCol=c.winner==='Bull'?'var(--gt)':c.winner==='Bear'?'var(--rt)':'var(--ink2)';
   const debate=`<div style="background:var(--s2);border:1px solid var(--line);border-radius:13px;padding:13px 16px;margin-bottom:15px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)">Bull vs Bear</span><span style="font-size:11px;font-weight:800;color:${wCol}">${c.winner==='Even'?'Too close to call':c.winner+' leads · '+c.conv+'%'}</span></div>
     <div style="display:flex;gap:14px">${sideCol(c.bull,'var(--gt)','▲ Bull case')}<div style="width:1px;background:var(--line);flex-shrink:0"></div>${sideCol(c.bear,'var(--rt)','▼ Bear case')}</div>
   </div>`;
-  return{verdict,notebook,now,chk,debate};
+  return{notebook,now,chk,debate};
 }
 
 // ── LIVE STREAMING ────────────────────────────────────────────────────
