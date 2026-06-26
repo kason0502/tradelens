@@ -3,6 +3,15 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16d) — AI coach: talks through the chart like a mentor
+- **The AI-read panel now reads like a human coach** (`coachRead`/`coachReadHTML`, rebuilt `dashConv`). All from the real engine — no fabricated news/flow:
+  - **Mentor narration** — a timestamped notebook of short plain-English sentences (trend, location in range, RSI, MACD, MA structure, and a concrete "I would / wouldn't…" action line).
+  - **"Would AI take this trade?"** — a big YES / NO / WAIT verdict with the reason, conviction % and R:R (the user's favorite ask).
+  - **Bull vs Bear** — the real bull/bear signals split into two cases with a "who leads" winner.
+  - **Conviction checklist** — Trend / Momentum / Entry location / Reward:risk / Volatility / Big-trend each marked ✓ ~ ✕ with the live value.
+- **Every indicator explains itself** — each Key-metrics tile got a condition-aware `title` tooltip (e.g. RSI 72 "in a strong trend can stay high, so not automatically a sell"); `.dm[title]` shows a help cursor + hover.
+- _Honesty note:_ deliberately did NOT fabricate per-candle "Fed speech / institutional volume / options flow" — those need real data feeds. Per-candle "why", replay mode, and the sector heat-map are scoped as future work.
+
 ## 2026-06-26 (session 16c) — self-grading trade journal
 - **New "Journal" tab** (`#tab-journal`, Research group, active-count pill). Hit **+ Track this setup** on the dashboard Trade Plan and the plan is logged (`trackSetup`→`JOURNAL`, localStorage `tlpro_journal_v1`).
 - **It grades itself from real price.** A background poller (`journalTick`, every 45s when `bgIdle`, ≤8 tickers via `fetchLivePrice`) runs `gradeJournal`: **pending → (entry hit) open → (target) win / (stop) loss**, scored in **R** (multiples of the defined risk). Pending setups expire after 7 days.

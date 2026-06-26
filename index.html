@@ -959,6 +959,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 /* Metrics strip */
 .dash-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:11px;overflow:hidden}
 .dm{background:var(--s1);padding:13px 15px}
+.dm[title]{cursor:help}.dm[title]:hover{background:var(--s2)}
 .dm-k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700;margin-bottom:6px}
 .dm-v{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-.01em}
 .dm-s{font-size:10.5px;color:var(--ink3);margin-top:3px}
@@ -4123,6 +4124,7 @@ async function renderDash(text){
     const watch=isNeutral?`Breaks <b>$${a.hi20}</b> → long · loses <b>$${a.lo20}</b> → short`
       :(isShort?`Short stays valid below <b>$${a.sma20}</b> (20-day avg); invalidated above <b>$${a.hi20}</b>`
               :`Long stays valid above <b>$${a.sma20}</b> (20-day avg); invalidated below <b>$${a.lo20}</b>`);
+    const CR=coachReadHTML({ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick});
     dashEl('dashConv').innerHTML=`
       <div class="dp-h">AI read <span class="tag">${convPct}% conviction</span></div>
       <div class="conv-top">
@@ -4132,10 +4134,13 @@ async function renderDash(text){
         </div>
         <div class="mood-beast ${sentClass}">${isNeutral?'':(isShort?BEAR_SVG:BULL_SVG)}</div>
       </div>
-      <div class="dash-rationale">${rationale}</div>
-      <div class="ins-head">What the AI sees</div>
-      <div class="ins-list">${insights}</div>
-      <div class="ins-foot"><span class="g">${bn} bullish</span> · <span class="r">${brn} bearish</span> signals<br>${watch}</div>`;
+      ${CR.verdict}
+      <div class="ins-head">Coach's read <span style="font-weight:500;color:var(--ink3);font-family:var(--mono);font-size:11px">${CR.now}</span></div>
+      <div style="margin-bottom:15px">${CR.notebook}</div>
+      ${CR.debate}
+      <div class="ins-head">Conviction checklist</div>
+      <div style="display:grid;gap:7px;margin:4px 0 14px">${CR.chk}</div>
+      <div class="ins-foot"><span class="g">${bn} bullish</span> · <span class="r">${brn} bearish</span> signals · ${rationale}<br>${watch}</div>`;
 
     // ── METRICS + INDICATORS ──
     const rangePos=Math.max(0,Math.min(100,((q.price-parseFloat(a.lo20))/((parseFloat(a.hi20)-parseFloat(a.lo20))||1))*100));
@@ -4145,16 +4150,25 @@ async function renderDash(text){
     let atrVal=0; try{atrVal=atr(cand.length>15?cand:q.h3m,14);}catch(e){}
     const atrPct=q.price?atrVal/q.price*100:0;
     const cross=ma50>=ma200, crossGap=ma200?((ma50-ma200)/ma200*100):0;
+    const tRsi=`RSI is ${a.rsi}. ${a.rsi>=70?'Above 70 is normally overbought — but in a strong trend RSI can stay high, so it is not automatically a sell.':a.rsi<=30?'Below 30 is oversold — bounces happen, but only buy with a confirmation candle.':'Between 30 and 70 is the neutral momentum zone.'}`;
+    const tMacd=`MACD histogram is ${md.hist>=0?'positive — short-term momentum has turned up (fast line above the signal).':'negative — momentum has not turned up yet (fast line below the signal).'}`;
+    const tMa=cross?`Golden cross: the 50-day average is above the 200-day — the long-term trend is constructive.`:`Death cross: the 50-day average is below the 200-day — the long-term trend is heavy.`;
+    const tTrend=`Short-term trend: the 20-day average is ${a.s20s60>=0?'above':'below'} the 60-day by ${Math.abs(a.s20s60).toFixed(1)}%. ${a.s20s60>0.2?'That is an uptrend.':a.s20s60<-0.2?'That is a downtrend.':'Basically flat — no trend.'}`;
+    const tPvs=`Price is ${a.pvs20>=0?'above':'below'} its 20-day average by ${Math.abs(a.pvs20).toFixed(1)}%. Far above = extended; far below = stretched.`;
+    const tAtr=`Average daily range is ${atrPct.toFixed(1)}% (about $${atrVal.toFixed(2)}). Higher means bigger swings — size positions smaller and give stops more room.`;
+    const tRange=`Price is ${Math.round(rangePos)}% up its 20-day range ($${a.lo20}–$${a.hi20}). Near 100% is extended into resistance; near 0% is down at support.`;
+    const tBb=`Bollinger %B is ${a.bbPct}. Above 75 hugs the upper band (extended); below 25 hugs the lower band (stretched down); around 50 is mid-band.`;
+    const tRr=isNeutral?`No active setup, so there is no reward-to-risk to measure yet.`:`For every $1 you risk to the stop, the first target aims for $${rr}. Aim for at least 1.5 to make the trade worth it.`;
     dashEl('dashMetrics').innerHTML=`
-      <div class="dm"><div class="dm-k">Momentum (RSI)</div><div class="dm-v">${a.rsi}</div><div class="dm-s">${a.rsi>=65?'overbought-strong':a.rsi>=55?'bullish':a.rsi<=35?'oversold':a.rsi<=45?'weak':'neutral'}</div></div>
-      <div class="dm"><div class="dm-k">MACD</div><div class="dm-v ${md.hist>=0?'g':'r'}">${md.hist>=0?'+':''}${md.hist.toFixed(2)}</div><div class="dm-s">${md.hist>=0?'bullish cross':'bearish cross'}</div></div>
-      <div class="dm"><div class="dm-k">MA 50 / 200</div><div class="dm-v ${cross?'g':'r'}">${cross?'Golden':'Death'}</div><div class="dm-s">${cross?'+':''}${crossGap.toFixed(1)}% spread</div></div>
-      <div class="dm"><div class="dm-k">Trend</div><div class="dm-v ${trendCls}">${a.s20s60>=0?'+':''}${a.s20s60.toFixed(1)}%</div><div class="dm-s">SMA20 vs SMA60</div></div>
-      <div class="dm"><div class="dm-k">vs 20D avg</div><div class="dm-v ${pvsCls}">${a.pvs20>=0?'+':''}${a.pvs20.toFixed(1)}%</div><div class="dm-s">price vs SMA20</div></div>
-      <div class="dm"><div class="dm-k">ATR (volatility)</div><div class="dm-v">${atrPct.toFixed(1)}%</div><div class="dm-s">$${atrVal.toFixed(2)} / day</div></div>
-      <div class="dm"><div class="dm-k">20D range</div><div class="dm-v">${Math.round(rangePos)}%</div><div class="dm-s">$${a.lo20}–$${a.hi20}</div></div>
-      <div class="dm"><div class="dm-k">Bollinger</div><div class="dm-v">${a.bbPct}%</div><div class="dm-s">${a.bbPct>75?'upper band':a.bbPct<25?'lower band':'mid band'}</div></div>
-      <div class="dm"><div class="dm-k">Risk : reward</div><div class="dm-v">${isNeutral?'—':'1:'+rr}</div><div class="dm-s">${isNeutral?'no active setup':riskT.toLocaleString()+' → '+rewT.toLocaleString()+' ticks'}</div></div>`;
+      <div class="dm" title="${tRsi}"><div class="dm-k">Momentum (RSI)</div><div class="dm-v">${a.rsi}</div><div class="dm-s">${a.rsi>=65?'overbought-strong':a.rsi>=55?'bullish':a.rsi<=35?'oversold':a.rsi<=45?'weak':'neutral'}</div></div>
+      <div class="dm" title="${tMacd}"><div class="dm-k">MACD</div><div class="dm-v ${md.hist>=0?'g':'r'}">${md.hist>=0?'+':''}${md.hist.toFixed(2)}</div><div class="dm-s">${md.hist>=0?'bullish cross':'bearish cross'}</div></div>
+      <div class="dm" title="${tMa}"><div class="dm-k">MA 50 / 200</div><div class="dm-v ${cross?'g':'r'}">${cross?'Golden':'Death'}</div><div class="dm-s">${cross?'+':''}${crossGap.toFixed(1)}% spread</div></div>
+      <div class="dm" title="${tTrend}"><div class="dm-k">Trend</div><div class="dm-v ${trendCls}">${a.s20s60>=0?'+':''}${a.s20s60.toFixed(1)}%</div><div class="dm-s">SMA20 vs SMA60</div></div>
+      <div class="dm" title="${tPvs}"><div class="dm-k">vs 20D avg</div><div class="dm-v ${pvsCls}">${a.pvs20>=0?'+':''}${a.pvs20.toFixed(1)}%</div><div class="dm-s">price vs SMA20</div></div>
+      <div class="dm" title="${tAtr}"><div class="dm-k">ATR (volatility)</div><div class="dm-v">${atrPct.toFixed(1)}%</div><div class="dm-s">$${atrVal.toFixed(2)} / day</div></div>
+      <div class="dm" title="${tRange}"><div class="dm-k">20D range</div><div class="dm-v">${Math.round(rangePos)}%</div><div class="dm-s">$${a.lo20}–$${a.hi20}</div></div>
+      <div class="dm" title="${tBb}"><div class="dm-k">Bollinger</div><div class="dm-v">${a.bbPct}%</div><div class="dm-s">${a.bbPct>75?'upper band':a.bbPct<25?'lower band':'mid band'}</div></div>
+      <div class="dm" title="${tRr}"><div class="dm-k">Risk : reward</div><div class="dm-v">${isNeutral?'—':'1:'+rr}</div><div class="dm-s">${isNeutral?'no active setup':riskT.toLocaleString()+' → '+rewT.toLocaleString()+' ticks'}</div></div>`;
     renderGreeks(q,a,isShort);
 
     // ── SIGNALS ──
@@ -4795,6 +4809,90 @@ function renderJournal(){
     ${active.length?`<div class="dp-h" style="margin:6px 0 12px">Live setups <span class="tag">${active.length}</span></div>${active.map(jCardActive).join('')}`:''}
     ${resolved.length||expired.length?`<div class="dp-h" style="margin:18px 0 12px;display:flex;align-items:center;gap:10px">History <span style="font-size:11px;color:var(--ink3);font-weight:500;margin-left:auto"><button class="dp-fu" onclick="journalClearResolved()">Clear history</button></span></div>${hist}`:''}
     <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--s1)"><b style="color:var(--ink2)">How grading works:</b> a setup starts <b>waiting</b> until live price reaches your entry, then it's <b>open</b>. It scores a <span style="color:var(--gt)">win</span> if price hits the target first or a <span style="color:var(--rt)">loss</span> if it hits the stop — measured in <b>R</b> (multiples of the risk you defined). Grading uses real delayed market data and only runs while the app is open; it's an educational record, not a brokerage fill.</div>`;
+}
+
+// ── AI COACH — talks through the chart like a human mentor ────────────
+// Everything below is derived from the REAL indicators STRATA already
+// computes (trend, RSI, MACD, MA structure, range location, ATR, R:R).
+// No fabricated news / institutional / options-flow data.
+function coachRead(L){
+  const a=L.a,q=L.q,price=q.price;
+  const isShort=L.isShort,isNeutral=L.isNeutral;
+  const conv=isNeutral?Math.round(a.score):(isShort?100-a.score:a.score);
+  const risk=Math.abs(L.entry-L.sl),reward=Math.abs(L.tp1-L.entry);
+  const rr=(!isNeutral&&risk>0)?reward/risk:0;
+  let md={hist:0};try{md=macdOf(q.closes);}catch(e){}
+  const ma50=smaN(q.closes,50),ma200=smaN(q.closes,200),cross=ma50>=ma200;
+  let atrVal=0;try{atrVal=atr(q.h3m&&q.h3m.length>15?q.h3m:[{h:price,l:price,c:price}],14);}catch(e){}
+  const atrPct=price?atrVal/price*100:0;
+  const lo20=parseFloat(a.lo20)||price,hi20=parseFloat(a.hi20)||price,sma20=parseFloat(a.sma20)||price;
+  const rangePos=Math.max(0,Math.min(100,((price-lo20)/((hi20-lo20)||1))*100));
+  const rsi=+a.rsi||50, trendUp=a.s20s60>0.2, trendDn=a.s20s60<-0.2;
+  // ── notebook narrative (mentor voice) ──
+  const lines=[];
+  lines.push(trendUp?`The trend is up — price is holding above its short-term average.`
+    :trendDn?`The trend is down — sellers are controlling the short-term average.`
+    :`There's no clear trend; price is chopping around its average.`);
+  lines.push(rangePos>=80?`It's pressing the top of its 20-day range — extended, not a fresh entry.`
+    :rangePos<=20?`It's sitting near the bottom of its 20-day range, closer to support.`
+    :`It's mid-range, with room to move either way.`);
+  lines.push(rsi>=70?`Momentum is hot (RSI ${rsi}) — strong, but prone to a pause.`
+    :rsi>=55?`Momentum is building (RSI ${rsi}).`
+    :rsi<=30?`It's oversold (RSI ${rsi}); bounces come fast, but so can more downside.`
+    :rsi<=45?`Momentum is weak (RSI ${rsi}).`:`Momentum is neutral (RSI ${rsi}).`);
+  lines.push(md.hist>=0?`MACD has crossed up — short-term momentum agrees.`:`MACD is still below its signal — momentum hasn't turned.`);
+  lines.push(cross?`The 50-day is above the 200-day — the bigger trend is constructive.`:`The 50-day is below the 200-day — the bigger trend is heavy.`);
+  lines.push(isNeutral?`There's no edge yet. I'd wait for price to clear $${hi20.toFixed(2)} or lose $${lo20.toFixed(2)} before committing.`
+    :(!isShort&&rangePos>=80)?`I would not chase up here. I'd wait for a pullback toward $${sma20.toFixed(2)} to get long.`
+    :(!isShort)?`I'd look to get long near $${L.entry.toFixed(2)}, with a stop under $${L.sl.toFixed(2)}.`
+    :(isShort&&rangePos<=20)?`I would not short into support down here. I'd wait for a bounce to fade.`
+    :`I'd look to short near $${L.entry.toFixed(2)}, covering risk above $${L.sl.toFixed(2)}.`);
+  // ── factor checklist ──
+  const okTrend=!isNeutral&&((!isShort&&trendUp)||(isShort&&trendDn));
+  const momAlign=!isNeutral&&((!isShort&&(rsi>=52||md.hist>=0))||(isShort&&(rsi<=48||md.hist<0)));
+  const okLoc=!isNeutral&&(!isShort?rangePos<72:rangePos>28);
+  const rrState=rr>=1.8?'yes':rr>=1.2?'mid':'no';
+  const F=[
+    {k:'Trend',s:okTrend?'yes':(isNeutral?'no':'mid'),n:trendUp?'up':trendDn?'down':'flat'},
+    {k:'Momentum',s:momAlign?'yes':'mid',n:`RSI ${rsi} · MACD ${md.hist>=0?'+':''}${md.hist.toFixed(2)}`},
+    {k:'Entry location',s:okLoc?'yes':'no',n:`${Math.round(rangePos)}% of range`},
+    {k:'Reward : risk',s:isNeutral?'no':rrState,n:isNeutral?'no setup':`1 : ${rr.toFixed(1)}`},
+    {k:'Volatility',s:(atrPct>=0.8&&atrPct<=6)?'yes':'mid',n:`${atrPct.toFixed(1)}% ATR/day`},
+    {k:'Big trend (50/200)',s:isNeutral?'mid':(((!isShort&&cross)||(isShort&&!cross))?'yes':'no'),n:cross?'golden':'death'}
+  ];
+  const fails=F.filter(f=>f.s==='no').length;
+  // ── would-I-take-it verdict ──
+  let call,callNote;
+  if(isNeutral){call='WAIT';callNote='No directional edge yet — price is mid-structure with mixed signals.';}
+  else if(conv>=64&&rr>=1.5&&okLoc&&fails===0){call='YES';callNote=`The read, the entry location and a 1:${rr.toFixed(1)} reward-to-risk all line up.`;}
+  else if(conv<50||rr<1.2||!okLoc||fails>=2){call='NO';callNote=!okLoc?`Price is in a poor spot to enter — that's chasing. I'd wait for a better location.`:rr<1.2?`The reward-to-risk (1:${rr.toFixed(1)}) is too thin to justify the risk.`:`Too many signals disagree right now.`;}
+  else{call='WAIT';callNote=`It's close, but not clean. I'd want one more confirmation before committing.`;}
+  // ── bull vs bear ──
+  const bull=(a.signals||[]).filter(s=>s.dir==='bull').map(s=>s.detail);
+  const bear=(a.signals||[]).filter(s=>s.dir==='bear').map(s=>s.detail);
+  if(!bull.length)bull.push(trendUp?'Holding above the short-term average.':'Near support where buyers can step in.');
+  if(!bear.length)bear.push(trendDn?'Below the short-term average.':'Extended into resistance.');
+  const winner=isNeutral?'Even':(isShort?'Bear':'Bull');
+  return{conv,rr,call,callNote,lines,factors:F,bull,bear,winner};
+}
+function coachReadHTML(L){
+  const c=coachRead(L),isShort=L.isShort,isNeutral=L.isNeutral;
+  const now=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  const callCol=c.call==='YES'?'var(--gt)':c.call==='NO'?'var(--rt)':'var(--at)';
+  const mk={yes:['var(--gt)','✓'],no:['var(--rt)','✕'],mid:['var(--at)','~']};
+  const chk=c.factors.map(f=>{const[col,sym]=mk[f.s];return`<div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="color:${col};font-weight:800;width:13px;text-align:center">${sym}</span><span style="color:var(--ink2);flex:1">${f.k}</span><span style="color:var(--ink3);font-family:var(--mono);font-size:11px">${f.n}</span></div>`;}).join('');
+  const notebook=c.lines.map(t=>`<div style="display:flex;gap:9px;font-size:13px;color:var(--ink);line-height:1.55;margin-bottom:7px"><span style="color:var(--ac);flex-shrink:0">·</span><span>${t}</span></div>`).join('');
+  const verdict=`<div style="display:flex;align-items:center;gap:14px;background:var(--s2);border:1px solid ${callCol};border-radius:13px;padding:13px 16px;margin-bottom:15px">
+    <div style="text-align:center;min-width:70px"><div style="font-size:25px;font-weight:900;letter-spacing:-.02em;color:${callCol}">${c.call}</div><div style="font-size:9px;font-weight:800;letter-spacing:.05em;color:var(--ink3);text-transform:uppercase">would AI take it</div></div>
+    <div style="flex:1;font-size:12.5px;color:var(--ink2);line-height:1.5">${c.callNote}<div style="margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink3)">conviction ${c.conv}% · ${isNeutral?'no setup':'R:R 1 : '+c.rr.toFixed(1)}</div></div>
+  </div>`;
+  const sideCol=(arr,col,label)=>`<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:800;color:${col};margin-bottom:6px">${label}</div>${arr.slice(0,3).map(t=>`<div style="font-size:11.5px;color:var(--ink2);line-height:1.45;margin-bottom:5px">• ${t}</div>`).join('')}</div>`;
+  const wCol=c.winner==='Bull'?'var(--gt)':c.winner==='Bear'?'var(--rt)':'var(--ink2)';
+  const debate=`<div style="background:var(--s2);border:1px solid var(--line);border-radius:13px;padding:13px 16px;margin-bottom:15px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)">Bull vs Bear</span><span style="font-size:11px;font-weight:800;color:${wCol}">${c.winner==='Even'?'Too close to call':c.winner+' leads · '+c.conv+'%'}</span></div>
+    <div style="display:flex;gap:14px">${sideCol(c.bull,'var(--gt)','▲ Bull case')}<div style="width:1px;background:var(--line);flex-shrink:0"></div>${sideCol(c.bear,'var(--rt)','▼ Bear case')}</div>
+  </div>`;
+  return{verdict,notebook,now,chk,debate};
 }
 
 // ── LIVE STREAMING ────────────────────────────────────────────────────

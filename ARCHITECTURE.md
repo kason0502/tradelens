@@ -52,6 +52,9 @@ Everything lives in **`index.html`** (~3,500 lines): one `<style>` block, the la
 - `AI_MEMORY` persisted in localStorage key `tlpro_ai_memory_v1`. `stratConf(key)` (Wilson-shrunk win rate).
 - `aiSelfBacktest(rounds)` — tests its own picks across history, logs W/L, updates confidence (drives dashboard level weighting). UI: AI Lab tab. `renderAILearnStats()`, `resetAIMemory()`.
 
+## AI Coach (rule-based, in the dashboard AI-read panel)
+- `coachRead(L)` takes the current setup (`{ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick}`) and derives, from the real indicators only: a mentor **narrative** (`lines[]`), a **would-I-take-it** verdict (`call` YES/NO/WAIT + `callNote`), a **factor checklist** (`factors[]` ✓/~/✕), and **bull/bear** cases (from `a.signals`). `coachReadHTML(L)` renders the verdict / notebook / Bull-vs-Bear / checklist HTML injected into `#dashConv` by `renderDash`. Key-metrics tiles (`#dashMetrics`) carry condition-aware `title` tooltips. No external data — all from `analyze`/`macdOf`/`smaN`/`atr`.
+
 ## Claude AI integration (optional)
 - Key held in-memory (`AI_KEY`) via `#moAI` modal (`saveAIKey`, `clearAIKey`), or server proxy at `/api/claude` (`probeProxy`, `AI_PROXY_OK`). `aiReady()`, `callClaude(system,user,maxTokens)`, `fmtAI()`.
 - Consumers: `aiMarketDirection` (dashboard deep-read), `btAIStrategyHelp` (backtest coach), `perfCoach` (performance), chat (`askAI`/`sendChat`).

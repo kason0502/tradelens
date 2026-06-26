@@ -12,6 +12,17 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Done (session 16d — AI coach / human-mentor read)
+- [x] **Mentor narration + "Would AI take it?" verdict + Bull-vs-Bear + conviction checklist** in the dashboard AI-read panel (`coachRead`/`coachReadHTML`), all from the real engine.
+- [x] **Condition-aware indicator tooltips** on the Key-metrics tiles.
+
+## Next (the "AI mentor" wishlist — sequenced)
+- [ ] **Per-candle "why"** (#2/#8/#13): click a candle → explain it from its real OHLC/volume/structure (engulfing, gap, volume spike, position vs MA). Needs candle-click hooks on the custom canvas. NO fabricated news/flow unless a real feed is wired.
+- [ ] **Replay mode** (#6): step through a historical day candle-by-candle with the coach read, future hidden. Builds on the Backtest engine.
+- [ ] **Market personality** (#4): "mood/fear/greed/momentum/health" panel from VIX + breadth + index structure (real data).
+- [ ] **Richer coach via Claude**: when a key is connected, let `callClaude` write the narrative for an even more natural voice (keep the rule-based version as the offline default).
+- [ ] **Sector heat-map** (#11): lower priority; needs sector data + heavier viz.
+
 ## Done (session 16c — self-grading trade journal)
 - [x] **Journal tab** — "+ Track this setup" on the dashboard logs a plan; a background poller grades it pending→open→win/loss in R from live price. Scoreboard + live progress bars + history.
 
