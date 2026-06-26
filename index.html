@@ -1548,6 +1548,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <button class="snav" data-tab="traders" onclick="mainTab('traders',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M20.5 20a5 5 0 0 0-4-4.9"/></svg><span class="lbl">Pro Traders</span></button>
     <button class="snav" data-tab="backtest" onclick="mainTab('backtest',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 2.6 6.3"/><path d="M3 20v-5h5"/><path d="M12 8v4l3 2"/></svg><span class="lbl">Backtest</span></button>
     <button class="snav" data-tab="performance" onclick="mainTab('performance',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7 15l4-4 3 2 5-6"/></svg><span class="lbl">Performance</span></button>
+    <button class="snav" data-tab="journal" onclick="mainTab('journal',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4a2 2 0 0 1 2-2h10l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 7h6M8 11h8M8 15h5"/></svg><span class="lbl">Journal</span><span class="pill" id="jrnPill" style="display:none"></span></button>
     <button class="snav" data-tab="ailab" onclick="mainTab('ailab',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.5L4.8 17a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 8.5V3"/></svg><span class="lbl">AI Lab</span></button>
     <div class="appnav-grp">Assistant</div>
     <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
@@ -1761,6 +1762,15 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div id="perfBody"></div>
     </div>
 
+    <!-- TRADE JOURNAL (self-grading) -->
+    <div class="tab-pane" id="tab-journal">
+      <div style="margin-bottom:18px">
+        <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">Trade journal</div>
+        <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-top:6px;max-width:720px">Setups you've chosen to <b>track</b> from the dashboard. STRATA watches live price and grades each one for you — <span style="color:var(--gt)">entry hit</span>, <span style="color:var(--rt)">stopped</span> or <span style="color:var(--gt)">target reached</span> — building a real, honest track record from actual market movement. Not financial advice.</div>
+      </div>
+      <div id="journalBody"></div>
+    </div>
+
     <!-- AI LAB -->
     <div class="tab-pane" id="tab-ailab">
       <div style="margin-bottom:18px">
@@ -1908,6 +1918,7 @@ function mainTab(name,btn){
   if(name==='traders')renderTraders(currentTraderFilter);
   if(name==='backtest')initBacktestTab();
   if(name==='performance')renderPerformance();
+  if(name==='journal')renderJournal();
   if(name==='ailab')renderAILearnStats();
   if(name==='movers')renderMovers();
   if(sb)snavGlideTo(sb);
@@ -4091,6 +4102,7 @@ async function renderDash(text){
       <div class="dash-verdict ${sentClass}">${verdict}</div>
       ${planBody}
       <div class="dp-actions">
+        ${isNeutral?'':`<button class="dp-fu" onclick="trackSetup()" style="border-color:rgba(var(--ac-rgb),.5);color:var(--act)">+ Track this setup</button>`}
         ${isNeutral?'':`<button class="dp-fu" onclick="cpExplainStop()">Why this stop?</button>`}
         <button class="dp-fu" onclick="cpBacktest('${ticker}')">Backtest</button>
         <button class="dp-fu" onclick="cpAIdeep('${ticker}')">Deeper AI read ↗</button>
@@ -4637,6 +4649,154 @@ async function loadStratCandidates(type,elId){
   }catch(e){window.__userFetch=0;el.innerHTML=`<div class="mv-empty" style="padding:16px">Couldn't load live candidates right now — the data feed may be busy.</div>`;}
 }
 
+// ── SELF-GRADING TRADE JOURNAL ────────────────────────────────────────
+// Setups you "Track" from the dashboard are logged here, then a background
+// poller checks live price and grades each one from REAL market movement:
+// pending → (entry hit) open → (target) win / (stop) loss. Honest, automatic
+// track record. Persisted in localStorage.
+const JOURNAL_KEY='tlpro_journal_v1';
+function loadJournal(){try{const r=localStorage.getItem(JOURNAL_KEY);if(r){const j=JSON.parse(r);if(Array.isArray(j))return j;}}catch(e){}return[];}
+let JOURNAL=loadJournal();
+function saveJournal(){try{localStorage.setItem(JOURNAL_KEY,JSON.stringify(JOURNAL.slice(0,200)));}catch(e){}}
+function jToast(msg){let t=document.getElementById('jToast');if(!t){t=document.createElement('div');t.id='jToast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--line);color:var(--ink);padding:11px 18px;border-radius:11px;font-size:13px;z-index:4000;box-shadow:var(--shadow);transition:opacity .3s;max-width:90vw;text-align:center';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';},2800);}
+function trackSetup(){
+  if(!lastData||lastData.isNeutral||!lastData.entry){jToast('No active setup to track right now.');return;}
+  const{ticker,isShort,entry,sl,tp1,tp2,q,aiPick}=lastData;
+  const dir=isShort?'short':'long';
+  if(JOURNAL.some(e=>e.ticker===ticker&&e.dir===dir&&(e.status==='pending'||e.status==='open'))){jToast(`${ticker} ${dir.toUpperCase()} is already in your journal.`);return;}
+  JOURNAL.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ticker,dir,entry:+entry,stop:+sl,tp1:+tp1,tp2:+tp2,priceAt:+q.price,triggerAbove:entry>=q.price,created:Date.now(),expireMs:7*864e5,status:'pending',horizon:(currentDTE||'').toUpperCase(),strat:(aiPick&&aiPick.name)||'Structure setup',lastPx:+q.price});
+  saveJournal();updateJournalBadge();
+  jToast(`Tracking ${ticker} ${dir.toUpperCase()} — it'll grade itself as price moves.`);
+  const jt=document.getElementById('tab-journal');if(jt&&jt.classList.contains('active'))renderJournal();
+}
+function gradeJournal(tk,px){
+  JOURNAL.forEach(e=>{
+    if(e.ticker!==tk||(e.status!=='pending'&&e.status!=='open'))return;
+    e.lastPx=px;
+    const risk=Math.abs(e.entry-e.stop)||(e.entry*0.01)||1;
+    if(e.status==='pending'){
+      const hit=e.triggerAbove?px>=e.entry:px<=e.entry;
+      if(hit){e.status='open';e.entryHit=Date.now();}
+      else if(Date.now()-e.created>e.expireMs){e.status='expired';e.exitTs=Date.now();}
+    }
+    if(e.status==='open'){
+      if(e.dir==='long'){
+        if(px<=e.stop){e.status='loss';e.exitReason='stop';e.exitPrice=px;e.exitTs=Date.now();e.r=+(((px-e.entry)/risk)).toFixed(2);}
+        else if(px>=e.tp1){e.status='win';e.exitReason='target';e.exitPrice=px;e.exitTs=Date.now();e.r=+(((e.tp1-e.entry)/risk)).toFixed(2);}
+      }else{
+        if(px>=e.stop){e.status='loss';e.exitReason='stop';e.exitPrice=px;e.exitTs=Date.now();e.r=+(((e.entry-px)/risk)).toFixed(2);}
+        else if(px<=e.tp1){e.status='win';e.exitReason='target';e.exitPrice=px;e.exitTs=Date.now();e.r=+(((e.entry-e.tp1)/risk)).toFixed(2);}
+      }
+    }
+  });
+}
+let _jrnBusy=false;
+async function journalTick(){
+  if(_jrnBusy)return;
+  const active=JOURNAL.filter(e=>e.status==='pending'||e.status==='open');
+  if(!active.length){updateJournalBadge();return;}
+  _jrnBusy=true;
+  const tks=[...new Set(active.map(e=>e.ticker))].slice(0,8);
+  let changed=false;
+  for(const tk of tks){
+    if(!bgIdle())break;
+    try{const r=await fetchLivePrice(tk);if(r&&r.price){gradeJournal(tk,r.price);changed=true;}}catch(e){}
+    await new Promise(r=>setTimeout(r,400));
+  }
+  if(changed)saveJournal();
+  _jrnBusy=false;
+  updateJournalBadge();
+  const jt=document.getElementById('tab-journal');if(jt&&jt.classList.contains('active'))renderJournal();
+}
+function updateJournalBadge(){
+  const n=JOURNAL.filter(e=>e.status==='pending'||e.status==='open').length;
+  const p=document.getElementById('jrnPill');
+  if(p){if(n){p.textContent=n;p.style.display='';}else p.style.display='none';}
+}
+function journalClose(id){const e=JOURNAL.find(x=>x.id===id);if(!e)return;const px=e.lastPx||e.entry;const risk=Math.abs(e.entry-e.stop)||1;e.r=+(((e.dir==='long'?(px-e.entry):(e.entry-px))/risk)).toFixed(2);e.status='closed';e.exitReason='manual';e.exitPrice=px;e.exitTs=Date.now();saveJournal();renderJournal();updateJournalBadge();}
+function journalRemove(id){JOURNAL=JOURNAL.filter(x=>x.id!==id);saveJournal();renderJournal();updateJournalBadge();}
+function journalClearResolved(){JOURNAL=JOURNAL.filter(e=>e.status==='pending'||e.status==='open');saveJournal();renderJournal();updateJournalBadge();}
+function _jBadge(s){const m={pending:['var(--at)','WAITING'],open:['var(--ac)','OPEN'],win:['var(--gt)','TARGET HIT'],loss:['var(--rt)','STOPPED'],closed:['var(--ink2)','CLOSED'],expired:['var(--ink3)','EXPIRED']};const[c,t]=m[s]||m.pending;return`<span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:3px 8px;border-radius:6px;color:${c};border:1px solid ${c}">${t}</span>`;}
+function _jAgo(ts){if(!ts)return'';const d=Date.now()-ts,h=Math.floor(d/36e5);if(h<1)return Math.max(1,Math.floor(d/6e4))+'m ago';if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
+function jCardActive(e){
+  const px=e.lastPx||e.priceAt, dirCol=e.dir==='long'?'var(--gt)':'var(--rt)';
+  const risk=Math.abs(e.entry-e.stop)||1;
+  const head=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-family:var(--mono);font-weight:800;font-size:16px;color:var(--ink)">${e.ticker}</span>
+      <span style="font-size:11px;font-weight:800;color:${dirCol}">${e.dir.toUpperCase()}</span>
+      ${_jBadge(e.status)}
+      <span style="font-size:11px;color:var(--ink3);margin-left:auto">${e.strat} · ${e.horizon} · ${_jAgo(e.created)}</span>
+    </div>`;
+  const lvls=`<div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;margin-bottom:12px">
+      <span style="color:var(--ink3)">Entry <b style="color:var(--ink)">$${e.entry.toFixed(2)}</b></span>
+      <span style="color:var(--ink3)">Stop <b style="color:var(--rt)">$${e.stop.toFixed(2)}</b></span>
+      <span style="color:var(--ink3)">Target <b style="color:var(--gt)">$${e.tp1.toFixed(2)}</b></span>
+      <span style="color:var(--ink3)">Now <b style="color:var(--ink)">$${px.toFixed(2)}</b></span>
+    </div>`;
+  let mid='';
+  if(e.status==='pending'){
+    const away=Math.abs((px-e.entry)/e.entry*100);
+    mid=`<div style="font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:12px">Waiting for price to ${e.triggerAbove?'rise to':'pull back to'} <b>$${e.entry.toFixed(2)}</b> — about <b>${away.toFixed(1)}%</b> away. It becomes <b>open</b> automatically when the entry triggers.</div>`;
+  }else{
+    const lo=Math.min(e.stop,e.tp1),hi=Math.max(e.stop,e.tp1),span=(hi-lo)||1;
+    const pos=Math.max(2,Math.min(98,(px-lo)/span*100));
+    const ent=Math.max(2,Math.min(98,(e.entry-lo)/span*100));
+    const liveR=+(((e.dir==='long'?(px-e.entry):(e.entry-px))/risk)).toFixed(2);
+    const rCol=liveR>=0?'var(--gt)':'var(--rt)';
+    const stopLeft=e.dir==='long';   // long: stop on left (low), target on right (high)
+    mid=`<div style="position:relative;height:8px;border-radius:99px;background:linear-gradient(90deg,${stopLeft?'var(--rd)':'var(--gr)'},var(--s3) 50%,${stopLeft?'var(--gr)':'var(--rd)'});margin:6px 0 6px">
+        <div style="position:absolute;top:-3px;left:${ent}%;width:2px;height:14px;background:var(--ink2);transform:translateX(-1px)"></div>
+        <div style="position:absolute;top:-4px;left:${pos}%;width:14px;height:14px;border-radius:50%;background:var(--ac);border:2px solid var(--bg);transform:translateX(-7px)"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin-bottom:10px"><span>${stopLeft?'stop':'target'}</span><span>entry</span><span>${stopLeft?'target':'stop'}</span></div>
+      <div style="font-size:12.5px;color:var(--ink2);margin-bottom:12px">Live result if closed now: <b style="color:${rCol};font-family:var(--mono)">${liveR>=0?'+':''}${liveR}R</b></div>`;
+  }
+  return `<div style="background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px">
+    ${head}${lvls}${mid}
+    <div style="display:flex;gap:8px">
+      <button class="dp-fu" onclick="loadTicker('${e.ticker}')">Open chart</button>
+      ${e.status==='open'?`<button class="dp-fu" onclick="journalClose('${e.id}')">Close now</button>`:''}
+      <button class="dp-fu" onclick="journalRemove('${e.id}')" style="margin-left:auto;color:var(--ink3)">Remove</button>
+    </div>
+  </div>`;
+}
+function renderJournal(){
+  const el=document.getElementById('journalBody');if(!el)return;
+  updateJournalBadge();
+  if(!JOURNAL.length){
+    el.innerHTML=`<div class="bt-empty">No tracked setups yet. On the <b>Dashboard</b>, analyze a ticker and hit <b style="color:var(--act)">+ Track this setup</b> — STRATA will then grade it live as price moves, and your real track record builds here.</div>`;
+    return;
+  }
+  const active=JOURNAL.filter(e=>e.status==='pending'||e.status==='open');
+  const resolved=JOURNAL.filter(e=>['win','loss','closed'].includes(e.status)&&typeof e.r==='number');
+  const expired=JOURNAL.filter(e=>e.status==='expired');
+  const wins=resolved.filter(e=>e.r>0).length, losses=resolved.length-wins;
+  const wr=resolved.length?Math.round(wins/resolved.length*100):0;
+  const totR=resolved.reduce((p,e)=>p+e.r,0), avgR=resolved.length?totR/resolved.length:0;
+  const sc=(v,l,col)=>`<div class="bt-score"><div class="bt-score-val"${col?` style="color:${col}"`:''}>${v}</div><div class="bt-score-lbl">${l}</div></div>`;
+  const board=`<div class="bt-scoreboard">
+    ${sc(active.length,'Live now','var(--ac)')}
+    ${sc(resolved.length,'Resolved')}
+    ${sc(wr+'%','Win rate',wr>=50?'var(--gt)':wr>0?'var(--rt)':'')}
+    ${sc((avgR>=0?'+':'')+avgR.toFixed(2)+'R','Avg result',avgR>=0?'var(--gt)':'var(--rt)')}
+    ${sc((totR>=0?'+':'')+totR.toFixed(1)+'R','Total R',totR>=0?'var(--gt)':'var(--rt)')}
+  </div>`;
+  const hist=resolved.concat(expired).sort((a,b)=>(b.exitTs||b.created)-(a.exitTs||a.created)).slice(0,30).map(e=>{
+    const r=typeof e.r==='number'?e.r:null, col=r==null?'var(--ink3)':r>0?'var(--gt)':'var(--rt)';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 13px;background:var(--s2);border:1px solid var(--line);border-radius:10px;margin-bottom:7px">
+      <span style="font-family:var(--mono);font-weight:800;font-size:13.5px;color:var(--ink);min-width:54px">${e.ticker}</span>
+      <span style="font-size:11px;font-weight:700;color:${e.dir==='long'?'var(--gt)':'var(--rt)'};min-width:44px">${e.dir.toUpperCase()}</span>
+      ${_jBadge(e.status)}
+      <span style="font-size:11px;color:var(--ink3);margin-left:6px">${e.strat}</span>
+      <span style="margin-left:auto;font-family:var(--mono);font-weight:800;font-size:13px;color:${col}">${r==null?'—':(r>0?'+':'')+r+'R'}</span>
+      <button onclick="journalRemove('${e.id}')" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:2px 4px">✕</button>
+    </div>`;}).join('');
+  el.innerHTML=`${board}
+    ${active.length?`<div class="dp-h" style="margin:6px 0 12px">Live setups <span class="tag">${active.length}</span></div>${active.map(jCardActive).join('')}`:''}
+    ${resolved.length||expired.length?`<div class="dp-h" style="margin:18px 0 12px;display:flex;align-items:center;gap:10px">History <span style="font-size:11px;color:var(--ink3);font-weight:500;margin-left:auto"><button class="dp-fu" onclick="journalClearResolved()">Clear history</button></span></div>${hist}`:''}
+    <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--s1)"><b style="color:var(--ink2)">How grading works:</b> a setup starts <b>waiting</b> until live price reaches your entry, then it's <b>open</b>. It scores a <span style="color:var(--gt)">win</span> if price hits the target first or a <span style="color:var(--rt)">loss</span> if it hits the stop — measured in <b>R</b> (multiples of the risk you defined). Grading uses real delayed market data and only runs while the app is open; it's an educational record, not a brokerage fill.</div>`;
+}
+
 // ── LIVE STREAMING ────────────────────────────────────────────────────
 // Fast price-only polling makes the dashboard feel like it's streaming:
 // the price ticks, the live dot pulses, and the chart's current-price
@@ -5035,6 +5195,7 @@ setTimeout(()=>{if(bgIdle())loadIndices();},14000);   setInterval(()=>{if(bgIdle
 setTimeout(()=>{if(bgIdle())refreshWatch();},22000);  setInterval(()=>{if(bgIdle())refreshWatch();},240000);  // watchlist
 setTimeout(()=>{if(bgIdle())renderMovers();},30000);  setInterval(()=>{if(MOVERS.length&&bgIdle())renderMovers(true);},360000); // movers
 setTimeout(()=>{if(AI_AUTO&&bgIdle())aiAutoLearnOnce();},40000); setInterval(()=>{if(AI_AUTO&&bgIdle()&&!aiSelfBusy)aiAutoLearnOnce();},60000); // AI auto-learn (idle trickle)
+updateJournalBadge(); setTimeout(()=>{if(bgIdle())journalTick();},26000); setInterval(()=>{if(bgIdle())journalTick();},45000); // grade tracked setups vs live price
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
 function launchApp(){

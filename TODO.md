@@ -12,6 +12,14 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Done (session 16c — self-grading trade journal)
+- [x] **Journal tab** — "+ Track this setup" on the dashboard logs a plan; a background poller grades it pending→open→win/loss in R from live price. Scoreboard + live progress bars + history.
+
+## Next (Journal follow-ups)
+- [ ] Grade the **currently-viewed** ticker on each `liveTick` too (instant updates without waiting for the 45s poller).
+- [ ] Optional: feed resolved Journal R-results into the AI/feedback weighting, and let the AI coach review your live journal (not just backtest history).
+- [ ] Optional: position-size each tracked setup ($ risk → shares) so the journal can show $ P&L, not just R.
+
 ## Done (session 16 — Strategy tab)
 - [x] **New Strategy tab** — day-by-day playbook (weekday themes), a date-computed event calendar (OPEX/witching/NFP/month-end), and live candidate scans that reuse the screener engine. Today auto-highlighted.
 

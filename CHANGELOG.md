@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16c) — self-grading trade journal
+- **New "Journal" tab** (`#tab-journal`, Research group, active-count pill). Hit **+ Track this setup** on the dashboard Trade Plan and the plan is logged (`trackSetup`→`JOURNAL`, localStorage `tlpro_journal_v1`).
+- **It grades itself from real price.** A background poller (`journalTick`, every 45s when `bgIdle`, ≤8 tickers via `fetchLivePrice`) runs `gradeJournal`: **pending → (entry hit) open → (target) win / (stop) loss**, scored in **R** (multiples of the defined risk). Pending setups expire after 7 days.
+- **Journal view** (`renderJournal`): scoreboard (live / resolved / win-rate / avg R / total R), live cards with a **stop↔target progress bar + live-R**, a resolved/expired history, manual **Close now** / **Remove** / **Clear history**, and a plain-English "how grading works" note. Honest framing — delayed data, runs only while the app is open, not a brokerage fill. Toasts via `jToast`; nav badge via `updateJournalBadge`.
+
 ## 2026-06-26 (session 16b) — Strategy "anatomy" charts
 - **Each strategy now shows on a chart.** New pure-SVG schematic (`strategyDiagram` / `strategyChartBlock`, configs in `STRAT_DIAGRAMS`) draws the setup's anatomy: the idealized price path, the **entry trigger** (dot + time line), dashed **Target 1/2** and **Stop** levels, shaded green **reward** + red **risk** zones, and an auto-computed **≈ 1 : N reward-to-risk**. Rendered in Today's focus and inside every weekday card (`STRAT_DKEY` maps day→pattern). Theme colors via CSS vars; labeled "schematic · not a live quote" (honest — it's a teaching diagram, not a price feed).
 
