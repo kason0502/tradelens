@@ -2115,7 +2115,19 @@ function extractChart(txt){
 }
 // Race all proxies for one URL IN PARALLEL — the first that returns a valid Yahoo
 // chart wins (so one slow/dead proxy can't hold up the lookup). Returns the chart.
+let _yfProxyOK=true;   // is the server-side /api/yf proxy available? (local PowerShell server or Vercel)
 async function raceAttempts(url){
+  // 1) Prefer the SERVER-SIDE proxy (no CORS, no flaky public proxies). Works on
+  //    the local PowerShell server (.claude/serve.ps1) or a Vercel deploy. If it's
+  //    not there (bare file / plain static host) it fails fast and we fall back.
+  if(_yfProxyOK){
+    try{
+      const txt=await tryOne(`/api/yf?url=${encodeURIComponent(url)}`,8000);
+      const c=extractChart(txt);
+      if(c)return c;
+    }catch(e){ if(/HTTP 404|Failed to fetch|NetworkError/i.test(e.message||''))_yfProxyOK=false; }
+  }
+  // 2) else race the public CORS proxies in parallel
   const attempts=buildAttempts(url);
   return new Promise((resolve,reject)=>{
     let pending=attempts.length, settled=false;

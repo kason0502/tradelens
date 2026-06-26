@@ -25,4 +25,5 @@ Keep docs concise and high-signal; they exist so work can continue after context
 
 ## Preview / verify
 - No Node/Python on this machine. Use preview config `tradelens` (`.claude/serve.ps1`, port 8777) → `http://localhost:8777`.
+- **`serve.ps1` is also the live-data proxy** (`/api/yf?url=…`, server-side PowerShell fetch of Yahoo/Stooq) — this is what makes stock data load reliably without flaky public CORS proxies. If you change `serve.ps1`, **restart the preview** for it to take effect.
 - The **screenshot tool can't capture this page** (live TradingView iframe + offscreen tab freezes animations → timeout). Verify with `preview_eval` / computed styles / console logs, and ask the user to view in a real browser.

@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 13) — reliable data via a server-side proxy
+- **Stocks now load reliably (no more flaky public CORS proxies).** Added a server-side market-data proxy at **`/api/yf?url=…`** that fetches Yahoo/Stooq server-side (no browser CORS, no per-user rate limits):
+  - **Local:** `.claude/serve.ps1` (the PowerShell preview server) now handles `/api/yf` — pure PowerShell `Invoke-WebRequest`, no Node/Python. **Restart the preview** to pick it up. Verified: AAPL/NVDA/TSLA/SPY load in 200–700ms.
+  - **Deployed:** `api/yf.js` is the equivalent Vercel serverless function, so a Vercel deploy is reliable too.
+  - Client (`raceAttempts`) calls `/api/yf` **first** (`_yfProxyOK` flag) and only falls back to the public CORS proxies if that route is absent (bare file / plain static host).
+- serve.ps1 also now serves image MIME types (png/jpg/webp/svg) so brand/mascot images can be dropped in.
+
 ## 2026-06-26 (session 12) — fix "nothing loads" (proxy flooding + slow sequential fetch)
 - **Root cause:** the new background pollers (movers/watchlist/indices on timers) were hammering the shared CORS proxies into rate-limiting, AND every lookup tried proxies **sequentially** (2 passes × 2 hosts × 5 proxies ≈ up to ~140s) so a busy feed hung instead of failing.
 - **Parallel proxy race** — new `raceAttempts(url)` fires all proxies at once and resolves on the first valid Yahoo chart; `tryFetch`, `fetchQuote` intraday, and `fetchLivePrice` all use it. Result: lookups now resolve in **~150ms** when proxies are up, and fail fast (~7s) when they're not. Trimmed 2 dead proxies, added 4 more providers, timeout 9s→7s.
