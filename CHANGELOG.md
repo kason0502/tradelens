@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16f) — candlesticks, real self-learning + console, timeframe bias
+- **Real candlestick chart + price axis.** `annotatedChartHTML` now draws green/red OHLC candlesticks (wick + body) with a **left price axis** (5 labeled gridlines) instead of a line, keeping the labeled Resistance/Support/Entry/Stop/Target lines, 20-day average and swing markers. Looks like a real terminal chart.
+- **AI Lab actually learns now (outcome-based).** New `simulateSetup` walks the strategy's real **entry/stop/target forward bar-by-bar** — a trade is a WIN only if the target hits before the stop (in **R**), a LOSS if stopped, "no fill" if entry never triggers (no stat change). Replaces the old direction-only coin-flip. `applyLearning` updates per-strategy confidence and records the **confidence before→after** each trade. Both manual (`aiSelfBacktest`) and auto (`aiAutoLearnOnce`) loops use it.
+- **Live learning console** (`renderAIConsole`, `#aiConsole`). A terminal-style stream of every self-test: time · ticker · setup · dir · planned @entry/sl/tp · WIN/LOSS/NO-FILL ±R · **conf 55%→58%** · auto tag. Replaces the old plain log. Tolerates legacy log entries.
+- **Bull/bear bias is timeframe-aware.** The dashboard read now analyzes the close-window matching the selected horizon (`HZ_LOOKBACK`: 0DTE/1W short … 1Y full), so the bias updates when you change timeframe. AI-read header shows "{horizon} bias".
+
 ## 2026-06-26 (session 16e) — strategy charts on REAL data + dropped the trade verdict
 - **Strategy tab now draws each setup on a ticker's real chart.** `loadRealStrategyChart(ticker,key,elId)` fetches real daily candles (`fetchQuote`), derives structure (`labLevels`: support/resistance/20-MA/swing pivots) + the strategy's entry/stop/targets (`aiStrategyLevels`), and `annotatedChartHTML` draws the real price line + dashed 20-day average with **labeled level lines** (Resistance/Support/Entry/Stop/Target 1·2) and on-chart **swing-high/low markers**, followed by the strategy's numbered **thought process** (real prices). Today's focus auto-loads it for SPY; weekday cards load it on demand; **ticker is editable**. Falls back to the schematic (`strategyChartBlock`) only if data fails.
 - **Removed "Would AI take this trade?"** from the AI-read panel — a bearish read is a valid short, so a single take/skip verdict was misleading. Kept the mentor narration, Bull-vs-Bear and conviction checklist.

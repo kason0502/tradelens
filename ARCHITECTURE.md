@@ -50,7 +50,9 @@ Everything lives in **`index.html`** (~3,500 lines): one `<style>` block, the la
 
 ## Self-learning AI (algorithmic, no Claude needed)
 - `AI_MEMORY` persisted in localStorage key `tlpro_ai_memory_v1`. `stratConf(key)` (Wilson-shrunk win rate).
-- `aiSelfBacktest(rounds)` — tests its own picks across history, logs W/L, updates confidence (drives dashboard level weighting). UI: AI Lab tab. `renderAILearnStats()`, `resetAIMemory()`.
+- **Outcome-based learning:** `simulateSetup(tk,full,cut,q)` walks the chosen strategy's real entry/stop/target forward bar-by-bar → win (target first), loss (stop first), or no-fill; result in **R**. `applyLearning(sim,auto)` updates per-strategy wins/losses/pnl + records confidence before→after, logs a rich entry, posts to the shared pool. Used by both `aiSelfBacktest(rounds)` (manual) and `aiAutoLearnOnce()` (idle auto).
+- **Live console:** `renderAIConsole()` renders `AI_MEMORY.log` into `#aiConsole` (terminal stream: time/ticker/setup/dir/levels/result-R/conf-delta). `renderAILearnStats()` (confidence bars + scoreboard) calls it. UI: AI Lab tab. `resetAIMemory()`.
+- **Timeframe-aware bias:** `renderDash` windows `q.closes` by `HZ_LOOKBACK[currentDTE]` before `analyze`, so the sentiment/bias reflects the selected horizon.
 
 ## AI Coach (rule-based, in the dashboard AI-read panel)
 - `coachRead(L)` takes the current setup (`{ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick}`) and derives, from the real indicators only: a mentor **narrative** (`lines[]`), a **would-I-take-it** verdict (`call` YES/NO/WAIT + `callNote`), a **factor checklist** (`factors[]` ✓/~/✕), and **bull/bear** cases (from `a.signals`). `coachReadHTML(L)` renders the verdict / notebook / Bull-vs-Bear / checklist HTML injected into `#dashConv` by `renderDash`. Key-metrics tiles (`#dashMetrics`) carry condition-aware `title` tooltips. No external data — all from `analyze`/`macdOf`/`smaN`/`atr`.

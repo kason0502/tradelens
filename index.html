@@ -960,6 +960,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dash-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:11px;overflow:hidden}
 .dm{background:var(--s1);padding:13px 15px}
 .dm[title]{cursor:help}.dm[title]:hover{background:var(--s2)}
+#aiConsole{font-family:var(--mono);font-size:11.5px;line-height:1.5;background:#060709;border:1px solid var(--line);border-radius:11px;padding:10px 12px;max-height:360px;overflow:auto}
+.aic-empty{color:var(--ink3);padding:20px;text-align:center;font-family:var(--sans,inherit)}
+.aic-row{display:flex;gap:10px;align-items:center;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+.aic-row:last-child{border-bottom:none}
+.aic-t{color:var(--ink3);width:44px;flex-shrink:0}
+.aic-tk{color:var(--ink);font-weight:800;width:50px;flex-shrink:0}
+.aic-nm{width:118px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis}
+.aic-dir{text-transform:uppercase;font-size:9.5px;font-weight:800;color:var(--ink3);width:38px;flex-shrink:0}
+.aic-dir.long{color:var(--gt)}.aic-dir.short{color:var(--rt)}
+.aic-px{color:var(--ink3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.aic-res{font-weight:800;width:90px;flex-shrink:0;text-align:right}
+.aic-conf{color:var(--ink3);width:140px;flex-shrink:0;text-align:right}
+.aic-auto{color:var(--ink3);font-size:9px;border:1px solid var(--line);border-radius:5px;padding:1px 5px;flex-shrink:0}
 .dm-k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700;margin-bottom:6px}
 .dm-v{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-.01em}
 .dm-s{font-size:10.5px;color:var(--ink3);margin-top:3px}
@@ -1789,12 +1802,13 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div id="aiAutoStatus" style="font-size:12px;color:var(--mu);margin-bottom:12px;min-height:16px"></div>
         <div class="ai-learn-barwrap"><div class="ai-learn-bar" id="aiLearnBar"></div></div>
         <div id="aiLearnStatus" style="font-size:12px;color:var(--mu);margin-top:8px;min-height:16px"></div>
-        <div style="font-size:11px;color:var(--fa);margin-top:6px">Each test reads a random historical chart, picks a strategy, takes the trade, then jumps forward to see if it worked — and updates its memory. Runs on real market data, so it needs a working connection and takes a few seconds per test.</div>
+        <div style="font-size:11px;color:var(--fa);margin-top:6px">Each test reads a random historical chart, picks the fitting strategy, then <b>walks the trade forward bar-by-bar on real data</b> to see whether the target or the stop hit first — and updates that strategy's confidence. Runs on real market data, so it needs a connection and takes a few seconds per test.</div>
       </div>
       <div id="aiLearnStats"></div>
       <div class="card">
-        <div class="card-title">Self-test log (most recent first)</div>
-        <div class="ai-learn-log" id="aiLearnLog"></div>
+        <div class="card-title"><span class="pdot"></span>Live learning console</div>
+        <div style="font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:12px">Every self-test streams here: the setup it picked, the planned <b>entry / stop / target</b>, whether the <span style="color:var(--gt)">target</span> or <span style="color:var(--rt)">stop</span> hit first on real forward data, the result in <b>R</b> (multiples of risk), and how that <b>nudged the strategy's confidence</b> — which feeds straight into your dashboard reads and trade levels.</div>
+        <div id="aiConsole"></div>
       </div>
     </div>
 
@@ -3070,6 +3084,57 @@ function aiStrategyLevels(key,candles){
 }
 
 // ── AI self-backtest: test the AI's OWN strategy picks on history ──
+// ── Simulate a setup on REAL forward data (does target or stop hit first?) ──
+// This is what makes the learning real rather than a coin-flip on direction:
+// the strategy's actual entry/stop/target are walked forward bar-by-bar.
+function simulateSetup(tk,full,cut,q){
+  const hold=14;
+  const histWin=full.slice(0,cut+1);
+  const win60=histWin.slice(-60);
+  const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
+  const setup=classifySetup(win60,a);
+  const lvl=aiStrategyLevels(setup.key,win60);
+  const entry=+lvl.entry, sl=+lvl.sl, tp1=+lvl.tp1, dir=lvl.dir;
+  const risk=Math.abs(entry-sl)||Math.max(0.01,entry*0.01);
+  const fwd=full.slice(cut+1,cut+1+hold);
+  let triggered=false, outcome=null, exitR=0, bars=0;
+  for(let k=0;k<fwd.length;k++){
+    const c=fwd[k]; bars=k+1;
+    if(!triggered){ const hit=dir==='long'?(c.l<=entry):(c.h>=entry); if(hit)triggered=true; else continue; }
+    if(dir==='long'){
+      if(c.l<=sl){outcome='loss';exitR=-1;break;}
+      if(c.h>=tp1){outcome='win';exitR=(tp1-entry)/risk;break;}
+    }else{
+      if(c.h>=sl){outcome='loss';exitR=-1;break;}
+      if(c.l<=tp1){outcome='win';exitR=(entry-tp1)/risk;break;}
+    }
+  }
+  if(!triggered){outcome='no-fill';exitR=0;}
+  else if(!outcome){ const lc=fwd.length?fwd[fwd.length-1].c:entry; const move=dir==='long'?(lc-entry):(entry-lc); exitR=move/risk; outcome=exitR>=0?'win':'loss'; }
+  const win=(outcome==='win');
+  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||'')};
+}
+// Fold one simulated trade into memory + the shared pool, recording the
+// confidence BEFORE→AFTER so the console can show what actually changed.
+function applyLearning(sim,auto){
+  const key=sim.setup.key;
+  const mem=AI_MEMORY.strats[key]||(AI_MEMORY.strats[key]={name:sim.lvl.name,bias:'',wins:0,losses:0,pnl:0,conf:0.5});
+  const confB=Math.round(stratConf(key)*100);
+  let counted=false;
+  if(sim.outcome!=='no-fill'){
+    if(sim.win)mem.wins++; else mem.losses++;
+    mem.pnl+=sim.r; mem.conf=stratConf(key);
+    AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
+    counted=true;
+    if(SHARED_OK)postShared({key,win:sim.win,pnl:sim.r,tk:sim.tk,name:sim.lvl.name,dir:sim.dir});
+  }
+  const confA=Math.round(stratConf(key)*100);
+  AI_MEMORY.log.unshift({t:Date.now(),tk:sim.tk,key,name:sim.lvl.name,color:sim.lvl.color,dir:sim.dir,
+    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,
+    confB,confA,score:+(sim.setup.score||0).toFixed(2),auto:!!auto,date:sim.date});
+  if(AI_MEMORY.log.length>60)AI_MEMORY.log.length=60;
+  return{counted,confB,confA};
+}
 let aiSelfBusy=false;
 async function aiSelfBacktest(rounds){
   if(aiSelfBusy)return;aiSelfBusy=true;
@@ -3094,33 +3159,11 @@ async function aiSelfBacktest(rounds){
       const q=await fetchQuote(tk);
       const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
       if(!full||full.length<70){fail++;continue;}
-      const hold=10;
-      const cut=Math.floor(50+Math.random()*(full.length-hold-52));
-      const histWin=full.slice(0,cut+1);
-      const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
-      const setup=classifySetup(histWin.slice(-60),a);
-      const lvl=aiStrategyLevels(setup.key,histWin.slice(-60));
-      const decisionPrice=full[cut].c;
-      const endPrice=full[Math.min(full.length-1,cut+hold)].c;
-      const changePct=((endPrice-decisionPrice)/decisionPrice)*100;
-      const dirRight=(lvl.dir==='long'&&changePct>=0)||(lvl.dir==='short'&&changePct<0);
-      const pnl=lvl.dir==='long'?changePct:-changePct;
-      // update memory
-      const mem=AI_MEMORY.strats[setup.key];
-      if(dirRight)mem.wins++;else mem.losses++;
-      mem.pnl+=pnl;mem.conf=stratConf(setup.key);
-      AI_MEMORY.trials++;if(dirRight)AI_MEMORY.wins++;
+      const cut=Math.floor(50+Math.random()*(full.length-14-52));
+      const sim=simulateSetup(tk,full,cut,q);   // walk the real trade forward
+      applyLearning(sim,false);                  // update confidence + log
       did++;
-      // persist this self-test so the history survives reloads
-      AI_MEMORY.log.unshift({tk,name:lvl.name,dir:lvl.dir,color:lvl.color,win:dirRight,pnl:+pnl.toFixed(1)});
-      if(AI_MEMORY.log.length>40)AI_MEMORY.log.length=40;
-      // contribute to the pooled cross-user model (if the backend is live)
-      if(SHARED_OK)postShared({key:setup.key,win:dirRight,pnl:+pnl.toFixed(1),tk,name:lvl.name,dir:lvl.dir});
-      if(log){
-        const row=document.createElement('div');row.className='ai-learn-row';
-        row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.name}</span><span class="bt-tag">${lvl.dir}</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'WIN':'LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
-        log.prepend(row);
-      }
+      renderAIConsole();
     }catch(e){fail++;}
     setBar((i+1)/rounds*100);
     await new Promise(r=>setTimeout(r,120));
@@ -3138,7 +3181,7 @@ async function aiSelfBacktest(rounds){
   // refresh dashboard so new confidence affects the current ticker
   if(lastData&&did>0)load(lastData.ticker);
 }
-function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnStats();const log=document.getElementById('aiLearnLog');if(log)log.innerHTML='';if(lastData)load(lastData.ticker);}
+function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnStats();renderAIConsole();if(lastData)load(lastData.ticker);}
 
 // ── AUTO self-learning ────────────────────────────────────────────────
 // When idle, the engine quietly runs ONE self-test on a real historical
@@ -3155,31 +3198,12 @@ async function aiAutoLearnOnce(){
     const q=await fetchQuote(tk);
     const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
     if(full&&full.length>=70){
-      const hold=10;
-      const cut=Math.floor(50+Math.random()*(full.length-hold-52));
-      const histWin=full.slice(0,cut+1);
-      const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
-      const setup=classifySetup(histWin.slice(-60),a);
-      const lvl=aiStrategyLevels(setup.key,histWin.slice(-60));
-      const decisionPrice=full[cut].c, endPrice=full[Math.min(full.length-1,cut+hold)].c;
-      const changePct=((endPrice-decisionPrice)/decisionPrice)*100;
-      const dirRight=(lvl.dir==='long'&&changePct>=0)||(lvl.dir==='short'&&changePct<0);
-      const pnl=lvl.dir==='long'?changePct:-changePct;
-      const mem=AI_MEMORY.strats[setup.key];
-      if(mem){if(dirRight)mem.wins++;else mem.losses++;mem.pnl+=pnl;mem.conf=stratConf(setup.key);}
-      AI_MEMORY.trials++;if(dirRight)AI_MEMORY.wins++;
-      AI_MEMORY.log.unshift({tk,name:lvl.name,dir:lvl.dir,color:lvl.color,win:dirRight,pnl:+pnl.toFixed(1),auto:true});
-      if(AI_MEMORY.log.length>40)AI_MEMORY.log.length=40;
+      const cut=Math.floor(50+Math.random()*(full.length-14-52));
+      const sim=simulateSetup(tk,full,cut,q);
+      applyLearning(sim,true);
       saveAIMemory();
-      if(SHARED_OK)postShared({key:setup.key,win:dirRight,pnl:+pnl.toFixed(1),tk,name:lvl.name,dir:lvl.dir});
       const lab=document.getElementById('tab-ailab');
-      if(lab&&lab.classList.contains('active')){
-        renderAILearnStats();
-        const log=document.getElementById('aiLearnLog');
-        if(log){const row=document.createElement('div');row.className='ai-learn-row';
-          row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.name}</span><span class="bt-tag" style="opacity:.7">auto</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'WIN':'LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
-          log.prepend(row);while(log.children.length>60)log.removeChild(log.lastChild);}
-      }
+      if(lab&&lab.classList.contains('active')){renderAILearnStats();renderAIConsole();}
     }
   }catch(e){}
   aiSelfBusy=false;
@@ -3217,15 +3241,39 @@ function renderAILearnStats(){
     </div>
     <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
     <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses STRATA — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>`;
-  renderAILearnLog();
+  renderAIConsole();
   paintAutoStatus();
 }
-// Render the persisted self-test history (survives reloads).
-function renderAILearnLog(){
-  const log=document.getElementById('aiLearnLog');if(!log)return;
+// ── AI learning console: streams what the engine learns from each trade ──
+function renderAIConsole(){
+  const el=document.getElementById('aiConsole');if(!el)return;
   const items=AI_MEMORY.log||[];
-  if(!items.length){log.innerHTML=`<div class="bt-empty" style="padding:16px">No self-tests recorded yet — run a batch above and the AI's learning history will accumulate here.</div>`;return;}
-  log.innerHTML=items.map(e=>`<div class="ai-learn-row"><span class="ai-learn-tk">${e.tk}</span><span style="color:${e.color||'var(--bt)'}">${e.name}</span><span class="bt-tag">${e.dir}</span><span class="${e.win?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${e.win?'WIN':'LOSS'} ${e.pnl>=0?'+':''}${e.pnl}%</span></div>`).join('');
+  if(!items.length){el.innerHTML=`<div class="aic-empty">Idle — the engine hasn't run a self-test yet. Hit <b>Run self-tests</b> above (or leave auto-learn on) and every trade it studies will stream here.</div>`;return;}
+  el.innerHTML=items.slice(0,60).map(e=>{
+    const time=e.t?new Date(e.t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'';
+    const tk=e.tk||'—', name=e.name||e.key||'', dir=(e.dir||'').toLowerCase();
+    // legacy entries (pre-outcome model)
+    if(e.outcome===undefined){
+      const wc=e.win?'var(--gt)':'var(--rt)';
+      return `<div class="aic-row"><span class="aic-t">${time}</span><span class="aic-tk">${tk}</span><span class="aic-nm" style="color:${e.color||'var(--act)'}">${name}</span><span class="aic-dir ${dir}">${dir}</span><span class="aic-px">legacy</span><span class="aic-res" style="color:${wc}">${e.win?'WIN':'LOSS'} ${e.pnl>=0?'+':''}${e.pnl}%</span></div>`;
+    }
+    const noFill=e.outcome==='no-fill';
+    const wc=noFill?'var(--ink3)':e.win?'var(--gt)':'var(--rt)';
+    const verdict=noFill?'NO FILL':(e.win?'WIN':'LOSS');
+    const rTxt=noFill?'':` ${e.r>=0?'+':''}${e.r}R`;
+    const conf=(e.confB!=null&&e.confA!=null&&!noFill)?`<span class="aic-conf">conf ${e.confB}%${e.confA!==e.confB?` <b style="color:${e.confA>=e.confB?'var(--gt)':'var(--rt)'}">→ ${e.confA}%</b>`:' ·'}</span>`:'<span class="aic-conf">no fill · no change</span>';
+    return `<div class="aic-row">
+      <span class="aic-t">${time}</span>
+      <span class="aic-tk">${tk}</span>
+      <span class="aic-nm" style="color:${e.color||'var(--act)'}">${name}</span>
+      <span class="aic-dir ${dir}">${dir}</span>
+      <span class="aic-px">@${(+e.entryP).toFixed(2)} sl ${(+e.sl).toFixed(2)} tp ${(+e.tp1).toFixed(2)}</span>
+      <span class="aic-res" style="color:${wc}">${verdict}${rTxt}</span>
+      ${conf}
+      ${e.auto?'<span class="aic-auto">auto</span>':''}
+    </div>`;
+  }).join('');
+  el.scrollTop=0;
 }
 
 // AI deep-read of a ticker's market direction (dashboard)
@@ -4043,7 +4091,13 @@ async function renderDash(text){
   try{
     const q=await fetchQuote(ticker);
     window.__userFetch=0;
-    const a=analyze(ticker,q.price,q.pct,q.hi52,q.lo52,q.closes);
+    // ── TIMEFRAME-AWARE BIAS: read the trend over the window that matches
+    //    the selected horizon, so the bull/bear bias updates with the chart.
+    const HZ_LOOKBACK={'0dte':20,'1w':28,'1m':46,'3m':70,'6m':130,'1y':252};
+    const lb=HZ_LOOKBACK[currentDTE]||252;
+    const cwin=(q.closes&&q.closes.length>lb)?q.closes.slice(-lb):q.closes;
+    const wHi=currentDTE==='1y'?q.hi52:Math.max(...cwin), wLo=currentDTE==='1y'?q.lo52:Math.min(...cwin);
+    const a=analyze(ticker,q.price,q.pct,wHi,wLo,cwin);
     const isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
     let entry=0,sl=0,tp1=0,tp2=0,aiPick=null;
     const cand=horizonCandles(q);   // structure window scaled to the chosen horizon
@@ -4126,7 +4180,7 @@ async function renderDash(text){
               :`Long stays valid above <b>$${a.sma20}</b> (20-day avg); invalidated below <b>$${a.lo20}</b>`);
     const CR=coachReadHTML({ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick});
     dashEl('dashConv').innerHTML=`
-      <div class="dp-h">AI read <span class="tag">${convPct}% conviction</span></div>
+      <div class="dp-h">AI read <span class="tag">${hzLabel} bias</span> <span class="tag">${convPct}% conviction</span></div>
       <div class="conv-top">
         <div class="conv-left">
           <div class="conv-verdict ${sentClass}">${isNeutral?'Neutral · no clear edge':(isShort?'Bearish':'Bullish')}</div>
@@ -4688,7 +4742,8 @@ async function loadRealStrategyChart(ticker,key,elId){
 }
 function annotatedChartHTML(ticker,key,candles,lv,lvls,elId){
   const mono='ui-monospace,Menlo,Consolas,monospace';
-  const closes=candles.map(c=>+c.c), n=closes.length, last=closes[n-1];
+  const C=candles.slice(-90);
+  const closes=C.map(c=>+c.c), n=closes.length, last=closes[n-1];
   const levels=[{v:lv.resis,col:'#f0a500',lab:'Resistance',dash:'4 3'},{v:lv.support,col:'#22c55e',lab:'Support',dash:'4 3'}];
   if(lvls&&isFinite(lvls.entry)){
     levels.push({v:lvls.entry,col:'#2f81f7',lab:'Entry',dash:'0'});
@@ -4696,31 +4751,38 @@ function annotatedChartHTML(ticker,key,candles,lv,lvls,elId){
     if(isFinite(lvls.tp1))levels.push({v:lvls.tp1,col:'#4ade80',lab:'Target 1',dash:'2 3'});
     if(lvls.tp2&&Math.abs(lvls.tp2-lvls.tp1)>0.01)levels.push({v:lvls.tp2,col:'#4ade80',lab:'Target 2',dash:'2 3'});
   }
-  const allV=closes.concat(levels.map(l=>l.v).filter(v=>isFinite(v)));
-  let mn=Math.min(...allV),mx=Math.max(...allV);const pad=(mx-mn)*0.06||1;mn-=pad;mx+=pad;
-  const W=760,H=340,padL=14,padR=132,padT=16,padB=30,pw=W-padL-padR,ph=H-padT-padB;
-  const X=i=>padL+(n<=1?0:i/(n-1)*pw), Y=v=>padT+(1-(v-mn)/((mx-mn)||1))*ph;
-  const pline=closes.map((c,i)=>`${X(i).toFixed(1)},${Y(c).toFixed(1)}`).join(' ');
-  const sma=[];for(let i=0;i<n;i++){if(i<19){sma.push(null);continue;}let s=0;for(let j=i-19;j<=i;j++)s+=closes[j];sma.push(s/20);}
-  const smaPath=sma.map((v,i)=>v==null?null:`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).filter(Boolean).join(' ');
-  let idxHi=0,idxLo=0;candles.forEach((c,i)=>{if(c.h>candles[idxHi].h)idxHi=i;if(c.l<candles[idxLo].l)idxLo=i;});
-  const lvLines=levels.map(l=>`<line x1="${padL}" y1="${Y(l.v).toFixed(1)}" x2="${W-padR}" y2="${Y(l.v).toFixed(1)}" stroke="${l.col}" stroke-width="1.3"${l.dash!=='0'?` stroke-dasharray="${l.dash}"`:''} opacity=".92"/>`).join('');
+  const lvVals=levels.map(l=>l.v).filter(v=>isFinite(v));
+  const allV=closes.concat(C.map(c=>c.h),C.map(c=>c.l),lvVals);
+  let mn=Math.min(...allV),mx=Math.max(...allV);const pad=(mx-mn)*0.05||1;mn-=pad;mx+=pad;
+  const W=760,H=340,padL=58,padR=128,padT=14,padB=28,pw=W-padL-padR,ph=H-padT-padB;
+  const slot=pw/n, bodyW=Math.max(1.8,Math.min(7,slot*0.62));
+  const cx=i=>padL+slot*(i+0.5), Y=v=>padT+(1-(v-mn)/((mx-mn)||1))*ph;
+  // left price axis + gridlines
+  let axisSvg='';for(let k=0;k<=5;k++){const v=mn+(mx-mn)*k/5,y=Y(v);axisSvg+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity=".32"/><text x="${padL-8}" y="${(y+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="${mono}" text-anchor="end">${v.toFixed(2)}</text>`;}
+  // candlesticks (real OHLC)
+  const candleSvg=C.map((c,i)=>{const up=c.c>=c.o,col=up?'#22c55e':'#f43f5e',x=cx(i),yH=Y(c.h),yL=Y(c.l),yO=Y(c.o),yC=Y(c.c),bt=Math.min(yO,yC),bh=Math.max(1,Math.abs(yC-yO));return`<line x1="${x.toFixed(1)}" y1="${yH.toFixed(1)}" x2="${x.toFixed(1)}" y2="${yL.toFixed(1)}" stroke="${col}" stroke-width="1" opacity=".9"/><rect x="${(x-bodyW/2).toFixed(1)}" y="${bt.toFixed(1)}" width="${bodyW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}"/>`;}).join('');
+  // 20-day average over the visible window (computed from full series for accuracy)
+  const fc=candles.map(c=>+c.c);const smaFull=[];for(let i=0;i<fc.length;i++){if(i<19){smaFull.push(null);continue;}let s=0;for(let j=i-19;j<=i;j++)s+=fc[j];smaFull.push(s/20);}
+  const smaC=smaFull.slice(-n);
+  const smaPath=smaC.map((v,i)=>v==null?null:`${cx(i).toFixed(1)},${Y(v).toFixed(1)}`).filter(Boolean).join(' ');
+  let idxHi=0,idxLo=0;C.forEach((c,i)=>{if(c.h>C[idxHi].h)idxHi=i;if(c.l<C[idxLo].l)idxLo=i;});
+  const lvLines=levels.map(l=>`<line x1="${padL}" y1="${Y(l.v).toFixed(1)}" x2="${W-padR}" y2="${Y(l.v).toFixed(1)}" stroke="${l.col}" stroke-width="1.3"${l.dash!=='0'?` stroke-dasharray="${l.dash}"`:''} opacity=".95"/>`).join('');
   const sorted=levels.map(l=>({col:l.col,lab:l.lab,v:l.v,y:Y(l.v)})).sort((a,b)=>a.y-b.y);
   for(let i=1;i<sorted.length;i++){if(sorted[i].y-sorted[i-1].y<13)sorted[i].y=sorted[i-1].y+13;}
-  const lvLabels=sorted.map(l=>`<text x="${W-padR+7}" y="${(l.y+4).toFixed(1)}" fill="${l.col}" font-size="11.5" font-family="${mono}" font-weight="700">${l.lab} $${(+l.v).toFixed(2)}</text>`).join('');
-  const svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="${ticker} ${key} setup on real data">
+  const lvLabels=sorted.map(l=>`<text x="${W-padR+7}" y="${(l.y+4).toFixed(1)}" fill="${l.col}" font-size="11" font-family="${mono}" font-weight="700">${l.lab} $${(+l.v).toFixed(2)}</text>`).join('');
+  const svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="${ticker} ${key} candlestick chart with labeled support, resistance, entry, stop and targets">
+    ${axisSvg}
     <rect x="${padL}" y="${padT}" width="${pw}" height="${ph}" fill="none" stroke="var(--line)" stroke-width="1"/>
     ${lvLines}
     ${smaPath?`<polyline points="${smaPath}" fill="none" stroke="var(--ink3)" stroke-width="1.3" stroke-dasharray="5 3" opacity=".7"/>`:''}
-    <polyline points="${pline}" fill="none" stroke="var(--ink)" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="${X(idxHi).toFixed(1)}" cy="${Y(candles[idxHi].h).toFixed(1)}" r="3.5" fill="#f0a500"/>
-    <text x="${X(idxHi).toFixed(1)}" y="${(Y(candles[idxHi].h)-7).toFixed(1)}" fill="#f0a500" font-size="10.5" font-family="${mono}" text-anchor="middle">swing high</text>
-    <circle cx="${X(idxLo).toFixed(1)}" cy="${Y(candles[idxLo].l).toFixed(1)}" r="3.5" fill="#22c55e"/>
-    <text x="${X(idxLo).toFixed(1)}" y="${(Y(candles[idxLo].l)+15).toFixed(1)}" fill="#22c55e" font-size="10.5" font-family="${mono}" text-anchor="middle">swing low</text>
-    <circle cx="${X(n-1).toFixed(1)}" cy="${Y(last).toFixed(1)}" r="4" fill="#2f81f7" stroke="var(--bg)" stroke-width="1.5"/>
+    ${candleSvg}
+    <circle cx="${cx(idxHi).toFixed(1)}" cy="${Y(C[idxHi].h).toFixed(1)}" r="3" fill="#f0a500"/>
+    <text x="${cx(idxHi).toFixed(1)}" y="${(Y(C[idxHi].h)-6).toFixed(1)}" fill="#f0a500" font-size="10" font-family="${mono}" text-anchor="middle">swing high</text>
+    <circle cx="${cx(idxLo).toFixed(1)}" cy="${Y(C[idxLo].l).toFixed(1)}" r="3" fill="#22c55e"/>
+    <text x="${cx(idxLo).toFixed(1)}" y="${(Y(C[idxLo].l)+14).toFixed(1)}" fill="#22c55e" font-size="10" font-family="${mono}" text-anchor="middle">swing low</text>
     ${lvLabels}
-    <text x="${padL+2}" y="${H-10}" fill="var(--ink3)" font-size="10.5" font-family="${mono}">${ticker} · ${n} sessions · last $${last.toFixed(2)}</text>
-    <text x="${W-padR}" y="${H-10}" fill="var(--ink3)" font-size="10.5" font-family="${mono}" text-anchor="end">grey dashed = 20-day avg</text>
+    <text x="${padL}" y="${H-9}" fill="var(--ink3)" font-size="10.5" font-family="${mono}">${ticker} · ${n} sessions · last $${last.toFixed(2)}</text>
+    <text x="${W-padR}" y="${H-9}" fill="var(--ink3)" font-size="10.5" font-family="${mono}" text-anchor="end">grey dashed = 20-day avg</text>
   </svg>`;
   const steps=((lvls&&lvls.steps)||[]).filter(s=>['zone','line','entry','stop','tp'].includes(s.k));
   const notes=steps.map((s,i)=>`<div style="display:flex;gap:9px;font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:6px"><span style="color:var(--act);font-weight:800;flex-shrink:0">${i+1}</span><span><b style="color:var(--ink)">${s.label}.</b> ${s.note}</span></div>`).join('');
