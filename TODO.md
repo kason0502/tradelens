@@ -12,6 +12,15 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Done (session 16g — proof windows / "show the receipts")
+- [x] **Reusable proof modal** (`#moWhy`/`openWhy`) — chart + reasoning behind a claim.
+- [x] **AI Lab: click any console trade → chart replay (decision divider) + why + conf delta** (`aiWhy`/`proofChartSVG`/`setupWhy`; `simulateSetup` stores a candle `snap`).
+- [x] **Dashboard "See the chart & reasoning ↗"** (`dashWhy`) → live candlestick + coach read.
+
+## Next (extend the proof pattern)
+- [ ] Add "why ↗" windows to more surfaces: Screener/Movers rows, Strategy candidates, News impact tags, Pro Traders calls — each opening a chart + reasoning.
+- [ ] Pooled (shared-backend) console entries have no local `snap` — optionally re-fetch + reconstruct the window by stored date so their charts work too.
+
 ## Done (session 16f — candlesticks + real learning + console + timeframe bias)
 - [x] **Real candlestick chart with a left price axis** in the Strategy tab (`annotatedChartHTML`).
 - [x] **Outcome-based self-learning** — `simulateSetup` walks entry/stop/target forward; win only if target beats stop (in R). `applyLearning` records conf before→after.
