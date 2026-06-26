@@ -921,7 +921,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dp-h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;color:var(--ink3);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .dp-h .tag{font-family:var(--mono);font-weight:600;color:var(--ink2);letter-spacing:.04em;text-transform:none}
 .dash-panel.chart{padding:0;overflow:hidden}
-.dash-tv{height:430px;background:var(--s2)}
+.dash-tv{height:380px;background:var(--s2)}
 .dash-tv>div{height:100%;width:100%}
 
 /* Trade Plan panel */
@@ -998,7 +998,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dash-load{display:flex;align-items:center;gap:10px;color:var(--ink3);font-size:13px;padding:6px 0}
 .dash-note{display:none}
 .dash-ai-tag{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink3);margin-bottom:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
-@media(max-width:640px){.dash-head{gap:16px}.dh-mini{display:none}.dash-tv{height:340px}}
+@media(max-width:640px){.dash-head{gap:16px}.dh-mini{display:none}.dash-tv{height:340px}
+  /* keep SVG charts legible on phones: scroll horizontally instead of squashing */
+  #dashPredict{overflow-x:auto;-webkit-overflow-scrolling:touch}#dashPredict svg{min-width:580px}}
 
 /* ═══════════ LIVING TERMINAL — landing kinetics ═══════════ */
 /* Streaming ticker tape under the nav */

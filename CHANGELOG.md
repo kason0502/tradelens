@@ -4,7 +4,10 @@
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
 ## 2026-06-26 (session 16i) — premium polish pass (self-critique, ongoing)
-> Standing directive from the user: continuously self-critique (designer/FE/UX/QA) and fix weaknesses without being told. First pass:
+> Standing directive from the user: continuously self-critique (designer/FE/UX/QA) and fix weaknesses without being told.
+- **Prediction chart was unreadable** — it was squeezed into the 352px right-column plan panel (≈38% scale). Moved it to its own **full-width panel** (`#dashPredictPanel`) in the wide left column (~770px, 2.2× bigger); bumped in-chart fonts (axis 11.5 / labels 12.5 / now-caption 11.5), taller viewBox (348), wider candles (55 bars, body ≤11px). Panel hides on a neutral read. Trimmed TradingView height 430→380 to balance the two stacked charts.
+- **Responsiveness:** SVG prediction chart now **scrolls horizontally on phones** (`min-width:580px` under 640px) instead of squashing to illegibility.
+- First pass (earlier this session):
 - **Trade plan reads in $ and %**, not "ticks". Killed the cluttered "+3,500 ticks" / "+0 ticks" framing across the plan, the Risk:reward metric tile, and "Why this stop?" — now `−3.1% · $4.20` style + plain-language R:R ("you make 2.4× what you risk"). Entry row shows "at market · now".
 - **Color consistency:** removed the orphan blue `#2f81f7` (brand accent is emerald) — the Entry/now/decision markers in all three chart renderers are now a neutral near-white (`#e8eaed`), the standard current-price convention. Green/red stay P&L-only.
 - **Cohesive loading state:** the whole `.dash-grid` now dims/desaturates (`.is-loading`) while a new ticker loads, so stale panels don't linger showing the previous symbol; cleared on success and error.
