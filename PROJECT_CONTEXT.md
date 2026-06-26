@@ -1,7 +1,7 @@
 # STRATA — Project Context
 
 > Living doc. Update at the end of any session that changes scope, status, or direction.
-> Last updated: 2026-06-26 (session 7). **The product was renamed TradeLens Pro → STRATA** ("Structure Terminal").
+> Last updated: 2026-06-26 (session 14). Renamed TradeLens Pro → STRATA; now hosted on GitHub→Vercel with a server-side data + AI proxy (see "Server, data & hosting" below).
 
 ## What this is
 STRATA (formerly TradeLens Pro) is a **single-file** web app (`index.html`, no build step, no framework) that combines:
@@ -25,7 +25,7 @@ Serious independent retail traders. Voice/feel: precise, institutional, trustwor
 - **The dashboard (post-launch) is a real panel terminal** (rebuilt from the session-5 AI Copilot chat). A slim **ask bar** (search + horizon + ticker chips) drives `renderDash`, which fills fixed panels: ticker header (live price + conviction), wide **TradingView** chart, a single Trade Plan (entry/stop/target — price primary, tick-distance secondary, R:R), an AI-read conviction panel, a key-metrics strip, and a live-signals panel. `loadTicker` (News/Screener/etc.) routes here. The old `.cp-*` chat and the older legacy `renderDash`/`.wk` workspace are gone/disabled.
 - **Shared cross-user learning** exists: `api/learn.js` (Vercel serverless + KV) pools the AI's self-test learning across all users; falls back to per-device localStorage when not deployed (`DEPLOY_BACKEND.md`).
 - Other tabs: Screener, News (sample feed), Pro Traders, Backtest, Performance, AI Lab (persistent learning), AI Chat, Alerts, Feedback — still on older `.card` styling.
-- Repo is git-tracked (`main`), **no remote yet**. Deploy-ready for Vercel (`index.html` at root, `api/yf.js` + `api/learn.js` serverless, brand PNGs tracked, `.vercelignore` excludes `.claude` + `*.md`). Step-by-step in **`DEPLOY.md`**.
+- Repo is git-tracked (`main`) and **on GitHub at `kason0502/tradelens`**, deployed via Vercel (`index.html` homepage, `api/yf.js`/`api/claude.js`/`api/learn.js` serverless, brand PNGs tracked, `.vercelignore` excludes `.claude` + `*.md`). See the "Server, data & hosting" section + **`DEPLOY.md`**.
 
 ## How to run / preview
 - No Node/Python on this machine. Use the bundled PowerShell server (**which is also the `/api/yf` data proxy** — that's what makes data load reliably):
@@ -34,6 +34,25 @@ Serious independent retail traders. Voice/feel: precise, institutional, trustwor
   - Always open via `http://localhost:8777` (through the server) — opening `index.html` as a bare file has no proxy and falls back to flaky public proxies.
 - **To host it for everyone (so the server runs in the cloud, not just locally):** see `DEPLOY.md` (GitHub → Vercel; `api/yf.js` runs the proxy server-side for all visitors).
 - ⚠️ The **screenshot tool cannot capture this page** (live TradingView iframe + offscreen tab pauses CSS animations → timeout). Verify with `preview_eval` / computed styles / console logs instead, and ask the user to view in a real browser.
+
+## Server, data & hosting (how the server works + GitHub/Vercel)
+
+### Why a server at all
+Browsers can't fetch stock data straight from Yahoo (CORS blocks it). The app used to bounce requests through flaky free public CORS proxies → "nothing loads". The fix is a **server-side proxy**: the *server* fetches Yahoo (servers aren't bound by CORS), so data loads fast and reliably. There are two server functions:
+- **`/api/yf?url=…`** — market-data proxy (Yahoo/Stooq). The reason stocks load.
+- **`/api/claude`** — Claude (Anthropic) proxy. Lets the owner's key power AI for every visitor.
+
+### Same code, two homes
+- **Local dev:** `.claude/serve.ps1` is the preview server AND the `/api/yf` proxy (pure PowerShell `Invoke-WebRequest`, no Node). `/api/claude` does NOT exist locally (PowerShell only does `/api/yf`), so locally AI is bring-your-own-key. **Restart the preview after editing `serve.ps1`.** Always open via `http://localhost:8777`.
+- **Deployed (Vercel):** `api/yf.js` and `api/claude.js` are serverless functions that do the same thing in the cloud for **every visitor**. `vercel.json` gives `api/claude.js` a 30s timeout.
+- **Client fallback chain** (`raceAttempts` in `index.html`): try `/api/yf` first (`_yfProxyOK`); if absent (bare file / plain static host), race the public CORS proxies in parallel. Background pollers throttle + stand down during a user lookup (`bgIdle`, `window.__userFetch`).
+
+### GitHub + Vercel
+- **Repo:** `https://github.com/kason0502/tradelens` (`origin/main`). Connected via `git remote add origin …`.
+- **History note:** the GitHub repo had been updated by *manual file uploads* ("Add files via upload"), so it diverged from the local git history and was **missing files** (the PNGs, `api/yf.js`, `api/learn.js`). Reconciled in session 14 by **merging** `origin/main` into the complete local project with `-X ours` (keep local files) + `--allow-unrelated-histories`, then a normal push. Local and GitHub are now in sync.
+- **Deploy flow:** push to GitHub → **Vercel auto-redeploys** in ~30s. `index.html` at root is the homepage; `api/*.js` become functions. `.vercelignore` keeps `.claude` + `*.md` out of the build.
+- **AI for everyone:** the owner set **`ANTHROPIC_API_KEY`** (encrypted) in Vercel env vars; once `api/claude.js` is deployed, the app probes `/api/claude` on load and gives all visitors AI with no key prompt (this bills the owner's key). Optional: Vercel KV for pooled learning (`api/learn.js`, see `DEPLOY_BACKEND.md`).
+- **Pushing updates:** normal `git add -A && git commit -m "…" && git push` (first time needed `git push --set-upstream origin main` to set tracking). Full step-by-step in **`DEPLOY.md`**.
 
 ## Key product decisions
 - **Real data only** — never simulate/fake prices. If a feed fails, show an honest error.
@@ -45,7 +64,7 @@ Serious independent retail traders. Voice/feel: precise, institutional, trustwor
 ## Known constraints / gotchas
 - **Data reliability is solved by the `/api/yf` proxy** (local PowerShell or deployed Vercel). The public CORS proxies are now only a *fallback* (used when the page is opened as a bare file with no server) — flaky/rate-limited. `raceAttempts` fires proxies in parallel (first valid wins), so even the fallback fails fast instead of hanging.
 - TradingView widget needs internet; shows a fallback message pointing to "AI Levels" if blocked.
-- No `/api/claude` server proxy exists in the repo, so on a public deploy each visitor must paste their own Anthropic key for AI features.
+- `/api/claude` exists (`api/claude.js`) but only runs when **deployed** (Vercel reads `ANTHROPIC_API_KEY`); the **local** PowerShell server doesn't run it, so locally AI is bring-your-own-key.
 - Commits warn `LF will be replaced by CRLF` — harmless (Windows).
 
 ## The doc set (keep all current)

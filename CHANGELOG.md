@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 14) — hosted on GitHub→Vercel + AI proxy + brand images + fixes
+- **Now hosted for everyone (GitHub → Vercel).** Connected `origin` = `github.com/kason0502/tradelens`. The GitHub repo had diverged (updated via manual "Add files via upload") and was **missing files** (PNGs, `api/yf.js`, `api/learn.js`); reconciled by merging `origin/main` into the complete local project (`-X ours` + `--allow-unrelated-histories`) then pushing. Local ↔ GitHub now in sync; Vercel auto-redeploys on push.
+- **`api/claude.js`** — server-side Claude proxy. With `ANTHROPIC_API_KEY` set in Vercel, every deployed visitor gets AI with no key prompt (the app already probes `/api/claude`). Added `package.json` + `vercel.json` (30s timeout for the AI function). `DEPLOY.md` covers the whole flow.
+- **Brand = the user's own transparent PNGs:** `logo.png` (bull-head) in the nav, `bull.png`/`bear.png` mascots in the dashboard.
+- **Fixes:** landing top gap (aurora `.lx-orb` were `position:static` → stacked ~1720px in flow; made absolute + `.lx-bg` fixed); mascot hidden on **neutral** reads (only shows for bullish/bearish); mascot bigger (144×104) with a stronger double-glow.
+
 ## 2026-06-26 (session 13) — reliable data via a server-side proxy
 - **Stocks now load reliably (no more flaky public CORS proxies).** Added a server-side market-data proxy at **`/api/yf?url=…`** that fetches Yahoo/Stooq server-side (no browser CORS, no per-user rate limits):
   - **Local:** `.claude/serve.ps1` (the PowerShell preview server) now handles `/api/yf` — pure PowerShell `Invoke-WebRequest`, no Node/Python. **Restart the preview** to pick it up. Verified: AAPL/NVDA/TSLA/SPY load in 200–700ms.
