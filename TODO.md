@@ -12,6 +12,10 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Done (session 16h — dashboard predicts from now + inline chart)
+- [x] **Entry re-anchored to current price** so the plan is a forward prediction, not a partway-through setup.
+- [x] **Inline prediction chart** in the Trade Plan (`predictChartSVG`): candles → "now" divider → reward/risk projection cone + labeled levels; removed the "See chart" button.
+
 ## Done (session 16g — proof windows / "show the receipts")
 - [x] **Reusable proof modal** (`#moWhy`/`openWhy`) — chart + reasoning behind a claim.
 - [x] **AI Lab: click any console trade → chart replay (decision divider) + why + conf delta** (`aiWhy`/`proofChartSVG`/`setupWhy`; `simulateSetup` stores a candle `snap`).

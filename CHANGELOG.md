@@ -3,6 +3,10 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16h) — dashboard predicts from NOW + inline chart
+- **Prediction is anchored to the current price.** `renderDash` now re-anchors the trade-plan **entry to `q.price`** (keeping the strategy's risk/reward distances, then `clampLevels` for the horizon), so the call is a forward prediction from the present bar instead of a structure level the move may have already passed ("halfway through").
+- **The chart is already there (no button).** New `predictChartSVG` renders inside the Trade Plan: real candlesticks up to a **"now" divider**, then a **forward projection cone** — green toward the target (reward), red toward the stop (risk) — plus labeled Support/Resistance/Entry(now)/Stop/Target and the left price axis. Removed the "See the chart & reasoning ↗" button (the chart is inline; `dashWhy`/proof window still exist for AI Lab).
+
 ## 2026-06-26 (session 16g) — "show the receipts" proof windows
 - **Reusable proof modal** (`#moWhy` + `openWhy(title,sub,body)`): a window that backs any claim with a **chart + reasoning**, so nothing feels made up.
 - **AI Lab: every trade has a why + chart.** Each console row is now clickable ("why ↗") → opens the proof window for that exact self-test: `proofChartSVG` redraws the trade on its **real stored candles** (a snapshot captured at learn time — decision tail + forward bars), with a **"decision" divider** (left = what the AI saw, right = what happened), labeled Support/Resistance/Entry/Stop/Target + 20-MA, plus `setupWhy` reasoning (per-strategy rationale grounded in the real level numbers, fit score) and the confidence before→after. `simulateSetup` now stores a compact `snap`; log capped to 45 to bound storage.
