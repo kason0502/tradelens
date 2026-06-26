@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 10) — logo de-boxed · richer mascots · deeper AI read · TV reliability
+- **Logo no longer in a box.** Removed the accent tile/box-shadow from `.logo-mark`; the bull mark now renders in the accent colour with a `drop-shadow` glow (and flips red when bearish). The conviction logo-pulse uses a glow filter instead of a box-shadow.
+- **Redesigned bull/bear mascots** — replaced the basic front-facing heads with semi-realistic **profile silhouettes** (glowing outline + soft fill, `BULL_SVG`/`BEAR_SVG`), larger frame (`.mood-beast` 104×70).
+- **Deeper AI read on the dashboard** — the AI-read panel now lists **"What the AI sees"**: a plain-language signal checklist (✓ bull / ✗ bear / • neutral, from `analyze().signals`), a bullish-vs-bearish signal tally, and a **what-keeps-it-valid / invalidation** level line.
+- **TradingView reliability + auto-update** — `mountTVInto` now **retries** if the free widget fails to render an iframe (it often silently fails under load during market hours), waits for `tv.js` to finish loading, and shows a **"↻ Reload chart"** fallback (`tvFallback`). The widget streams live once mounted.
+
 ## 2026-06-26 (session 9) — sentiment-reactive theme · bull/bear · bull logo · index strip
 - **The whole UI flips red when the read is bearish.** Accent is now a flippable RGB token (`--ac-rgb`, all chrome greens converted to `rgba(var(--ac-rgb),…)`); `body.bearish` overrides `--ac`/`--ac-rgb`/`--act`/etc. to red. `setMood(sentiment)` (called from `renderDash`) toggles `body.bearish` and `window.FX_MOOD`. The animated background (`#fxCanvas`) eases its aurora/grid/constellation between green↔red via `moodT`. Smooth `.7s` transitions on key surfaces. Bullish/neutral = green, bearish = red.
 - **Original bull + bear mascots** (`BULL_SVG`/`BEAR_SVG`, hand-built STRATA line-art) glow in the dashboard **AI-read** panel — bull for bullish/neutral, bear for bearish, colour-matched with a `drop-shadow` glow (`.mood-beast`).

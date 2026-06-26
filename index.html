@@ -63,8 +63,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 
 /* ── LOGO ── */
 .logo-wrap{display:flex;align-items:center;gap:13px;text-decoration:none;cursor:pointer}
-.logo-mark{width:38px;height:38px;border-radius:11px;background:var(--ac);box-shadow:0 0 0 1px rgba(var(--ac-rgb),.4),0 6px 16px -6px rgba(var(--ac-rgb),.5),inset 0 1px 0 rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;transition:transform .25s,box-shadow .25s}
-.logo-wrap:hover .logo-mark{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(var(--ac-rgb),.55),0 8px 20px -6px rgba(var(--ac-rgb),.55),inset 0 1px 0 rgba(255,255,255,.26)}
+.logo-mark{width:42px;height:42px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;color:var(--ac);filter:drop-shadow(0 0 9px rgba(var(--ac-rgb),.6));transition:transform .3s cubic-bezier(.34,1.6,.5,1),filter .3s}
+.logo-mark svg{width:100%;height:100%}
+.logo-wrap:hover .logo-mark{transform:translateY(-1px) scale(1.05);filter:drop-shadow(0 0 15px rgba(var(--ac-rgb),.85))}
 .logo-text{display:flex;flex-direction:column;line-height:1}
 .logo-name{font-size:18px;font-weight:900;letter-spacing:-.04em;color:var(--tx);display:flex;align-items:center;gap:5px}
 .logo-name b{color:var(--ac)}
@@ -921,11 +922,17 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .conv-left{flex:1;min-width:0}
 .conv-verdict{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:11px}
 .conv-verdict.long{color:var(--gt)}.conv-verdict.short{color:var(--rt)}.conv-verdict.wait{color:var(--ink2)}
-.mood-beast{width:78px;height:66px;flex-shrink:0;transition:color .6s ease}
-.mood-beast svg{width:100%;height:100%;filter:drop-shadow(0 0 11px currentColor)}
+.mood-beast{width:104px;height:70px;flex-shrink:0;transition:color .6s ease}
+.mood-beast svg{width:100%;height:100%;filter:drop-shadow(0 0 9px currentColor)}
 .mood-beast.long{color:var(--gt)}.mood-beast.short{color:var(--rt)}.mood-beast.wait{color:var(--ink3)}
 .conv-bar{height:8px;border-radius:99px;background:var(--s3);overflow:hidden}
 .conv-left .conv-bar{margin-bottom:0}
+.ins-head{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--fa);margin:17px 0 10px}
+.ins-list{display:flex;flex-direction:column;gap:9px}
+.ins-row{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;line-height:1.5;color:var(--ink2)}
+.ins-ic{width:16px;height:16px;flex-shrink:0;margin-top:1px}.ins-ic svg{width:100%;height:100%}
+.ins-row.pos .ins-ic{color:var(--gt)}.ins-row.neg .ins-ic{color:var(--rt)}.ins-row.neu .ins-ic{color:var(--ink3)}
+.ins-foot{font-size:11.5px;color:var(--ink3);margin-top:13px;padding-top:12px;border-top:1px solid var(--line);line-height:1.7}
 .conv-fill{height:100%;border-radius:99px;transition:width .5s ease}
 .dash-rationale{font-size:13px;color:var(--ink2);line-height:1.7}
 
@@ -1100,7 +1107,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <header class="lx-nav" id="lxNav">
     <div class="lx-nav-in">
       <div class="logo-wrap" onclick="lpScroll('lxTop')" style="cursor:pointer">
-        <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 40 40" fill="none"><g stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15C8 13 5 9 4 4 9 7 12 10 15 14"/><path d="M27 15C32 13 35 9 36 4 31 7 28 10 25 14"/><path d="M12 15C11 23 14 30 20 33 26 30 29 23 28 15"/><path d="M16 22L19 21M24 22L21 21"/></g><circle cx="20" cy="26" r="1.7" fill="#fff"/></svg></div>
+        <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 40 40" fill="none"><g stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15C8 13 5 9 4 4 9 7 12 10 15 14"/><path d="M27 15C32 13 35 9 36 4 31 7 28 10 25 14"/><path d="M12 15C11 23 14 30 20 33 26 30 29 23 28 15"/><path d="M16 22L19 21M24 22L21 21"/></g><circle cx="20" cy="26" r="1.7" fill="currentColor"/></svg></div>
         <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Structure Terminal</div></div>
       </div>
       <nav class="lx-nav-links">
@@ -1426,7 +1433,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="lx lx-foot-grid">
       <div class="lx-foot-brand">
         <div class="logo-wrap" style="cursor:default">
-          <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 40 40" fill="none"><g stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15C8 13 5 9 4 4 9 7 12 10 15 14"/><path d="M27 15C32 13 35 9 36 4 31 7 28 10 25 14"/><path d="M12 15C11 23 14 30 20 33 26 30 29 23 28 15"/><path d="M16 22L19 21M24 22L21 21"/></g><circle cx="20" cy="26" r="1.7" fill="#fff"/></svg></div>
+          <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 40 40" fill="none"><g stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15C8 13 5 9 4 4 9 7 12 10 15 14"/><path d="M27 15C32 13 35 9 36 4 31 7 28 10 25 14"/><path d="M12 15C11 23 14 30 20 33 26 30 29 23 28 15"/><path d="M16 22L19 21M24 22L21 21"/></g><circle cx="20" cy="26" r="1.7" fill="currentColor"/></svg></div>
           <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Structure Terminal</div></div>
         </div>
         <p>Precision market analysis and AI strategy tools for serious, independent traders.</p>
@@ -1500,7 +1507,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <div class="appnav-logo logo-wrap" onclick="showLanding()" title="Back to home">
     <div class="logo-mark">
       <!-- STRATA bull mark -->
-      <svg width="23" height="23" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15C8 13 5 9 4 4 9 7 12 10 15 14"/><path d="M27 15C32 13 35 9 36 4 31 7 28 10 25 14"/><path d="M12 15C11 23 14 30 20 33 26 30 29 23 28 15"/><path d="M16 22L19 21M24 22L21 21"/></g><circle cx="20" cy="26" r="1.7" fill="#fff"/></svg>
+      <svg width="23" height="23" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15C8 13 5 9 4 4 9 7 12 10 15 14"/><path d="M27 15C32 13 35 9 36 4 31 7 28 10 25 14"/><path d="M12 15C11 23 14 30 20 33 26 30 29 23 28 15"/><path d="M16 22L19 21M24 22L21 21"/></g><circle cx="20" cy="26" r="1.7" fill="currentColor"/></svg>
     </div>
     <div class="logo-text">
       <div class="logo-name">STRATA</div>
@@ -1883,25 +1890,18 @@ function initPremiumNav(){
 }
 
 // ── SENTIMENT-REACTIVE THEME + bull/bear mascots (original STRATA line-art) ──
-const BULL_SVG=`<svg viewBox="0 0 200 170" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-label="bull">
-  <path d="M64 56C44 52 26 38 18 16C16 38 30 56 56 66"/>
-  <path d="M136 56C156 52 174 38 182 16C184 38 170 56 144 66"/>
-  <path d="M60 64C50 60 41 63 36 73"/>
-  <path d="M140 64C150 60 159 63 164 73"/>
-  <path d="M56 66C52 88 56 110 70 126C80 138 120 138 130 126C144 110 148 88 144 66"/>
-  <path d="M70 90L86 84"/><path d="M130 90L114 84"/>
-  <path d="M72 126C78 146 122 146 128 126"/>
-  <path d="M88 132C92 138 108 138 112 132"/>
-  <circle cx="100" cy="142" r="7"/>
+const BULL_SVG=`<svg viewBox="0 0 232 150" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" aria-label="bull">
+  <path d="M16 98C9 88 16 76 29 77C24 62 22 49 35 45C28 38 39 31 48 38C50 47 45 55 41 61C51 59 59 57 65 63C69 48 84 38 101 42C111 33 124 35 130 46C152 42 176 44 192 55C198 46 208 38 216 36C212 49 207 59 203 67C201 88 199 110 193 130C191 138 187 142 183 143L174 143C176 121 174 103 170 93C150 97 118 99 95 95C97 111 93 129 89 141C87 147 83 149 79 143L73 143C75 121 73 105 69 95C55 97 36 97 24 98Z"/>
+  <path d="M58 53C64 49 71 51 73 57" fill="none"/>
+  <path d="M150 60C166 64 180 60 188 50" fill="none" stroke-opacity=".55"/>
+  <circle cx="41" cy="69" r="2.6" fill-opacity="1" stroke="none"/>
+  <circle cx="22" cy="91" r="1.9" fill-opacity="1" stroke="none"/>
 </svg>`;
-const BEAR_SVG=`<svg viewBox="0 0 200 170" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-label="bear">
-  <circle cx="56" cy="46" r="22"/><circle cx="144" cy="46" r="22"/>
-  <path d="M40 78C40 130 66 150 100 150C134 150 160 130 160 78C160 48 132 36 100 36C68 36 40 48 40 78Z"/>
-  <circle cx="78" cy="80" r="3.6" fill="currentColor" stroke="none"/>
-  <circle cx="122" cy="80" r="3.6" fill="currentColor" stroke="none"/>
-  <ellipse cx="100" cy="116" rx="26" ry="20"/>
-  <path d="M90 108C93 103 107 103 110 108C110 116 100 121 100 121C100 121 90 116 90 108Z" fill="currentColor" stroke="none"/>
-  <path d="M100 121L100 132M84 136C92 144 108 144 116 136"/>
+const BEAR_SVG=`<svg viewBox="0 0 210 150" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" aria-label="bear">
+  <path d="M14 86C8 80 10 71 19 69C16 58 22 49 35 49C33 40 42 38 47 47C53 43 58 49 55 57C66 52 80 47 96 51C114 40 136 42 152 53C170 47 188 54 195 71C199 84 197 104 190 127C188 136 184 140 179 141L169 141C171 119 169 104 165 95C145 99 118 99 100 96C102 112 98 130 94 141L84 141C86 118 84 104 80 95C66 97 50 97 38 92C28 88 19 84 14 86Z"/>
+  <path d="M150 64C166 66 180 62 187 54" fill="none" stroke-opacity=".5"/>
+  <circle cx="33" cy="63" r="2.5" fill-opacity="1" stroke="none"/>
+  <circle cx="15" cy="81" r="2.6" fill-opacity="1" stroke="none"/>
 </svg>`;
 function setMood(sent){
   const bear=sent==='bearish';
@@ -3525,12 +3525,10 @@ function renderDash(ticker,q,a){
   // Scale the logo by predicted-impact conviction: how far score sits from neutral (50)
   // plus today's move magnitude. Strong conviction → larger mark.
   const conviction=Math.min(1,(Math.abs(a.score-50)/42)*0.7+Math.min(1,Math.abs(q.pct)/4)*0.3);
-  const logoSize=Math.round(40+conviction*16); // 40px..56px
   const lm=document.querySelector('.logo-mark');
   if(lm){
-    lm.style.width=logoSize+'px';lm.style.height=logoSize+'px';
-    const glow=0.28+conviction*0.4;
-    lm.style.boxShadow=`0 0 0 1px rgba(var(--ac-rgb),${0.3+conviction*0.3}),0 6px ${18+conviction*16}px rgba(var(--ac-rgb),${glow}),inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -2px 6px rgba(0,0,0,0.18)`;
+    // no box anymore — pulse the glow intensity with conviction
+    lm.style.filter=`drop-shadow(0 0 ${8+conviction*14}px rgba(var(--ac-rgb),${0.5+conviction*0.4}))`;
     lm.title=`Conviction: ${Math.round(conviction*100)}% — ${conviction>0.66?'high impact expected':conviction>0.33?'moderate impact':'low impact / range-bound'}`;
   }
   const risk=Math.abs(entry-sl),reward=Math.abs(tp1-entry);
@@ -3786,11 +3784,30 @@ function cpSend(){const inp=dashEl('cpInput');if(!inp)return;const txt=(inp.valu
 function cpChip(txt){const inp=dashEl('cpInput');if(inp)inp.value=txt;renderDash(txt);}
 function cpSetHorizon(v){currentDTE=v;if(lastData)renderDash(lastData.ticker);}
 function cpInit(){renderDash('AAPL');}
-function mountTVInto(id,ticker){
+function tvFallback(id,ticker,msg){
+  return `<div style="height:100%;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;color:var(--ink3);font-size:13px;text-align:center;padding:24px">
+    <div>${msg} for <b>${ticker}</b>. The free chart feed is sometimes slow during market hours.</div>
+    <button class="dp-fu" onclick="mountTVInto('${id}','${ticker}')">↻ Reload chart</button></div>`;
+}
+// Mount TradingView with retries — the free widget often fails silently under load
+// (esp. during trading hours), so we re-mount if no iframe appears.
+function mountTVInto(id,ticker,tries){
   const el=dashEl(id);if(!el)return;
-  if(typeof TradingView==='undefined'){el.innerHTML='<div style="padding:42px 20px;text-align:center;color:var(--ink3);font-size:13px">TradingView chart unavailable (offline or blocked).</div>';return;}
-  try{new TradingView.widget({autosize:true,symbol:ticker,interval:'D',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',toolbar_bg:'#0c0c0e',enable_publishing:false,allow_symbol_change:false,hide_side_toolbar:true,hide_legend:false,withdateranges:false,details:false,container_id:id});}
-  catch(e){el.innerHTML='<div style="padding:42px 20px;text-align:center;color:var(--ink3);font-size:13px">TradingView chart unavailable right now.</div>';}
+  tries=tries||0;
+  if(typeof TradingView==='undefined'||!TradingView.widget){
+    if(tries<10){setTimeout(()=>mountTVInto(id,ticker,tries+1),600);return;}
+    el.innerHTML=tvFallback(id,ticker,'TradingView is taking a while to load');return;
+  }
+  el.innerHTML='';
+  try{
+    new TradingView.widget({autosize:true,symbol:ticker,interval:'D',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',toolbar_bg:'#0c0c0e',enable_publishing:false,allow_symbol_change:false,hide_side_toolbar:true,hide_legend:false,withdateranges:false,details:false,container_id:id});
+    // verify it actually rendered; retry a few times, then offer a manual reload
+    setTimeout(()=>{
+      if(!el.querySelector('iframe')){ if(tries<4){mountTVInto(id,ticker,tries+1);} else {el.innerHTML=tvFallback(id,ticker,'Chart didn\'t load');} }
+    },5000);
+  }catch(e){
+    if(tries<4){setTimeout(()=>mountTVInto(id,ticker,tries+1),800);} else {el.innerHTML=tvFallback(id,ticker,'Chart unavailable');}
+  }
 }
 function dashLoading(ticker){
   const head=dashEl('dashHead');if(head)head.innerHTML=`<div class="dash-load"><span class="ai-spin"></span> Reading ${ticker||'the market'}…</div>`;
@@ -3912,16 +3929,31 @@ async function renderDash(text){
 
     // ── AI READ (conviction) ──
     const rationale=`${a.reason}${aiPick&&!isNeutral?` Strongest learned strategy here is <b>${aiPick.name}</b> (${Math.round((aiPick.conf||0.5)*100)}% confidence).`:''}`;
+    const icCheck='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    const icX='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+    const icDot='<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="4.5"/></svg>';
+    const insights=(a.signals||[]).slice(0,6).map(s=>{
+      const cls=s.dir==='bull'?'pos':s.dir==='bear'?'neg':'neu';
+      const ic=s.dir==='bull'?icCheck:s.dir==='bear'?icX:icDot;
+      return `<div class="ins-row ${cls}"><span class="ins-ic">${ic}</span><span class="ins-tx">${s.detail}</span></div>`;
+    }).join('');
+    const bn=(a.signals||[]).filter(s=>s.dir==='bull').length, brn=(a.signals||[]).filter(s=>s.dir==='bear').length;
+    const watch=isNeutral?`Breaks <b>$${a.hi20}</b> → long · loses <b>$${a.lo20}</b> → short`
+      :(isShort?`Short stays valid below <b>$${a.sma20}</b> (20-day avg); invalidated above <b>$${a.hi20}</b>`
+              :`Long stays valid above <b>$${a.sma20}</b> (20-day avg); invalidated below <b>$${a.lo20}</b>`);
     dashEl('dashConv').innerHTML=`
-      <div class="dp-h">AI read <span class="tag">${convPct}%</span></div>
+      <div class="dp-h">AI read <span class="tag">${convPct}% conviction</span></div>
       <div class="conv-top">
         <div class="conv-left">
-          <div class="conv-verdict ${sentClass}">${isNeutral?'Neutral':(isShort?'Bearish':'Bullish')}</div>
+          <div class="conv-verdict ${sentClass}">${isNeutral?'Neutral · no clear edge':(isShort?'Bearish':'Bullish')}</div>
           <div class="conv-bar"><div class="conv-fill" style="width:${convPct}%;background:${sentCol}"></div></div>
         </div>
         <div class="mood-beast ${sentClass}">${isShort?BEAR_SVG:BULL_SVG}</div>
       </div>
-      <div class="dash-rationale">${rationale}</div>`;
+      <div class="dash-rationale">${rationale}</div>
+      <div class="ins-head">What the AI sees</div>
+      <div class="ins-list">${insights}</div>
+      <div class="ins-foot"><span class="g">${bn} bullish</span> · <span class="r">${brn} bearish</span> signals<br>${watch}</div>`;
 
     // ── METRICS ──
     const rangePos=Math.max(0,Math.min(100,((q.price-parseFloat(a.lo20))/((parseFloat(a.hi20)-parseFloat(a.lo20))||1))*100));
