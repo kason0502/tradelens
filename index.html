@@ -2055,23 +2055,29 @@ Algo sentiment: ${a.sentiment} (${a.score}/100)`;
 
 
 // ── FETCH — 4 proxy fallbacks ─────────────────────────────────────────
-async function tryOne(url,ms=9000){
+async function tryOne(url,ms=7000){
   return Promise.race([
     fetch(url,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();}),
     new Promise((_,r)=>setTimeout(()=>r(new Error('Timeout')),ms))
   ]);
 }
-// Build a list of proxy-wrapped attempts for a given Yahoo URL
+// Build a list of proxy-wrapped attempts for a given Yahoo URL.
+// (Dropped two dead proxies — cors-anywhere needs unlocking, test.cors.workers.dev
+//  is down — so a failing lookup no longer hangs ~18s longer trying them.)
 function buildAttempts(yahooUrl){
   const enc=encodeURIComponent(yahooUrl);
+  // These all race in parallel (see raceAttempts) — more providers = better odds
+  // when some are rate-limited, and dead ones just time out without blocking.
   return [
     ()=>tryOne(`https://corsproxy.io/?url=${enc}`),
-    ()=>tryOne(`https://api.allorigins.win/raw?url=${enc}`),
     ()=>tryOne(`https://api.codetabs.com/v1/proxy?quest=${enc}`),
+    ()=>tryOne(`https://api.allorigins.win/raw?url=${enc}`),
     ()=>tryOne(`https://api.allorigins.win/get?url=${enc}`).then(t=>{try{const j=JSON.parse(t);return j.contents||t;}catch{return t;}}),
     ()=>tryOne(`https://thingproxy.freeboard.io/fetch/${yahooUrl}`),
+    ()=>tryOne(`https://api.cors.lol/?url=${enc}`),
+    ()=>tryOne(`https://cors.eu.org/${yahooUrl}`),
     ()=>tryOne(`https://test.cors.workers.dev/?${yahooUrl}`),
-    ()=>tryOne(`https://cors-anywhere.herokuapp.com/${yahooUrl}`),
+    ()=>tryOne(`https://proxy.corsfix.com/?${yahooUrl}`),
   ];
 }
 function extractChart(txt){
@@ -2082,25 +2088,28 @@ function extractChart(txt){
   if(typeof d?.contents==='string'){try{const d2=JSON.parse(d.contents);if(d2?.chart?.result?.[0])return d2;}catch{}}
   return null;
 }
+// Race all proxies for one URL IN PARALLEL — the first that returns a valid Yahoo
+// chart wins (so one slow/dead proxy can't hold up the lookup). Returns the chart.
+async function raceAttempts(url){
+  const attempts=buildAttempts(url);
+  return new Promise((resolve,reject)=>{
+    let pending=attempts.length, settled=false;
+    if(!pending){reject(new Error('no proxies'));return;}
+    attempts.forEach(fn=>Promise.resolve().then(fn).then(txt=>{
+      if(settled)return;
+      const c=extractChart(txt);
+      if(c){settled=true;resolve(c);}
+      else if(--pending===0)reject(new Error('no data'));
+    }).catch(()=>{ if(!settled && --pending===0)reject(new Error('all proxies failed')); }));
+  });
+}
 async function tryFetch(yahooUrl){
-  // Rotate across a few Yahoo hostnames too — sometimes one is blocked
+  // Race proxies for host 1; fall back to host 2 only if all of host 1 fails.
   const hosts=['query1.finance.yahoo.com','query2.finance.yahoo.com'];
-  const urls=hosts.map(h=>yahooUrl.replace(/query[12]\.finance\.yahoo\.com/,h));
   let lastErr;
-  // 2 full passes for resilience
-  for(let pass=0;pass<2;pass++){
-    for(const u of urls){
-      for(const fn of buildAttempts(u)){
-        try{
-          const txt=await fn();
-          const chart=extractChart(txt);
-          if(chart)return chart;
-        }catch(e){lastErr=e;}
-        await new Promise(r=>setTimeout(r,180));
-      }
-    }
-    // backoff between passes
-    await new Promise(r=>setTimeout(r,500));
+  for(const h of hosts){
+    try{ return await raceAttempts(yahooUrl.replace(/query[12]\.finance\.yahoo\.com/,h)); }
+    catch(e){ lastErr=e; }
   }
   throw new Error(`Market data feed is busy. (${lastErr?.message||'all sources timed out'})`);
 }
@@ -2170,9 +2179,7 @@ async function fetchQuote(ticker){
   try{
     const iurl=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1m&range=1d`;
     let idata=null;
-    for(const fn of buildAttempts(iurl)){
-      try{const txt=await fn();const c=extractChart(txt);if(c){idata=c;break;}}catch(e){}
-    }
+    try{idata=await raceAttempts(iurl);}catch(e){}
     const ires=idata?.chart?.result?.[0];
     if(ires){
       const iq=ires.indicators.quote[0],it=ires.timestamp||[];
@@ -3910,8 +3917,10 @@ async function renderDash(text){
     return;
   }
   dashLoading(ticker);
+  window.__userFetch=Date.now();   // background pollers stand down while you're looking something up
   try{
     const q=await fetchQuote(ticker);
+    window.__userFetch=0;
     const a=analyze(ticker,q.price,q.pct,q.hi52,q.lo52,q.closes);
     const isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
     let entry=0,sl=0,tp1=0,tp2=0,aiPick=null;
@@ -4035,6 +4044,7 @@ async function renderDash(text){
 
     if(!liveStarted){liveStarted=true;startLiveRefresh();}
   }catch(e){
+    window.__userFetch=0;
     const head=dashEl('dashHead');
     if(head)head.innerHTML=`<div class="dash-rationale">Couldn't load <b>${ticker}</b> right now — the public market-data feed may be busy. <button class="dp-fu" onclick="cpChip('${ticker}')" style="margin-top:8px">Try again</button></div>`;
     const plan=dashEl('dashPlan');if(plan)plan.innerHTML=`<div class="dp-h">Trade plan</div><div class="dash-rationale">Waiting on data for ${ticker}.</div>`;
@@ -4313,9 +4323,7 @@ function startLiveRefresh(){
 async function fetchLivePrice(ticker){
   const iurl=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1m&range=1d`;
   let idata=null;
-  for(const fn of buildAttempts(iurl)){
-    try{const txt=await fn();const c=extractChart(txt);if(c){idata=c;break;}}catch(e){}
-  }
+  try{idata=await raceAttempts(iurl);}catch(e){}
   const res=idata?.chart?.result?.[0];
   if(!res)throw new Error('no live price');
   const meta=res.meta;
@@ -4331,6 +4339,7 @@ async function liveTick(){
   const dash=document.getElementById('tab-dashboard');
   if(!dash||!dash.classList.contains('active'))return;
   if(document.hidden)return;
+  if(window.__userFetch && (Date.now()-window.__userFetch)<14000)return;  // don't compete with an active lookup
   if(!lastData)return;
   const t=lastData.ticker;
   // Lightweight price-only stream — never rebuilds the DOM, so the Pro Chart
@@ -4653,13 +4662,21 @@ updateAIBadge();
 probeProxy();
 cpInit();
 initPremiumNav();    // gliding active pill, magnetic hover, cursor glow
-buildIndexStrip(); setTimeout(loadIndices,3500); setInterval(loadIndices,90000);   // live index context
-renderWatch(); setTimeout(refreshWatch,5500); setInterval(refreshWatch,60000);      // persistent watchlist
+// Background data pollers share the same flaky CORS proxies as your live lookups,
+// so they STAND DOWN while you're analyzing a ticker (or on the landing / tab hidden),
+// run staggered (never all at once), and refresh slowly — so they never starve your lookups.
+function bgIdle(){
+  if(window.__userFetch && (Date.now()-window.__userFetch)<14000) return false; // a lookup is in flight
+  if(document.hidden) return false;
+  const land=document.getElementById('landing'); if(land && getComputedStyle(land).display!=='none') return false;
+  return true;
+}
 startDashTVRefresh();                                                                // keep the TradingView chart live
 syncSharedMemory();  // pull pooled cross-user learning if the backend is live
-paintMoversBanner();                       // seed the movers banner with symbols immediately
-setTimeout(()=>renderMovers(),4500);       // load real movers shortly after, once initial loads settle
-setInterval(()=>{if(MOVERS.length)renderMovers(true);},120000);
+buildIndexStrip(); paintMoversBanner(); renderWatch();                               // paint shells immediately (no fetch)
+setTimeout(()=>{if(bgIdle())loadIndices();},14000);   setInterval(()=>{if(bgIdle())loadIndices();},300000);   // indices
+setTimeout(()=>{if(bgIdle())refreshWatch();},22000);  setInterval(()=>{if(bgIdle())refreshWatch();},240000);  // watchlist
+setTimeout(()=>{if(bgIdle())renderMovers();},30000);  setInterval(()=>{if(MOVERS.length&&bgIdle())renderMovers(true);},360000); // movers
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
 function launchApp(){

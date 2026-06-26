@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 12) — fix "nothing loads" (proxy flooding + slow sequential fetch)
+- **Root cause:** the new background pollers (movers/watchlist/indices on timers) were hammering the shared CORS proxies into rate-limiting, AND every lookup tried proxies **sequentially** (2 passes × 2 hosts × 5 proxies ≈ up to ~140s) so a busy feed hung instead of failing.
+- **Parallel proxy race** — new `raceAttempts(url)` fires all proxies at once and resolves on the first valid Yahoo chart; `tryFetch`, `fetchQuote` intraday, and `fetchLivePrice` all use it. Result: lookups now resolve in **~150ms** when proxies are up, and fail fast (~7s) when they're not. Trimmed 2 dead proxies, added 4 more providers, timeout 9s→7s.
+- **Background pollers stand down** while you're analyzing a ticker (`window.__userFetch` gate + `bgIdle()` checks page-visible / not-landing), start **staggered**, and refresh far less often (indices 90s→5m, watchlist 60s→4m, movers 2m→6m) so they never starve your lookups. `liveTick` also yields during a lookup.
+
 ## 2026-06-26 (session 11) — watchlist · Greeks/indicators · TV live · landing tighten
 - **Persistent watchlist** (`#dashWatch`, `WATCH`/`strata_watch_v1`): add by symbol, ✕ remove, "★ add current", live prices (`refreshWatch`), click a row to analyze. On the dashboard side column.
 - **Options Greeks panel** (`#dashGreeks`, `renderGreeks` + Black–Scholes `bsGreeks`/`normCDF`): Delta · Gamma · Theta · Vega · est. premium · IV (from `histVol`) for an ATM call/put at the chosen horizon (`HZ_T`). Educational estimate.
