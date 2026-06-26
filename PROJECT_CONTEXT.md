@@ -13,7 +13,11 @@ It pulls **real market data**, derives structure-based trade plans (entry / stop
 ## Who it's for
 Serious independent retail traders. Voice/feel: precise, institutional, trustworthy, data-driven — not flashy marketing.
 
-## Current state (2026-06-26, session 8)
+## Current state (2026-06-26, session 13)
+- **Reliable market data via a server-side proxy** (`/api/yf?url=…`): fetches Yahoo/Stooq server-side so there's no browser-CORS and no public-proxy rate-limiting. Two implementations: `.claude/serve.ps1` handles it **locally** (pure PowerShell, no Node), and `api/yf.js` is the **Vercel serverless** equivalent for a public deploy. The client (`raceAttempts`) calls `/api/yf` first and only falls back to public CORS proxies if absent. Background pollers throttled + stand down during a user lookup (`bgIdle`, `window.__userFetch`). → To host it for everyone, see **`DEPLOY.md`** (push to GitHub → Vercel).
+- **Brand = the user's own images** (transparent PNGs): `logo.png` (low-poly bull-head, in the nav — no box), `bull.png`/`bear.png` (low-poly mascots in the dashboard AI-read panel, swapped by sentiment with a green/red glow).
+- **Sentiment-reactive theme:** the whole UI flips **red when the read is bearish** (`setMood`, `--ac-rgb`, `body.bearish`, `FX_MOOD`) and green otherwise.
+- Dashboard is loaded with info: index strip (S&P/Nasdaq/Dow/VIX), 9 indicator tiles (RSI/MACD/MA-cross/ATR/…), an **options Greeks** panel (Black–Scholes delta/gamma/theta/vega), a "What the AI sees" checklist, and a **persistent watchlist** (add/remove/live).
 - **Accent is emerald green** (`#22c55e`, brand + bullish; was blue) to match a reference dashboard the user supplied. The nav is a **premium animated floating glass rail** (gliding active pill, magnetic hover, cursor glow, spring icons — `initPremiumNav`). The landing is opaque again (no more app bleed-through); the animated `#fxCanvas` background now lives behind the app only.
 - **Branded STRATA.** App chrome moved to a **left sidebar** (`.appnav`, grouped Terminal/Research/Assistant) — the top nav bar is gone; the top "✨ AI" button is gone (connect-AI lives in the sidebar footer). A streaming **movers banner** (`.appbar`) sits at the top of the app, and a new **High Volume** tab (`#tab-movers`) lists the day's most active / biggest movers from real data. Pro Traders gained a desk-consensus panel; Backtest gained a session scoreboard + "Surprise me".
 - Fully working single page. Landing + app both live.
@@ -21,12 +25,14 @@ Serious independent retail traders. Voice/feel: precise, institutional, trustwor
 - **The dashboard (post-launch) is a real panel terminal** (rebuilt from the session-5 AI Copilot chat). A slim **ask bar** (search + horizon + ticker chips) drives `renderDash`, which fills fixed panels: ticker header (live price + conviction), wide **TradingView** chart, a single Trade Plan (entry/stop/target — price primary, tick-distance secondary, R:R), an AI-read conviction panel, a key-metrics strip, and a live-signals panel. `loadTicker` (News/Screener/etc.) routes here. The old `.cp-*` chat and the older legacy `renderDash`/`.wk` workspace are gone/disabled.
 - **Shared cross-user learning** exists: `api/learn.js` (Vercel serverless + KV) pools the AI's self-test learning across all users; falls back to per-device localStorage when not deployed (`DEPLOY_BACKEND.md`).
 - Other tabs: Screener, News (sample feed), Pro Traders, Backtest, Performance, AI Lab (persistent learning), AI Chat, Alerts, Feedback — still on older `.card` styling.
-- Repo is git-tracked (`main`), **no remote yet**. Deploy-ready for Vercel (`index.html` at root, `api/` serverless, `.vercelignore` excludes `.claude` + `*.md`).
+- Repo is git-tracked (`main`), **no remote yet**. Deploy-ready for Vercel (`index.html` at root, `api/yf.js` + `api/learn.js` serverless, brand PNGs tracked, `.vercelignore` excludes `.claude` + `*.md`). Step-by-step in **`DEPLOY.md`**.
 
 ## How to run / preview
-- No Node/Python on this machine. Use the bundled static server:
+- No Node/Python on this machine. Use the bundled PowerShell server (**which is also the `/api/yf` data proxy** — that's what makes data load reliably):
   - Preview config `tradelens` → `.claude/serve.ps1` serves the repo root at `http://localhost:8777`.
-  - In Claude Code: `preview_start` with name `tradelens`.
+  - In Claude Code: `preview_start` with name `tradelens`. **Restart the preview after editing `serve.ps1`.**
+  - Always open via `http://localhost:8777` (through the server) — opening `index.html` as a bare file has no proxy and falls back to flaky public proxies.
+- **To host it for everyone (so the server runs in the cloud, not just locally):** see `DEPLOY.md` (GitHub → Vercel; `api/yf.js` runs the proxy server-side for all visitors).
 - ⚠️ The **screenshot tool cannot capture this page** (live TradingView iframe + offscreen tab pauses CSS animations → timeout). Verify with `preview_eval` / computed styles / console logs instead, and ask the user to view in a real browser.
 
 ## Key product decisions
@@ -37,7 +43,7 @@ Serious independent retail traders. Voice/feel: precise, institutional, trustwor
 - Charts in the Copilot are the **real TradingView** widget (user preference over the custom canvas).
 
 ## Known constraints / gotchas
-- Free CORS proxies (corsproxy.io, allorigins, codetabs, etc.) are flaky / rate-limited; failures are silent-with-retry by design.
+- **Data reliability is solved by the `/api/yf` proxy** (local PowerShell or deployed Vercel). The public CORS proxies are now only a *fallback* (used when the page is opened as a bare file with no server) — flaky/rate-limited. `raceAttempts` fires proxies in parallel (first valid wins), so even the fallback fails fast instead of hanging.
 - TradingView widget needs internet; shows a fallback message pointing to "AI Levels" if blocked.
 - No `/api/claude` server proxy exists in the repo, so on a public deploy each visitor must paste their own Anthropic key for AI features.
 - Commits warn `LF will be replaced by CRLF` — harmless (Windows).
