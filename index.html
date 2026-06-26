@@ -966,6 +966,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .aic-empty{color:var(--ink3);padding:20px;text-align:center;font-family:var(--sans,inherit)}
 .aic-row{display:flex;gap:10px;align-items:center;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap;cursor:pointer;border-radius:6px;transition:background .12s}
 .aic-row:hover{background:rgba(255,255,255,.045)}
+.aic-row:focus-visible{outline:2px solid var(--act);outline-offset:-2px}
 .aic-row:last-child{border-bottom:none}
 .aic-why{color:var(--act);font-size:10px;font-weight:700;flex-shrink:0;opacity:.6}
 .aic-row:hover .aic-why{opacity:1}
@@ -3281,14 +3282,14 @@ function renderAIConsole(){
     // legacy entries (pre-outcome model)
     if(e.outcome===undefined){
       const wc=e.win?'var(--gt)':'var(--rt)';
-      return `<div class="aic-row" onclick="aiWhy(${i})"><span class="aic-t">${time}</span><span class="aic-tk">${tk}</span><span class="aic-nm" style="color:${e.color||'var(--act)'}">${name}</span><span class="aic-dir ${dir}">${dir}</span><span class="aic-px">legacy</span><span class="aic-res" style="color:${wc}">${e.win?'WIN':'LOSS'} ${e.pnl>=0?'+':''}${e.pnl}%</span><span class="aic-why">why ↗</span></div>`;
+      return `<div class="aic-row" role="button" tabindex="0" onclick="aiWhy(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();aiWhy(${i})}"><span class="aic-t">${time}</span><span class="aic-tk">${tk}</span><span class="aic-nm" style="color:${e.color||'var(--act)'}">${name}</span><span class="aic-dir ${dir}">${dir}</span><span class="aic-px">legacy</span><span class="aic-res" style="color:${wc}">${e.win?'WIN':'LOSS'} ${e.pnl>=0?'+':''}${e.pnl}%</span><span class="aic-why">why ↗</span></div>`;
     }
     const noFill=e.outcome==='no-fill';
     const wc=noFill?'var(--ink3)':e.win?'var(--gt)':'var(--rt)';
     const verdict=noFill?'NO FILL':(e.win?'WIN':'LOSS');
     const rTxt=noFill?'':` ${e.r>=0?'+':''}${e.r}R`;
     const conf=(e.confB!=null&&e.confA!=null&&!noFill)?`<span class="aic-conf">conf ${e.confB}%${e.confA!==e.confB?` <b style="color:${e.confA>=e.confB?'var(--gt)':'var(--rt)'}">→ ${e.confA}%</b>`:' ·'}</span>`:'<span class="aic-conf">no fill · no change</span>';
-    return `<div class="aic-row" onclick="aiWhy(${i})" title="Open the chart + reasoning for this trade">
+    return `<div class="aic-row" role="button" tabindex="0" onclick="aiWhy(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();aiWhy(${i})}" title="Open the chart + reasoning for this trade">
       <span class="aic-t">${time}</span>
       <span class="aic-tk">${tk}</span>
       <span class="aic-nm" style="color:${e.color||'var(--act)'}">${name}</span>
