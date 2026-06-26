@@ -3,6 +3,9 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16b) — Strategy "anatomy" charts
+- **Each strategy now shows on a chart.** New pure-SVG schematic (`strategyDiagram` / `strategyChartBlock`, configs in `STRAT_DIAGRAMS`) draws the setup's anatomy: the idealized price path, the **entry trigger** (dot + time line), dashed **Target 1/2** and **Stop** levels, shaded green **reward** + red **risk** zones, and an auto-computed **≈ 1 : N reward-to-risk**. Rendered in Today's focus and inside every weekday card (`STRAT_DKEY` maps day→pattern). Theme colors via CSS vars; labeled "schematic · not a live quote" (honest — it's a teaching diagram, not a price feed).
+
 ## 2026-06-26 (session 16) — Strategy tab (day-by-day ideas + live candidates)
 - **New "Strategy" tab** (`#tab-strategy`, in the Research nav group, `DAILY` pill). Three parts, all from real data/date:
   - **Today's focus** — auto-detects the weekday from `new Date()` and shows that day's theme, lean (recommended strategy/bias), do's, any event badges, and a **live candidate scan** for the day's setup. Weekends show a "plan the week" card.

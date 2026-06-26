@@ -4440,6 +4440,72 @@ const STRAT_DAYS={
      dos:['Favor range-fades and quick 0DTE plays with tight risk.','Expect price to gravitate toward major option strikes (pinning).','Don\'t carry heavy exposure over the weekend gap.']}
 };
 const STRAT_TYPE_LABEL={trend:'trend-continuation',bullish:'pullback',breakout:'breakout',oversold:'oversold-bounce',bearish:'short',all:'best-of-list'};
+const STRAT_DKEY={1:'pullback',2:'pullback',3:'breakout',4:'oversold',5:'rangefade'};
+
+// ── Strategy "anatomy" chart: a schematic SVG of the setup ────────────
+// Pure SVG (theme colors via CSS vars) so it always renders — a teaching
+// diagram of where you'd enter, stop and target for each pattern.
+const STRAT_DIAGRAMS={
+  pullback:{dir:'long',title:'Trend pullback — buy the dip',
+    path:[[15,205],[95,150],[170,120],[205,118],[255,158],[290,170],[345,130],[420,95],[500,68],[600,46]],
+    entry:170,stop:198,tp1:112,tp2:70,ex:290,
+    note:'Uptrend pulls back into the rising 20-day average, finds buyers at support, then resumes higher.'},
+  breakout:{dir:'long',title:'Breakout — enter on the break',
+    path:[[15,160],[70,128],[120,140],[175,122],[235,138],[300,124],[360,136],[395,121],[415,116],[470,84],[545,58],[600,44]],
+    entry:120,stop:152,tp1:80,tp2:50,ex:415,
+    note:'Price coils in a tight range under resistance; volume dries up, then surges as it clears the ceiling.'},
+  oversold:{dir:'long',title:'Oversold bounce — mean reversion',
+    path:[[15,72],[80,108],[150,148],[215,188],[270,214],[300,210],[345,176],[410,150],[490,130],[600,120]],
+    entry:184,stop:224,tp1:150,tp2:122,ex:345,
+    note:'A capitulation low and a high-volume reversal candle snap price back toward the 20-day average.'},
+  rangefade:{dir:'short',title:'Range fade — sell the ceiling',
+    path:[[15,175],[70,112],[140,176],[205,110],[275,178],[345,112],[420,148],[500,176],[560,150],[600,176]],
+    entry:112,stop:84,tp1:150,tp2:178,ex:345,
+    note:'Price oscillates in a range; you fade the upper boundary with a tight stop, targeting the floor.'},
+  breakdown:{dir:'short',title:'Breakdown — short the bounce',
+    path:[[15,70],[90,108],[160,92],[235,138],[320,172],[410,198],[510,222],[600,240]],
+    entry:96,stop:72,tp1:150,tp2:208,ex:160,
+    note:'A downtrend bounces into resistance / the falling 20-MA, stalls, and rolls over to new lows.'}
+};
+function strategyDiagram(key){
+  const c=STRAT_DIAGRAMS[key]||STRAT_DIAGRAMS.pullback;
+  const W=720,H=270,gut=600,mono='ui-monospace,Menlo,Consolas,monospace';
+  const pts=c.path.map(p=>p.join(',')).join(' ');
+  const riskTop=Math.min(c.entry,c.stop),riskH=Math.abs(c.stop-c.entry);
+  const rewTop=Math.min(c.entry,c.tp2),rewH=Math.abs(c.tp2-c.entry);
+  const lvl=(y,col,solid,label)=>`<line x1="14" y1="${y}" x2="${gut}" y2="${y}" stroke="${col}" stroke-width="1.4"${solid?'':' stroke-dasharray="3 3"'} opacity="${solid?1:.85}"/><text x="${gut+8}" y="${y+4}" fill="${col}" font-size="12.5" font-family="${mono}" font-weight="700">${label}</text>`;
+  const ey=c.entry, arrowUp=c.dir==='long';
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="${c.title}">
+    <rect x="14" y="14" width="${gut-14}" height="${H-44}" fill="none" stroke="var(--line)" stroke-width="1"/>
+    <rect x="14" y="${rewTop}" width="${gut-14}" height="${rewH}" fill="var(--gt)" opacity=".09"/>
+    <rect x="14" y="${riskTop}" width="${gut-14}" height="${riskH}" fill="var(--rt)" opacity=".11"/>
+    ${lvl(c.tp2,'var(--gt)',false,'Target 2')}
+    ${lvl(c.tp1,'var(--gt)',false,'Target 1')}
+    ${lvl(c.entry,'var(--act)',true,'Entry')}
+    ${lvl(c.stop,'var(--rt)',false,'Stop')}
+    <line x1="${c.ex}" y1="14" x2="${c.ex}" y2="${H-30}" stroke="var(--act)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/>
+    <polyline points="${pts}" fill="none" stroke="var(--ink2)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${c.ex}" cy="${ey}" r="6" fill="var(--ac)" stroke="#04130a" stroke-width="2"/>
+    <path d="${arrowUp?`M${c.ex} ${ey-14} l-4 7 l8 0 z`:`M${c.ex} ${ey+14} l-4 -7 l8 0 z`}" fill="var(--ac)"/>
+    <text x="18" y="${H-12}" fill="var(--ink3)" font-size="11" font-family="${mono}">TIME →</text>
+    <text x="${gut-4}" y="${H-12}" fill="var(--ink3)" font-size="11" font-family="${mono}" text-anchor="end">schematic · not a live quote</text>
+  </svg>`;
+}
+function strategyChartBlock(key){
+  const c=STRAT_DIAGRAMS[key]||STRAT_DIAGRAMS.pullback;
+  const rr=Math.abs(c.tp2-c.entry)/Math.max(1,Math.abs(c.entry-c.stop));
+  const chip=(col,op,txt)=>`<span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:${col};opacity:${op}"></span>${txt}</span>`;
+  return `<div style="background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:14px 16px 12px">
+    ${strategyDiagram(key)}
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:12px;font-size:11.5px;color:var(--ink3)">
+      ${chip('var(--ac)',1,'Entry trigger')}
+      ${chip('var(--gt)',.5,'Reward → targets')}
+      ${chip('var(--rt)',.5,'Risk → stop')}
+      <span style="margin-left:auto;font-family:var(--mono);font-weight:800;color:var(--ink);background:var(--s3);border:1px solid var(--line);border-radius:7px;padding:4px 10px">≈ 1 : ${rr.toFixed(1)} reward-to-risk</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--ink3);line-height:1.6;margin-top:9px">${c.note}</div>
+  </div>`;
+}
 // ── event-date helpers (all computed from the real date) ──
 function _nthFriday(y,m,n){let c=0;for(let d=1;d<=31;d++){const dt=new Date(y,m,d);if(dt.getMonth()!==m)break;if(dt.getDay()===5){c++;if(c===n)return dt;}}return null;}
 function _lastWeekday(y,m){let dt=new Date(y,m+1,0);while(dt.getDay()===0||dt.getDay()===6)dt.setDate(dt.getDate()-1);return dt;}
@@ -4497,7 +4563,9 @@ function renderStrategy(){
       <div style="display:grid;gap:7px;margin-bottom:18px">
         ${d.dos.map(t=>`<div style="display:flex;gap:9px;font-size:12.5px;color:var(--ink2);line-height:1.5"><span style="color:var(--act);flex-shrink:0">▸</span><span>${t}</span></div>`).join('')}
       </div>
-      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Live candidates for a ${STRAT_TYPE_LABEL[d.type]} setup</div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">How this setup looks on a chart</div>
+      ${strategyChartBlock(STRAT_DKEY[dow])}
+      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:18px 0 10px">Live candidates for a ${STRAT_TYPE_LABEL[d.type]} setup</div>
       <div id="stratTodayCand"><div class="mv-empty" style="padding:16px"><span class="ai-spin"></span> Scanning live market…</div></div>
     </div>`;
     loadStratCandidates(d.type,'stratTodayCand');
@@ -4533,6 +4601,7 @@ function renderStrategy(){
         <div class="pb-body"><div class="pb-inner">
           <div style="font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:12px">${d.theme}</div>
           <div style="display:grid;gap:6px;margin-bottom:14px">${d.dos.map(t=>`<div style="display:flex;gap:9px;font-size:12px;color:var(--ink2);line-height:1.5"><span style="color:var(--act)">▸</span><span>${t}</span></div>`).join('')}</div>
+          <div style="margin-bottom:14px">${strategyChartBlock(STRAT_DKEY[i])}</div>
           <button class="mv-tgl" onclick="loadStratCandidates('${d.type}','sdc${i}')">Find live ${STRAT_TYPE_LABEL[d.type]} candidates</button>
           <div id="sdc${i}" style="margin-top:12px"></div>
         </div></div>
