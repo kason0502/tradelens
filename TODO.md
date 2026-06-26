@@ -12,6 +12,20 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Premium polish backlog (standing self-critique — prioritized, ongoing)
+> Per the user's directive to continuously refine toward a TradingView/Bloomberg bar. Fix top items each session.
+- [ ] **Reusable candlestick renderer.** `proofChartSVG`, `predictChartSVG`, `annotatedChartHTML` duplicate ~40 lines of scaling/axis/candle code — extract a shared `drawCandles({candles,levels,...})` helper (DRY; lower regression surface).
+- [ ] **AI-read panel is very tall** (conviction + mood beast + coach notebook + bull/bear + checklist + signals). Tighten hierarchy / consider collapsing the checklist or signals into a compact toggle.
+- [ ] **Dead code sweep:** `dashWhy` (button removed), `other` var, schematic `strategyDiagram`/`STRAT_DIAGRAMS` (fallback-only), legacy `renderDash(ticker,q,a)`/`.wk`/`runScan`/`SCAN_DATA`. Prune safely.
+- [ ] **A11y:** clickable `<div onclick>` rows (AI console, etc.) need `role="button"`/`tabindex`/keydown; check focus rings + contrast on muted text.
+- [ ] **Responsiveness:** audit dashboard + new SVG charts at mobile/tablet widths (charts are width:100% but label gutters may crowd <420px); verify the sidebar icon-rail tap targets.
+- [ ] **Loading polish:** consider skeleton shimmer in the metrics/AI-read panels (not just grid dim).
+- [ ] **Micro-interactions:** intentional, subtle panel entrance + value-change flashes (price already tweens) — make them feel designed, not default.
+- [ ] **Empty states** for every tab when data feed fails (Movers/Screener/Strategy candidates have them; double-check News/Pro Traders/Performance).
+
+## Done (session 16i — premium polish pass 1)
+- [x] Trade plan in $/% (killed "ticks" clutter) · orphan blue → neutral · cohesive grid loading state · trimmed Compare button · Escape-to-close modals.
+
 ## Done (session 16h — dashboard predicts from now + inline chart)
 - [x] **Entry re-anchored to current price** so the plan is a forward prediction, not a partway-through setup.
 - [x] **Inline prediction chart** in the Trade Plan (`predictChartSVG`): candles → "now" divider → reward/risk projection cone + labeled levels; removed the "See chart" button.

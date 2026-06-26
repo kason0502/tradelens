@@ -3,6 +3,14 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16i) — premium polish pass (self-critique, ongoing)
+> Standing directive from the user: continuously self-critique (designer/FE/UX/QA) and fix weaknesses without being told. First pass:
+- **Trade plan reads in $ and %**, not "ticks". Killed the cluttered "+3,500 ticks" / "+0 ticks" framing across the plan, the Risk:reward metric tile, and "Why this stop?" — now `−3.1% · $4.20` style + plain-language R:R ("you make 2.4× what you risk"). Entry row shows "at market · now".
+- **Color consistency:** removed the orphan blue `#2f81f7` (brand accent is emerald) — the Entry/now/decision markers in all three chart renderers are now a neutral near-white (`#e8eaed`), the standard current-price convention. Green/red stay P&L-only.
+- **Cohesive loading state:** the whole `.dash-grid` now dims/desaturates (`.is-loading`) while a new ticker loads, so stale panels don't linger showing the previous symbol; cleared on success and error.
+- **Less clutter:** dropped the gimmicky hardcoded "Compare NVDA/AAPL" plan button.
+- **A11y/UX:** modals close on **Escape**; widened the level distance column.
+
 ## 2026-06-26 (session 16h) — dashboard predicts from NOW + inline chart
 - **Prediction is anchored to the current price.** `renderDash` now re-anchors the trade-plan **entry to `q.price`** (keeping the strategy's risk/reward distances, then `clampLevels` for the horizon), so the call is a forward prediction from the present bar instead of a structure level the move may have already passed ("halfway through").
 - **The chart is already there (no button).** New `predictChartSVG` renders inside the Trade Plan: real candlesticks up to a **"now" divider**, then a **forward projection cone** — green toward the target (reward), red toward the stop (risk) — plus labeled Support/Resistance/Entry(now)/Stop/Target and the left price axis. Removed the "See the chart & reasoning ↗" button (the chart is inline; `dashWhy`/proof window still exist for AI Lab).

@@ -916,6 +916,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dash-col{display:flex;flex-direction:column;gap:16px;min-width:0}
 @media(max-width:980px){.dash-grid{grid-template-columns:1fr}}
 .dash-panel{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.dash-grid{transition:opacity .22s ease,filter .22s ease}
+.dash-grid.is-loading{opacity:.4;filter:saturate(.55);pointer-events:none}
 .dp-h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.11em;color:var(--ink3);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .dp-h .tag{font-family:var(--mono);font-weight:600;color:var(--ink2);letter-spacing:.04em;text-transform:none}
 .dash-panel.chart{padding:0;overflow:hidden}
@@ -929,7 +931,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lv-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;background:var(--s1);padding:11px 14px}
 .lv-row .lk{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink2)}
 .lv-row .lp{font-family:var(--mono);font-size:17px;font-weight:800;letter-spacing:-.01em;text-align:right}
-.lv-row .lt{font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:right;min-width:78px}
+.lv-row .lt{font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:right;min-width:104px;white-space:nowrap}
 .lv-row.entry .lp{color:var(--act)}.lv-row.risk .lp{color:var(--rt)}.lv-row.rew .lp{color:var(--gt)}
 .dp-rr{font-size:12px;color:var(--ink3);font-family:var(--mono);line-height:1.65}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
@@ -1937,6 +1939,7 @@ function openWhy(title,sub,bodyHTML){
   document.getElementById('moWhy').classList.add('open');
 }
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mo.open').forEach(m=>m.classList.remove('open'));});
 
 // ── TABS ──────────────────────────────────────────────────────────────
 function mainTab(name,btn){
@@ -3307,7 +3310,7 @@ function proofChartSVG(snap,e,live){
   let lv={resis:Math.max(...decisionWin.map(c=>c.h)),support:Math.min(...decisionWin.map(c=>c.l))};
   try{const L=labLevels(decisionWin);if(L&&isFinite(L.resis))lv=L;}catch(_){}
   const levels=[{v:lv.resis,col:'#f0a500',lab:'Resistance',dash:'4 3'},{v:lv.support,col:'#22c55e',lab:'Support',dash:'4 3'},
-    {v:+e.entryP,col:'#2f81f7',lab:'Entry',dash:'0'},{v:+e.sl,col:'#f43f5e',lab:'Stop',dash:'4 3'},{v:+e.tp1,col:'#4ade80',lab:'Target',dash:'2 3'}];
+    {v:+e.entryP,col:'#e8eaed',lab:'Entry',dash:'0'},{v:+e.sl,col:'#f43f5e',lab:'Stop',dash:'4 3'},{v:+e.tp1,col:'#4ade80',lab:'Target',dash:'2 3'}];
   const lvVals=levels.map(l=>l.v).filter(v=>isFinite(v));
   const allV=C.map(c=>c.h).concat(C.map(c=>c.l),lvVals);
   let mn=Math.min(...allV),mx=Math.max(...allV);const pad=(mx-mn)*0.05||1;mn-=pad;mx+=pad;
@@ -3322,7 +3325,7 @@ function proofChartSVG(snap,e,live){
   const sorted=levels.filter(l=>isFinite(l.v)).map(l=>({col:l.col,lab:l.lab,v:l.v,y:Y(l.v)})).sort((a,b)=>a.y-b.y);
   for(let i=1;i<sorted.length;i++){if(sorted[i].y-sorted[i-1].y<13)sorted[i].y=sorted[i-1].y+13;}
   const lvLabels=sorted.map(l=>`<text x="${W-padR+7}" y="${(l.y+4).toFixed(1)}" fill="${l.col}" font-size="11" font-family="${mono}" font-weight="700">${l.lab} $${(+l.v).toFixed(2)}</text>`).join('');
-  const decLine=live?'':`<line x1="${fx.toFixed(1)}" y1="${padT}" x2="${fx.toFixed(1)}" y2="${(padT+ph).toFixed(1)}" stroke="#2f81f7" stroke-width="1.2" stroke-dasharray="3 3" opacity=".85"/><text x="${fx.toFixed(1)}" y="${(padT-3).toFixed(1)}" fill="#2f81f7" font-size="10" font-family="${mono}" text-anchor="middle">decision</text>`;
+  const decLine=live?'':`<line x1="${fx.toFixed(1)}" y1="${padT}" x2="${fx.toFixed(1)}" y2="${(padT+ph).toFixed(1)}" stroke="#e8eaed" stroke-width="1.2" stroke-dasharray="3 3" opacity=".85"/><text x="${fx.toFixed(1)}" y="${(padT-3).toFixed(1)}" fill="#e8eaed" font-size="10" font-family="${mono}" text-anchor="middle">decision</text>`;
   const caption=live?`${e.tk} · current setup on real daily data`:`left of the line = what the AI saw · right = what actually happened`;
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="${e.tk} ${e.key||''} setup chart">
     ${axisSvg}${fwdShade}
@@ -3343,7 +3346,7 @@ function predictChartSVG(candles,e){
   try{const L=labLevels(C);if(L&&isFinite(L.resis))lv=L;}catch(_){}
   const entry=+e.entryP, sl=+e.sl, tp1=+e.tp1;
   const levels=[{v:lv.resis,col:'#f0a500',lab:'Resistance',dash:'4 3'},{v:lv.support,col:'#22c55e',lab:'Support',dash:'4 3'},
-    {v:entry,col:'#2f81f7',lab:'Entry (now)',dash:'0'},{v:sl,col:'#f43f5e',lab:'Stop',dash:'4 3'},{v:tp1,col:'#4ade80',lab:'Target',dash:'2 3'}];
+    {v:entry,col:'#e8eaed',lab:'Entry (now)',dash:'0'},{v:sl,col:'#f43f5e',lab:'Stop',dash:'4 3'},{v:tp1,col:'#4ade80',lab:'Target',dash:'2 3'}];
   const lvVals=levels.map(l=>l.v).filter(v=>isFinite(v));
   const allV=C.map(c=>c.h).concat(C.map(c=>c.l),lvVals);
   let mn=Math.min(...allV),mx=Math.max(...allV);const pad=(mx-mn)*0.06||1;mn-=pad;mx+=pad;
@@ -3363,8 +3366,8 @@ function predictChartSVG(candles,e){
   const rewardFill=`<path d="M${bx.toFixed(1)} ${yE.toFixed(1)} L${rx.toFixed(1)} ${yT.toFixed(1)} L${rx.toFixed(1)} ${yE.toFixed(1)} Z" fill="#22c55e" opacity=".10"/>`;
   const riskFill=`<path d="M${bx.toFixed(1)} ${yE.toFixed(1)} L${rx.toFixed(1)} ${yS.toFixed(1)} L${rx.toFixed(1)} ${yE.toFixed(1)} Z" fill="#f43f5e" opacity=".11"/>`;
   const projLines=`<line x1="${bx.toFixed(1)}" y1="${yE.toFixed(1)}" x2="${rx.toFixed(1)}" y2="${yT.toFixed(1)}" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4 3"/><line x1="${bx.toFixed(1)}" y1="${yE.toFixed(1)}" x2="${rx.toFixed(1)}" y2="${yS.toFixed(1)}" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="4 3"/>`;
-  const nowLine=`<line x1="${bx.toFixed(1)}" y1="${padT}" x2="${bx.toFixed(1)}" y2="${(padT+ph).toFixed(1)}" stroke="#2f81f7" stroke-width="1.2" stroke-dasharray="3 3" opacity=".8"/><text x="${bx.toFixed(1)}" y="${(padT-3).toFixed(1)}" fill="#2f81f7" font-size="10" font-family="${mono}" text-anchor="middle">now</text>`;
-  const nowDot=`<circle cx="${bx.toFixed(1)}" cy="${yE.toFixed(1)}" r="4" fill="#2f81f7" stroke="var(--bg)" stroke-width="1.5"/>`;
+  const nowLine=`<line x1="${bx.toFixed(1)}" y1="${padT}" x2="${bx.toFixed(1)}" y2="${(padT+ph).toFixed(1)}" stroke="#e8eaed" stroke-width="1.2" stroke-dasharray="3 3" opacity=".8"/><text x="${bx.toFixed(1)}" y="${(padT-3).toFixed(1)}" fill="#e8eaed" font-size="10" font-family="${mono}" text-anchor="middle">now</text>`;
+  const nowDot=`<circle cx="${bx.toFixed(1)}" cy="${yE.toFixed(1)}" r="4" fill="#e8eaed" stroke="var(--bg)" stroke-width="1.5"/>`;
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="${e.tk||''} prediction from the current price with projected target and stop">
     ${axisSvg}
     <rect x="${padL}" y="${padT}" width="${pw}" height="${ph}" fill="none" stroke="var(--line)" stroke-width="1"/>
@@ -4191,6 +4194,7 @@ function dashLoading(ticker){
   const head=dashEl('dashHead');if(head)head.innerHTML=`<div class="dash-load"><span class="ai-spin"></span> Reading ${ticker||'the market'}…</div>`;
   const plan=dashEl('dashPlan');if(plan)plan.innerHTML=`<div class="dp-h">Trade plan</div><div class="dash-load"><span class="ai-spin"></span> Building the setup…</div>`;
   const note=dashEl('dashNote');if(note)note.style.display='none';
+  const g=document.querySelector('.dash-grid');if(g)g.classList.add('is-loading'); // dim stale panels until the new read lands
 }
 // ── HORIZON-AWARE LEVELS ──────────────────────────────────────────────
 // The structure window must match the trade horizon: a 0DTE scalp reads
@@ -4297,19 +4301,22 @@ async function renderDash(text){
     if(dashTVTicker!==ticker){dashTVTicker=ticker;dashEl('dashTV').innerHTML='';mountTVInto('dashTV',ticker);}
 
     // ── TRADE PLAN (single source of truth for levels) ──
-    const tk=l=>{const n=Math.round((l-q.price)/0.01);return (n>=0?'+':'−')+Math.abs(n).toLocaleString();};
-    const riskT=Math.round(Math.abs(entry-sl)/0.01),rewT=Math.round(Math.abs(tp1-entry)/0.01);
-    const rr=riskT>0?(rewT/riskT).toFixed(1):'–';
+    // Distances read in $ and % from the current price — how traders actually see levels.
+    const pctOf=l=>{const d=q.price?(l-q.price)/q.price*100:0;return (d>=0?'+':'−')+Math.abs(d).toFixed(1)+'%';};
+    const dollarOf=l=>'$'+Math.abs(l-q.price).toFixed(2);
+    const riskAbs=Math.abs(entry-sl),rewAbs=Math.abs(tp1-entry);
+    const riskPct=entry?riskAbs/entry*100:0,rewPct=entry?rewAbs/entry*100:0;
+    const rr=riskAbs>0?(rewAbs/riskAbs).toFixed(1):'–';
     const hzLabel=(DTE[currentDTE]&&DTE[currentDTE].short)||currentDTE.toUpperCase();
     const verdict=isNeutral?`No clear edge on ${ticker} — wait for direction.`:`${isShort?'Short':'Long'} setup · ${convPct}% conviction`;
     const planBody=isNeutral
       ? `<div class="dash-rationale">Mixed signals — no setup until price clears <b>$${a.hi20}</b> (breakout) or <b>$${a.lo20}</b> (breakdown).</div>`
       : `<div class="lv-table">
-          <div class="lv-row entry"><div class="lk">Entry</div><div class="lp">$${entry.toFixed(2)}</div><div class="lt">${tk(entry)} ticks</div></div>
-          <div class="lv-row risk"><div class="lk">${isShort?'Stop · cover':'Stop'}</div><div class="lp">$${sl.toFixed(2)}</div><div class="lt">${tk(sl)} ticks</div></div>
-          <div class="lv-row rew"><div class="lk">Target</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${tk(tp1)} ticks</div></div>
+          <div class="lv-row entry"><div class="lk">Entry</div><div class="lp">$${entry.toFixed(2)}</div><div class="lt">at market · now</div></div>
+          <div class="lv-row risk"><div class="lk">${isShort?'Stop · cover':'Stop'}</div><div class="lp">$${sl.toFixed(2)}</div><div class="lt">${pctOf(sl)} · ${dollarOf(sl)}</div></div>
+          <div class="lv-row rew"><div class="lk">Target</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
         </div>
-        <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk ${riskT.toLocaleString()} ticks → reward ${rewT.toLocaleString()} ticks<br>Distances from current price · 1 tick = $0.01</div>`;
+        <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>`;
     const other=ticker==='NVDA'?'AAPL':'NVDA';
     let chartCand=(cand&&cand.length>=40)?cand:((q.h1y&&q.h1y.length)?q.h1y:(q.h6m||q.h3m||[]));
     const predChart=isNeutral?'':`
@@ -4323,9 +4330,8 @@ async function renderDash(text){
       <div class="dp-actions">
         ${isNeutral?'':`<button class="dp-fu" onclick="trackSetup()" style="border-color:rgba(var(--ac-rgb),.5);color:var(--act)">+ Track this setup</button>`}
         ${isNeutral?'':`<button class="dp-fu" onclick="cpExplainStop()">Why this stop?</button>`}
-        <button class="dp-fu" onclick="cpBacktest('${ticker}')">Backtest</button>
+        <button class="dp-fu" onclick="cpBacktest('${ticker}')">Backtest this</button>
         <button class="dp-fu" onclick="cpAIdeep('${ticker}')">Deeper AI read ↗</button>
-        <button class="dp-fu" onclick="cpChip('${other}')">Compare ${other}</button>
       </div>`;
 
     // ── AI READ (conviction) ──
@@ -4385,7 +4391,7 @@ async function renderDash(text){
       <div class="dm" title="${tAtr}"><div class="dm-k">ATR (volatility)</div><div class="dm-v">${atrPct.toFixed(1)}%</div><div class="dm-s">$${atrVal.toFixed(2)} / day</div></div>
       <div class="dm" title="${tRange}"><div class="dm-k">20D range</div><div class="dm-v">${Math.round(rangePos)}%</div><div class="dm-s">$${a.lo20}–$${a.hi20}</div></div>
       <div class="dm" title="${tBb}"><div class="dm-k">Bollinger</div><div class="dm-v">${a.bbPct}%</div><div class="dm-s">${a.bbPct>75?'upper band':a.bbPct<25?'lower band':'mid band'}</div></div>
-      <div class="dm" title="${tRr}"><div class="dm-k">Risk : reward</div><div class="dm-v">${isNeutral?'—':'1:'+rr}</div><div class="dm-s">${isNeutral?'no active setup':riskT.toLocaleString()+' → '+rewT.toLocaleString()+' ticks'}</div></div>`;
+      <div class="dm" title="${tRr}"><div class="dm-k">Risk : reward</div><div class="dm-v">${isNeutral?'—':'1:'+rr}</div><div class="dm-s">${isNeutral?'no active setup':'risk '+riskPct.toFixed(1)+'% → reward '+rewPct.toFixed(1)+'%'}</div></div>`;
     renderGreeks(q,a,isShort);
 
     // ── SIGNALS ──
@@ -4395,9 +4401,11 @@ async function renderDash(text){
       return `<div class="sig-row"><span class="sig-dot ${dot}"></span><div class="sig-tx"><div class="sig-nm">${s.name}</div><div class="sig-dt">${s.detail}</div></div><span class="sig-pts ${pcls}">${s.pts}</span></div>`;
     }).join('');
 
+    const g=document.querySelector('.dash-grid');if(g)g.classList.remove('is-loading');
     if(!liveStarted){liveStarted=true;startLiveRefresh();}
   }catch(e){
     window.__userFetch=0;
+    const g=document.querySelector('.dash-grid');if(g)g.classList.remove('is-loading');
     const head=dashEl('dashHead');
     if(head)head.innerHTML=`<div class="dash-rationale">Couldn't load <b>${ticker}</b> right now — the public market-data feed may be busy. <button class="dp-fu" onclick="cpChip('${ticker}')" style="margin-top:8px">Try again</button></div>`;
     const plan=dashEl('dashPlan');if(plan)plan.innerHTML=`<div class="dp-h">Trade plan</div><div class="dash-rationale">Waiting on data for ${ticker}.</div>`;
@@ -4407,8 +4415,8 @@ async function renderDash(text){
 function cpAppendNote(html){const el=dashEl('dashNote');if(!el)return null;el.style.display='block';el.innerHTML=html;el.scrollIntoView({behavior:'smooth',block:'nearest'});return el;}
 function cpExplainStop(){
   if(!lastData||lastData.isNeutral){cpAppendNote('<div class="dp-h">Stop logic</div><div class="dash-rationale">There\'s no active setup to place a stop on right now.</div>');return;}
-  const d=lastData,n=Math.round(Math.abs(d.entry-d.sl)/0.01);
-  cpAppendNote(`<div class="dash-ai-tag"><i class="ai-spark">✦</i> Stop logic</div><div class="dash-rationale">The stop sits about <b>${n.toLocaleString()} ticks</b> from entry, just beyond the nearest swing ${d.isShort?'high':'low'} plus a volatility (ATR) buffer. That's the level where the read is wrong: if price trades through it, the structure that justified the trade has broken, so you're out — small loss, no hoping.</div>`);
+  const d=lastData,risk=Math.abs(d.entry-d.sl),riskPct=d.entry?risk/d.entry*100:0;
+  cpAppendNote(`<div class="dash-ai-tag"><i class="ai-spark">✦</i> Stop logic</div><div class="dash-rationale">The stop sits about <b>${riskPct.toFixed(1)}%</b> ($${risk.toFixed(2)}) from entry, just beyond the nearest swing ${d.isShort?'high':'low'} plus a volatility (ATR) buffer. That's the level where the read is wrong: if price trades through it, the structure that justified the trade has broken, so you're out — small loss, no hoping.</div>`);
 }
 function cpBacktest(ticker){
   const b=[...document.querySelectorAll('.ntab')].find(x=>x.textContent.trim()==='Backtest');
@@ -4910,7 +4918,7 @@ function annotatedChartHTML(ticker,key,candles,lv,lvls,elId){
   const closes=C.map(c=>+c.c), n=closes.length, last=closes[n-1];
   const levels=[{v:lv.resis,col:'#f0a500',lab:'Resistance',dash:'4 3'},{v:lv.support,col:'#22c55e',lab:'Support',dash:'4 3'}];
   if(lvls&&isFinite(lvls.entry)){
-    levels.push({v:lvls.entry,col:'#2f81f7',lab:'Entry',dash:'0'});
+    levels.push({v:lvls.entry,col:'#e8eaed',lab:'Entry',dash:'0'});
     if(isFinite(lvls.sl))levels.push({v:lvls.sl,col:'#f43f5e',lab:'Stop',dash:'4 3'});
     if(isFinite(lvls.tp1))levels.push({v:lvls.tp1,col:'#4ade80',lab:'Target 1',dash:'2 3'});
     if(lvls.tp2&&Math.abs(lvls.tp2-lvls.tp1)>0.01)levels.push({v:lvls.tp2,col:'#4ade80',lab:'Target 2',dash:'2 3'});
