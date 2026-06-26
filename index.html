@@ -941,8 +941,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .conv-left{flex:1;min-width:0}
 .conv-verdict{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:11px}
 .conv-verdict.long{color:var(--gt)}.conv-verdict.short{color:var(--rt)}.conv-verdict.wait{color:var(--ink2)}
-.mood-beast{width:118px;height:84px;flex-shrink:0;transition:filter .6s ease}
-.mood-beast svg,.mood-beast img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 0 10px currentColor)}
+.mood-beast{width:144px;height:104px;flex-shrink:0;transition:filter .6s ease}
+.mood-beast:empty{display:none}
+.mood-beast svg,.mood-beast img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 0 16px currentColor) drop-shadow(0 0 7px currentColor)}
 .mood-beast.long{color:var(--gt)}.mood-beast.short{color:var(--rt)}.mood-beast.wait{color:var(--ink3)}
 .conv-bar{height:8px;border-radius:99px;background:var(--s3);overflow:hidden}
 .conv-left .conv-bar{margin-bottom:0}
@@ -1108,7 +1109,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 #fxCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.85}
 #landing{background:var(--bg)}
 /* re-enable soft green aurora orbs on the landing for premium depth */
-#landing .lx-orb{display:block;opacity:.42;filter:blur(36px);mix-blend-mode:screen}
+#landing .lx-bg{position:fixed;inset:0;height:100%}
+#landing .lx-orb{display:block;position:absolute;opacity:.42;filter:blur(36px);mix-blend-mode:screen}
 /* keep app surfaces readable above the canvas */
 .page-wrap,.main-col{position:relative;z-index:1}
 .appbar{background:rgba(6,6,8,.74)}
@@ -3995,7 +3997,7 @@ async function renderDash(text){
           <div class="conv-verdict ${sentClass}">${isNeutral?'Neutral · no clear edge':(isShort?'Bearish':'Bullish')}</div>
           <div class="conv-bar"><div class="conv-fill" style="width:${convPct}%;background:${sentCol}"></div></div>
         </div>
-        <div class="mood-beast ${sentClass}">${isShort?BEAR_SVG:BULL_SVG}</div>
+        <div class="mood-beast ${sentClass}">${isNeutral?'':(isShort?BEAR_SVG:BULL_SVG)}</div>
       </div>
       <div class="dash-rationale">${rationale}</div>
       <div class="ins-head">What the AI sees</div>
