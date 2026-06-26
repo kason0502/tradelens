@@ -1648,6 +1648,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <section class="dash-panel chart">
             <div class="dash-tv" id="dashTV"></div>
           </section>
+          <section class="dash-panel" id="dashPredictPanel" style="display:none"><div id="dashPredict"></div></section>
           <section class="dash-panel">
             <div class="dp-h">Key metrics</div>
             <div class="dash-metrics" id="dashMetrics"></div>
@@ -3340,7 +3341,7 @@ function proofChartSVG(snap,e,live){
 // current price — so the call is a prediction from the present bar.
 function predictChartSVG(candles,e){
   const mono='ui-monospace,Menlo,Consolas,monospace';
-  const C=(candles||[]).slice(-70).map(c=>({o:+(c.o!=null?c.o:c.c),h:+(c.h!=null?c.h:c.c),l:+(c.l!=null?c.l:c.c),c:+c.c})).filter(c=>isFinite(c.c));
+  const C=(candles||[]).slice(-55).map(c=>({o:+(c.o!=null?c.o:c.c),h:+(c.h!=null?c.h:c.c),l:+(c.l!=null?c.l:c.c),c:+c.c})).filter(c=>isFinite(c.c));
   const n=C.length; if(n<8)return'<div style="font-size:12px;color:var(--ink3);padding:16px;text-align:center">Not enough chart data to draw the prediction.</div>';
   const isShort=e.dir==='short';
   let lv={resis:Math.max(...C.map(c=>c.h)),support:Math.min(...C.map(c=>c.l))};
@@ -3351,30 +3352,30 @@ function predictChartSVG(candles,e){
   const lvVals=levels.map(l=>l.v).filter(v=>isFinite(v));
   const allV=C.map(c=>c.h).concat(C.map(c=>c.l),lvVals);
   let mn=Math.min(...allV),mx=Math.max(...allV);const pad=(mx-mn)*0.06||1;mn-=pad;mx+=pad;
-  const W=820,H=320,padL=58,padR=128,padT=14,padB=26,pw=W-padL-padR,ph=H-padT-padB;
+  const W=820,H=348,padL=62,padR=132,padT=16,padB=28,pw=W-padL-padR,ph=H-padT-padB;
   const projW=Math.round(pw*0.26), candW=pw-projW;          // candles left, projection right
-  const slot=candW/n,bodyW=Math.max(2,Math.min(8,slot*0.62));
+  const slot=candW/n,bodyW=Math.max(3,Math.min(11,slot*0.64));
   const cx=i=>padL+slot*(i+0.5),Y=v=>padT+(1-(v-mn)/((mx-mn)||1))*ph;
   const bx=padL+candW, rx=W-padR;                            // boundary (now) and right edge
-  let axisSvg='';for(let k=0;k<=5;k++){const v=mn+(mx-mn)*k/5,y=Y(v);axisSvg+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${rx}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity=".3"/><text x="${padL-8}" y="${(y+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="${mono}" text-anchor="end">${v.toFixed(2)}</text>`;}
+  let axisSvg='';for(let k=0;k<=5;k++){const v=mn+(mx-mn)*k/5,y=Y(v);axisSvg+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${rx}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity=".3"/><text x="${padL-8}" y="${(y+3.5).toFixed(1)}" fill="var(--ink3)" font-size="11.5" font-family="${mono}" text-anchor="end">${v.toFixed(2)}</text>`;}
   const candleSvg=C.map((c,i)=>{const up=c.c>=c.o,col=up?'#22c55e':'#f43f5e',x=cx(i),bt=Math.min(Y(c.o),Y(c.c)),bh=Math.max(1,Math.abs(Y(c.c)-Y(c.o)));return`<line x1="${x.toFixed(1)}" y1="${Y(c.h).toFixed(1)}" x2="${x.toFixed(1)}" y2="${Y(c.l).toFixed(1)}" stroke="${col}" stroke-width="1" opacity=".9"/><rect x="${(x-bodyW/2).toFixed(1)}" y="${bt.toFixed(1)}" width="${bodyW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}"/>`;}).join('');
   const lvLines=levels.map(l=>isFinite(l.v)?`<line x1="${padL}" y1="${Y(l.v).toFixed(1)}" x2="${rx}" y2="${Y(l.v).toFixed(1)}" stroke="${l.col}" stroke-width="1.3"${l.dash!=='0'?` stroke-dasharray="${l.dash}"`:''} opacity=".9"/>`:'').join('');
   const sorted=levels.filter(l=>isFinite(l.v)).map(l=>({col:l.col,lab:l.lab,v:l.v,y:Y(l.v)})).sort((a,b)=>a.y-b.y);
-  for(let i=1;i<sorted.length;i++){if(sorted[i].y-sorted[i-1].y<13)sorted[i].y=sorted[i-1].y+13;}
-  const lvLabels=sorted.map(l=>`<text x="${rx+7}" y="${(l.y+4).toFixed(1)}" fill="${l.col}" font-size="11" font-family="${mono}" font-weight="700">${l.lab} $${(+l.v).toFixed(2)}</text>`).join('');
+  for(let i=1;i<sorted.length;i++){if(sorted[i].y-sorted[i-1].y<15)sorted[i].y=sorted[i-1].y+15;}
+  const lvLabels=sorted.map(l=>`<text x="${rx+7}" y="${(l.y+4).toFixed(1)}" fill="${l.col}" font-size="12.5" font-family="${mono}" font-weight="700">${l.lab} $${(+l.v).toFixed(2)}</text>`).join('');
   // projection cone: from now(entry) toward target (reward) and stop (risk)
   const yE=Y(entry),yT=Y(tp1),yS=Y(sl);
   const rewardFill=`<path d="M${bx.toFixed(1)} ${yE.toFixed(1)} L${rx.toFixed(1)} ${yT.toFixed(1)} L${rx.toFixed(1)} ${yE.toFixed(1)} Z" fill="#22c55e" opacity=".10"/>`;
   const riskFill=`<path d="M${bx.toFixed(1)} ${yE.toFixed(1)} L${rx.toFixed(1)} ${yS.toFixed(1)} L${rx.toFixed(1)} ${yE.toFixed(1)} Z" fill="#f43f5e" opacity=".11"/>`;
   const projLines=`<line x1="${bx.toFixed(1)}" y1="${yE.toFixed(1)}" x2="${rx.toFixed(1)}" y2="${yT.toFixed(1)}" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4 3"/><line x1="${bx.toFixed(1)}" y1="${yE.toFixed(1)}" x2="${rx.toFixed(1)}" y2="${yS.toFixed(1)}" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="4 3"/>`;
-  const nowLine=`<line x1="${bx.toFixed(1)}" y1="${padT}" x2="${bx.toFixed(1)}" y2="${(padT+ph).toFixed(1)}" stroke="#e8eaed" stroke-width="1.2" stroke-dasharray="3 3" opacity=".8"/><text x="${bx.toFixed(1)}" y="${(padT-3).toFixed(1)}" fill="#e8eaed" font-size="10" font-family="${mono}" text-anchor="middle">now</text>`;
+  const nowLine=`<line x1="${bx.toFixed(1)}" y1="${padT}" x2="${bx.toFixed(1)}" y2="${(padT+ph).toFixed(1)}" stroke="#e8eaed" stroke-width="1.2" stroke-dasharray="3 3" opacity=".8"/><text x="${bx.toFixed(1)}" y="${(padT-4).toFixed(1)}" fill="#e8eaed" font-size="11.5" font-family="${mono}" text-anchor="middle" font-weight="700">now</text>`;
   const nowDot=`<circle cx="${bx.toFixed(1)}" cy="${yE.toFixed(1)}" r="4" fill="#e8eaed" stroke="var(--bg)" stroke-width="1.5"/>`;
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="${e.tk||''} prediction from the current price with projected target and stop">
     ${axisSvg}
     <rect x="${padL}" y="${padT}" width="${pw}" height="${ph}" fill="none" stroke="var(--line)" stroke-width="1"/>
     <rect x="${bx.toFixed(1)}" y="${padT}" width="${(rx-bx).toFixed(1)}" height="${ph}" fill="var(--ink)" opacity=".03"/>
     ${lvLines}${rewardFill}${riskFill}${candleSvg}${projLines}${nowLine}${nowDot}${lvLabels}
-    <text x="${padL}" y="${(H-7).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="${mono}">real candles up to now · shaded zone = the ${isShort?'short':'long'} prediction from here</text>
+    <text x="${padL}" y="${(H-8).toFixed(1)}" fill="var(--ink3)" font-size="11.5" font-family="${mono}">real candles up to now · shaded zone = the ${isShort?'short':'long'} prediction from here</text>
   </svg>`;
 }
 // Why each strategy was picked — grounded in the stored level numbers.
@@ -4318,16 +4319,18 @@ async function renderDash(text){
           <div class="lv-row rew"><div class="lk">Target</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
         </div>
         <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>`;
-    const other=ticker==='NVDA'?'AAPL':'NVDA';
+    // ── PREDICTION CHART (full-width left column, readable) ──
     let chartCand=(cand&&cand.length>=40)?cand:((q.h1y&&q.h1y.length)?q.h1y:(q.h6m||q.h3m||[]));
-    const predChart=isNeutral?'':`
-      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:16px 0 8px">Prediction from the current price</div>
-      ${predictChartSVG(chartCand,{tk:ticker,dir:isShort?'short':'long',entryP:entry,sl,tp1})}`;
+    const predPanel=dashEl('dashPredictPanel'), pred=dashEl('dashPredict');
+    if(isNeutral){ if(predPanel)predPanel.style.display='none'; }
+    else {
+      if(predPanel)predPanel.style.display='';
+      if(pred)pred.innerHTML=`<div class="dp-h">AI prediction <span class="tag">${isShort?'Short':'Long'} · ${hzLabel}</span> <span class="tag">from current price</span></div>${predictChartSVG(chartCand,{tk:ticker,dir:isShort?'short':'long',entryP:entry,sl,tp1})}`;
+    }
     dashEl('dashPlan').innerHTML=`
       <div class="dp-h">Trade plan <span class="tag">${hzLabel} horizon</span></div>
       <div class="dash-verdict ${sentClass}">${verdict}</div>
       ${planBody}
-      ${predChart}
       <div class="dp-actions">
         ${isNeutral?'':`<button class="dp-fu" onclick="trackSetup()" style="border-color:rgba(var(--ac-rgb),.5);color:var(--act)">+ Track this setup</button>`}
         ${isNeutral?'':`<button class="dp-fu" onclick="cpExplainStop()">Why this stop?</button>`}
