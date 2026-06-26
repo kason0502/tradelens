@@ -47,15 +47,20 @@ Vercel redeploys automatically in a few seconds.
 - **Pool the AI's self-test learning across all users:** add Vercel's **KV (Upstash)**
   integration from the Vercel dashboard — it sets the env vars `api/learn.js` reads.
   Without it, learning is per-device (localStorage). See `DEPLOY_BACKEND.md`.
-- **Claude AI features:** each visitor still pastes their own Anthropic key (the
-  ✨ Connect AI button). A single shared key would bill you for everyone, so it's off
-  by default.
+- **Claude AI for everyone (your key):** `api/claude.js` is the server-side AI proxy.
+  In Vercel → Project → Settings → Environment Variables, add
+  **`ANTHROPIC_API_KEY = sk-ant-…`** (and redeploy). The app probes `/api/claude` on
+  load and, when present, gives **every visitor** the AI features with no key prompt.
+  ⚠️ This bills *your* Anthropic key for every visitor's AI request. Remove the env
+  var to go back to bring-your-own-key. (The env var must be named `ANTHROPIC_API_KEY`,
+  or `ANTHROPIC_MODEL` to override the model.)
 
 ## What deploys where
 | File | Role |
 |---|---|
 | `index.html` | the entire app (served as the homepage) |
 | `api/yf.js` | **server-side market-data proxy** — makes stock data load reliably for all visitors |
+| `api/claude.js` | **server-side Claude proxy** — uses `ANTHROPIC_API_KEY` so visitors get AI without their own key |
 | `api/learn.js` | shared AI-learning store (optional; needs KV) |
 | `logo.png` / `bull.png` / `bear.png` | brand + mascots |
 | `.claude/serve.ps1` | the **local** dev server + proxy — NOT deployed |
