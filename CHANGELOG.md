@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16) — Strategy tab (day-by-day ideas + live candidates)
+- **New "Strategy" tab** (`#tab-strategy`, in the Research nav group, `DAILY` pill). Three parts, all from real data/date:
+  - **Today's focus** — auto-detects the weekday from `new Date()` and shows that day's theme, lean (recommended strategy/bias), do's, any event badges, and a **live candidate scan** for the day's setup. Weekends show a "plan the week" card.
+  - **Event calendar** (`eventCalendar`) — OPEX / quad-witching / NFP / month-/quarter-end are **computed from the date** (`_nthFriday`, `_lastWeekday`), each with a TODAY / THIS WEEK / UPCOMING / PASSED badge. FOMC/CPI noted as "check a calendar" (no fabricated dates — honest).
+  - **Weekday playbook** — Mon–Fri expandable cards (today auto-open + highlighted), each with a "Find live candidates" button.
+- **Live candidates reuse the screener engine** (`loadStratCandidates` → `loadScreener`/`SCREEN`/`scanFilter`, cached via the movers fetch) and map each day to a scan type (Mon trend · Tue pullback · Wed breakout · Thu oversold · Fri best-of). Click any candidate → opens on the dashboard. Guarded by `window.__userFetch` so it stands down for user lookups.
+
 ## 2026-06-26 (session 15) — ticker-only ask bar + self-running AI learning
 - **Dashboard ask bar is now ticker-only.** Per the user: it's a symbol lookup, not a natural-language Q&A. Input is uppercased + stripped to A–Z on the fly (`maxlength=6`), placeholder reworded to "Enter a ticker — e.g. AAPL, NVDA, TSLA, SPY". `resolveTicker`/`cpSend` unchanged (already symbol-first).
 - **AI now learns on its own.** New `aiAutoLearnOnce()` runs ONE silent self-test on a real historical chart when idle (folds win/loss into `AI_MEMORY`, posts to the shared pool when `SHARED_OK`). Scheduled in the init pollers (first run ~40s, then every 60s) behind `bgIdle()` so it stands down during user lookups / on the landing / when hidden. AI Lab gained a **Pause/Resume auto-learn** toggle (`toggleAutoLearn`, persisted to `tlpro_ai_auto`) + a live status line (`paintAutoStatus`); auto results tag as `auto` in the log. The manual "Run N self-tests" buttons still work and just accelerate it.

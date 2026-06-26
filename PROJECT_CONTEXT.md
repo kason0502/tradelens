@@ -1,7 +1,7 @@
 # STRATA — Project Context
 
 > Living doc. Update at the end of any session that changes scope, status, or direction.
-> Last updated: 2026-06-26 (session 15). Dashboard ask bar is now ticker-only; AI self-learning runs automatically in the background (idle trickle + Pause/Resume in AI Lab). Earlier: renamed TradeLens Pro → STRATA; hosted on GitHub→Vercel with a server-side data + AI proxy (see "Server, data & hosting" below).
+> Last updated: 2026-06-26 (session 16). New **Strategy** tab (day-by-day ideas + date-computed event calendar + live candidate scans). Earlier this session: ticker-only dashboard ask bar; background AI self-learning; richer info in every tab. Before that: renamed TradeLens Pro → STRATA; hosted on GitHub→Vercel with a server-side data + AI proxy (see "Server, data & hosting" below).
 
 ## What this is
 STRATA (formerly TradeLens Pro) is a **single-file** web app (`index.html`, no build step, no framework) that combines:

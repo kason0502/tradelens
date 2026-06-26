@@ -12,6 +12,13 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Done (session 16 — Strategy tab)
+- [x] **New Strategy tab** — day-by-day playbook (weekday themes), a date-computed event calendar (OPEX/witching/NFP/month-end), and live candidate scans that reuse the screener engine. Today auto-highlighted.
+
+## Next (Strategy tab follow-ups)
+- [ ] Wire FOMC/CPI/PCE **actual dates** (needs an economic-calendar source) so they can carry real TODAY/THIS-WEEK badges instead of the generic "check a calendar" note.
+- [ ] Optional: let each day's candidate scan also derive a one-line entry/stop/target via the dashboard engine, not just a verdict chip.
+
 ## Done (session 15 — more info in every tab)
 - [x] **News** breadth summary + legend · **Pro Traders** legend + 2 desk members · **Backtest** equity curve + per-strategy mastery + legend · **Performance** risk/edge metrics (profit factor, avg win/loss, expectancy, discipline) + legend · **AI Chat** topic reference · **Alerts** legend + active count · **Feedback** legend.
 

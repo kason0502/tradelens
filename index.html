@@ -1544,6 +1544,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <button class="snav" data-tab="screener" onclick="mainTab('screener',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span class="lbl">Screener</span></button>
     <button class="snav" data-tab="news" onclick="mainTab('news',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 8h2a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2"/><path d="M7 8h7M7 12h7M7 16h4"/></svg><span class="lbl">News</span></button>
     <div class="appnav-grp">Research</div>
+    <button class="snav" data-tab="strategy" onclick="mainTab('strategy',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8.5 14.5l2 2 4-4"/></svg><span class="lbl">Strategy</span><span class="pill">DAILY</span></button>
     <button class="snav" data-tab="traders" onclick="mainTab('traders',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M20.5 20a5 5 0 0 0-4-4.9"/></svg><span class="lbl">Pro Traders</span></button>
     <button class="snav" data-tab="backtest" onclick="mainTab('backtest',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 2.6 6.3"/><path d="M3 20v-5h5"/><path d="M12 8v4l3 2"/></svg><span class="lbl">Backtest</span></button>
     <button class="snav" data-tab="performance" onclick="mainTab('performance',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7 15l4-4 3 2 5-6"/></svg><span class="lbl">Performance</span></button>
@@ -1664,6 +1665,18 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <b style="color:var(--ink2)">How to read this:</b> each card carries a <span class="ntag ntag-bull">Bullish</span> / <span class="ntag ntag-bear">Bearish</span> / <span class="ntag ntag-neut">Neutral</span> tag = the likely <i>direction of pressure</i> on the named tickers, plus a one-line "what it could mean for price." Headlines aren't trade signals on their own — confirm the structure on the dashboard before acting.
       </div>
       <div class="news-grid" id="newsTabFeed"></div>
+    </div>
+
+    <!-- STRATEGY IDEAS (day-by-day) -->
+    <div class="tab-pane" id="tab-strategy">
+      <div style="margin-bottom:18px">
+        <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">Strategy ideas</div>
+        <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-top:6px;max-width:720px">A day-by-day playbook: what each trading day tends to favor, the scheduled events that move markets this week, and <b>live candidates</b> scanned from real data to match today's setup. Educational — not financial advice.</div>
+      </div>
+      <div id="stratToday"></div>
+      <div id="stratEvents"></div>
+      <div id="stratWeek"></div>
+      <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--s1)"><b style="color:var(--ink2)">How to read this:</b> these are <i>tendencies</i>, not guarantees — markets don't follow a calendar perfectly. Use each day's theme to bias which setups you hunt, confirm the structure on the dashboard, and always size with a stop. Scheduled macro events (FOMC, CPI) shift dates each month — check an economic calendar for exact times.</div>
     </div>
 
     <!-- PRO TRADERS -->
@@ -1891,6 +1904,7 @@ function mainTab(name,btn){
   if(name==='screener')renderScreener();
   if(name==='news')renderNewsTab();
   if(name==='feedback')renderFeedbackTab();
+  if(name==='strategy')renderStrategy();
   if(name==='traders')renderTraders(currentTraderFilter);
   if(name==='backtest')initBacktestTab();
   if(name==='performance')renderPerformance();
@@ -4401,6 +4415,157 @@ function paintScreen(){
 async function renderScreener(force){
   const out=document.getElementById('scanResults'); if(out&&!SCREEN.length)out.innerHTML='<div class="mv-empty">Running live structure scan…</div>';
   await loadScreener(force); paintScreen();
+}
+
+// ── STRATEGY IDEAS (day-by-day) ───────────────────────────────────────
+// A weekday playbook + a computed event calendar (OPEX / witching / NFP /
+// month-end — all derivable from the date, so no fake data) + a LIVE
+// candidate scan that reuses the screener engine to surface real names
+// matching the day's setup.
+const STRAT_DAYS={
+  1:{name:'Monday',tag:'Set the week\'s tone',type:'trend',strat:'Trend continuation',bias:'long',
+     theme:'Monday establishes the week\'s bias. Weekend headlines create gaps, and the first hour usually signals whether the prior trend continues or resets.',
+     dos:['Trade with the prevailing trend rather than fighting it.','Let a gap settle 30–60 min before committing — avoid chasing the open.','Mark the day\'s range early; it often frames the rest of the week.']},
+  2:{name:'Tuesday',tag:'Turnaround Tuesday',type:'bullish',strat:'Trend pullback long',bias:'long',
+     theme:'Historically one of the stronger sessions. Reversals of Monday\'s move are common, and trends that establish here tend to hold into mid-week.',
+     dos:['Look for pullback entries in names that resumed their trend.','A sharp Monday selloff reversing higher is the classic setup.','Buy dips into the rising 20-day average with a stop below support.']},
+  3:{name:'Wednesday',tag:'Mid-week momentum (and FOMC)',type:'breakout',strat:'Breakout continuation',bias:'long',
+     theme:'Momentum often follows through mid-week. FOMC rate decisions land Wednesday at 2:00pm ET (8×/year) — volatility spikes right after.',
+     dos:['Trade breakout continuation in the day\'s leaders.','On an FOMC day, cut size and wait for the post-2pm dust to settle.','Don\'t carry a fresh full-size position into the 2pm release.']},
+  4:{name:'Thursday',tag:'Position before Friday',type:'oversold',strat:'Oversold bounce',bias:'long',
+     theme:'Weekly jobless claims hit at 8:30am ET. Traders position ahead of Friday\'s expiration, and beaten-down names often see a bounce.',
+     dos:['Hunt oversold bounces and late-week breakouts.','Watch for desks starting to de-risk into Friday.','Tighten stops — Thursday reversals into expiration are common.']},
+  5:{name:'Friday',tag:'Expiration & profit-taking',type:'all',strat:'Range fade',bias:'mixed',
+     theme:'Options expiration (every 3rd Friday is monthly OPEX) drives "pinning" toward big strikes and heavy theta decay. Many traders book profits and flatten into the weekend.',
+     dos:['Favor range-fades and quick 0DTE plays with tight risk.','Expect price to gravitate toward major option strikes (pinning).','Don\'t carry heavy exposure over the weekend gap.']}
+};
+const STRAT_TYPE_LABEL={trend:'trend-continuation',bullish:'pullback',breakout:'breakout',oversold:'oversold-bounce',bearish:'short',all:'best-of-list'};
+// ── event-date helpers (all computed from the real date) ──
+function _nthFriday(y,m,n){let c=0;for(let d=1;d<=31;d++){const dt=new Date(y,m,d);if(dt.getMonth()!==m)break;if(dt.getDay()===5){c++;if(c===n)return dt;}}return null;}
+function _lastWeekday(y,m){let dt=new Date(y,m+1,0);while(dt.getDay()===0||dt.getDay()===6)dt.setDate(dt.getDate()-1);return dt;}
+function _dayDiff(a,b){return Math.round((new Date(a.getFullYear(),a.getMonth(),a.getDate())-new Date(b.getFullYear(),b.getMonth(),b.getDate()))/864e5);}
+function _evStatus(date,now){const d=_dayDiff(date,now);if(d===0)return'today';if(d>0&&d<=(7-now.getDay()))return'this week';if(d>0)return'upcoming';return'passed';}
+function eventCalendar(now){
+  const y=now.getFullYear(),m=now.getMonth();
+  const witch=[2,5,8,11].includes(m);
+  const opex=_nthFriday(y,m,3), nfp=_nthFriday(y,m,1), eom=_lastWeekday(y,m);
+  const fmt=d=>d?d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}):'—';
+  const list=[
+    {name:witch?'Quadruple witching':'Monthly OPEX',date:opex,icon:'⛓',note:'Monthly options & '+(witch?'futures ':'')+'expiration. Pinning toward big strikes, elevated volume into the close.'},
+    {name:'Jobs report (NFP)',date:nfp,icon:'📊',note:'8:30am ET. Large pre-market volatility; the first 30 minutes can whipsaw hard.'},
+    {name:witch?'Quarter end':'Month end',date:eom,icon:'📆',note:'Window dressing — funds adjust positions, which can amplify late-day moves.'}
+  ];
+  list.forEach(e=>{e.status=e.date?_evStatus(e.date,now):'upcoming';e.dateStr=fmt(e.date);});
+  // soonest/today first
+  const rank={today:0,'this week':1,upcoming:2,passed:3};
+  list.sort((a,b)=>rank[a.status]-rank[b.status]||(a.date-b.date));
+  return list;
+}
+function _evBadge(s){const m={today:['var(--ac)','TODAY'],'this week':['var(--at)','THIS WEEK'],upcoming:['var(--ink3)','UPCOMING'],passed:['var(--ink3)','PASSED']};const[c,t]=m[s]||m.upcoming;return`<span style="font-size:9.5px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:6px;color:${c};border:1px solid ${c};opacity:${s==='passed'?.5:1}">${t}</span>`;}
+
+let _stratScanned={};   // cache which day-types we've already scanned this session view
+function renderStrategy(){
+  const now=new Date();
+  const dow=now.getDay(), weekend=(dow===0||dow===6);
+  const dateStr=now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  const evs=eventCalendar(now);
+  const todayEvs=evs.filter(e=>e.status==='today');
+  // ── TODAY'S FOCUS ──
+  const tEl=document.getElementById('stratToday');
+  if(weekend){
+    tEl.innerHTML=`<div style="background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">${dateStr} · markets closed</div>
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px">Weekend — plan the week ahead</div>
+      <div style="font-size:13.5px;color:var(--ink2);line-height:1.65">Markets are closed. Use the downtime to build your watchlist and review the weekday playbook below, so you know which setups to hunt when the bell rings. ${todayEvs.length?'Heads up: there are scheduled events early next week — see the calendar below.':''}</div>
+    </div>`;
+  }else{
+    const d=STRAT_DAYS[dow];
+    const evBadges=todayEvs.map(e=>`<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--act);background:rgba(var(--ac-rgb),.12);border:1px solid rgba(var(--ac-rgb),.3);border-radius:8px;padding:5px 10px">${e.icon} ${e.name} today</span>`).join(' ');
+    tEl.innerHTML=`<div style="background:var(--s1);border:1px solid rgba(var(--ac-rgb),.28);border-radius:16px;padding:20px 22px;margin-bottom:16px;box-shadow:0 0 0 1px rgba(var(--ac-rgb),.06)">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--act)">Today's focus · ${dateStr}</div>
+        <span style="font-size:10px;font-weight:800;letter-spacing:.08em;background:var(--ac);color:#04130a;border-radius:6px;padding:4px 9px">${d.name.toUpperCase()}</span>
+      </div>
+      <div style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px">${d.tag}</div>
+      <div style="font-size:13.5px;color:var(--ink2);line-height:1.65;margin-bottom:14px">${d.theme}</div>
+      ${evBadges?`<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">${evBadges}</div>`:''}
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <span style="font-size:11px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Lean toward</span>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink);background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:6px 12px">${d.strat} <span style="color:${d.bias==='long'?'var(--gt)':d.bias==='short'?'var(--rt)':'var(--ink3)'}">· ${d.bias}</span></span>
+        <button class="mv-tgl" onclick="mainTab('backtest',document.querySelector('.snav[data-tab=&quot;backtest&quot;]'))">Practice in Backtest →</button>
+      </div>
+      <div style="display:grid;gap:7px;margin-bottom:18px">
+        ${d.dos.map(t=>`<div style="display:flex;gap:9px;font-size:12.5px;color:var(--ink2);line-height:1.5"><span style="color:var(--act);flex-shrink:0">▸</span><span>${t}</span></div>`).join('')}
+      </div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Live candidates for a ${STRAT_TYPE_LABEL[d.type]} setup</div>
+      <div id="stratTodayCand"><div class="mv-empty" style="padding:16px"><span class="ai-spin"></span> Scanning live market…</div></div>
+    </div>`;
+    loadStratCandidates(d.type,'stratTodayCand');
+  }
+  // ── EVENT CALENDAR ──
+  const eEl=document.getElementById('stratEvents');
+  eEl.innerHTML=`<div class="card"><div class="card-title">This month's market-moving events</div>
+    <div style="display:grid;gap:9px">${evs.map(e=>`
+      <div style="display:flex;align-items:center;gap:13px;padding:11px 14px;background:var(--s2);border:1px solid var(--line);border-radius:11px;${e.status==='passed'?'opacity:.55':''}">
+        <span style="font-size:18px;flex-shrink:0">${e.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:700;color:var(--ink)">${e.name} <span style="font-family:var(--mono);font-weight:600;color:var(--ink3);font-size:12px">· ${e.dateStr}</span></div>
+          <div style="font-size:11.5px;color:var(--ink3);line-height:1.5;margin-top:2px">${e.note}</div>
+        </div>
+        ${_evBadge(e.status)}
+      </div>`).join('')}</div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">Also watch:</b> FOMC meetings (8×/year), CPI inflation (~mid-month, 8:30am ET) and PCE move dates each cycle — they're the biggest single-day volatility drivers. Check an economic calendar for exact times and trade lighter into the print.</div>
+  </div>`;
+  // ── WEEKDAY PLAYBOOK ──
+  const wEl=document.getElementById('stratWeek');
+  wEl.innerHTML=`<div class="card"><div class="card-title">The weekday playbook</div>
+    <div style="font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:14px">Tap any day to see its character and pull live candidates that fit. ${weekend?'':'<b style="color:var(--act)">Today is highlighted.</b>'}</div>
+    ${[1,2,3,4,5].map(i=>{const d=STRAT_DAYS[i],today=(i===dow);
+      return `<div class="pb-item${today?' open':''}" id="sd${i}" style="${today?'border-color:rgba(var(--ac-rgb),.4)':''}">
+        <div class="pb-head" onclick="document.getElementById('sd${i}').classList.toggle('open')">
+          <div class="pb-icon" style="background:linear-gradient(135deg,#22c55e,#0e7a3a);font-family:var(--mono);font-size:13px;font-weight:800">${d.name.slice(0,2).toUpperCase()}</div>
+          <div class="pb-title">
+            <div class="pb-name">${d.name}${today?'<span class="pb-bias bull" style="background:var(--ac);color:#04130a">TODAY</span>':''}</div>
+            <div class="pb-tag">${d.tag}</div>
+          </div>
+          <div class="pb-arrow">▶</div>
+        </div>
+        <div class="pb-body"><div class="pb-inner">
+          <div style="font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:12px">${d.theme}</div>
+          <div style="display:grid;gap:6px;margin-bottom:14px">${d.dos.map(t=>`<div style="display:flex;gap:9px;font-size:12px;color:var(--ink2);line-height:1.5"><span style="color:var(--act)">▸</span><span>${t}</span></div>`).join('')}</div>
+          <button class="mv-tgl" onclick="loadStratCandidates('${d.type}','sdc${i}')">Find live ${STRAT_TYPE_LABEL[d.type]} candidates</button>
+          <div id="sdc${i}" style="margin-top:12px"></div>
+        </div></div>
+      </div>`;}).join('')}
+  </div>`;
+}
+async function loadStratCandidates(type,elId){
+  const el=document.getElementById(elId); if(!el)return;
+  el.innerHTML=`<div class="mv-empty" style="padding:16px"><span class="ai-spin"></span> Scanning live market for ${STRAT_TYPE_LABEL[type]||type} setups…</div>`;
+  window.__userFetch=Date.now();
+  try{
+    await loadScreener(false);          // reuses the movers cache — cheap on repeat
+    window.__userFetch=0;
+    let rows=scanFilter(SCREEN,type);
+    rows.sort((a,b)=>(type==='bearish'||type==='oversold')?a.a.score-b.a.score:b.a.score-a.a.score);
+    rows=rows.slice(0,4);
+    if(!rows.length){el.innerHTML=`<div class="mv-empty" style="padding:16px">No live names fit this setup right now — conditions may not match, or the data feed is busy. Try the <b>Screener</b> tab.</div>`;return;}
+    el.innerHTML=rows.map(r=>{
+      const a=r.a,up=r.pct>=0;
+      const dir=a.sentiment==='bullish'?'long':a.sentiment==='bearish'?'short':'wait';
+      const conv=a.sentiment==='bearish'?100-a.score:a.score;
+      const verdict=dir==='wait'?'Watch':(dir==='long'?'Long '+conv+'%':'Short '+conv+'%');
+      const bC=dir==='long'?'var(--gt)':dir==='short'?'var(--rt)':'var(--ink2)';
+      const bB=dir==='long'?'rgba(34,197,94,.13)':dir==='short'?'rgba(244,63,94,.13)':'var(--s3)';
+      return `<button onclick="loadTicker('${r.sym}')" style="display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--s2);border:1px solid var(--line);border-radius:11px;padding:10px 13px;cursor:pointer;font-family:inherit;margin-bottom:8px">
+        <span style="font-family:var(--mono);font-weight:800;font-size:14.5px;color:var(--ink);min-width:56px">${r.sym}</span>
+        <span style="flex:1;font-size:11.5px;color:var(--ink3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0">${(r.name||'').slice(0,24)}</span>
+        <span style="font-size:11px;color:var(--ink3);font-family:var(--mono)">RSI ${a.rsi}</span>
+        <span style="font-family:var(--mono);font-size:13px;color:var(--ink2);min-width:64px;text-align:right">$${r.price.toFixed(2)}</span>
+        <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${up?'var(--gt)':'var(--rt)'};min-width:58px;text-align:right">${up?'+':''}${r.pct.toFixed(2)}%</span>
+        <span style="font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:7px;background:${bB};color:${bC};white-space:nowrap">${verdict}</span>
+      </button>`;}).join('')+`<div style="font-size:10.5px;color:var(--ink3);margin-top:2px">Real-time structure scan across the most liquid names · click any to open it on the dashboard.</div>`;
+  }catch(e){window.__userFetch=0;el.innerHTML=`<div class="mv-empty" style="padding:16px">Couldn't load live candidates right now — the data feed may be busy.</div>`;}
 }
 
 // ── LIVE STREAMING ────────────────────────────────────────────────────
