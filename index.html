@@ -1911,33 +1911,58 @@ function initPremiumNav(){
 }
 
 // ── SENTIMENT-REACTIVE THEME + bull/bear mascots (original STRATA line-art) ──
-const BULL_SVG=`<svg viewBox="0 0 232 152" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round" aria-label="bull">
-  <path d="M16 98C9 88 16 76 29 77C24 62 22 49 35 45C28 38 39 31 48 38C50 47 45 55 41 61C51 59 59 57 65 63C69 48 84 38 101 42C111 33 124 35 130 46C152 42 176 44 192 55C198 46 208 38 216 36C212 49 207 59 203 67C201 88 199 110 193 130C191 138 187 142 183 143L174 143C176 121 174 103 170 93C150 97 118 99 95 95C97 111 93 129 89 141C87 147 83 149 79 143L73 143C75 121 73 105 69 95C55 97 36 97 24 98Z"/>
-  <g fill="none" stroke-width="2.1">
+const BULL_PATH="M16 98C9 88 16 76 29 77C24 62 22 49 35 45C28 38 39 31 48 38C50 47 45 55 41 61C51 59 59 57 65 63C69 48 84 38 101 42C111 33 124 35 130 46C152 42 176 44 192 55C198 46 208 38 216 36C212 49 207 59 203 67C201 88 199 110 193 130C191 138 187 142 183 143L174 143C176 121 174 103 170 93C150 97 118 99 95 95C97 111 93 129 89 141C87 147 83 149 79 143L73 143C75 121 73 105 69 95C55 97 36 97 24 98Z";
+const BULL_SVG=`<svg viewBox="0 0 232 152" aria-label="bull">
+  <defs><clipPath id="bullClip"><path d="${BULL_PATH}"/></clipPath></defs>
+  <g clip-path="url(#bullClip)" stroke="none">
+    <path d="${BULL_PATH}" fill="currentColor" fill-opacity=".13"/>
+    <polygon points="96,52 130,45 133,80" fill="currentColor" fill-opacity=".30"/>
+    <polygon points="133,80 163,53 161,93" fill="currentColor" fill-opacity=".20"/>
+    <polygon points="163,53 193,57 179,97" fill="currentColor" fill-opacity=".10"/>
+    <polygon points="41,60 67,63 47,93" fill="currentColor" fill-opacity=".26"/>
+    <polygon points="67,63 96,52 90,96" fill="currentColor" fill-opacity=".16"/>
+    <polygon points="90,96 133,80 151,93" fill="currentColor" fill-opacity=".05"/>
+    <polygon points="69,96 90,96 82,141" fill="currentColor" fill-opacity=".22"/>
+    <polygon points="170,94 179,97 183,138" fill="currentColor" fill-opacity=".09"/>
+  </g>
+  <g clip-path="url(#bullClip)" fill="none" stroke="currentColor" stroke-width="1.15" stroke-opacity=".45" stroke-linejoin="round">
+    <path d="M41 60L67 63L30 95M67 63L96 52L90 96M96 52L133 80L67 63M133 80L163 53L161 93M163 53L193 57L179 97M90 96L133 80L151 93L161 93M151 93L179 97M82 141L90 96M82 141L133 80M183 138L179 97M183 138L161 93M47 93L67 63M130 45L133 80"/>
+  </g>
+  <path d="${BULL_PATH}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M45 45C41 34 47 25 56 28C53 37 51 43 48 48"/>
-    <path d="M35 64L49 60"/>
-    <path d="M30 84C41 89 52 89 60 84"/>
-    <path d="M96 50C91 65 96 80 109 88" stroke-opacity=".55"/>
-    <path d="M170 94C181 106 187 121 183 134" stroke-opacity=".5"/>
-    <path d="M72 96C79 111 86 124 88 138" stroke-opacity=".5"/>
-    <path d="M150 60C167 64 181 60 189 50" stroke-opacity=".5"/>
     <path d="M11 88C5 86 4 80 9 77M19 81C13 79 12 73 17 71" stroke-opacity=".5"/>
   </g>
-  <circle cx="41" cy="69" r="2.7" fill-opacity="1" stroke="none"/>
-  <circle cx="22" cy="91" r="1.9" fill-opacity="1" stroke="none"/>
+  <circle cx="41" cy="69" r="2.7" fill="currentColor"/>
+  <circle cx="22" cy="91" r="1.9" fill="currentColor"/>
 </svg>`;
-const BEAR_SVG=`<svg viewBox="0 0 212 152" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round" aria-label="bear">
-  <path d="M13 90C6 84 9 73 19 70C15 58 22 48 36 49C34 39 44 37 49 47C55 43 60 49 57 58C68 53 82 48 98 52C116 41 138 43 154 54C172 48 190 55 197 72C201 85 199 105 192 128C190 137 186 141 181 142L171 142C173 120 171 105 167 96C147 100 119 100 101 97C103 113 99 131 95 142L85 142C87 119 85 105 81 96C67 98 51 98 39 93C29 89 19 86 13 90Z"/>
-  <g fill="none" stroke-width="2.1">
-    <path d="M41 47C45 44 50 46 51 51"/>
-    <path d="M26 62L41 57"/>
-    <path d="M14 86C23 92 33 91 40 86"/>
-    <path d="M101 52L106 44M116 50L121 42M131 50L136 42" stroke-opacity=".75"/>
-    <path d="M83 142L81 148M89 142L88 149M95 142L96 149" stroke-opacity=".8"/>
+const BEAR_PATH="M13 90C6 84 9 73 19 70C15 58 22 48 36 49C34 39 44 37 49 47C55 43 60 49 57 58C68 53 82 48 98 52C116 41 138 43 154 54C172 48 190 55 197 72C201 85 199 105 192 128C190 137 186 141 181 142L171 142C173 120 171 105 167 96C147 100 119 100 101 97C103 113 99 131 95 142L85 142C87 119 85 105 81 96C67 98 51 98 39 93C29 89 19 86 13 90Z";
+const BEAR_SVG=`<svg viewBox="0 0 212 152" aria-label="bear">
+  <defs><clipPath id="bearClip"><path d="${BEAR_PATH}"/></clipPath></defs>
+  <g clip-path="url(#bearClip)" stroke="none">
+    <path d="${BEAR_PATH}" fill="currentColor" fill-opacity=".13"/>
+    <polygon points="98,52 138,52 116,84" fill="currentColor" fill-opacity=".28"/>
+    <polygon points="138,52 168,58 160,92" fill="currentColor" fill-opacity=".19"/>
+    <polygon points="168,58 197,72 186,100" fill="currentColor" fill-opacity=".10"/>
+    <polygon points="36,58 60,57 44,92" fill="currentColor" fill-opacity=".24"/>
+    <polygon points="60,57 98,52 100,96" fill="currentColor" fill-opacity=".15"/>
+    <polygon points="101,96 138,82 158,93" fill="currentColor" fill-opacity=".05"/>
+    <polygon points="81,96 101,96 92,141" fill="currentColor" fill-opacity=".2"/>
+    <polygon points="167,96 186,100 181,140" fill="currentColor" fill-opacity=".09"/>
   </g>
-  <path d="M25 86L28 93L32 86" fill="currentColor" fill-opacity="1" stroke="none"/>
-  <circle cx="33" cy="63" r="2.5" fill-opacity="1" stroke="none"/>
-  <circle cx="14" cy="82" r="2.7" fill-opacity="1" stroke="none"/>
+  <g clip-path="url(#bearClip)" fill="none" stroke="currentColor" stroke-width="1.15" stroke-opacity=".42" stroke-linejoin="round">
+    <path d="M36 58L60 57L98 52M60 57L44 92M98 52L138 52L116 84M138 52L168 58L160 92M168 58L197 72L186 100M101 96L138 82L160 92M138 82L116 84M92 141L101 96M92 141L138 82M181 140L186 100M181 140L160 92M100 96L60 57"/>
+  </g>
+  <path d="${BEAR_PATH}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M41 47C45 44 50 46 51 51"/>
+    <path d="M14 86C23 92 33 91 40 86"/>
+    <path d="M101 52L106 44M116 50L121 42M131 50L136 42" stroke-opacity=".7"/>
+    <path d="M83 142L81 148M89 142L88 149M95 142L96 149" stroke-opacity=".75"/>
+  </g>
+  <path d="M25 86L28 93L32 86" fill="currentColor" stroke="none"/>
+  <circle cx="33" cy="63" r="2.5" fill="currentColor"/>
+  <circle cx="14" cy="82" r="2.7" fill="currentColor"/>
 </svg>`;
 function setMood(sent){
   const bear=sent==='bearish';
