@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradeLens Pro</title>
+<title>STRATA — Structure Terminal</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://s3.tradingview.com/tv.js"></script>
 <style>
@@ -959,6 +959,64 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 @keyframes gloDraw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .wl-r .p,.wl-r .c{transition:color .4s}
 @media(prefers-reduced-motion:reduce){.lx-tape-track{animation:none}.lx-h1 .glo::after{animation:none}}
+
+/* ═══════════ APP SIDEBAR NAV (super-pro) ═══════════ */
+.appnav{position:fixed;top:0;left:0;bottom:0;width:236px;z-index:300;display:flex;flex-direction:column;background:rgba(9,9,11,.9);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);border-right:1px solid var(--line2)}
+.appnav-logo{display:flex;align-items:center;gap:12px;padding:20px 18px 16px;cursor:pointer;text-decoration:none;border-bottom:1px solid var(--line)}
+.appnav-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:8px 12px}
+.appnav-scroll::-webkit-scrollbar{width:0}
+.appnav-grp{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--fa);padding:16px 10px 7px}
+.snav{display:flex;align-items:center;gap:12px;padding:9px 11px;border-radius:9px;border:none;background:transparent;color:var(--ink2);font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;width:100%;transition:background .14s,color .14s;font-family:inherit;position:relative}
+.snav:hover{background:rgba(255,255,255,.04);color:var(--ink)}
+.snav.active{background:rgba(47,129,247,.12);color:var(--act)}
+.snav.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--ac)}
+.snav svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;stroke-width:1.85;fill:none}
+.snav .lbl{flex:1;white-space:nowrap}
+.snav .pill{font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(240,68,90,.16);color:var(--rt);letter-spacing:.04em}
+.appnav-foot{border-top:1px solid var(--line);padding:10px 12px 14px;display:flex;flex-direction:column;gap:2px}
+.appnav-live{display:inline-flex;align-items:center;gap:9px;font-size:10.5px;font-weight:800;color:var(--ink3);padding:8px 11px;letter-spacing:.1em;text-transform:uppercase}
+.appnav-live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--em);box-shadow:0 0 0 0 rgba(38,194,129,.6);animation:pulse 2s infinite}
+
+/* ── MOVERS BANNER (app top) ── */
+.appbar{position:sticky;top:0;z-index:200;height:48px;display:flex;align-items:stretch;background:rgba(8,8,10,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);overflow:hidden}
+.appbar-lead{display:inline-flex;align-items:center;gap:7px;padding:0 16px;border-right:1px solid var(--line2);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;flex-shrink:0;background:rgba(255,255,255,.015)}
+.appbar-lead svg{width:14px;height:14px;stroke:var(--ac);fill:none;stroke-width:2}
+.appbar-tape{flex:1;overflow:hidden;display:flex;align-items:center;-webkit-mask-image:linear-gradient(90deg,#000 90%,transparent);mask-image:linear-gradient(90deg,#000 90%,transparent)}
+.appbar-track{display:inline-flex;align-items:center;white-space:nowrap;animation:tapeScroll 70s linear infinite;will-change:transform}
+.appbar-tape:hover .appbar-track{animation-play-state:paused}
+.mv{display:inline-flex;align-items:center;gap:9px;padding:0 20px;border-right:1px solid var(--line);font-family:var(--mono);font-size:12.5px;cursor:pointer}
+.mv:hover{background:rgba(255,255,255,.03)}
+.mv .sym{font-weight:800;color:var(--ink)}
+.mv .px{color:var(--ink3)}
+.mv .ch{font-weight:700;display:inline-flex;align-items:center;gap:3px;color:var(--ink3)}
+.mv .ch.up{color:var(--gt)}.mv .ch.dn{color:var(--rt)}
+.mv .ch.up::before{content:'▲';font-size:7px}.mv .ch.dn::before{content:'▼';font-size:7px}
+@media(prefers-reduced-motion:reduce){.appbar-track{animation:none}}
+
+/* ── layout shift for the sidebar ── */
+.page-wrap{margin-left:236px}
+.main-col{max-width:1340px;margin:0 auto;padding:30px 38px 120px}
+@media(max-width:1080px){.appnav{width:64px}.appnav .lbl,.appnav-grp,.appnav .pill,.appnav-logo .logo-text,.appnav-live{display:none}.appnav-logo{justify-content:center;padding:18px 0 14px}.snav{justify-content:center;padding:11px 0}.appnav-foot{padding:10px 8px}.page-wrap{margin-left:64px}.main-col{padding:24px 22px 90px}}
+@media(max-width:640px){.appnav{width:56px}.page-wrap{margin-left:56px}.main-col{padding:16px 14px 70px}.appbar-lead{display:none}}
+
+/* ── HIGH VOLUME / MOVERS tab ── */
+.mv-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.mv-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 20px}
+.mv-tgl{font-size:12.5px;font-weight:700;border:1px solid var(--line2);background:rgba(255,255,255,.025);color:var(--ink2);border-radius:9px;padding:8px 15px;cursor:pointer;font-family:inherit;transition:all .15s}
+.mv-tgl:hover{border-color:rgba(47,129,247,.5);color:var(--ink)}
+.mv-tgl.active{background:var(--ac);border-color:var(--ac);color:#fff}
+.mv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px}
+.mvc{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:16px 18px;cursor:pointer;transition:border-color .18s,transform .18s;position:relative;overflow:hidden}
+.mvc:hover{border-color:rgba(47,129,247,.4);transform:translateY(-2px)}
+.mvc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mvc-sym{font-family:var(--mono);font-size:18px;font-weight:800;letter-spacing:-.02em}
+.mvc-name{font-size:11px;color:var(--ink3);margin-top:2px}
+.mvc-ch{font-family:var(--mono);font-size:13px;font-weight:800;padding:4px 9px;border-radius:7px}
+.mvc-ch.up{background:var(--gd);color:var(--gt)}.mvc-ch.dn{background:var(--rdd);color:var(--rt)}
+.mvc-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-top:1px solid var(--line)}
+.mvc-row .k{color:var(--ink3)}.mvc-row .v{font-family:var(--mono);font-weight:700}
+.mvc-spark{height:34px;margin:8px 0 4px}
+.mv-empty{padding:46px 20px;text-align:center;color:var(--ink3);font-size:13.5px;border:1px dashed var(--line2);border-radius:14px}
 </style>
 </head>
 <body>
@@ -972,8 +1030,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <header class="lx-nav" id="lxNav">
     <div class="lx-nav-in">
       <div class="logo-wrap" onclick="lpScroll('lxTop')" style="cursor:pointer">
-        <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L10 11l4 3 6-8"/><path d="M16 6h4v4"/></svg></div>
-        <div class="logo-text"><div class="logo-name">Trade<b>Lens</b><span class="logo-pro">PRO</span></div><div class="logo-sub">Trading Intelligence</div></div>
+        <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 40 40" fill="none"><rect x="6" y="25" width="9" height="9" rx="2" fill="#fff" opacity="0.5"/><rect x="15.5" y="16.5" width="9" height="17.5" rx="2" fill="#fff" opacity="0.78"/><rect x="25" y="8" width="9" height="26" rx="2" fill="#fff"/></svg></div>
+        <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Structure Terminal</div></div>
       </div>
       <nav class="lx-nav-links">
         <a class="nl" onclick="lpScroll('lxFeatures')">Platform</a>
@@ -993,7 +1051,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="lx-hero-head lx-reveal in">
         <div class="lx-status"><span class="pulse"></span> <b>Live</b>&nbsp;·&nbsp;real-time market data</div>
         <h1 class="lx-h1">Trade on <span class="glo">structure</span>,<br>not on noise.</h1>
-        <p class="lx-lead">TradeLens turns live market data into structure-based plans — entry, stop, and targets from real swing levels and volatility, with a self-learning strategy engine behind every read.</p>
+        <p class="lx-lead">STRATA turns live market data into structure-based plans — entry, stop, and targets from real swing levels and volatility, with a self-learning strategy engine behind every read.</p>
         <div class="lx-hero-cta">
           <button class="lx-btn primary lg" onclick="launchApp()">Launch terminal →</button>
           <button class="lx-btn ghost lg" onclick="lpScroll('lxFeatures')">See how it works</button>
@@ -1083,7 +1141,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <section class="lx-statement">
     <div class="lx">
       <h2 class="lx-quote lx-reveal">Markets don't reward <span class="dim">emotion.</span><br>They reward <span class="lx-grad">precision,</span> repeated.</h2>
-      <div class="lx-statement-note lx-reveal r"><div class="bar"></div><p>Most retail traders lose to their own impulses — chasing, hoping, freezing. TradeLens removes the guesswork: every read is grounded in real structure and risk, so you act on a plan instead of a feeling.</p></div>
+      <div class="lx-statement-note lx-reveal r"><div class="bar"></div><p>Most retail traders lose to their own impulses — chasing, hoping, freezing. STRATA removes the guesswork: every read is grounded in real structure and risk, so you act on a plan instead of a feeling.</p></div>
     </div>
   </section>
 
@@ -1232,7 +1290,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="lx">
       <div class="lx-reveal" style="max-width:560px"><div class="lx-kicker lx-grad">How it works</div><h2 class="lx-h2">From symbol to plan in seconds.</h2></div>
       <div class="lx-steps">
-        <div class="lx-step lx-reveal"><div class="no">01</div><h4>Pull any ticker</h4><p>Type a symbol and TradeLens pulls live price, structure and volatility — and renders a professional chart instantly.</p></div>
+        <div class="lx-step lx-reveal"><div class="no">01</div><h4>Pull any ticker</h4><p>Type a symbol and STRATA pulls live price, structure and volatility — and renders a professional chart instantly.</p></div>
         <div class="lx-step lx-reveal" style="transition-delay:.08s"><div class="no">02</div><h4>Read the setup</h4><p>The engine picks the fitting strategy and lays out entry, stop and targets with a clear reward-to-risk you can act on.</p></div>
         <div class="lx-step lx-reveal" style="transition-delay:.16s"><div class="no">03</div><h4>Act with conviction</h4><p>Practice it risk-free, get an AI read on the context, and step into the trade knowing exactly where you're wrong.</p></div>
       </div>
@@ -1288,18 +1346,18 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="lx-final lx-reveal">
       <h2>Stop trading on feeling.<br>Start trading on <span class="lx-grad">structure.</span></h2>
       <p>The full analysis platform is free, forever. No card, no setup — just open it and read your first chart.</p>
-      <button class="lx-btn primary lg" onclick="launchApp()">Launch TradeLens →</button>
+      <button class="lx-btn primary lg" onclick="launchApp()">Launch STRATA →</button>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer class="lx-footer">
-    <div class="lx-footmark">TRADELENS</div>
+    <div class="lx-footmark">STRATA</div>
     <div class="lx lx-foot-grid">
       <div class="lx-foot-brand">
         <div class="logo-wrap" style="cursor:default">
-          <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L10 11l4 3 6-8"/><path d="M16 6h4v4"/></svg></div>
-          <div class="logo-text"><div class="logo-name">Trade<b>Lens</b></div><div class="logo-sub">Trading Intelligence</div></div>
+          <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 40 40" fill="none"><rect x="6" y="25" width="9" height="9" rx="2" fill="#fff" opacity="0.5"/><rect x="15.5" y="16.5" width="9" height="17.5" rx="2" fill="#fff" opacity="0.78"/><rect x="25" y="8" width="9" height="26" rx="2" fill="#fff"/></svg></div>
+          <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Structure Terminal</div></div>
         </div>
         <p>Precision market analysis and AI strategy tools for serious, independent traders.</p>
       </div>
@@ -1308,7 +1366,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="lx-foot-col"><h5>Company</h5><a onclick="lpScroll('lxTop')">About</a><a href="#">Contact</a><a href="#">Disclaimer</a></div>
     </div>
     <div class="lx lx-foot-bottom">
-      <span>© 2026 TradeLens — educational market analysis, not financial advice.</span>
+      <span>© 2026 STRATA — educational market analysis, not financial advice.</span>
       <span>Markets involve risk. Do your own research.</span>
     </div>
   </footer>
@@ -1368,58 +1426,51 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   </div>
 </div>
 
-<nav>
-  <div class="logo-wrap" onclick="showLanding()" title="Back to home">
+<aside class="appnav">
+  <div class="appnav-logo logo-wrap" onclick="showLanding()" title="Back to home">
     <div class="logo-mark">
-      <!-- TradeLens "aperture lens + rising signal" mark -->
-      <svg width="26" height="26" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="tlStroke" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#ffffff"/>
-            <stop offset="1" stop-color="#caffe9"/>
-          </linearGradient>
-        </defs>
-        <!-- Outer aperture ring -->
-        <circle cx="20" cy="20" r="15" stroke="url(#tlStroke)" stroke-width="2.4" opacity="0.95"/>
-        <!-- Aperture blades (three short chords suggesting a camera iris) -->
-        <path d="M20 6 L31 13" stroke="url(#tlStroke)" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
-        <path d="M34 23 L25 33" stroke="url(#tlStroke)" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
-        <path d="M14 34 L7 22" stroke="url(#tlStroke)" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
-        <!-- Rising signal line through the lens -->
-        <path d="M12 25 L17 20 L21 23 L28 14" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <!-- Signal endpoint dot -->
-        <circle cx="28" cy="14" r="2.4" fill="#ffffff"/>
-        <circle cx="28" cy="14" r="4" stroke="#ffffff" stroke-width="1.2" opacity="0.4"/>
+      <!-- STRATA "rising strata" mark -->
+      <svg width="23" height="23" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="25" width="9" height="9" rx="2" fill="#fff" opacity="0.5"/>
+        <rect x="15.5" y="16.5" width="9" height="17.5" rx="2" fill="#fff" opacity="0.78"/>
+        <rect x="25" y="8" width="9" height="26" rx="2" fill="#fff"/>
       </svg>
     </div>
     <div class="logo-text">
-      <div class="logo-name">Trade<b>Lens</b><span class="logo-pro">PRO</span></div>
-      <div class="logo-sub">Trading Intelligence</div>
+      <div class="logo-name">STRATA</div>
+      <div class="logo-sub">Structure Terminal</div>
     </div>
   </div>
-  <div class="nav-tabs">
-    <button class="ntab active" onclick="mainTab('dashboard',this)">Dashboard</button>
-    <button class="ntab" onclick="mainTab('screener',this)">Screener</button>
-    <button class="ntab" onclick="mainTab('news',this)">News</button>
-    <button class="ntab" onclick="mainTab('traders',this)">Pro Traders</button>
-    <span class="nav-sep"></span>
-    <button class="ntab" onclick="mainTab('backtest',this)">Backtest</button>
-    <button class="ntab" onclick="mainTab('performance',this)">Performance</button>
-    <button class="ntab" onclick="mainTab('ailab',this)">AI Lab</button>
-    <span class="nav-sep"></span>
-    <button class="ntab" onclick="mainTab('ai',this)">AI Chat</button>
-    <button class="ntab" onclick="mainTab('alerts',this)">Alerts</button>
-    <button class="ntab" onclick="mainTab('feedback',this)">Feedback</button>
+  <div class="appnav-scroll">
+    <div class="appnav-grp">Terminal</div>
+    <button class="snav active" data-tab="dashboard" onclick="mainTab('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Dashboard</span></button>
+    <button class="snav" data-tab="movers" onclick="mainTab('movers',this)"><svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M4 20V11"/><path d="M10 20V4"/><path d="M16 20v-6"/><path d="M22 20V8"/></svg><span class="lbl">High Volume</span><span class="pill">LIVE</span></button>
+    <button class="snav" data-tab="screener" onclick="mainTab('screener',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span class="lbl">Screener</span></button>
+    <button class="snav" data-tab="news" onclick="mainTab('news',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 8h2a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2"/><path d="M7 8h7M7 12h7M7 16h4"/></svg><span class="lbl">News</span></button>
+    <div class="appnav-grp">Research</div>
+    <button class="snav" data-tab="traders" onclick="mainTab('traders',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M20.5 20a5 5 0 0 0-4-4.9"/></svg><span class="lbl">Pro Traders</span></button>
+    <button class="snav" data-tab="backtest" onclick="mainTab('backtest',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 2.6 6.3"/><path d="M3 20v-5h5"/><path d="M12 8v4l3 2"/></svg><span class="lbl">Backtest</span></button>
+    <button class="snav" data-tab="performance" onclick="mainTab('performance',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7 15l4-4 3 2 5-6"/></svg><span class="lbl">Performance</span></button>
+    <button class="snav" data-tab="ailab" onclick="mainTab('ailab',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.5L4.8 17a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 8.5V3"/></svg><span class="lbl">AI Lab</span></button>
+    <div class="appnav-grp">Assistant</div>
+    <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
+    <button class="snav" data-tab="alerts" onclick="mainTab('alerts',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="lbl">Alerts</span></button>
+    <button class="snav" data-tab="feedback" onclick="mainTab('feedback',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7 0l-.8.8-.8-.8a5 5 0 1 0-7 7l7.8 7.8 7.8-7.8a5 5 0 0 0 0-7z"/></svg><span class="lbl">Feedback</span></button>
   </div>
-  <div class="nav-right">
-    <div class="live-pill">LIVE</div>
-    <button class="nbtn" id="aiKeyBtn" onclick="openMo('moAI')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"/></svg>AI</button>
-    <button class="nbtn" onclick="openMo('moAlert')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Alerts</button>
-    <button class="nbtn" onclick="openMo('moAcct')"><div class="nav-av">T</div>Account</button>
+  <div class="appnav-foot">
+    <div class="appnav-live">Live data</div>
+    <button class="snav" id="aiKeyBtn" onclick="openMo('moAI')"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6z"/></svg><span class="lbl">Connect AI</span></button>
+    <button class="snav" onclick="openMo('moAcct')"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6 6 0 0 1 11 0"/></svg><span class="lbl">Account</span></button>
   </div>
-</nav>
+</aside>
 
 <div class="page-wrap">
+  <!-- MOVERS BANNER -->
+  <div class="appbar">
+    <span class="appbar-lead"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M17 7h4v4"/></svg> Big movers</span>
+    <div class="appbar-tape"><div class="appbar-track" id="appBarTrack"></div></div>
+  </div>
+
   <!-- LEFT NEWS -->
   <div class="sidebar" id="sideL">
     <div class="side-hd">Market News</div>
@@ -1484,6 +1535,24 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       </div>
     </div>
 
+    <!-- HIGH VOLUME / MOVERS -->
+    <div class="tab-pane" id="tab-movers">
+      <div class="mv-head">
+        <div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">High volume &amp; big movers</div>
+          <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-top:6px;max-width:680px">The day's most active names and largest moves, pulled from live market data. Click any card to analyze its structure on the dashboard.</div>
+        </div>
+        <button class="mv-tgl" onclick="renderMovers(true)" style="flex-shrink:0"><span>↻ Refresh</span></button>
+      </div>
+      <div class="mv-toolbar" id="mvToolbar">
+        <button class="mv-tgl active" data-sort="vol" onclick="moversSort('vol',this)">Most active</button>
+        <button class="mv-tgl" data-sort="gain" onclick="moversSort('gain',this)">Top gainers</button>
+        <button class="mv-tgl" data-sort="lose" onclick="moversSort('lose',this)">Top losers</button>
+        <button class="mv-tgl" data-sort="vola" onclick="moversSort('vola',this)">Most volatile</button>
+      </div>
+      <div id="moversBody"><div class="mv-empty">Loading live market movers…</div></div>
+    </div>
+
     <!-- NEWS -->
     <div class="tab-pane" id="tab-news">
       <div style="margin-bottom:8px;font-size:26px;font-weight:800;letter-spacing:-.03em">Market News</div>
@@ -1519,6 +1588,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div style="font-size:13px;color:var(--mu);line-height:1.6">Pull up a historical chart, study the setup, then predict <b style="color:var(--gt)">Long</b> or <b style="color:var(--rt)">Short</b>. We reveal what actually happened next and score your call. Practice reading charts with zero risk.</div>
       </div>
 
+      <!-- Session scoreboard -->
+      <div id="btScore"></div>
+
       <!-- Setup controls -->
       <div class="card">
         <div class="card-title"><span class="pdot"></span>Set Up a Backtest</div>
@@ -1546,6 +1618,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
             </select>
           </div>
           <button class="go-btn" id="btStart" style="align-self:flex-end">Deal Setup →</button>
+          <button class="nbtn" id="btRandom" type="button" style="align-self:flex-end">Surprise me</button>
         </div>
         <div class="bt-hint">You'll be assigned a <b>strategy to apply</b> and shown price history up to a hidden decision point. Make your call, then see how the strategy would've played out.</div>
       </div>
@@ -1665,7 +1738,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       </div>
     </div>
 
-    <div class="disclaimer">⚠️ TradeLens Pro is for <strong>educational purposes only</strong>. All analysis is algorithmic — not financial advice. Never trade more than you can afford to lose.</div>
+    <div class="disclaimer">⚠️ STRATA is for <strong>educational purposes only</strong>. All analysis is algorithmic — not financial advice. Never trade more than you can afford to lose.</div>
   </div>
 
   <!-- RIGHT SIDEBAR -->
@@ -1686,9 +1759,10 @@ document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.
 // ── TABS ──────────────────────────────────────────────────────────────
 function mainTab(name,btn){
   document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  if(btn)btn.classList.add('active');
+  document.querySelectorAll('.ntab,.snav').forEach(b=>b.classList.remove('active'));
+  const pane=document.getElementById('tab-'+name); if(pane)pane.classList.add('active');
+  if(btn&&btn.classList)btn.classList.add('active');
+  const sb=document.querySelector('.snav[data-tab="'+name+'"]'); if(sb)sb.classList.add('active');
   if(name==='screener')runScan('bullish',document.querySelector('.scan-card'));
   if(name==='news')renderNewsTab();
   if(name==='feedback')renderFeedbackTab();
@@ -1696,6 +1770,8 @@ function mainTab(name,btn){
   if(name==='backtest')initBacktestTab();
   if(name==='performance')renderPerformance();
   if(name==='ailab')renderAILearnStats();
+  if(name==='movers')renderMovers();
+  const pw=document.querySelector('.page-wrap'); if(pw)pw.scrollTop=0;
 }
 
 // ── DTE CONFIG ────────────────────────────────────────────────────────
@@ -1742,7 +1818,7 @@ async function saveAIKey(test){
   updateAIStatusBanner();
 }
 function clearAIKey(){AI_KEY=null;document.getElementById('aiKeyInput').value='';document.getElementById('aiKeyStatus').innerHTML='<span style="color:var(--mu)">Key cleared. Using built-in engine.</span>';updateAIBadge();updateAIStatusBanner();}
-function updateAIBadge(){const b=document.getElementById('aiKeyBtn');if(b)b.innerHTML=AI_PROXY_OK?'✨ AI ✓':(AI_KEY?'✨ AI ✓':'✨ AI');}
+function updateAIBadge(){const b=document.getElementById('aiKeyBtn');if(!b)return;const lbl=b.querySelector('.lbl');const on=AI_PROXY_OK||AI_KEY;if(lbl)lbl.textContent=on?'AI connected':'Connect AI';b.classList.toggle('active',!!on);}
 function updateAIStatusBanner(){const ban=document.getElementById('aiBanner');if(ban)ban.style.display=(AI_KEY||AI_PROXY_OK)?'none':'flex';}
 function aiReady(){return AI_PROXY_OK||!!AI_KEY;}
 
@@ -1890,7 +1966,7 @@ async function fetchStooq(ticker){
   const vol=pts[pts.length-1].v||0;
   const volFmt=vol>=1e9?(vol/1e9).toFixed(2)+'B':vol>=1e6?(vol/1e6).toFixed(1)+'M':vol>=1e3?(vol/1e3).toFixed(0)+'K':String(vol||'—');
   const mkH=n=>pts.slice(-n).map(p=>{const d=new Date(p.date);return{x:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),o:+p.o.toFixed(2),h:+p.h.toFixed(2),l:+p.l.toFixed(2),c:+p.c.toFixed(2),v:p.v};});
-  return{price,change,pct,hi52,lo52,volFmt,name:ticker,closes,h1d:[],h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252),_src:'Stooq'};
+  return{price,change,pct,hi52,lo52,vol,volFmt,name:ticker,closes,h1d:[],h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252),_src:'Stooq'};
 }
 
 async function fetchQuote(ticker){
@@ -1933,7 +2009,7 @@ async function fetchQuote(ticker){
         .map(p=>{const d=new Date(p.t*1000);return{x:d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}),o:+p.o.toFixed(2),h:+p.h.toFixed(2),l:+p.l.toFixed(2),c:+p.c.toFixed(2),v:p.v};});
     }
   }catch(e){h1d=[];}
-  return{price,change,pct,hi52,lo52,volFmt,name,closes,h1d,h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252)};
+  return{price,change,pct,hi52,lo52,vol,volFmt,name,closes,h1d,h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252)};
 }
 
 // Fetch OHLC candles for the backtest at a given timeframe.
@@ -2137,11 +2213,32 @@ const BT_STRATEGIES=[
    apply:(s,ctx)=>`The plan: short near the range ceiling <b>$${ctx.resis.toFixed(2)}</b>, tight stop above it, target the range floor <b>$${ctx.support.toFixed(2)}</b>. ${!ctx.up?'It faded off the highs — the range held.':'It broke out instead — when the ceiling gives way, this flips into a breakout long.'}`},
 ];
 
+function renderBtScore(){
+  const el=document.getElementById('btScore'); if(!el)return;
+  const h=btHistory, tot=h.length;
+  if(!tot){el.innerHTML=`<div style="background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:16px;font-size:13px;color:var(--ink3);line-height:1.6">No practice rounds yet — deal a setup below to start your track record. Your <b style="color:var(--ink2)">accuracy</b>, <b style="color:var(--ink2)">streak</b> and <b style="color:var(--ink2)">best-read strategy</b> build up here as you play.</div>`;return;}
+  const corr=h.filter(x=>x.correct).length, acc=Math.round(corr/tot*100);
+  let streak=0; for(let i=h.length-1;i>=0;i--){if(h[i].correct)streak++;else break;}
+  const pnl=h.reduce((p,x)=>p+(x.pnl||0),0);
+  const g={}; h.forEach(x=>{const k=(x.strat||'—').split(' ')[0];g[k]=g[k]||{n:0,c:0};g[k].n++;if(x.correct)g[k].c++;});
+  let best=null; Object.entries(g).forEach(([k,v])=>{if(v.n>=2){const r=v.c/v.n;if(!best||r>best.r)best={k,r};}});
+  const tile=(lbl,val,col)=>`<div style="background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:13px 16px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700;margin-bottom:6px">${lbl}</div><div style="font-family:var(--mono);font-size:19px;font-weight:800;${col?'color:'+col:''}">${val}</div></div>`;
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:12px;margin-bottom:16px">
+    ${tile('Rounds',tot)}
+    ${tile('Accuracy',acc+'%',acc>=55?'var(--gt)':acc<45?'var(--rt)':'')}
+    ${tile('Win streak',streak,streak>=3?'var(--gt)':'')}
+    ${tile('Sim P&L',(pnl>=0?'+':'')+pnl.toFixed(1)+'%',pnl>=0?'var(--gt)':'var(--rt)')}
+    ${tile('Best read',best?best.k+' '+Math.round(best.r*100)+'%':'—')}
+  </div>`;
+}
 function initBacktestTab(){
+  renderBtScore();
   if(!btInited){
     btInited=true;
     renderPlaybook();
     document.getElementById('btStart').addEventListener('click',dealBacktest);
+    const rnd=document.getElementById('btRandom');
+    if(rnd)rnd.addEventListener('click',()=>{const u=['AAPL','NVDA','TSLA','MSFT','META','AMD','GOOGL','AMZN','NFLX','COIN','SPY','QQQ','PLTR','AVGO'];document.getElementById('btTicker').value=u[Math.floor(Math.random()*u.length)];dealBacktest();});
     const ti=document.getElementById('btTicker');
     ti.addEventListener('keydown',e=>{if(e.key==='Enter')dealBacktest();});
   }
@@ -2351,7 +2448,7 @@ function resolveBacktest(call){
     verdictIcon=correct?'✅':'❌';
   }
   btScore.played++;if(correct)btScore.correct++;btScore.pnl+=tradePnl;
-  btHistory.push({ticker:s.ticker,strat:st.name,stratKey:st.key,bias:stratDir,tf:s.tf,took,correct,pnl:tradePnl,changePct,when:Date.now()});saveBtHistory();
+  btHistory.push({ticker:s.ticker,strat:st.name,stratKey:st.key,bias:stratDir,tf:s.tf,took,correct,pnl:tradePnl,changePct,when:Date.now()});saveBtHistory();renderBtScore();
   // peak excursions
   let maxUp=0,maxDn=0;
   s.future.forEach(d=>{const u=((d.h-s.decisionPrice)/s.decisionPrice)*100;const dn=((d.l-s.decisionPrice)/s.decisionPrice)*100;if(u>maxUp)maxUp=u;if(dn<maxDn)maxDn=dn;});
@@ -2837,7 +2934,7 @@ function renderAILearnStats(){
       <div class="bt-score"><div class="bt-score-val r">${AI_MEMORY.trials-AI_MEMORY.wins}</div><div class="bt-score-lbl">Losses</div></div>
     </div>
     <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses TradeLens — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>`;
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses STRATA — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>`;
   renderAILearnLog();
 }
 // Render the persisted self-test history (survives reloads).
@@ -3713,6 +3810,79 @@ async function cpAIdeep(ticker){
   }catch(e){if(note)note.innerHTML=`<div class="dash-ai-tag"><i class="ai-spark">✦</i> Deeper AI read</div><div class="dash-rationale">AI read failed: ${e.message}</div>`;}
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// ── HIGH VOLUME / BIG MOVERS (real data) ──────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+const MOVERS_UNIVERSE=['NVDA','AAPL','MSFT','TSLA','META','AMD','COIN','GOOGL','AMZN','SPY','QQQ','NFLX','PLTR','AVGO','MU','SMCI','BABA','UBER','SHOP','INTC'];
+let MOVERS=[], moversSortKey='vol', moversLoading=false;
+function fmtBig(n){return n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(0)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':String(Math.round(n||0));}
+function sparkPath(closes,w,h){
+  if(!closes||closes.length<2)return '';
+  const lo=Math.min(...closes),hi=Math.max(...closes),rng=(hi-lo)||1;
+  return closes.map((c,i)=>`${i?'L':'M'}${(i/(closes.length-1)*w).toFixed(1)},${(h-((c-lo)/rng)*(h-3)-1.5).toFixed(1)}`).join(' ');
+}
+async function loadMovers(force){
+  if(moversLoading)return; if(MOVERS.length&&!force)return;
+  moversLoading=true;
+  const rows=[];
+  await Promise.all(MOVERS_UNIVERSE.map(async sym=>{
+    try{const q=await fetchQuote(sym);
+      const closes=(q&&q.h1m||[]).map(d=>d.c);
+      const ref=closes.length?closes[closes.length-1]:(q&&q.price);
+      // drop corrupted quotes from flaky proxies (absurd % or price far off recent close)
+      const sane=q&&q.price>0&&isFinite(q.pct)&&Math.abs(q.pct)<=40&&(!ref||(q.price<ref*1.8&&q.price>ref*0.55));
+      if(sane)rows.push({sym,name:q.name||sym,price:q.price,pct:q.pct,change:q.change,vol:q.vol||0,volFmt:q.volFmt,dollarVol:(q.vol||0)*q.price,closes});
+    }catch(e){}
+  }));
+  if(rows.length)MOVERS=rows;
+  moversLoading=false;
+}
+function sortMovers(rows,key){
+  const k=key||moversSortKey,r=[...rows];
+  if(k==='vol')r.sort((a,b)=>b.dollarVol-a.dollarVol);
+  else if(k==='gain')r.sort((a,b)=>b.pct-a.pct);
+  else if(k==='lose')r.sort((a,b)=>a.pct-b.pct);
+  else r.sort((a,b)=>Math.abs(b.pct)-Math.abs(a.pct));
+  return r;
+}
+function moversSort(key,btn){
+  moversSortKey=key;
+  document.querySelectorAll('#mvToolbar .mv-tgl').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  paintMovers();
+}
+function paintMovers(){
+  const body=document.getElementById('moversBody'); if(!body)return;
+  if(!MOVERS.length){body.innerHTML='<div class="mv-empty">No live data right now — the public market-data feed may be busy.<br><button class="mv-tgl" style="margin-top:12px" onclick="renderMovers(true)">↻ Try again</button></div>';return;}
+  const rows=sortMovers(MOVERS).slice(0,18);
+  body.innerHTML='<div class="mv-grid">'+rows.map(r=>{
+    const up=r.pct>=0,col=up?'#26c281':'#f0445a';
+    return `<div class="mvc" onclick="loadTicker('${r.sym}')">
+      <div class="mvc-top"><div><div class="mvc-sym">${r.sym}</div><div class="mvc-name">${(r.name||'').slice(0,22)}</div></div><div class="mvc-ch ${up?'up':'dn'}">${up?'+':''}${r.pct.toFixed(2)}%</div></div>
+      <svg class="mvc-spark" viewBox="0 0 200 34" preserveAspectRatio="none"><path d="${sparkPath(r.closes,200,34)}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <div class="mvc-row"><span class="k">Price</span><span class="v">$${r.price.toFixed(2)}</span></div>
+      <div class="mvc-row"><span class="k">Volume</span><span class="v">${r.volFmt}</span></div>
+      <div class="mvc-row"><span class="k">$ Volume</span><span class="v">$${fmtBig(r.dollarVol)}</span></div>
+    </div>`;
+  }).join('')+'</div>';
+}
+async function renderMovers(force){
+  const body=document.getElementById('moversBody');
+  if(body&&!MOVERS.length)body.innerHTML='<div class="mv-empty">Loading live market movers…</div>';
+  await loadMovers(force);
+  paintMovers(); paintMoversBanner();
+}
+// streaming movers banner at the top of the app
+function paintMoversBanner(){
+  const tr=document.getElementById('appBarTrack'); if(!tr)return;
+  const rows=MOVERS.length ? sortMovers(MOVERS,'vola').slice(0,14)
+    : MOVERS_UNIVERSE.slice(0,12).map(s=>({sym:s,price:0,pct:null,volFmt:'—'}));
+  const cell=r=>{const has=r.pct!=null;const up=has&&r.pct>=0;
+    return `<span class="mv" onclick="loadTicker('${r.sym}')"><span class="sym">${r.sym}</span><span class="px">${r.price?('$'+r.price.toFixed(2)):'—'}</span><span class="ch ${has?(up?'up':'dn'):''}">${has?((up?'+':'')+r.pct.toFixed(2)+'%'):''}</span></span>`;};
+  const html=rows.map(cell).join('');
+  tr.innerHTML=html+html;
+}
+
 // ── LIVE STREAMING ────────────────────────────────────────────────────
 // Fast price-only polling makes the dashboard feel like it's streaming:
 // the price ticks, the live dot pulses, and the chart's current-price
@@ -3833,8 +4003,29 @@ function filterTraders(btn){
   currentTraderFilter=btn.dataset.f;
   renderTraders(currentTraderFilter);
 }
+function tradersConsensus(){
+  const all=TRADERS.flatMap(t=>t.calls.map(c=>({...c,trader:t.name})));
+  const bull=all.filter(c=>c.dir==='bull').length,bear=all.filter(c=>c.dir==='bear').length,tot=all.length||1;
+  const bp=Math.round(bull/tot*100),rp=100-bp;
+  const tk={};
+  all.forEach(c=>(c.tickers&&c.tickers.length?c.tickers:[c.ticker]).forEach(s=>{tk[s]=tk[s]||{s,bull:0,bear:0};c.dir==='bull'?tk[s].bull++:tk[s].bear++;}));
+  const top=Object.values(tk).sort((a,b)=>(b.bull+b.bear)-(a.bull+a.bear)).slice(0,8);
+  const avgWR=Math.round(TRADERS.reduce((p,t)=>p+parseFloat(t.winRate||0),0)/TRADERS.length);
+  const chips=top.map(t=>{const n=t.bull+t.bear,lean=t.bull>t.bear?'var(--gt)':t.bear>t.bull?'var(--rt)':'var(--ink2)';const lbl=t.bull>t.bear?'bull':t.bear>t.bull?'bear':'split';
+    return `<button onclick="loadTicker('${t.s}')" style="display:flex;flex-direction:column;gap:3px;background:var(--s2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;font-family:inherit"><span style="font-family:var(--mono);font-weight:800;font-size:14px;color:var(--ink)">${t.s}</span><span style="font-size:10.5px;color:${lean};font-weight:700">${lbl} · ${n} call${n>1?'s':''}</span></button>`;}).join('');
+  return `<div style="background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:13px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)">Desk consensus · ${all.length} active calls</div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--ink3)"><span style="color:var(--gt)">${bull} bullish</span> · <span style="color:var(--rt)">${bear} bearish</span> · avg win rate ${avgWR}%</div>
+    </div>
+    <div style="height:9px;border-radius:99px;overflow:hidden;display:flex;margin-bottom:16px;background:var(--s3)"><div style="width:${bp}%;background:var(--gr)"></div><div style="width:${rp}%;background:var(--rd)"></div></div>
+    <div style="font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--fa);margin-bottom:9px">Most-called names</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:9px">${chips}</div>
+  </div>`;
+}
 function renderTraders(filter){
   const container=document.getElementById('traderCards');if(!container)return;
+  const consensus=(filter==='all')?tradersConsensus():'';
   const html=TRADERS.map(t=>{
     let calls=t.calls;
     if(filter==='bull')calls=calls.filter(c=>c.dir==='bull');
@@ -3851,7 +4042,7 @@ function renderTraders(filter){
           <div class="tc-lv"><div class="tc-lv-lbl">Entry</div><div class="tc-lv-val" style="color:var(--bt)">${c.entry}</div></div>
           <div class="tc-lv"><div class="tc-lv-lbl">Stop</div><div class="tc-lv-val" style="color:var(--rt)">${c.sl}</div></div>
           <div class="tc-lv"><div class="tc-lv-lbl">Target</div><div class="tc-lv-val" style="color:var(--gt)">${c.tp}</div></div>
-          <button onclick="loadTicker('${c.ticker}');mainTab('dashboard',document.querySelector('.ntab'))" style="margin-left:auto;padding:4px 10px;border-radius:6px;border:1px solid var(--b2);background:var(--s3);color:var(--mu);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap">Analyze ↗</button>
+          <button onclick="loadTicker('${c.ticker}')" style="margin-left:auto;padding:4px 10px;border-radius:6px;border:1px solid var(--b2);background:var(--s3);color:var(--mu);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap">Analyze ↗</button>
         </div>
       </div>`).join('');
     return`<div class="trader-card">
@@ -3870,7 +4061,7 @@ function renderTraders(filter){
       <div class="trader-bio">${t.bio}</div>
       ${callsHtml}
     </div>`;}).join('');
-  container.innerHTML=html||`<div style="text-align:center;padding:28px;color:var(--fa);font-size:13px">No calls match this filter in the current feed.</div>`;
+  container.innerHTML=consensus+(html||`<div style="text-align:center;padding:28px;color:var(--fa);font-size:13px">No calls match this filter in the current feed.</div>`);
 }
 
 // ── AI CHAT ───────────────────────────────────────────────────────────
@@ -4049,6 +4240,9 @@ updateAIBadge();
 probeProxy();
 cpInit();
 syncSharedMemory();  // pull pooled cross-user learning if the backend is live
+paintMoversBanner();                       // seed the movers banner with symbols immediately
+setTimeout(()=>renderMovers(),4500);       // load real movers shortly after, once initial loads settle
+setInterval(()=>{if(MOVERS.length)renderMovers(true);},120000);
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
 function launchApp(){
