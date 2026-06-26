@@ -3,6 +3,14 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 11) — watchlist · Greeks/indicators · TV live · landing tighten
+- **Persistent watchlist** (`#dashWatch`, `WATCH`/`strata_watch_v1`): add by symbol, ✕ remove, "★ add current", live prices (`refreshWatch`), click a row to analyze. On the dashboard side column.
+- **Options Greeks panel** (`#dashGreeks`, `renderGreeks` + Black–Scholes `bsGreeks`/`normCDF`): Delta · Gamma · Theta · Vega · est. premium · IV (from `histVol`) for an ATM call/put at the chosen horizon (`HZ_T`). Educational estimate.
+- **More indicators on the dashboard:** metrics grid extended with **MACD** (`macdOf`), **MA 50/200 golden/death cross**, and **ATR%** (now 9 tiles).
+- **TradingView kept live:** added `startDashTVRefresh` — re-mounts the chart ~every 2.5 min while the dashboard is visible (the free widget silently drops its data socket and appears "paused"). Combined with the session-10 load retries.
+- **Landing tightened:** big section paddings reduced (`.lx-sec` 120→84, `.lx-statement` 120→80, hero 72/96→48/60, bento margin 52→34) so there's far less empty scrolling.
+- **Beefier bull/bear** mascots — added a second horn, muscle lines, brow and breath (bull) and a roaring mouth, fangs, claws + raised hackles (bear). (Still original line-art; iterative without a live preview.)
+
 ## 2026-06-26 (session 10) — logo de-boxed · richer mascots · deeper AI read · TV reliability
 - **Logo no longer in a box.** Removed the accent tile/box-shadow from `.logo-mark`; the bull mark now renders in the accent colour with a `drop-shadow` glow (and flips red when bearish). The conviction logo-pulse uses a glow filter instead of a box-shadow.
 - **Redesigned bull/bear mascots** — replaced the basic front-facing heads with semi-realistic **profile silhouettes** (glowing outline + soft fill, `BULL_SVG`/`BEAR_SVG`), larger frame (`.mood-beast` 104×70).
