@@ -1,6 +1,6 @@
 # CLAUDE.md — working agreement for this repo
 
-TradeLens Pro is a **single-file** app: everything is in `index.html` (no build step, no framework; Chart.js + TradingView via CDN). Start by reading the living docs below — they are the source of truth, not chat history.
+STRATA (formerly TradeLens Pro) is a **single-file** app: everything is in `index.html` (no build step, no framework; Chart.js + TradingView via CDN). Start by reading the living docs below — they are the source of truth, not chat history.
 
 ## Living docs — READ at the start, UPDATE before you finish
 At the **start** of a session, read:

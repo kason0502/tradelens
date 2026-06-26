@@ -1,23 +1,51 @@
-# TradeLens Pro — TODO
+# STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-25 (session 3)
+> Last updated: 2026-06-26 (session 9)
+
+## Done (session 9 — reactive theme + bull/bear + bull logo + index strip)
+- [x] **Sentiment-reactive UI** — whole site (accent, nav, background) flips red when the read is bearish (`setMood`, `--ac-rgb`, `body.bearish`, `FX_MOOD`).
+- [x] **Original bull + bear mascots** in the dashboard AI-read panel; **new bull-head logo**.
+- [x] **Index strip** (S&P/Nasdaq/Dow/VIX) on the dashboard.
+
+## Next (more info, not yet done)
+- [ ] **Extend "more info" to the other tabs** (the user asked for the whole app, not just the dashboard) — e.g. Markets/Screener summary headers, richer News, Strategies detail — without clutter.
+- [ ] **Lean closer to the reference dashboard layout** if wanted (watchlist + chart + Key Levels + Technical Indicators side-by-side; the index strip is a first step).
+
+## Done (session 8 — emerald + premium nav + landing fix)
+- [x] **Emerald-green rebrand** (accent `#22c55e`, brand + bullish) to match the reference.
+- [x] **Premium animated nav** — floating glass rail, gliding active pill (spring), magnetic hover, cursor glow, spring icons (`initPremiumNav`).
+- [x] **Landing bleed-through fixed** — `#landing` opaque again; `#fxCanvas` behind the app only; landing gets its own green aurora orbs.
 
 ## Now / next (highest value)
-- [ ] **Copilot polish.** Each answer card mounts its own TradingView iframe — cap the thread (e.g. keep last ~5) or lazy-mount to limit weight. Consider: persist conversation, voice of follow-ups, and when a Claude key is connected, lead with a natural-language answer (not just the rule-based verdict). Tick numbers are large by design (1 tick = $0.01) — confirm the user wants ticks vs points/$ distance.
-- [ ] **Dead code:** legacy `renderDash`/`.wk`/`.fc` and the old ticker-row/dte-row CSS are now unused — safe to prune later.
-- [ ] **Apply a consistent look to the inner tabs.** The main Dashboard view was rebuilt as the `.wk` terminal workspace; Screener / Backtest / AI Lab / Pro Traders / News / Feedback still use the older `.card` styling and don't match the new panel system yet.
-- [ ] **Bring the rest of the landing to black-minimal.** Hero + design tokens are done, but the other sections still use the older gradient/glow styling: feature rows (`.lx-feat` gradient icon tiles), metrics band (`.lx-band` blue radial), steps (`.lx-step` gradient numerals), pricing (`.lx-plan.hot` blue glow), and the final CTA (`.lx-final` big gradient slab). Flatten to dark surfaces + thin borders + single accent so every section matches the new hero.
+- [ ] **(Optional) lean further into the reference layout:** index-chips row (SPX/NDX/DJI/VIX), and a classic watchlist+chart+indicators dashboard composition if the user wants the dashboard itself to mirror the picture more literally.
+- [ ] **Apply the data-quality fix to the dashboard too.** Movers/Screener now recompute day-% from the price series (the proxy prev-close is often wrong), but the **dashboard header** still shows the raw `q.pct`/`q.change` from `fetchQuote` (can read e.g. "+36%" on AAPL). Move the series-based recompute into `fetchQuote` so every consumer benefits.
+- [ ] **Background perf check.** `#fxCanvas` runs a full-screen rAF (aurora gradients + O(n²) constellation links). It pauses when hidden and respects reduced-motion, but profile on a low-end laptop; if needed, cap particle count / pre-render the aurora.
+- [ ] **Apply the dashboard's `dash-` look to the inner tabs.** Dashboard, the sidebar, movers, Pro Traders (consensus) and Backtest (scoreboard) are on the new flat look; Screener / AI Lab / News / Feedback / the Backtest arena+playbook still use older `.card` chrome. Strategy emoji 📈🚀📉🪃↔️ still linger in LAB_STRATEGIES/PLAYBOOK, and the Pro Traders filter row still has 🟢🔴.
+- [ ] **Deepen Backtest / Pro Traders further** if wanted: Backtest could add an equity curve + per-strategy mastery breakdown (Performance tab already has some of this); Pro Traders could add more desk members and a per-ticker "desk vs STRATA" agreement check.
+- [ ] **Dashboard polish.** Each panel re-renders on every ask; the TradingView widget only remounts on ticker change (good). Consider: lazy-mount TV until the tab is visible, persist last ticker, and when a Claude key is connected lead the AI-read panel with a natural-language answer. Tick distances are large by design (1 tick = $0.01) — confirm ticks vs points/$ with the user.
+- [ ] **Dead code:** legacy `renderDash`/`.wk`/`.fc`/`.cp` remnants and the old ticker-row/dte-row CSS are unused — safe to prune. (The `.cp-*` chat CSS was removed in session 6; the disabled legacy `renderDash`/`.wk` workspace JS still lingers.)
 - [ ] **Deploy the shared-learning backend** — code is ready (`api/learn.js`); follow `DEPLOY_BACKEND.md` (push to GitHub → Vercel → add KV). Until then it's local-only.
-- [ ] **Kill level redundancy on the dashboard.** Entry/stop/TP still appear in the direction banner *and* the trade-setup card *and* the chart chips. Pick ONE source of truth.
-- [ ] **Polish the inner tabs** to black-minimal (Screener, Backtest, AI Lab, Pro Traders, Feedback still use denser legacy styling; strategy icons 📈🚀📉🪃↔️ remain in LAB_STRATEGIES/PLAYBOOK).
-- [ ] **Consolidate the metrics strip vs the Indicators card** (duplicated values).
+
+## Done (session 6)
+- [x] **Dashboard rebuilt as a real panel terminal** (ask bar + header + chart/plan/AI-read/metrics/signals panels), replacing the conversational chat. `renderDash` reuses the analysis engine.
+- [x] **Single source of truth for levels** — entry/stop/TP now live only in the Trade Plan panel (no more banner + card + chip triplication).
+- [x] **Landing flattened to black-minimal** — logo, buttons, bullet icons, bars, metrics band, pricing card, final CTA, and showcase charts no longer use blue→cyan→purple gradients or glow.
 - [ ] **Live news** — News tab is a static sample feed; wire a real newswire (needs a provider API key).
 - [ ] **AI auto-learning** — optional background trickle of self-tests so confidence builds without manual training (persistence + sharing are done; auto-train is not).
 
+## Done (session 7 — STRATA rebrand + pro shell + "wow" pass)
+- [x] **Rebrand → STRATA** (name, logo, all chrome/copy).
+- [x] **Sidebar nav** (`.appnav`, grouped) replaced the top nav; **removed the top AI button** (moved to footer).
+- [x] **Animated "living market" background** (`#fxCanvas`) site-wide.
+- [x] **Movers banner** (`.appbar`) + **High Volume tab** with real-data sortable cards + breadth header.
+- [x] **Live Screener** (real `analyze` scan, sortable filters, breadth stats, results table).
+- [x] **Performance** equity curve + best-streak; **Pro Traders** desk-consensus; **Backtest** scoreboard + "Surprise me".
+- [x] **Data-quality:** recompute day-% from the price series in movers/screener (kills the "+36%" artifact there).
+
 ## Soon
-- [ ] **Nav consolidation:** 9 top tabs → ~4 primary (Terminal · Screener · Backtest · AI Lab) + a "More" menu and a utility cluster (Account/Alerts/AI key). Fold Pro Traders / AI Chat / Feedback.
-- [ ] Replace remaining emoji across the app with line icons.
+- [ ] **Mobile sidebar:** under 1080/640px it collapses to an icon rail — verify tap targets / consider a slide-over drawer for phones.
+- [ ] Replace remaining emoji across the app with line icons (strategy icons, Pro Traders filter row, ✅/❌ verdicts).
 - [ ] Re-style the modals (`#moAcct`, `#moAlert`, `#moAI`) to full glass/landing language.
 
 ## Deploy / infra

@@ -1,10 +1,10 @@
-# TradeLens Pro — Project Context
+# STRATA — Project Context
 
 > Living doc. Update at the end of any session that changes scope, status, or direction.
-> Last updated: 2026-06-25 (session 5)
+> Last updated: 2026-06-26 (session 7). **The product was renamed TradeLens Pro → STRATA** ("Structure Terminal").
 
 ## What this is
-TradeLens Pro is a **single-file** web app (`index.html`, no build step, no framework) that combines:
+STRATA (formerly TradeLens Pro) is a **single-file** web app (`index.html`, no build step, no framework) that combines:
 1. A **premium marketing landing page** (shown first), and
 2. A **trading-analysis dashboard** ("the app") behind a *Launch App* button.
 
@@ -13,10 +13,12 @@ It pulls **real market data**, derives structure-based trade plans (entry / stop
 ## Who it's for
 Serious independent retail traders. Voice/feel: precise, institutional, trustworthy, data-driven — not flashy marketing.
 
-## Current state (2026-06-25, session 5)
+## Current state (2026-06-26, session 8)
+- **Accent is emerald green** (`#22c55e`, brand + bullish; was blue) to match a reference dashboard the user supplied. The nav is a **premium animated floating glass rail** (gliding active pill, magnetic hover, cursor glow, spring icons — `initPremiumNav`). The landing is opaque again (no more app bleed-through); the animated `#fxCanvas` background now lives behind the app only.
+- **Branded STRATA.** App chrome moved to a **left sidebar** (`.appnav`, grouped Terminal/Research/Assistant) — the top nav bar is gone; the top "✨ AI" button is gone (connect-AI lives in the sidebar footer). A streaming **movers banner** (`.appbar`) sits at the top of the app, and a new **High Volume** tab (`#tab-movers`) lists the day's most active / biggest movers from real data. Pro Traders gained a desk-consensus panel; Backtest gained a session scoreboard + "Surprise me".
 - Fully working single page. Landing + app both live.
-- Visual language: **Bloomberg/terminal minimal** — pure black (`#050505`), dark-gray surfaces, white type, ONE accent (`#2f81f7`); no big gradients/glowing blobs. (Evolved from an earlier blue/cyan/purple glass look, and before that a gold theme.) Landing hero is a realistic terminal **bento** (candles/watchlist/volume profile/AI probability/etc.).
-- **The dashboard (post-launch) is now an AI Copilot** — a conversation. Ask in plain language ("is NVDA a buy?") → an answer card with a verdict, an embedded **TradingView** chart, and entry/stop/target shown **as ticks** up/down from current price (1 tick = $0.01; price as subtitle), R/R in ticks, rationale, and follow-up chips. The dashboard went through several rebuilds this session (terminal workspace → Focus → Copilot); Copilot is current. Legacy `renderDash`/`load` are disabled (guarded on missing `#main`).
+- Visual language: **Bloomberg/terminal minimal** — pure black (`#050505`), dark-gray surfaces, white type, ONE accent (`#2f81f7`); no gradients/glowing blobs (the landing's residual blue/cyan/purple gradients + glow were flattened in session 6). Landing hero is a realistic terminal **bento** (candles/watchlist/volume profile/AI probability/etc.).
+- **The dashboard (post-launch) is a real panel terminal** (rebuilt from the session-5 AI Copilot chat). A slim **ask bar** (search + horizon + ticker chips) drives `renderDash`, which fills fixed panels: ticker header (live price + conviction), wide **TradingView** chart, a single Trade Plan (entry/stop/target — price primary, tick-distance secondary, R:R), an AI-read conviction panel, a key-metrics strip, and a live-signals panel. `loadTicker` (News/Screener/etc.) routes here. The old `.cp-*` chat and the older legacy `renderDash`/`.wk` workspace are gone/disabled.
 - **Shared cross-user learning** exists: `api/learn.js` (Vercel serverless + KV) pools the AI's self-test learning across all users; falls back to per-device localStorage when not deployed (`DEPLOY_BACKEND.md`).
 - Other tabs: Screener, News (sample feed), Pro Traders, Backtest, Performance, AI Lab (persistent learning), AI Chat, Alerts, Feedback — still on older `.card` styling.
 - Repo is git-tracked (`main`), **no remote yet**. Deploy-ready for Vercel (`index.html` at root, `api/` serverless, `.vercelignore` excludes `.claude` + `*.md`).
