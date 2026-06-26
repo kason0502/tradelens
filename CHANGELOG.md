@@ -3,6 +3,19 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 15) — ticker-only ask bar + self-running AI learning
+- **Dashboard ask bar is now ticker-only.** Per the user: it's a symbol lookup, not a natural-language Q&A. Input is uppercased + stripped to A–Z on the fly (`maxlength=6`), placeholder reworded to "Enter a ticker — e.g. AAPL, NVDA, TSLA, SPY". `resolveTicker`/`cpSend` unchanged (already symbol-first).
+- **AI now learns on its own.** New `aiAutoLearnOnce()` runs ONE silent self-test on a real historical chart when idle (folds win/loss into `AI_MEMORY`, posts to the shared pool when `SHARED_OK`). Scheduled in the init pollers (first run ~40s, then every 60s) behind `bgIdle()` so it stands down during user lookups / on the landing / when hidden. AI Lab gained a **Pause/Resume auto-learn** toggle (`toggleAutoLearn`, persisted to `tlpro_ai_auto`) + a live status line (`paintAutoStatus`); auto results tag as `auto` in the log. The manual "Run N self-tests" buttons still work and just accelerate it.
+- **Richer info in every tab** (user asked for summary stats + plain-English legends + more depth, in tab order):
+  - **News:** live breadth summary (headline tone, bull/bear/neutral counts, most-mentioned tickers) + a "how to read this" legend (`renderNewsTab`).
+  - **Pro Traders:** legend on the desk-consensus panel + **2 new desk members** (Linda Raschke, Quant Macro Desk) for depth.
+  - **Backtest:** scoreboard now shows an **equity curve** (`drawEquityCurve` generalized to take a canvas id) + a **per-strategy mastery** breakdown + legend (`renderBtScore`, ≥2 rounds).
+  - **Performance:** new **Risk & edge metrics** card — profit factor, avg win/avg loss, expectancy, discipline (accuracy on taken trades) + legend.
+  - **AI Chat:** "What I can explain" tappable topic grid mapped to the knowledge base + a tip linking concepts to the dashboard.
+  - **Alerts:** how-to legend (set at entry/stop/target) + live active-alert count.
+  - **Feedback:** legend clarifying the rating loop tunes indicator weighting vs the AI Lab's self-learning.
+  - (Dashboard / High Volume / Screener already carried breadth stats + context, so left as-is.)
+
 ## 2026-06-26 (session 14) — hosted on GitHub→Vercel + AI proxy + brand images + fixes
 - **Now hosted for everyone (GitHub → Vercel).** Connected `origin` = `github.com/kason0502/tradelens`. The GitHub repo had diverged (updated via manual "Add files via upload") and was **missing files** (PNGs, `api/yf.js`, `api/learn.js`); reconciled by merging `origin/main` into the complete local project (`-X ours` + `--allow-unrelated-histories`) then pushing. Local ↔ GitHub now in sync; Vercel auto-redeploys on push.
 - **`api/claude.js`** — server-side Claude proxy. With `ANTHROPIC_API_KEY` set in Vercel, every deployed visitor gets AI with no key prompt (the app already probes `/api/claude`). Added `package.json` + `vercel.json` (30s timeout for the AI function). `DEPLOY.md` covers the whole flow.

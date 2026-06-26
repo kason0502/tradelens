@@ -1591,7 +1591,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="dash-cmd">
         <div class="dash-cmd-main">
           <svg class="dash-cmd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input id="cpInput" type="text" placeholder="Ask about any ticker, setup, or strategy — e.g. “is NVDA a buy?”" autocomplete="off" onkeydown="if(event.key==='Enter')cpSend()"/>
+          <input id="cpInput" type="text" maxlength="6" spellcheck="false" placeholder="Enter a ticker — e.g. AAPL, NVDA, TSLA, SPY" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')" onkeydown="if(event.key==='Enter')cpSend()"/>
           <select class="dash-hz" id="cpHorizon" onchange="cpSetHorizon(this.value)" aria-label="Horizon">
             <option value="0dte">0DTE</option><option value="1w">1W</option><option value="1m" selected>1M</option><option value="3m">3M</option><option value="6m">6M</option><option value="1y">1Y</option>
           </select>
@@ -1658,7 +1658,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="tab-pane" id="tab-news">
       <div style="margin-bottom:8px;font-size:26px;font-weight:800;letter-spacing:-.03em">Market News</div>
       <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:8px;max-width:640px">Macro and single-name headlines with a plain-English read on what each could mean for price. Click a ticker to analyze it on the dashboard.</div>
-      <div style="font-size:12px;color:var(--ink3);margin-bottom:24px">Illustrative sample feed — a live newswire can be wired in with a data provider key.</div>
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:18px">Illustrative sample feed — a live newswire can be wired in with a data provider key.</div>
+      <div id="newsSummary" class="scan-stats"></div>
+      <div id="newsLegend" style="font-size:12px;color:var(--ink3);line-height:1.7;margin:4px 0 22px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--s1)">
+        <b style="color:var(--ink2)">How to read this:</b> each card carries a <span class="ntag ntag-bull">Bullish</span> / <span class="ntag ntag-bear">Bearish</span> / <span class="ntag ntag-neut">Neutral</span> tag = the likely <i>direction of pressure</i> on the named tickers, plus a one-line "what it could mean for price." Headlines aren't trade signals on their own — confirm the structure on the dashboard before acting.
+      </div>
       <div class="news-grid" id="newsTabFeed"></div>
     </div>
 
@@ -1755,8 +1759,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
           <button class="ai-btn" id="aiTrain12" onclick="aiSelfBacktest(12)">▶ Run 12 self-tests</button>
           <button class="ai-btn" id="aiTrain30" onclick="aiSelfBacktest(30)">▶▶ Run 30 (deeper)</button>
+          <button class="walk-ctrl" id="aiAutoBtn" onclick="toggleAutoLearn()">⏸ Pause auto-learn</button>
           <button class="walk-ctrl" onclick="resetAIMemory()">↻ Reset memory</button>
         </div>
+        <div id="aiAutoStatus" style="font-size:12px;color:var(--mu);margin-bottom:12px;min-height:16px"></div>
         <div class="ai-learn-barwrap"><div class="ai-learn-bar" id="aiLearnBar"></div></div>
         <div id="aiLearnStatus" style="font-size:12px;color:var(--mu);margin-top:8px;min-height:16px"></div>
         <div style="font-size:11px;color:var(--fa);margin-top:6px">Each test reads a random historical chart, picks a strategy, takes the trade, then jumps forward to see if it worked — and updates its memory. Runs on real market data, so it needs a working connection and takes a few seconds per test.</div>
@@ -1772,7 +1778,14 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="tab-pane" id="tab-ai">
       <div style="margin-bottom:16px">
         <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">AI Trading Assistant</div>
-        <div style="font-size:13px;color:var(--mu)">Ask about RSI, strategies, options, candlestick patterns, position sizing, and more.</div>
+        <div style="font-size:13px;color:var(--mu)">Ask about RSI, strategies, options, candlestick patterns, position sizing, and more. Works offline on a built-in knowledge base; connect Claude for richer, conversational answers.</div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">What I can explain — tap a topic</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${[['RSI','rsi'],['Bollinger Bands','bollinger'],['Moving averages','moving averages sma'],['Support & resistance','support'],['MACD','macd'],['Volume','volume'],['Short selling','short'],['Puts','puts'],['Calls','calls'],['Delta','delta'],['Gamma','gamma'],['Theta','theta'],['Position sizing','position sizing'],['Risk / reward','risk reward'],['0DTE options','0dte'],['Earnings & IV','earnings']].map(t=>`<span class="chat-sug" onclick="askAI('${t[1]}')">${t[0]}</span>`).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">Tip:</b> the dashboard already turns these concepts into a concrete entry/stop/target for any ticker — use this assistant to understand the <i>why</i> behind a setup.</div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="chat-msgs" id="chatMessages">
@@ -1816,7 +1829,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 
     <!-- ALERTS -->
     <div class="tab-pane" id="tab-alerts">
-      <div style="margin-bottom:16px"><div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">Price Alerts</div><div style="font-size:13px;color:var(--mu)">Monitor key price levels for any ticker.</div></div>
+      <div style="margin-bottom:16px"><div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">Price Alerts</div><div style="font-size:13px;color:var(--mu)">Monitor key price levels for any ticker — set one at your trade plan's <b>entry</b>, <b>stop</b>, or <b>target</b> so you never miss the trigger.</div></div>
       <div class="card">
         <div class="card-title">Add New Alert</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1825,8 +1838,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <select class="fi" id="alDir2" style="max-width:90px;margin:0"><option value="above">Above</option><option value="below">Below</option></select>
           <button class="go-btn" style="padding:9px 15px;font-size:13px" onclick="addAlert2()">+ Add</button>
         </div>
+        <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">How to use this:</b> pick <b>Above</b> to be notified when price rises through your level (breakouts, targets) or <b>Below</b> for breakdowns and stops. A typical plan needs two alerts — one at your <span style="color:var(--gt)">target</span> to take profit and one at your <span style="color:var(--rt)">stop</span> to cut the loss.</div>
       </div>
-      <div class="card"><div class="card-title">Active Alerts</div><div id="alertList2"><div style="text-align:center;padding:22px;color:var(--fa);font-size:13px">No alerts yet. Add one above.</div></div></div>
+      <div class="card"><div class="card-title">Active Alerts <span id="alertCount" style="font-family:var(--mono);font-weight:700;color:var(--ink3);font-size:12px"></span></div><div id="alertList2"><div style="text-align:center;padding:22px;color:var(--fa);font-size:13px">No alerts yet. Add one above.</div></div></div>
     </div>
 
     <!-- FEEDBACK -->
@@ -1845,6 +1859,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div class="metric"><div class="metric-lbl">Losses</div><div class="metric-val r" id="pf-loss">0</div></div>
           <div class="metric"><div class="metric-lbl">Win Rate</div><div class="metric-val a" id="pf-wr">—</div></div>
         </div>
+        <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">How to read this:</b> these count the dashboard signals you've personally rated as wins or losses. Your win rate here trains the <i>indicator weighting</i> shown above — it's separate from the <b>AI Lab</b>, which learns on its own from historical self-tests. Together they tune what the dashboard shows you.</div>
       </div>
     </div>
 
@@ -2391,13 +2406,31 @@ function renderBtScore(){
   const g={}; h.forEach(x=>{const k=(x.strat||'—').split(' ')[0];g[k]=g[k]||{n:0,c:0};g[k].n++;if(x.correct)g[k].c++;});
   let best=null; Object.entries(g).forEach(([k,v])=>{if(v.n>=2){const r=v.c/v.n;if(!best||r>best.r)best={k,r};}});
   const tile=(lbl,val,col)=>`<div style="background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:13px 16px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700;margin-bottom:6px">${lbl}</div><div style="font-family:var(--mono);font-size:19px;font-weight:800;${col?'color:'+col:''}">${val}</div></div>`;
+  // per-strategy mastery (full strategy name, win% + sim P&L)
+  const gs={}; h.forEach(x=>{const k=x.strat||'—';gs[k]=gs[k]||{n:0,c:0,pnl:0};gs[k].n++;if(x.correct)gs[k].c++;gs[k].pnl+=(x.pnl||0);});
+  const mastery=Object.entries(gs).sort((a,b)=>b[1].n-a[1].n).map(([k,v])=>{
+    const w=Math.round(v.c/v.n*100),col=w>=55?'var(--gr)':w<45?'var(--rd)':'var(--at)';
+    return `<div class="perf-row"><div class="perf-row-name">${k}</div><div class="perf-bar"><div class="perf-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="perf-row-stat">${w}% · ${v.n}t · <span class="${v.pnl>=0?'g':'r'}">${v.pnl>=0?'+':''}${v.pnl.toFixed(1)}%</span></div></div>`;
+  }).join('');
   el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:12px;margin-bottom:16px">
     ${tile('Rounds',tot)}
     ${tile('Accuracy',acc+'%',acc>=55?'var(--gt)':acc<45?'var(--rt)':'')}
     ${tile('Win streak',streak,streak>=3?'var(--gt)':'')}
     ${tile('Sim P&L',(pnl>=0?'+':'')+pnl.toFixed(1)+'%',pnl>=0?'var(--gt)':'var(--rt)')}
     ${tile('Best read',best?best.k+' '+Math.round(best.r*100)+'%':'—')}
-  </div>`;
+  </div>
+  ${tot>=2?`<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-bottom:16px" class="bt-review-grid">
+    <div style="background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">Equity curve · cumulative sim P&amp;L</div>
+      <canvas id="btEquity" style="width:100%;height:130px;display:block"></canvas>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Per-strategy mastery</div>
+      ${mastery}
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-bottom:16px"><b style="color:var(--ink2)">How to read this:</b> the equity curve tracks your running simulated P&amp;L round-by-round — a steady climb means consistent reads, deep dips mean you're forcing trades. Mastery bars show your win-rate per strategy; lean into the green ones and study the red ones in the playbook below.</div>`:''}`;
+  if(tot>=2)try{drawEquityCurve('btEquity');}catch(e){}
 }
 function initBacktestTab(){
   renderBtScore();
@@ -3081,6 +3114,61 @@ async function aiSelfBacktest(rounds){
 }
 function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnStats();const log=document.getElementById('aiLearnLog');if(log)log.innerHTML='';if(lastData)load(lastData.ticker);}
 
+// ── AUTO self-learning ────────────────────────────────────────────────
+// When idle, the engine quietly runs ONE self-test on a real historical
+// chart, scores it, and folds the result into its memory (and the shared
+// cross-user pool when the backend is live). So confidence keeps building
+// on its own — the manual "Run N self-tests" buttons just accelerate it.
+let AI_AUTO=(localStorage.getItem('tlpro_ai_auto')!=='off');
+const AI_AUTO_UNIVERSE=['AAPL','MSFT','NVDA','AMZN','META','GOOGL','GOOG','TSLA','AMD','SPY','QQQ','NFLX','AVGO','JPM','COIN','CRM'];
+async function aiAutoLearnOnce(){
+  if(aiSelfBusy||!AI_AUTO)return;
+  aiSelfBusy=true;
+  try{
+    const tk=AI_AUTO_UNIVERSE[Math.floor(Math.random()*AI_AUTO_UNIVERSE.length)];
+    const q=await fetchQuote(tk);
+    const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
+    if(full&&full.length>=70){
+      const hold=10;
+      const cut=Math.floor(50+Math.random()*(full.length-hold-52));
+      const histWin=full.slice(0,cut+1);
+      const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
+      const setup=classifySetup(histWin.slice(-60),a);
+      const lvl=aiStrategyLevels(setup.key,histWin.slice(-60));
+      const decisionPrice=full[cut].c, endPrice=full[Math.min(full.length-1,cut+hold)].c;
+      const changePct=((endPrice-decisionPrice)/decisionPrice)*100;
+      const dirRight=(lvl.dir==='long'&&changePct>=0)||(lvl.dir==='short'&&changePct<0);
+      const pnl=lvl.dir==='long'?changePct:-changePct;
+      const mem=AI_MEMORY.strats[setup.key];
+      if(mem){if(dirRight)mem.wins++;else mem.losses++;mem.pnl+=pnl;mem.conf=stratConf(setup.key);}
+      AI_MEMORY.trials++;if(dirRight)AI_MEMORY.wins++;
+      AI_MEMORY.log.unshift({tk,name:lvl.name,dir:lvl.dir,color:lvl.color,win:dirRight,pnl:+pnl.toFixed(1),auto:true});
+      if(AI_MEMORY.log.length>40)AI_MEMORY.log.length=40;
+      saveAIMemory();
+      if(SHARED_OK)postShared({key:setup.key,win:dirRight,pnl:+pnl.toFixed(1),tk,name:lvl.name,dir:lvl.dir});
+      const lab=document.getElementById('tab-ailab');
+      if(lab&&lab.classList.contains('active')){
+        renderAILearnStats();
+        const log=document.getElementById('aiLearnLog');
+        if(log){const row=document.createElement('div');row.className='ai-learn-row';
+          row.innerHTML=`<span class="ai-learn-tk">${tk}</span><span style="color:${lvl.color}">${lvl.name}</span><span class="bt-tag" style="opacity:.7">auto</span><span class="${dirRight?'g':'r'}" style="font-weight:700;font-family:var(--mono)">${dirRight?'WIN':'LOSS'} ${pnl>=0?'+':''}${pnl.toFixed(1)}%</span>`;
+          log.prepend(row);while(log.children.length>60)log.removeChild(log.lastChild);}
+      }
+    }
+  }catch(e){}
+  aiSelfBusy=false;
+}
+function toggleAutoLearn(){AI_AUTO=!AI_AUTO;localStorage.setItem('tlpro_ai_auto',AI_AUTO?'on':'off');paintAutoStatus();if(AI_AUTO)aiAutoLearnOnce();}
+function paintAutoStatus(){
+  const b=document.getElementById('aiAutoBtn');
+  if(b)b.innerHTML=AI_AUTO?'⏸ Pause auto-learn':'▶ Resume auto-learn';
+  const s=document.getElementById('aiAutoStatus');
+  if(!s)return;
+  s.innerHTML=AI_AUTO
+    ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--em);box-shadow:0 0 6px var(--em);margin-right:7px;vertical-align:middle"></span>Learning on its own in the background${SHARED_OK?' · contributing to the shared model':''} — ${AI_MEMORY.trials} self-tests logged so far.`
+    : `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ink3);margin-right:7px;vertical-align:middle"></span>Auto-learning paused — the AI only learns when you run tests manually.`;
+}
+
 function renderAILearnStats(){
   const el=document.getElementById('aiLearnStats');if(!el)return;
   const acc=AI_MEMORY.trials?Math.round(AI_MEMORY.wins/AI_MEMORY.trials*100):0;
@@ -3104,6 +3192,7 @@ function renderAILearnStats(){
     <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
     <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses STRATA — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>`;
   renderAILearnLog();
+  paintAutoStatus();
 }
 // Render the persisted self-test history (survives reloads).
 function renderAILearnLog(){
@@ -3133,8 +3222,8 @@ function perfGroup(keyFn){
   btHistory.forEach(h=>{const k=keyFn(h);if(!g[k])g[k]={n:0,correct:0,pnl:0};g[k].n++;if(h.correct)g[k].correct++;g[k].pnl+=h.pnl;});
   return g;
 }
-function drawEquityCurve(){
-  const cv=document.getElementById('perfEquity'); if(!cv)return;
+function drawEquityCurve(id){
+  const cv=document.getElementById(id||'perfEquity'); if(!cv)return;
   const ctx=cv.getContext('2d'); const dpr=Math.min(2,window.devicePixelRatio||1);
   const W=cv.clientWidth||600,H=cv.clientHeight||200; cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
@@ -3160,6 +3249,14 @@ function renderPerformance(){
   let cur=0,maxStreak=0; btHistory.forEach(h=>{if(h.correct){cur++;maxStreak=Math.max(maxStreak,cur);}else cur=0;});
   const byStrat=perfGroup(h=>h.strat),byDir=perfGroup(h=>h.bias),byTf=perfGroup(h=>h.tf);
   const row=(name,o)=>`<div class="perf-row"><div class="perf-row-name">${name}</div><div class="perf-bar"><div class="perf-bar-fill" style="width:${Math.round(o.correct/o.n*100)}%;background:${o.correct/o.n>=0.5?'var(--gr)':'var(--rd)'}"></div></div><div class="perf-row-stat">${Math.round(o.correct/o.n*100)}% · ${o.n}t · <span class="${o.pnl>=0?'g':'r'}">${o.pnl>=0?'+':''}${o.pnl.toFixed(1)}%</span></div></div>`;
+  // ── advanced trader metrics ──
+  const wins=btHistory.filter(h=>h.pnl>0), losses=btHistory.filter(h=>h.pnl<0);
+  const grossWin=wins.reduce((p,h)=>p+h.pnl,0), grossLoss=Math.abs(losses.reduce((p,h)=>p+h.pnl,0));
+  const avgWin=wins.length?grossWin/wins.length:0, avgLoss=losses.length?grossLoss/losses.length:0;
+  const pf=grossLoss>0?(grossWin/grossLoss):(grossWin>0?Infinity:0);
+  const expect=pnl/tot;                                  // avg P&L per round
+  const tookCorr=taken.filter(h=>h.correct).length, tookAcc=taken.length?Math.round(tookCorr/taken.length*100):0;
+  const m=(lbl,val,col,sub)=>`<div class="bt-score"><div class="bt-score-val" ${col?`style="color:${col}"`:''}>${val}</div><div class="bt-score-lbl">${lbl}${sub?`<br><span style="opacity:.6">${sub}</span>`:''}</div></div>`;
   el.innerHTML=`
     <div class="bt-scoreboard">
       <div class="bt-score"><div class="bt-score-val">${tot}</div><div class="bt-score-lbl">Trades</div></div>
@@ -3167,6 +3264,16 @@ function renderPerformance(){
       <div class="bt-score"><div class="bt-score-val ${pnl>=0?'g':'r'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div><div class="bt-score-lbl">Sim P&L</div></div>
       <div class="bt-score"><div class="bt-score-val">${taken.length}/${passed.length}</div><div class="bt-score-lbl">Took / Passed</div></div>
       <div class="bt-score"><div class="bt-score-val" style="color:var(--at)">${maxStreak}</div><div class="bt-score-lbl">Best streak</div></div>
+    </div>
+    <div class="card"><div class="card-title">Risk &amp; edge metrics</div>
+      <div class="bt-scoreboard" style="margin:0 0 12px">
+        ${m('Profit factor',pf===Infinity?'∞':pf.toFixed(2),pf>=1.5?'var(--gt)':pf<1?'var(--rt)':'var(--at)','gross win ÷ gross loss')}
+        ${m('Avg win',(avgWin>=0?'+':'')+avgWin.toFixed(1)+'%','var(--gt)',wins.length+' winners')}
+        ${m('Avg loss',(avgLoss>0?'−':'')+avgLoss.toFixed(1)+'%','var(--rt)',losses.length+' losers')}
+        ${m('Expectancy',(expect>=0?'+':'')+expect.toFixed(2)+'%',expect>=0?'var(--gt)':'var(--rt)','per round')}
+        ${m('Discipline',tookAcc+'%',tookAcc>=55?'var(--gt)':tookAcc<45?'var(--rt)':'var(--at)','accuracy when you took the trade')}
+      </div>
+      <div style="font-size:11px;color:var(--ink3);line-height:1.7"><b style="color:var(--ink2)">How to read this:</b> <b>Profit factor</b> above 1.5 is healthy — you make $1.50+ for every $1 lost. <b>Expectancy</b> is your average result per round; keep it positive. <b>Discipline</b> is how often the trades you actually took were right — if it's well above your overall accuracy, you're picking your spots well; if below, you're forcing entries.</div>
     </div>
     <div class="card"><div class="card-title">Equity curve · cumulative sim P&L</div><canvas id="perfEquity" style="width:100%;height:210px;display:block"></canvas></div>
     <div class="card"><div class="card-title">By Strategy</div>${Object.entries(byStrat).sort((a,b)=>b[1].n-a[1].n).map(([k,o])=>row(k,o)).join('')}</div>
@@ -4406,6 +4513,18 @@ const TRADERS=[
     {ticker:'AMD',dir:'bull',text:'AMD is the second-source AI chip play and the market keeps underpricing it. MI300 demand exceeding supply, Lisa Su executing. Basing above $155 — break of $168 sends it toward $185.',entry:'$157–$162',sl:'$147',tp:'$175–$188',tickers:['AMD']},
     {ticker:'GOOG',dir:'bull',text:'Google Cloud reacceleration + YouTube AI monetization = earnings inflection. Cheap vs MSFT on cloud metrics. Buy the dip near $175. Target $205 by year end.',entry:'$174–$178',sl:'$162',tp:'$200–$210',tickers:['GOOG']},
   ]},
+  {name:'Linda Raschke',handle:'@lindaraschke',initials:'LR',grad:'linear-gradient(135deg,#22d3ee,#0e7490)',verified:true,followers:'140K',winRate:'79%',years:'40+',
+   bio:'Market Wizard. Short-term swing and momentum trader known for the "Holy Grail" ADX pullback and the 80-20 reversal. Process over prediction.',
+   calls:[
+    {ticker:'SPY',dir:'bull',text:'Classic Holy Grail setup on the daily — ADX above 30, first pullback to the 20-EMA after a strong leg up. These resolve in the direction of the trend ~7 of 10 times. Tight stop under the EMA.',entry:'$580–$583',sl:'$571',tp:'$598–$606',tickers:['SPY']},
+    {ticker:'META',dir:'bear',text:'META printed an 80-20 bar at the highs — closed in the bottom 20% of its range after opening in the top 20% on heavy volume. Short-term exhaustion. Fade toward the 10-day, manage tight.',entry:'Short ~$615',sl:'$628',tp:'$585–$592',tickers:['META']},
+  ]},
+  {name:'Quant Macro Desk',handle:'@quantmacro',initials:'QM',grad:'linear-gradient(135deg,#818cf8,#3730a3)',verified:false,followers:'88K',winRate:'68%',years:'10+',
+   bio:'Systematic desk blending trend-following with cross-asset macro. Rules-based entries, volatility-scaled position sizing, no discretionary overrides.',
+   calls:[
+    {ticker:'NVDA',dir:'bull',text:'Trend model is max-long NVDA: price above the 50/100/200-day, realized vol contracting, momentum z-score top decile. Position sized to 1% account risk at a 7% trailing stop. Ride it until the trend breaks.',entry:'$130–$134',sl:'7% trail',tp:'trend-follow',tickers:['NVDA']},
+    {ticker:'TSLA',dir:'bear',text:'Cross-asset signal flipped negative: TSLA below the 200-day with rising correlation to a weakening high-beta basket. Systematic short, vol-scaled. Cover on a close back above the 50-day.',entry:'Short ~$250',sl:'Close > 50DMA',tp:'$205–$215',tickers:['TSLA']},
+  ]},
 ];
 
 let currentTraderFilter='all';
@@ -4431,8 +4550,9 @@ function tradersConsensus(){
       <div style="font-family:var(--mono);font-size:12px;color:var(--ink3)"><span style="color:var(--gt)">${bull} bullish</span> · <span style="color:var(--rt)">${bear} bearish</span> · avg win rate ${avgWR}%</div>
     </div>
     <div style="height:9px;border-radius:99px;overflow:hidden;display:flex;margin-bottom:16px;background:var(--s3)"><div style="width:${bp}%;background:var(--gr)"></div><div style="width:${rp}%;background:var(--rd)"></div></div>
-    <div style="font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--fa);margin-bottom:9px">Most-called names</div>
+    <div style="font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--fa);margin-bottom:9px">Most-called names — click to analyze on the dashboard</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:9px">${chips}</div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)"><b style="color:var(--ink2)">How to read this:</b> the bar is the share of all open calls that are <span style="color:var(--gt)">bullish</span> vs <span style="color:var(--rt)">bearish</span>. Each name chip shows how many traders are covering it and which way the desk leans. <b>Win rate is self-reported</b> and past performance ≠ future results — treat these as ideas to test, not signals to copy.</div>
   </div>`;
 }
 function renderTraders(filter){
@@ -4577,6 +4697,20 @@ function renderNews(){
 function renderNewsTab(){
   const el=document.getElementById('newsTabFeed');if(!el)return;
   const lbl=t=>t==='bull'?'Bullish':t==='bear'?'Bearish':'Neutral';
+  // ── live breadth summary across the whole feed ──
+  const all=[...NEWS,...SECTOR_NEWS];
+  const bull=all.filter(n=>n.tag==='bull').length, bear=all.filter(n=>n.tag==='bear').length, neut=all.length-bull-bear;
+  const tone=bull>bear?'Risk-on':bear>bull?'Risk-off':'Mixed';
+  const toneCol=bull>bear?'var(--gt)':bear>bull?'var(--rt)':'var(--ink2)';
+  const counts={}; all.forEach(n=>n.t.forEach(x=>counts[x]=(counts[x]||0)+1));
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const sum=document.getElementById('newsSummary');
+  if(sum)sum.innerHTML=`
+    <div class="scan-stat"><div class="k">Headline tone</div><div class="v" style="color:${toneCol}">${tone}</div></div>
+    <div class="scan-stat"><div class="k">Bullish stories</div><div class="v g">${bull}</div></div>
+    <div class="scan-stat"><div class="k">Bearish stories</div><div class="v r">${bear}</div></div>
+    <div class="scan-stat"><div class="k">Neutral / mixed</div><div class="v">${neut}</div></div>
+    <div class="scan-stat" style="grid-column:span 2"><div class="k">Most-mentioned tickers</div><div class="v" style="font-size:13px;display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">${top.map(([k,v])=>`<span class="nticker nclk" onclick="newsOpen('${k}')">${k} ·${v}</span>`).join('')}</div></div>`;
   el.innerHTML=[...NEWS,...SECTOR_NEWS].map(n=>`<div class="news-item glass"><div class="news-item-top"><span class="ntag ${n.tag==='bull'?'ntag-bull':n.tag==='bear'?'ntag-bear':'ntag-neut'}">${lbl(n.tag)}</span><span class="news-src">${n.src}</span></div><div class="news-item-h">${n.h}</div><div class="news-item-impact">${n.impact}</div><div class="news-item-tk">${n.t.map(x=>`<span class="nticker nclk" onclick="newsOpen('${x}')">${x}</span>`).join('')}</div></div>`).join('');
 }
 function newsOpen(sym){mainTab('dashboard',document.querySelector('.ntab'));loadTicker(sym);}
@@ -4606,7 +4740,7 @@ function runScan(type,el){
 let alerts=[];
 function addAlertModal(){const t=document.getElementById('alTk').value.trim().toUpperCase(),p=parseFloat(document.getElementById('alPr').value),d=document.getElementById('alDir').value;if(!t||!p)return;alerts.push({ticker:t,price:p,dir:d,time:new Date().toLocaleTimeString()});document.getElementById('alTk').value='';document.getElementById('alPr').value='';renderAlerts();renderAlertsMo();}
 function addAlert2(){const t=document.getElementById('alTk2').value.trim().toUpperCase(),p=parseFloat(document.getElementById('alPr2').value),d=document.getElementById('alDir2').value;if(!t||!p)return;alerts.push({ticker:t,price:p,dir:d,time:new Date().toLocaleTimeString()});document.getElementById('alTk2').value='';document.getElementById('alPr2').value='';renderAlerts();renderAlertsMo();}
-function renderAlerts(){const el=document.getElementById('alertList2');if(!el)return;el.innerHTML=alerts.length?alerts.map((a,i)=>`<div class="alert-panel"><div class="alert-icon">🔔</div><div class="alert-body"><div class="alert-title">${a.ticker} — ${a.dir==='above'?'Above':'Below'} $${a.price.toFixed(2)}</div><div class="alert-text">Monitoring</div></div><div class="alert-time">${a.time}</div><button onclick="alerts.splice(${i},1);renderAlerts();renderAlertsMo()" style="background:none;border:none;color:var(--fa);cursor:pointer;font-size:14px;padding:4px">✕</button></div>`).join(''):'<div style="text-align:center;padding:20px;color:var(--fa);font-size:13px">No alerts yet.</div>';}
+function renderAlerts(){const el=document.getElementById('alertList2');const ac=document.getElementById('alertCount');if(ac)ac.textContent=alerts.length?`· ${alerts.length} active`:'';if(!el)return;el.innerHTML=alerts.length?alerts.map((a,i)=>`<div class="alert-panel"><div class="alert-icon">🔔</div><div class="alert-body"><div class="alert-title">${a.ticker} — ${a.dir==='above'?'Above':'Below'} $${a.price.toFixed(2)}</div><div class="alert-text">Monitoring</div></div><div class="alert-time">${a.time}</div><button onclick="alerts.splice(${i},1);renderAlerts();renderAlertsMo()" style="background:none;border:none;color:var(--fa);cursor:pointer;font-size:14px;padding:4px">✕</button></div>`).join(''):'<div style="text-align:center;padding:20px;color:var(--fa);font-size:13px">No alerts yet.</div>';}
 function renderAlertsMo(){const el=document.getElementById('moAlertList');if(!el)return;el.innerHTML=alerts.slice(0,5).map((a,i)=>`<div class="alert-panel"><div class="alert-icon">🔔</div><div class="alert-body"><div class="alert-title">${a.ticker} ${a.dir} $${a.price.toFixed(2)}</div></div><div class="alert-time">${a.time}</div><button onclick="alerts.splice(${i},1);renderAlerts();renderAlertsMo()" style="background:none;border:none;color:var(--fa);cursor:pointer;font-size:12px;padding:3px">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--fa)">No alerts yet</div>';}
 
 // ── FEEDBACK ──────────────────────────────────────────────────────────
@@ -4666,6 +4800,7 @@ buildIndexStrip(); paintMoversBanner(); renderWatch();                          
 setTimeout(()=>{if(bgIdle())loadIndices();},14000);   setInterval(()=>{if(bgIdle())loadIndices();},300000);   // indices
 setTimeout(()=>{if(bgIdle())refreshWatch();},22000);  setInterval(()=>{if(bgIdle())refreshWatch();},240000);  // watchlist
 setTimeout(()=>{if(bgIdle())renderMovers();},30000);  setInterval(()=>{if(MOVERS.length&&bgIdle())renderMovers(true);},360000); // movers
+setTimeout(()=>{if(AI_AUTO&&bgIdle())aiAutoLearnOnce();},40000); setInterval(()=>{if(AI_AUTO&&bgIdle()&&!aiSelfBusy)aiAutoLearnOnce();},60000); // AI auto-learn (idle trickle)
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
 function launchApp(){

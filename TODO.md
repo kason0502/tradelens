@@ -8,8 +8,17 @@
 - [x] **Original bull + bear mascots** in the dashboard AI-read panel; **new bull-head logo**.
 - [x] **Index strip** (S&P/Nasdaq/Dow/VIX) on the dashboard.
 
-## Next (more info, not yet done)
-- [ ] **Extend "more info" to the other tabs** (the user asked for the whole app, not just the dashboard) — e.g. Markets/Screener summary headers, richer News, Strategies detail — without clutter.
+## Done (session 15 — ticker-only ask bar + self-running AI)
+- [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
+- [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
+
+## Done (session 15 — more info in every tab)
+- [x] **News** breadth summary + legend · **Pro Traders** legend + 2 desk members · **Backtest** equity curve + per-strategy mastery + legend · **Performance** risk/edge metrics (profit factor, avg win/loss, expectancy, discipline) + legend · **AI Chat** topic reference · **Alerts** legend + active count · **Feedback** legend.
+
+## Next (more info — optional follow-ups)
+- [ ] **Pro Traders per-ticker desk-vs-STRATA agreement** (compare desk lean to STRATA's learned sentiment) — deferred (needs a fetch/analyze per name).
+- [ ] **Movers/Screener legends** for full consistency (they already have breadth stats + descriptive headers, so low priority).
+- [ ] **Wire a live newswire** (still a sample feed; needs a provider key).
 - [ ] **Lean closer to the reference dashboard layout** if wanted (watchlist + chart + Key Levels + Technical Indicators side-by-side; the index strip is a first step).
 
 ## Done (session 8 — emerald + premium nav + landing fix)
