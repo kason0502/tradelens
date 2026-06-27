@@ -137,6 +137,29 @@ def _probe_theta(cfg: dict, day_str: str):
     print("\n" + "=" * 64 + "\nPaste ALL of this back to your assistant.")
 
 
+def _publish(cfg: dict):
+    """Commit + push results.json so the PUBLIC (Vercel) site picks it up.
+    Only needed for the deployed site — the local localhost:8777 view reads the
+    file directly and needs no commit."""
+    import subprocess
+    out = cfg["output"]["results_json"]
+    rng = f"{cfg.get('symbol','')} {cfg.get('start_date','')}..{cfg.get('end_date','')}"
+    try:
+        # -f because results.json is gitignored for normal commits; we publish it explicitly.
+        subprocess.run(["git", "add", "-f", out], check=True)
+        r = subprocess.run(["git", "commit", "-m", f"backtest results: {rng}"],
+                           capture_output=True, text=True)
+        if r.returncode != 0 and "nothing to commit" in (r.stdout + r.stderr).lower():
+            print("[publish] results unchanged — nothing to push.")
+            return
+        subprocess.run(["git", "push"], check=True)
+        print("[publish] Pushed to GitHub. The public Vercel site will redeploy in ~30s.")
+    except FileNotFoundError:
+        print("[publish] git not found on PATH — can't auto-publish. Commit/push manually.")
+    except subprocess.CalledProcessError as e:
+        print(f"[publish] git step failed: {e}. (Local site at localhost:8777 still works without publishing.)")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="config.json")
@@ -146,6 +169,7 @@ def main():
     ap.add_argument("--symbol", help="override symbol, e.g. SPY")
     ap.add_argument("--check", action="store_true", help="probe what your Polygon key can access, then exit")
     ap.add_argument("--probe-theta", action="store_true", help="dump raw ThetaData v3 response shape, then exit")
+    ap.add_argument("--publish", action="store_true", help="after the run, commit+push results.json so the PUBLIC (Vercel) site updates")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -179,6 +203,8 @@ def main():
     if cfg["output"].get("write_png"):
         report.write_png(payload, "equity_curve.png")
     report.console_summary(payload)
+    if args.publish:
+        _publish(cfg)
 
 
 if __name__ == "__main__":
