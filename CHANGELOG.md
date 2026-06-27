@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 26) — backtester speed + noise: disk cache, holiday skip, --publish, refresh
+- **Disk cache:** ThetaData days are pickled to `backtester/.cache/` after first fetch; re-runs (incl. the 5 fragility scenarios) read from disk instead of re-downloading — big speedup on multi-day ranges.
+- **Market-holiday skip:** `trading_days` filters NYSE closures (2023–2026), so the engine stops requesting closed days (kills the Terminal's `No data found` WARN spam).
+- **`--publish` flag:** runs the backtest then commits+pushes `results.json` so the public Vercel site updates (local `localhost:8777` needs no commit).
+- **0DTE Lab auto-refresh:** re-fetches `results.json` on tab open, a Refresh button, optional 10s auto-refresh, and a "last run" timestamp.
+
 ## 2026-06-27 (session 25) — ThetaData v3 adapter + put-call-parity underlying
 - **Rewrote `ThetaDataProvider` for the real Terminal v3 API** (port 25503, `/v3/option/history/quote` at `interval=1m`, CSV) after probing a live STANDARD-options/FREE-stock account. Added `--probe-theta` (endpoint/shape discovery) and `--check` diagnostics.
 - **Put-call-parity underlying reconstruction:** that tier blocks stock data and serves greeks EOD-only, so the intraday SPY price is rebuilt from real option quotes — `S(t) = K + call_mid(t) − put_mid(t)` at the anchor ATM strike (exact for 0DTE bar tiny rate/div). Clearly labelled reconstructed, not a feed. Contract selection is nearest-ATM (no intraday greeks).

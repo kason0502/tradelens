@@ -18,10 +18,29 @@ inventing them.
 from __future__ import annotations
 import datetime as dt
 import io
+import os
+import pickle
 import pandas as pd
 import requests
 
 from . import schema
+
+# US equity-market full closures 2023–2026 (NYSE). Used to skip days that have no
+# data so we don't hammer the feed with requests that can only come back empty.
+NYSE_HOLIDAYS = {
+    # 2023
+    "2023-01-02", "2023-01-16", "2023-02-20", "2023-04-07", "2023-05-29",
+    "2023-06-19", "2023-07-04", "2023-09-04", "2023-11-23", "2023-12-25",
+    # 2024
+    "2024-01-01", "2024-01-15", "2024-02-19", "2024-03-29", "2024-05-27",
+    "2024-06-19", "2024-07-04", "2024-09-02", "2024-11-28", "2024-12-25",
+    # 2025
+    "2025-01-01", "2025-01-20", "2025-02-17", "2025-04-18", "2025-05-26",
+    "2025-06-19", "2025-07-04", "2025-09-01", "2025-11-27", "2025-12-25",
+    # 2026
+    "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25",
+    "2026-06-19", "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
+}
 
 
 class BaseProvider:
@@ -33,9 +52,9 @@ class BaseProvider:
     def trading_days(self) -> list[dt.date]:
         start = pd.Timestamp(self.cfg["start_date"]).date()
         end = pd.Timestamp(self.cfg["end_date"]).date()
-        # Mon–Fri only; real holiday calendar is the user's job (see README).
+        # Mon–Fri minus known market holidays (so we don't request closed days).
         days = pd.bdate_range(start, end)
-        return [d.date() for d in days]
+        return [d.date() for d in days if d.strftime("%Y-%m-%d") not in NYSE_HOLIDAYS]
 
     def load_options(self, day: dt.date) -> pd.DataFrame:
         raise NotImplementedError
@@ -145,9 +164,23 @@ class ThetaDataProvider(BaseProvider):
         anchor = float(up.median())
         return float(min(strikes, key=lambda k: abs(k - anchor)))
 
+    def _disk_path(self, day: dt.date) -> str:
+        d = os.path.join(os.path.dirname(__file__), "..", ".cache")
+        os.makedirs(d, exist_ok=True)
+        return os.path.join(d, f"{self.symbol}_{day}_w{self.window}.pkl")
+
     def _load_day(self, day: dt.date):
-        if day in self._cache:
+        if day in self._cache:                              # in-memory (this run)
             return self._cache[day]
+        p = self._disk_path(day)
+        if os.path.exists(p):                               # on-disk (previous runs) — no re-download
+            try:
+                with open(p, "rb") as f:
+                    obj = pickle.load(f)
+                self._cache[day] = obj
+                return obj
+            except Exception:
+                pass
         k0 = self._atm_strike(day)                          # ATM anchor (any liquid strike works for parity)
         calls = self._quotes(day, "*", "call")              # full call chain @1m (real bid/ask)
         put0 = self._quotes(day, f"{k0:.3f}", "put")        # ATM put @1m, for parity
@@ -174,6 +207,11 @@ class ThetaDataProvider(BaseProvider):
         chain["gamma"] = float("nan")
         chain["theta"] = float("nan")
         self._cache[day] = {"underlying": und, "chain": chain.reset_index(drop=True)}
+        try:                                                # persist so re-runs skip the download
+            with open(p, "wb") as f:
+                pickle.dump(self._cache[day], f)
+        except Exception:
+            pass
         return self._cache[day]
 
     def load_underlying(self, day: dt.date) -> pd.DataFrame:

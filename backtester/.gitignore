@@ -3,4 +3,5 @@ __pycache__/
 results.json
 equity_curve.png
 data/
+.cache/
 .venv/
