@@ -3157,6 +3157,24 @@ function regimeCell(s,regime){
   return s.byRegime[regime];
 }
 
+// Unified "edge" for a strategy — what the AI has actually LEARNED about it.
+// Combines expectancy (avg R), how fast it resolves (efficiency = R per bar),
+// and trust (sample size). Prefers the current regime's record when it exists.
+function stratStats(key,regime){
+  const s=AI_MEMORY.strats[key]||{};
+  let n=(s.wins||0)+(s.losses||0),wins=s.wins||0,pnl=s.pnl||0,bars=s.bars||0;
+  if(regime&&s.byRegime&&s.byRegime[regime]){
+    const c=s.byRegime[regime],rn=(c.wins||0)+(c.losses||0);
+    if(rn>=4){n=rn;wins=c.wins||0;pnl=c.pnl||0;bars=c.bars||0;}   // trust the regime cell once it has a sample
+  }
+  const winRate=n?wins/n:0, exp=n?pnl/n:0, avgBars=(n&&bars)?bars/n:0;
+  const trust=Math.min(1,n/12);
+  // efficiency: faster-resolving setups earn more per unit of time/risk → small bonus
+  const effKicker=avgBars>0?Math.max(-0.4,Math.min(0.4,(28-avgBars)/28)):0;
+  const edge=exp*trust + 0.25*effKicker;                          // the learned edge, per regime
+  return{n,winRate,exp,avgBars,trust,edge};
+}
+
 // Decide which strategy fits the current chart, by structure + learned confidence.
 function classifySetup(candles,a){
   const lv=labLevels(candles);
@@ -3171,18 +3189,16 @@ function classifySetup(candles,a){
   cand.breakdown= (!up?0.6:0.1) + (last>lv.sma20Val?0.2:0) + (rsi>45&&rsi<62?0.2:0);
   cand.oversold = (rsi<32?0.7:rsi<40?0.3:0) + (nearLow?0.25:0);
   cand.rangefade= (Math.abs(a.s20s60)<1.2?0.5:0.1) + (nearHigh?0.35:0) + (rsi>55?0.15:0);
-  // blend structure score with what it has LEARNED — and learn it PER REGIME:
-  // use each strategy's expectancy in the CURRENT market regime when there's a
-  // sample, falling back to its overall expectancy / win-rate otherwise.
+  // Structure decides which strategies FIT; the learned edge (expectancy +
+  // efficiency, per regime, trusted by sample size) decides which of the
+  // fitting ones to actually deploy. The more it has learned, the harder it
+  // leans on what works — strong winners up to ~1.9×, proven losers down to ~0.45×.
   const regime=marketRegime(a,candles);
   let best=null,bestScore=-1;
   Object.keys(cand).forEach(k=>{
-    const conf=stratConf(k);
-    const s=AI_MEMORY.strats[k]||{}; const n=(s.wins||0)+(s.losses||0);
-    const rc=(s.byRegime&&s.byRegime[regime])||null; const rn=rc?(rc.wins+rc.losses):0;
-    const exp = rn>=4 ? rc.pnl/rn : (n>=4 ? (s.pnl||0)/n : 0);  // regime expectancy if learned, else overall
-    const expMul=Math.max(0.7,Math.min(1.4,1+exp*0.12));        // reward + expectancy, dampen losers
-    const score=cand[k]*(0.6+conf*0.8)*expMul;
+    const st=stratStats(k,regime);
+    const mul=Math.max(0.45,Math.min(1.9,1+st.edge*0.35));
+    const score=cand[k]*mul;
     if(score>bestScore){bestScore=score;best=k;}
   });
   return{key:best,score:bestScore,structure:cand,levels:lv,regime};
@@ -3253,8 +3269,8 @@ function applyLearning(sim,auto){
   let counted=false;
   if(sim.outcome!=='no-fill'&&sim.outcome!=='open'){
     if(sim.win)mem.wins++; else mem.losses++;
-    mem.pnl+=sim.r; mem.conf=stratConf(key);
-    if(sim.regime){const rc=regimeCell(mem,sim.regime);if(sim.win)rc.wins++;else rc.losses++;rc.pnl+=sim.r;} // learn per regime
+    mem.pnl+=sim.r; mem.bars=(mem.bars||0)+(sim.bars||0); mem.conf=stratConf(key);   // track time-in-trade for efficiency
+    if(sim.regime){const rc=regimeCell(mem,sim.regime);if(sim.win)rc.wins++;else rc.losses++;rc.pnl+=sim.r;rc.bars=(rc.bars||0)+(sim.bars||0);} // learn per regime
     AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
     counted=true;
     if(SHARED_OK)postShared({key,win:sim.win,pnl:sim.r,tk:sim.tk,name:sim.lvl.name,dir:sim.dir});
@@ -3352,27 +3368,38 @@ function paintAutoStatus(){
 
 function renderAILearnStats(){
   const el=document.getElementById('aiLearnStats');if(!el)return;
-  const acc=AI_MEMORY.trials?Math.round(AI_MEMORY.wins/AI_MEMORY.trials*100):0;
-  const rows=Object.entries(AI_MEMORY.strats).map(([k,s])=>{
-    const n=s.wins+s.losses,conf=Math.round(stratConf(k)*100);
-    const w=n?Math.round(s.wins/n*100):0;
-    const exp=n?(s.pnl||0)/n:0;   // expectancy = average R per resolved trade
-    const col=conf>=60?'var(--gr)':conf>=45?'var(--at)':'var(--rd)';
+  const trials=AI_MEMORY.trials||0, wins=AI_MEMORY.wins||0, losses=trials-wins;
+  const winPct=trials?Math.round(wins/trials*100):0, lossPct=trials?100-winPct:0;
+  const totalR=Object.values(AI_MEMORY.strats).reduce((p,s)=>p+(s.pnl||0),0);
+  const expOverall=trials?totalR/trials:0;
+  // strategy rows sorted by LEARNED edge (best first), with efficiency (avg bars to resolve)
+  const data=Object.entries(AI_MEMORY.strats).map(([k,s])=>{
+    const n=(s.wins||0)+(s.losses||0), exp=n?(s.pnl||0)/n:0, w=n?Math.round(s.wins/n*100):0, avgB=(n&&s.bars)?s.bars/n:0;
+    return {k,name:s.name,n,exp,w,avgB,edge:stratStats(k).edge};
+  }).sort((a,b)=> (b.n?b.edge:-9) - (a.n?a.edge:-9));
+  const rows=data.map((d,idx)=>{
+    const col=d.exp>0.1?'var(--gr)':d.exp<-0.1?'var(--rd)':'var(--at)';
+    const barW=d.n?Math.max(4,Math.min(100,Math.round((d.exp+1)/2*100))):50;
+    const eff=d.avgB?`~${Math.round(d.avgB)}b`:'—';
     return `<div class="perf-row">
-      <div class="perf-row-name">${s.name}</div>
-      <div class="perf-bar"><div class="perf-bar-fill" style="width:${conf}%;background:${col}"></div></div>
-      <div class="perf-row-stat">${w}% win · ${n} tests · <span class="${exp>=0?'g':'r'}" title="Expectancy: average R won/lost per resolved trade">exp ${exp>=0?'+':''}${exp.toFixed(2)}R</span></div>
+      <div class="perf-row-name">${(idx===0&&d.n>=4)?'<span style="color:var(--at)">★</span> ':''}${d.name}</div>
+      <div class="perf-bar"><div class="perf-bar-fill" style="width:${barW}%;background:${col}"></div></div>
+      <div class="perf-row-stat">${d.w}% win · ${d.n}t · <span title="Avg bars to resolve — lower = more efficient">${eff}</span> · <span class="${d.exp>=0?'g':'r'}" title="Expectancy: average R per resolved trade">exp ${d.exp>=0?'+':''}${d.exp.toFixed(2)}R</span></div>
     </div>`;
   }).join('');
+  const best=data.find(d=>d.n>=4);
   el.innerHTML=`
     <div class="bt-scoreboard">
-      <div class="bt-score"><div class="bt-score-val">${AI_MEMORY.trials}</div><div class="bt-score-lbl">Self-tests</div></div>
-      <div class="bt-score"><div class="bt-score-val" style="color:var(--at)">${acc}%</div><div class="bt-score-lbl">AI accuracy</div></div>
-      <div class="bt-score"><div class="bt-score-val g">${AI_MEMORY.wins}</div><div class="bt-score-lbl">Wins</div></div>
-      <div class="bt-score"><div class="bt-score-val r">${AI_MEMORY.trials-AI_MEMORY.wins}</div><div class="bt-score-lbl">Losses</div></div>
+      <div class="bt-score"><div class="bt-score-val">${trials}</div><div class="bt-score-lbl">Trades resolved</div></div>
+      <div class="bt-score"><div class="bt-score-val g">${winPct}%</div><div class="bt-score-lbl">Win rate</div></div>
+      <div class="bt-score"><div class="bt-score-val r">${lossPct}%</div><div class="bt-score-lbl">Loss rate</div></div>
+      <div class="bt-score"><div class="bt-score-val ${expOverall>=0?'g':'r'}" title="Average R per trade — the real edge metric">${expOverall>=0?'+':''}${expOverall.toFixed(2)}R</div><div class="bt-score-lbl">Expectancy</div></div>
+      <div class="bt-score"><div class="bt-score-val ${totalR>=0?'g':'r'}">${totalR>=0?'+':''}${totalR.toFixed(1)}R</div><div class="bt-score-lbl">Net result</div></div>
     </div>
-    <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses STRATA — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>${regimeMatrixHTML()}`;
+    <div style="display:flex;height:11px;border-radius:99px;overflow:hidden;margin:0 0 6px;background:var(--s3)" title="${wins} wins · ${losses} losses">${winPct?`<div style="width:${winPct}%;background:var(--gr)"></div>`:''}${lossPct?`<div style="width:${lossPct}%;background:var(--rd)"></div>`:''}</div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);margin-bottom:18px"><span class="g">${wins} wins (${winPct}%)</span><span class="r">${losses} losses (${lossPct}%)</span></div>
+    <div class="card"><div class="card-title">Strategy leaderboard — best edge first</div>${rows}
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> (expectancy × how efficiently it resolves, in the regimes it's seen). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:''} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${regimeMatrixHTML()}`;
   renderAIConsole();
   paintAutoStatus();
 }

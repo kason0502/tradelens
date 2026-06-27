@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 16n) — remodel the self-learning engine for efficiency
+- **Learns by edge, not just win-rate.** New `stratStats(key,regime)` = expectancy (avg R) × trust (sample size) + an **efficiency** bonus (how fast it resolves — R per bar held; faster = better). `applyLearning` now tracks bars-held per strategy/regime.
+- **Selection leans harder on what works.** `classifySetup` reweights the structure-fit by the learned edge with a stronger range (~0.45×–1.9×, was 0.7–1.4) and uses the current-regime record — so proven, efficient strategies get deployed and chronic losers get suppressed.
+- **Explicit overall win/loss %** (requested): the AI Lab scoreboard now shows **Win rate / Loss rate / Expectancy / Net R** with a green-red **win/loss split bar** and counts. The per-strategy list became a **leaderboard ranked by learned edge** (★ best), each row showing win% · tests · **avg bars (efficiency)** · expectancy.
+- _Honest framing kept:_ win rate < 50% is fine — expectancy (R) is the real metric, and it drives selection.
+
 ## 2026-06-27 (session 16m) — levels on real structure (zones), not arbitrary numbers
 - **Stops & targets now sit on meaningful structure, not a random R-multiple.** New `findZones` (every swing high = supply/sell zone, every swing low = demand/buy zone) + `structureLevels(candles,dir,atr)`: the **stop goes just beyond the nearest swing/liquidity**, the **target at the next opposing supply/demand zone** that pays ≥1.8R (floored to keep reward > risk). R:R is now a *result of structure*, not forced.
 - **More context candles:** `structCandles` reads a wider, horizon-scaled window (e.g. ~55 bars for 1M, ~200 for 1Y, intraday for 0DTE) so the AI sees real S/R, not the last few bars.
