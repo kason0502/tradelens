@@ -3057,10 +3057,11 @@ function findZones(candles,look){
 }
 // Build entry/stop/targets from real structure for a given direction.
 // Returns the levels AND the zones (so the chart can shade them).
-function structureLevels(candles,dir,atrVal){
+function structureLevels(candles,dir,atrVal,cfg){
   const a=atrVal||atr(candles,14);
   const last=+candles[candles.length-1].c;
-  const z=findZones(candles), buf=a*0.45;
+  const stopBuf=(cfg&&cfg.stopBuf)||0.45, minRR=(cfg&&cfg.minRR)||2.0;   // learned construction params
+  const z=findZones(candles), buf=a*stopBuf;
   const cap=v=>+v.toFixed(2);
   if(dir==='long'){
     const lows=z.lows.map(p=>p.price).filter(p=>p<last-a*0.15).sort((x,y)=>y-x);   // demand zones below, nearest first
@@ -3068,10 +3069,10 @@ function structureLevels(candles,dir,atrVal){
     let risk=Math.max(a*0.6,Math.min(a*4,(last-base)+buf));                          // stop beyond the liquidity, sane size
     const sl=last-risk;
     const highs=z.highs.map(p=>p.price).filter(p=>p>last+a*0.15).sort((x,y)=>x-y);   // supply zones above, nearest first
-    let tp1=highs.find(p=>(p-last)>=risk*1.8);                                        // first supply that pays ≥1.8R
-    if(tp1==null)tp1=highs.length?highs[highs.length-1]:last+risk*2;
-    if((tp1-last)<risk*1.6)tp1=last+risk*2;                                           // floor so reward > risk
-    let tp2=highs.find(p=>(p-last)>=risk*3); if(tp2==null||tp2<=tp1)tp2=Math.max(last+risk*3.2,tp1+risk);
+    let tp1=highs.find(p=>(p-last)>=risk*minRR);                                      // first supply that pays ≥ minRR
+    if(tp1==null)tp1=highs.length?Math.max(highs[highs.length-1],last+risk*minRR):last+risk*minRR;
+    if((tp1-last)<risk*(minRR*0.9))tp1=last+risk*minRR;                               // floor at the learned min R:R
+    let tp2=highs.find(p=>(p-last)>=risk*(minRR+1.2)); if(tp2==null||tp2<=tp1)tp2=Math.max(last+risk*(minRR+1.4),tp1+risk);
     return{entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,
       zones:{buy:[cap(base-buf),cap(base+buf)],sell:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}};
   }else{
@@ -3080,10 +3081,10 @@ function structureLevels(candles,dir,atrVal){
     let risk=Math.max(a*0.6,Math.min(a*4,(base-last)+buf));
     const sl=last+risk;
     const lows=z.lows.map(p=>p.price).filter(p=>p<last-a*0.15).sort((x,y)=>y-x);     // demand zones below
-    let tp1=lows.find(p=>(last-p)>=risk*1.8);
-    if(tp1==null)tp1=lows.length?lows[lows.length-1]:last-risk*2;
-    if((last-tp1)<risk*1.6)tp1=last-risk*2;
-    let tp2=lows.find(p=>(last-p)>=risk*3); if(tp2==null||tp2>=tp1)tp2=Math.min(last-risk*3.2,tp1-risk);
+    let tp1=lows.find(p=>(last-p)>=risk*minRR);
+    if(tp1==null)tp1=lows.length?Math.min(lows[lows.length-1],last-risk*minRR):last-risk*minRR;
+    if((last-tp1)<risk*(minRR*0.9))tp1=last-risk*minRR;
+    let tp2=lows.find(p=>(last-p)>=risk*(minRR+1.2)); if(tp2==null||tp2>=tp1)tp2=Math.min(last-risk*(minRR+1.4),tp1-risk);
     return{entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,
       zones:{sell:[cap(base-buf),cap(base+buf)],buy:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}};
   }
@@ -3098,9 +3099,51 @@ function structureLevels(candles,dir,atrVal){
 const AI_MEMORY_KEY='tlpro_ai_memory_v1';
 let AI_MEMORY=loadAIMemory();
 function defaultMemory(){
-  const m={strats:{},trials:0,wins:0,log:[]};
+  const m={strats:{},trials:0,wins:0,log:[],params:defaultGenomes()};
   LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
   return m;
+}
+// ── EVOLVING TRADE-CONSTRUCTION PARAMETERS ───────────────────────────
+// The bot doesn't just pick among fixed strategies — it SEARCHES for the
+// most profitable way to build a trade: how far beyond liquidity to place
+// the stop (stopBuf × ATR) and the minimum reward:risk to demand of the
+// target (minRR). It tests variants on real data, keeps the best expectancy,
+// and mutates toward better ones. The winning construction drives the dashboard.
+function defaultGenomes(){
+  return {pop:[
+    {stopBuf:0.30,minRR:1.8,wins:0,losses:0,pnl:0,bars:0},
+    {stopBuf:0.45,minRR:2.2,wins:0,losses:0,pnl:0,bars:0},
+    {stopBuf:0.60,minRR:2.8,wins:0,losses:0,pnl:0,bars:0},
+    {stopBuf:0.45,minRR:3.4,wins:0,losses:0,pnl:0,bars:0},
+    {stopBuf:0.80,minRR:2.2,wins:0,losses:0,pnl:0,bars:0},
+    {stopBuf:0.25,minRR:2.5,wins:0,losses:0,pnl:0,bars:0}
+  ], evolves:0};
+}
+function ensureParams(){if(!AI_MEMORY.params||!Array.isArray(AI_MEMORY.params.pop)||!AI_MEMORY.params.pop.length)AI_MEMORY.params=defaultGenomes();return AI_MEMORY.params;}
+function genomeExp(g){const n=(g.wins||0)+(g.losses||0);if(!n)return 0;return ((g.pnl||0)/n)*Math.min(1,n/10);} // sample-shrunk expectancy
+function bestGenomeIdx(){
+  const pop=ensureParams().pop; let bi=-1,bs=-1e9;
+  pop.forEach((g,i)=>{const n=(g.wins||0)+(g.losses||0);const s=n>=5?genomeExp(g):-1e8;if(s>bs){bs=s;bi=i;}});
+  return bi>=0?bi:1;   // until something has a sample, use a sensible middle genome
+}
+function pickGenomeIdx(){
+  const pop=ensureParams().pop;
+  if(Math.random()<0.28)return Math.floor(Math.random()*pop.length);  // explore a variant
+  return bestGenomeIdx();                                              // exploit the best so far
+}
+function evolveGenomes(){
+  const P=ensureParams(), pop=P.pop;
+  const withN=pop.map((g,i)=>({i,n:(g.wins||0)+(g.losses||0),s:genomeExp(g)})).filter(x=>x.n>=5);
+  if(withN.length<3)return;
+  const best=withN.reduce((a,b)=>b.s>a.s?b:a), worst=withN.reduce((a,b)=>b.s<a.s?b:a);
+  if(worst.i===best.i)return;
+  const b=pop[best.i];   // breed a mutated child of the best into the worst slot
+  pop[worst.i]={
+    stopBuf:+Math.max(0.15,Math.min(1.3,b.stopBuf+(Math.random()-0.5)*0.3)).toFixed(2),
+    minRR:+Math.max(1.4,Math.min(4.2,b.minRR+(Math.random()-0.5)*0.8)).toFixed(2),
+    wins:0,losses:0,pnl:0,bars:0
+  };
+  P.evolves=(P.evolves||0)+1;
 }
 function loadAIMemory(){
   try{const raw=localStorage.getItem(AI_MEMORY_KEY);if(raw){const m=JSON.parse(raw);if(m&&m.strats){if(!Array.isArray(m.log))m.log=[];return m;}}}catch(e){}
@@ -3235,7 +3278,8 @@ function simulateSetup(tk,full,cut,q){
   const lvl=aiStrategyLevels(setup.key,win60);                      // strategy name/colour/direction
   const dir=lvl.dir;
   const structWin=histWin.slice(-120);                             // MORE context for reading real structure/zones
-  const SLv=structureLevels(structWin,dir,atr(structWin,14));      // stop beyond liquidity, target at the next zone
+  const gi=pickGenomeIdx(), cfg=ensureParams().pop[gi];            // pick a construction variant to test
+  const SLv=structureLevels(structWin,dir,atr(structWin,14),cfg);  // stop beyond liquidity, target at the next zone
   const entry=+SLv.entry, sl=+SLv.sl, tp1=+SLv.tp1;               // market entry at the decision close
   const risk=Math.max(0.01,Math.abs(entry-sl));
   const fwd=full.slice(cut+1);            // walk ALL remaining bars until the stop or target hits
@@ -3258,7 +3302,7 @@ function simulateSetup(tk,full,cut,q){
   const tail=histWin.slice(-45);
   const snapC=tail.concat(fwd.slice(0,45)).map(c=>({o:+(+c.o).toFixed(2),h:+(+c.h).toFixed(2),l:+(+c.l).toFixed(2),c:+(+c.c).toFixed(2)}));
   const snap={c:snapC,cut:tail.length-1};
-  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime,zones:SLv.zones};
+  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime,zones:SLv.zones,genomeIdx:gi,cfg};
 }
 // Fold one simulated trade into memory + the shared pool, recording the
 // confidence BEFORE→AFTER so the console can show what actually changed.
@@ -3271,7 +3315,9 @@ function applyLearning(sim,auto){
     if(sim.win)mem.wins++; else mem.losses++;
     mem.pnl+=sim.r; mem.bars=(mem.bars||0)+(sim.bars||0); mem.conf=stratConf(key);   // track time-in-trade for efficiency
     if(sim.regime){const rc=regimeCell(mem,sim.regime);if(sim.win)rc.wins++;else rc.losses++;rc.pnl+=sim.r;rc.bars=(rc.bars||0)+(sim.bars||0);} // learn per regime
+    if(sim.genomeIdx!=null){const g=ensureParams().pop[sim.genomeIdx];if(g){if(sim.win)g.wins++;else g.losses++;g.pnl+=sim.r;g.bars=(g.bars||0)+(sim.bars||0);}} // learn the construction params
     AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
+    if(AI_MEMORY.trials%25===0)evolveGenomes();   // breed a better construction every 25 resolved trades
     counted=true;
     if(SHARED_OK)postShared({key,win:sim.win,pnl:sim.r,tk:sim.tk,name:sim.lvl.name,dir:sim.dir});
   }
@@ -3399,9 +3445,28 @@ function renderAILearnStats(){
     <div style="display:flex;height:11px;border-radius:99px;overflow:hidden;margin:0 0 6px;background:var(--s3)" title="${wins} wins · ${losses} losses">${winPct?`<div style="width:${winPct}%;background:var(--gr)"></div>`:''}${lossPct?`<div style="width:${lossPct}%;background:var(--rd)"></div>`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);margin-bottom:18px"><span class="g">${wins} wins (${winPct}%)</span><span class="r">${losses} losses (${lossPct}%)</span></div>
     <div class="card"><div class="card-title">Strategy leaderboard — best edge first</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> (expectancy × how efficiently it resolves, in the regimes it's seen). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:''} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${regimeMatrixHTML()}`;
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> (expectancy × how efficiently it resolves, in the regimes it's seen). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:''} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${genomePanelHTML()}${regimeMatrixHTML()}`;
   renderAIConsole();
   paintAutoStatus();
+}
+// The evolving trade-construction parameters (stop buffer + min R:R).
+function genomePanelHTML(){
+  const P=ensureParams(), pop=P.pop, bi=bestGenomeIdx(), best=pop[bi];
+  const bn=(best.wins||0)+(best.losses||0), bexp=bn?(best.pnl||0)/bn:0;
+  const rows=pop.map((g,i)=>{
+    const n=(g.wins||0)+(g.losses||0), exp=n?(g.pnl||0)/n:0, col=exp>0.1?'var(--gr)':exp<-0.1?'var(--rd)':'var(--at)';
+    return `<div style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11.5px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="width:12px;color:var(--at)">${(i===bi&&n>=5)?'★':''}</span>
+      <span style="flex:1;color:var(--ink2)">stop ${g.stopBuf}×ATR · target ≥${g.minRR}R</span>
+      <span style="color:var(--ink3)">${n}t</span>
+      <span style="color:${col};font-weight:700;width:60px;text-align:right">${n?(exp>=0?'+':'')+exp.toFixed(2)+'R':'—'}</span>
+    </div>`;
+  }).join('');
+  return `<div class="card"><div class="card-title">How it builds the trade — learned by evolution</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:12px">Best construction found: <b style="color:var(--act)">stop ${best.stopBuf}× ATR beyond liquidity</b> · <b style="color:var(--act)">target ≥ ${best.minRR}R</b>${bn>=5?` → <span class="${bexp>=0?'g':'r'}">${bexp>=0?'+':''}${bexp.toFixed(2)}R</span> over ${bn} trades`:` (still gathering data)`}. Your dashboard uses this.</div>
+    ${rows}
+    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">It tests these <b>${pop.length} variants</b> of where to place the stop &amp; target, keeps the most profitable, and <b>mutates toward better ones</b> (${P.evolves||0} generations bred). This is the bot learning <i>how to trade</i> — not just which strategy to pick.</div>
+  </div>`;
 }
 // What each strategy has learned PER market regime (expectancy grid).
 function regimeMatrixHTML(){
@@ -4431,7 +4496,7 @@ async function renderDash(text){
       // target at the next real supply/demand zone — never an arbitrary number.
       try{
         const sc=structCandles(q), lastC=+sc[sc.length-1].c;
-        const SLv=structureLevels(sc,dir,atr(sc,14));
+        const SLv=structureLevels(sc,dir,atr(sc,14),ensureParams().pop[bestGenomeIdx()]);  // use the most profitable construction learned
         const shift=px-lastC;                       // re-anchor structure to the live price (predict from now)
         entry=px;
         sl=+(SLv.sl+shift).toFixed(2); tp1=+(SLv.tp1+shift).toFixed(2); tp2=+(SLv.tp2+shift).toFixed(2);

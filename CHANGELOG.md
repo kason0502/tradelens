@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 16o) — the bot learns HOW to trade (evolutionary params)
+- **It now tunes its own trade construction, not just which strategy to pick.** New genome layer (`AI_MEMORY.params.pop`): each genome is a `{stopBuf, minRR}` — how far beyond liquidity to place the stop (× ATR) and the minimum reward:risk to demand of the target. `structureLevels(...,cfg)` is parameterised by it.
+- **Online evolutionary search:** each self-test picks a variant (`pickGenomeIdx`, ε-greedy: ~28% explore / else exploit the best), grades it on real data, and updates that variant's expectancy. Every 25 resolved trades `evolveGenomes` replaces the worst variant with a **mutation of the best** — so the population converges toward the most profitable construction.
+- **The winning construction drives the dashboard** (`bestGenomeIdx` → `structureLevels`), so what it learns directly shapes your live entry/stop/target.
+- **Visible in AI Lab:** new "How it builds the trade — learned by evolution" panel shows the best construction found (e.g. "stop 0.45×ATR, target ≥2.8R → +0.37R") and the whole variant population with their expectancies + generations bred.
+
 ## 2026-06-27 (session 16n) — remodel the self-learning engine for efficiency
 - **Learns by edge, not just win-rate.** New `stratStats(key,regime)` = expectancy (avg R) × trust (sample size) + an **efficiency** bonus (how fast it resolves — R per bar held; faster = better). `applyLearning` now tracks bars-held per strategy/regime.
 - **Selection leans harder on what works.** `classifySetup` reweights the structure-fit by the learned edge with a stronger range (~0.45×–1.9×, was 0.7–1.4) and uses the current-regime record — so proven, efficient strategies get deployed and chronic losers get suppressed.
