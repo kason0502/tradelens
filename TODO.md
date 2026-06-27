@@ -1,7 +1,12 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-27 (session 18)
+> Last updated: 2026-06-27 (session 19)
+
+## Done (session 19 — dashboard ↔ AI Lab per-timeframe link)
+- [x] **Dashboard plan shows the AI Lab model driving it** — "AI Lab · {style} model" strip (tests, win%, edge, learned construction) + a "{style} style" header tag; Intraday/Swing/Position each pull their own learned model.
+- [x] **"Sharpen {model} ↗" button** (`cpTuneBucket`) — train the swing/position/intraday model from the dashboard in one click.
+- [x] **Swing vs Position differentiated** — per-bucket forward-holding cap (`FWD_CAP`) so each learns setups that resolve in its own horizon (were identical apart from the label).
 
 ## Done (session 18 — per-timeframe self-learning)
 - [x] **Self-learning is timeframe-aware** — Intraday / Swing / Position buckets, each with its own genome population + per-strategy edge (`byTF`). Intraday trains on real 5-/1-min data; swing/position on daily.
@@ -9,7 +14,7 @@
 - [x] **User chooses which timeframe to study** — AI Lab timeframe selector; per-bucket scoreboard/leaderboard/construction/recent-form; console tags each trade's timeframe; auto-learn rotates all three buckets.
 
 ## Next (per-timeframe follow-ups)
-- [ ] **Position bucket could read weekly bars** (currently daily, same as swing) for genuinely longer structure.
+- [ ] **Position bucket could read weekly bars** for longer structure — deferred: it adds a fetch per position render (rate-limit risk) and daily-over-~10-months is a decent proxy. The `FWD_CAP` split (session 19) already differentiates swing vs position cheaply.
 - [ ] **Shared-pool is still global per strategy** — `byTF` buckets are local-only. Extend `api/learn.js` to pool per-timeframe if cross-user intraday learning is wanted.
 - [ ] **Intraday training cost** — each intraday self-test is one `fetchBacktestSeries('5m')` call; if rate-limits bite, cache a few symbols' intraday series for the session.
 

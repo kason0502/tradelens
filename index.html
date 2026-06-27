@@ -934,6 +934,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lv-row .lt{font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:right;min-width:104px;white-space:nowrap}
 .lv-row.entry .lp{color:var(--act)}.lv-row.risk .lp{color:var(--rt)}.lv-row.rew .lp{color:var(--gt)}
 .dp-rr{font-size:12px;color:var(--ink3);font-family:var(--mono);line-height:1.65}
+.dp-ailab{display:flex;align-items:flex-start;gap:8px;margin-top:11px;padding:9px 11px;border:1px solid rgba(var(--ac-rgb),.22);background:rgba(var(--ac-rgb),.06);border-radius:9px;font-size:11.5px;color:var(--ink2);line-height:1.5}
+.dp-ailab-dot{width:7px;height:7px;border-radius:50%;background:var(--act);box-shadow:0 0 6px rgba(var(--ac-rgb),.7);flex-shrink:0;margin-top:4px}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .dp-fu{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:7px 13px;color:var(--ink2);background:transparent;cursor:pointer;transition:all .15s;font-family:inherit}
 .dp-fu:hover{border-color:rgba(var(--ac-rgb),.5);color:var(--act)}
@@ -3111,6 +3113,11 @@ const TF_BUCKETS=['intraday','swing','position'];
 const TF_LABEL={intraday:'Intraday',swing:'Swing',position:'Position'};
 const TF_SUB={intraday:'0DTE · 1-min',swing:'1W–1M',position:'3M–1Y'};
 function tfBucket(dte){ if(dte==='0dte')return 'intraday'; if(dte==='1w'||dte==='1m')return 'swing'; return 'position'; }
+// Max forward bars a self-test will hold before calling it "open" (unresolved).
+// This is what makes the buckets learn DIFFERENT things from the same data: a
+// swing setup only "wins" if it resolves in swing time (~weeks), a position
+// trade gets months. Without it, swing & position would be statistically equal.
+const FWD_CAP={intraday:130,swing:25,position:160};
 function defaultMemory(){
   const m={strats:{},trials:0,wins:0,log:[],params:defaultParams()};
   LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
@@ -3255,6 +3262,19 @@ function stratStats(key,regime,bucket){
   const edge=exp*trust + 0.25*effKicker;                          // the learned edge, per regime
   return{n,winRate,exp,avgBars,trust,edge};
 }
+// Roll-up of what the AI Lab has learned for ONE timeframe bucket — used to
+// show (and link) the bucket model's influence right on the dashboard.
+function tfBucketStats(bucket){
+  let trials=0,wins=0,pnl=0;
+  Object.values(AI_MEMORY.strats).forEach(s=>{const c=s.byTF&&s.byTF[bucket];if(c){trials+=(c.wins||0)+(c.losses||0);wins+=c.wins||0;pnl+=c.pnl||0;}});
+  const g=ensureParams(bucket).pop[bestGenomeIdx(bucket)];
+  const gN=(g.wins||0)+(g.losses||0), gExp=gN?(g.pnl||0)/gN:0;
+  return {trials,wins,winPct:trials?Math.round(wins/trials*100):0,exp:trials?pnl/trials:0,best:g,gExp,gN};
+}
+// Jump to the AI Lab focused on a timeframe bucket and start sharpening it —
+// lets you improve the swing/position (or intraday) model that drives the
+// dashboard plan you're looking at, in one click.
+function cpTuneBucket(b){ window.aiLabBucket=b; mainTab('ailab'); setTimeout(()=>{try{aiSelfBacktest(12,b);}catch(e){}},160); }
 
 // Decide which strategy fits the current chart, by structure + learned confidence.
 function classifySetup(candles,a,bucket){
@@ -3308,8 +3328,9 @@ function aiStrategyLevels(key,candles){
 // ── Simulate a setup on REAL forward data (does target or stop hit first?) ──
 // This is what makes the learning real rather than a coin-flip on direction:
 // the strategy's actual entry/stop/target are walked forward bar-by-bar.
-function simulateSetup(tk,full,cut,q,bucket){
+function simulateSetup(tk,full,cut,q,bucket,maxFwd){
   bucket=bucket||'swing';
+  const fwdCap=maxFwd||FWD_CAP[bucket]||1e9;   // hold window matched to the timeframe
   const histWin=full.slice(0,cut+1);
   const win60=histWin.slice(-60);
   const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
@@ -3321,9 +3342,9 @@ function simulateSetup(tk,full,cut,q,bucket){
   const SLv=structureLevels(structWin,dir,atr(structWin,14),cfg);  // stop beyond liquidity, target at the next zone
   const entry=+SLv.entry, sl=+SLv.sl, tp1=+SLv.tp1;               // market entry at the decision close
   const risk=Math.max(0.01,Math.abs(entry-sl));
-  const fwd=full.slice(cut+1);            // walk ALL remaining bars until the stop or target hits
+  const fwd=full.slice(cut+1);            // walk forward bars until the stop or target hits (capped to the timeframe)
   let outcome=null, exitR=0, bars=0;
-  for(let k=0;k<fwd.length;k++){
+  for(let k=0;k<fwd.length&&k<fwdCap;k++){
     const c=fwd[k]; bars=k+1;
     // stop is checked before target so an intrabar tie resolves to the loss (conservative)
     if(dir==='long'){
@@ -4647,6 +4668,11 @@ async function renderDash(text){
     const rr=riskAbs>0?(rewAbs/riskAbs).toFixed(1):'–';
     const hzLabel={'0dte':'Intraday','1w':'1 Week','1m':'1 Month','3m':'3 Month','6m':'6 Month','1y':'1 Year'}[currentDTE]||currentDTE.toUpperCase();
     const verdict=isNeutral?`No clear edge on ${ticker} — wait for direction.`:`${isShort?'Short':'Long'} setup · ${convPct}% conviction`;
+    // ── AI LAB INFLUENCE: show (and link) the timeframe model driving this plan ──
+    const bs=tfBucketStats(bucket);
+    const constr=`stop ${bs.best.stopBuf}×ATR · target ≥${bs.best.minRR}R`;
+    const aiLabLine=`<div class="dp-ailab" title="The AI Lab learns each timeframe separately and tunes the stop/target construction. This plan uses the ${TF_LABEL[bucket]} model.">
+        <span class="dp-ailab-dot"></span><span><b style="color:var(--act)">AI Lab · ${TF_LABEL[bucket]} model</b> ${bs.trials>=4?`— ${bs.trials} self-tests, ${bs.winPct}% win, <b class="${bs.exp>=0?'g':'r'}">${bs.exp>=0?'+':''}${bs.exp.toFixed(2)}R</b> edge`:`— still learning (${bs.trials} test${bs.trials===1?'':'s'})`} · ${constr}</span></div>`;
     const planBody=isNeutral
       ? `<div class="dash-rationale">Mixed signals — no setup until price clears <b>$${a.hi20}</b> (breakout) or <b>$${a.lo20}</b> (breakdown).</div>`
       : `<div class="lv-table">
@@ -4654,7 +4680,8 @@ async function renderDash(text){
           <div class="lv-row risk"><div class="lk">${isShort?'Stop · cover':'Stop'}${zsub(isShort?'above the swing high (liquidity)':'below the swing low (liquidity)')}</div><div class="lp">$${sl.toFixed(2)}</div><div class="lt">${pctOf(sl)} · ${dollarOf(sl)}</div></div>
           <div class="lv-row rew"><div class="lk">Target${zsub(isShort?'prior support / demand zone':'prior resistance / supply zone')}</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
         </div>
-        <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>`;
+        <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>
+        ${aiLabLine}`;
     // ── PREDICTION CHART (full-width left column, readable) ──
     // Chart the SAME window the levels were read from, so the picture matches
     // the plan (never fall back to a full year of daily bars on a short trade).
@@ -4670,12 +4697,13 @@ async function renderDash(text){
       if(pred)pred.innerHTML=`<div class="dp-h">AI prediction <span class="tag">${isShort?'Short':'Long'} · ${hzLabel}</span>${tfNote} <span class="tag">from current price</span></div>${predictChartSVG(chartCand,{tk:ticker,dir:isShort?'short':'long',entryP:entry,sl,tp1,zones:dashZones})}`;
     }
     dashEl('dashPlan').innerHTML=`
-      <div class="dp-h">Trade plan <span class="tag">${hzLabel} horizon</span></div>
+      <div class="dp-h">Trade plan <span class="tag">${hzLabel} · ${TF_LABEL[bucket]} style</span></div>
       <div class="dash-verdict ${sentClass}">${verdict}</div>
       ${planBody}
       <div class="dp-actions">
         ${isNeutral?'':`<button class="dp-fu" onclick="trackSetup()" style="border-color:rgba(var(--ac-rgb),.5);color:var(--act)">+ Track this setup</button>`}
         ${isNeutral?'':`<button class="dp-fu" onclick="cpExplainStop()">Why this stop?</button>`}
+        <button class="dp-fu" onclick="cpTuneBucket('${bucket}')" title="Train the ${TF_LABEL[bucket]} model in the AI Lab — it sharpens this plan">Sharpen ${TF_LABEL[bucket]} model ↗</button>
         <button class="dp-fu" onclick="cpBacktest('${ticker}')">Backtest this</button>
         <button class="dp-fu" onclick="cpAIdeep('${ticker}')">Deeper AI read ↗</button>
       </div>`;

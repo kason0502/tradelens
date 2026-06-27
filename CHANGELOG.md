@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 19) — dashboard shows (and tunes) the timeframe model
+- **The AI Lab's influence is now visible on the dashboard plan.** Each Trade Plan shows an **"AI Lab · {Intraday/Swing/Position} model"** strip — the self-tests run, win%, R-edge, and the learned construction (stop ×ATR · target ≥R) driving that exact plan — plus a **"{style} style"** tag in the header. So you can see that picking 1W/1M (Swing) or 3M–1Y (Position) pulls a *different learned model*.
+- **One-click "Sharpen {model} ↗"** on the plan (`cpTuneBucket`) jumps to the AI Lab focused on that bucket and starts training it — so you can improve the swing/position (or intraday) model that powers the plan you're looking at, right from the dashboard.
+- **Swing and Position now learn genuinely different things** from the same daily data: a per-bucket **forward-holding cap** (`FWD_CAP` — intraday 130 bars, swing 25, position 160) means a setup only counts as a win if it resolves *within that timeframe's horizon* (else it's logged "open", uncounted). Previously the two buckets were statistically identical apart from their label.
+
 ## 2026-06-27 (session 18) — per-timeframe self-learning (intraday vs swing vs position)
 - **The AI now learns each timeframe SEPARATELY and improves shorter *and* longer setups.** New timeframe buckets (`tfBucket`): **Intraday** (0DTE), **Swing** (1W/1M), **Position** (3M/1Y). Each bucket has its **own evolutionary genome population** (`AI_MEMORY.params` is now `{intraday,swing,position}`) and its **own per-strategy edge** (`strats[k].byTF[bucket]`, mirroring `byRegime`). `stratStats`/`stratConf`/`classifySetup` prefer the bucket's record once sampled.
 - **Intraday actually trains on intraday data.** `tfTrainData` fetches **real 5-min (fallback 1-min) bars** for the intraday bucket and daily history for swing/position — so what the AI learns matches the timeframe it powers (closes the session-17 gap). `simulateSetup`/`applyLearning` thread the bucket through; evolution breeds a better construction every 25 resolved trades *per bucket*.

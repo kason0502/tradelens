@@ -1,7 +1,9 @@
 # TradeLens Pro — Architecture
 
 > Living doc. Update when structure, key functions, or data flow change.
-> Last updated: 2026-06-27 (session 18)
+> Last updated: 2026-06-27 (session 19)
+
+**Dashboard ↔ AI Lab link (session 19):** `renderDash` renders an "AI Lab · {bucket} model" influence strip in the Trade Plan from `tfBucketStats(bucket)` (per-bucket trials/win%/exp + the best genome's construction) and a "{style} style" header tag; `cpTuneBucket(bucket)` jumps to the AI Lab focused on that bucket and starts training it. Self-test outcomes are bucket-differentiated by `FWD_CAP` (max forward hold bars: intraday 130 / swing 25 / position 160) passed through `simulateSetup(...,maxFwd)` — a setup that doesn't resolve within its timeframe is logged "open" (uncounted), so swing and position learn distinct edges from the same daily series.
 
 **Per-timeframe learning (session 18):** the self-learning engine is partitioned into 3 **timeframe buckets** — `intraday` (0DTE), `swing` (1W/1M), `position` (3M/1Y) via `tfBucket(currentDTE)`. `AI_MEMORY.params` is now `{intraday,swing,position}` (each a genome `{pop,evolves,n}`); strategy edge is bucketed in `strats[k].byTF[bucket]` (mirrors `byRegime`). Bucket-aware fns: `ensureParams(bucket)`, `bestGenomeIdx(bucket)`, `pickGenomeIdx(bucket)`, `evolveGenomes(bucket)`, `stratStats(key,regime,bucket)`, `stratConf(key,bucket)`, `classifySetup(candles,a,bucket)`, `simulateSetup(...,bucket)`, `tfCell(s,bucket)`. **Training data per bucket:** `tfTrainData(tk,bucket)` fetches real intraday 5-/1-min bars (`fetchBacktestSeries`) for `intraday`, daily history for swing/position. `aiSelfBacktest(rounds,bucket)` trains the AI-Lab-selected bucket; `aiAutoLearnOnce` rotates all three. `renderDash` reads `tfBucket(currentDTE)`'s genome + confidence. AI Lab UI: `setAILabBucket`/`window.aiLabBucket` drives a per-bucket scoreboard/leaderboard/`genomePanelHTML(bucket)`; regime matrix stays global. Old single-pop memory migrates into `swing` on load. Shared pool (`api/learn.js`) is still global per strategy.
 
