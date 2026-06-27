@@ -63,6 +63,41 @@ def run_demo(cfg: dict):
     return trades, mt, fr, True
 
 
+def _check(cfg: dict, day_str: str):
+    import datetime as dt
+    prov = providers.get_provider(cfg)
+    if not hasattr(prov, "diagnose"):
+        print("[check] The configured provider has no diagnose(); only Polygon does.")
+        return
+    day = dt.date.fromisoformat(day_str)
+    print(f"\nProbing your Polygon entitlements on {day_str}…\n" + "-" * 60)
+    res = prov.diagnose(day)
+    for label, r in res.items():
+        mark = "OK " if r["ok"] else "NO "
+        line = f"  [{mark}] {label}"
+        if not r["ok"]:
+            line += f"  (status {r['status']}: {r['msg']})"
+        print(line)
+    print("-" * 60)
+    stocks = res.get("Stocks minute bars (underlying SPY)", {}).get("ok")
+    quotes = res.get(next((k for k in res if k.startswith("Options QUOTES")), ""), {}).get("ok")
+    print("\nWhat this means:")
+    if quotes and stocks:
+        print("  ✅ You have BOTH the underlying bars and options quotes — run it for real:")
+        print("     py run_backtest.py --start 2024-05-15")
+    elif quotes and not stocks:
+        print("  ⚠ You have OPTIONS QUOTES but NOT the underlying SPY stock bars.")
+        print("     The structure strategy needs the underlying price. Two fixes:")
+        print("       (A) add a Polygon STOCKS plan (cheapest fix), or")
+        print("       (B) reconstruct the underlying from your option quotes via put-call")
+        print("           parity (no extra cost; approximate). Ask and I'll enable it.")
+    elif not quotes:
+        print("  ✕ Your plan does NOT include options QUOTES (bid/ask). Honest fill modeling")
+        print("    is impossible without them — the engine will not fake bid/ask. You'd need")
+        print("    a Polygon options tier that includes quotes.")
+    print()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="config.json")
@@ -70,9 +105,13 @@ def main():
     ap.add_argument("--start", help="override start date, e.g. 2024-05-15")
     ap.add_argument("--end", help="override end date (omit = same as --start, i.e. one day)")
     ap.add_argument("--symbol", help="override symbol, e.g. SPY")
+    ap.add_argument("--check", action="store_true", help="probe what your Polygon key can access, then exit")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
+    if args.check:
+        _check(cfg, args.start or "2024-05-15")
+        return
     # Command-line overrides so you never have to hand-edit config.json.
     if args.start:
         cfg["start_date"] = args.start

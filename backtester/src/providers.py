@@ -199,6 +199,48 @@ class PolygonProvider(BaseProvider):
             return r.json()
         raise RuntimeError("Polygon kept returning 429 (rate limit). Slow down or upgrade tier.")
 
+    def diagnose(self, day: dt.date) -> dict:
+        """Probe what this API key is actually entitled to (no exceptions raised)."""
+        ds = day.strftime("%Y-%m-%d")
+        out = {}
+
+        def probe(label, url, params=None):
+            full = url if url.startswith("http") else self.BASE + url
+            try:
+                r = self.s.get(full, params=params, timeout=30)
+                ok = r.status_code == 200
+                msg = ""
+                if not ok:
+                    try:
+                        msg = r.json().get("message", "")[:140]
+                    except Exception:
+                        msg = r.text[:140]
+                out[label] = {"ok": ok, "status": r.status_code, "msg": msg}
+                return r
+            except Exception as e:
+                out[label] = {"ok": False, "status": "ERR", "msg": str(e)[:140]}
+                return None
+
+        probe("Stocks minute bars (underlying SPY)",
+              f"/v2/aggs/ticker/{self.symbol}/range/1/minute/{ds}/{ds}", {"limit": 1})
+        rc = probe("Options contracts list (0DTE calls)", "/v3/reference/options/contracts",
+                   {"underlying_ticker": self.symbol, "expiration_date": ds,
+                    "contract_type": "call", "expired": "true", "limit": 1})
+        tk = None
+        try:
+            if rc is not None and rc.status_code == 200:
+                res = rc.json().get("results", [])
+                if res:
+                    tk = res[0]["ticker"]
+        except Exception:
+            pass
+        if tk:
+            probe(f"Options QUOTES bid/ask ({tk})", f"/v3/quotes/{tk}", {"limit": 1})
+        else:
+            out["Options QUOTES bid/ask"] = {"ok": False, "status": "-",
+                                             "msg": "couldn't list a contract to test (reference call failed)"}
+        return out
+
     def load_underlying(self, day: dt.date) -> pd.DataFrame:
         ds = day.strftime("%Y-%m-%d")
         j = self._get(f"/v2/aggs/ticker/{self.symbol}/range/1/minute/{ds}/{ds}",
