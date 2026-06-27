@@ -155,10 +155,149 @@ class ThetaDataProvider(BaseProvider):
         return base + pd.to_timedelta(raw["ms_of_day"].astype("int64"), unit="ms")
 
 
+class PolygonProvider(BaseProvider):
+    """
+    Polygon.io adapter.
+
+    HONEST LIMITS (read these):
+      * Polygon gives REAL NBBO bid/ask via /v3/quotes (tick-level) — requires an
+        Options tier that includes QUOTES. If your plan only has trade aggregates,
+        load_options ABORTS rather than faking bid/ask from trades.
+      * Polygon does NOT serve historical greeks (delta/gamma/theta are live-snapshot
+        only). So this provider returns greeks = NaN and the strategy must select by
+        nearest-ATM strike (set strategy.contract_selection = "nearest_atm"). We never
+        invent greeks.
+
+    To stay tractable we only pull quotes for strikes within `strike_window` of the
+    opening ATM (a 0DTE call chain is huge); that's fine for an ATM strategy.
+    """
+    BASE = "https://api.polygon.io"
+
+    def __init__(self, cfg: dict):
+        super().__init__(cfg)
+        import os
+        pc = cfg["data"].get("polygon", {})
+        self.key = os.environ.get(pc.get("api_key_env", "POLYGON_API_KEY")) or pc.get("api_key")
+        if not self.key:
+            raise RuntimeError(
+                "No Polygon API key. Set the POLYGON_API_KEY environment variable "
+                "(preferred — keeps it out of the committed config) or data.polygon.api_key."
+            )
+        self.window = pc.get("strike_window", 8)
+        self.s = requests.Session()
+        self.s.headers.update({"Authorization": f"Bearer {self.key}"})
+
+    def _get(self, url: str, params: dict | None = None):
+        import time
+        full = url if url.startswith("http") else self.BASE + url
+        for attempt in range(6):
+            r = self.s.get(full, params=params, timeout=60)
+            if r.status_code == 429:                       # rate limited — back off
+                time.sleep(1.5 * (attempt + 1)); continue
+            if r.status_code != 200:
+                raise RuntimeError(f"Polygon {url} -> {r.status_code}: {r.text[:200]}")
+            return r.json()
+        raise RuntimeError("Polygon kept returning 429 (rate limit). Slow down or upgrade tier.")
+
+    def load_underlying(self, day: dt.date) -> pd.DataFrame:
+        ds = day.strftime("%Y-%m-%d")
+        j = self._get(f"/v2/aggs/ticker/{self.symbol}/range/1/minute/{ds}/{ds}",
+                      {"adjusted": "true", "sort": "asc", "limit": 50000})
+        res = j.get("results") or []
+        if not res:
+            raise RuntimeError(f"No {self.symbol} minute bars for {ds} (non-trading day or entitlement).")
+        ts = pd.to_datetime([r["t"] for r in res], unit="ms", utc=True).tz_convert(self.tz)
+        df = pd.DataFrame({
+            "ts": ts,
+            "open": [r["o"] for r in res], "high": [r["h"] for r in res],
+            "low": [r["l"] for r in res], "close": [r["c"] for r in res],
+        })
+        # regular session only
+        df = df[(df["ts"].dt.time >= dt.time(9, 30)) & (df["ts"].dt.time <= dt.time(16, 0))]
+        return df.reset_index(drop=True)
+
+    def _list_calls(self, day: dt.date, atm: float):
+        ds = day.strftime("%Y-%m-%d")
+        params = {
+            "underlying_ticker": self.symbol, "expiration_date": ds, "contract_type": "call",
+            "strike_price.gte": atm - self.window, "strike_price.lte": atm + self.window,
+            "expired": "true", "limit": 1000,
+        }
+        j = self._get("/v3/reference/options/contracts", params)
+        out = []
+        while True:
+            for c in j.get("results", []):
+                out.append({"ticker": c["ticker"], "strike": float(c["strike_price"])})
+            nxt = j.get("next_url")
+            if not nxt:
+                break
+            j = self._get(nxt)
+        return out
+
+    def _minute_quotes(self, opt_ticker: str, day: dt.date):
+        start = pd.Timestamp(day, tz=self.tz) + pd.Timedelta(hours=9, minutes=30)
+        end = pd.Timestamp(day, tz=self.tz) + pd.Timedelta(hours=16)
+        params = {
+            "timestamp.gte": int(start.value), "timestamp.lte": int(end.value),  # nanoseconds, UTC
+            "order": "asc", "limit": 50000,
+        }
+        rows = []
+        j = self._get(f"/v3/quotes/{opt_ticker}", params)
+        while True:
+            for q in j.get("results", []):
+                rows.append((q.get("sip_timestamp"), q.get("bid_price"), q.get("ask_price")))
+            nxt = j.get("next_url")
+            if not nxt:
+                break
+            j = self._get(nxt)
+        if not rows:
+            return None
+        qdf = pd.DataFrame(rows, columns=["ns", "bid", "ask"]).dropna()
+        if qdf.empty:
+            return None
+        qts = pd.to_datetime(qdf["ns"], unit="ns", utc=True).dt.tz_convert(self.tz)
+        qdf["ts"] = qts.dt.floor("min")
+        last = qdf.sort_values("ns").groupby("ts", as_index=False).tail(1)  # last quote in each minute
+        return last[["ts", "bid", "ask"]]
+
+    def load_options(self, day: dt.date) -> pd.DataFrame:
+        und = self.load_underlying(day)
+        if und.empty:
+            return pd.DataFrame()
+        atm = round(float(und["close"].iloc[0]))
+        contracts = self._list_calls(day, atm)
+        if not contracts:
+            raise RuntimeError(f"No 0DTE call contracts listed for {self.symbol} {day}.")
+        umap = dict(zip(und["ts"], und["close"]))
+        frames = []
+        for c in contracts:
+            qm = self._minute_quotes(c["ticker"], day)
+            if qm is None or qm.empty:
+                continue
+            qm = qm.copy()
+            qm["expiration"] = day
+            qm["strike"] = c["strike"]
+            qm["type"] = "C"
+            qm["underlying_price"] = qm["ts"].map(umap)
+            qm["delta"] = float("nan")   # Polygon has no historical greeks — NOT estimated
+            qm["gamma"] = float("nan")
+            qm["theta"] = float("nan")
+            frames.append(qm)
+        if not frames:
+            raise RuntimeError(
+                f"No NBBO quotes returned for {self.symbol} 0DTE on {day}. Your Polygon plan most "
+                "likely lacks OPTIONS QUOTES (NBBO) — it only has trade aggregates. The engine will "
+                "NOT fabricate bid/ask from trades. Upgrade to an Options tier that includes quotes."
+            )
+        return pd.concat(frames, ignore_index=True)
+
+
 def get_provider(cfg: dict) -> BaseProvider:
     name = cfg["data"]["provider"]
     if name == "thetadata":
         return ThetaDataProvider(cfg)
+    if name == "polygon":
+        return PolygonProvider(cfg)
     if name == "local":
         return LocalFileProvider(cfg)
     raise ValueError(f"Unknown data provider '{name}'. See config.json data.provider.")

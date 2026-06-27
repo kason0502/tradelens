@@ -7,8 +7,13 @@
   "timezone": "America/New_York",
 
   "data": {
-    "provider": "thetadata",
-    "_provider_options": ["thetadata", "local"],
+    "provider": "polygon",
+    "_provider_options": ["polygon", "thetadata", "local"],
+    "polygon": {
+      "api_key_env": "POLYGON_API_KEY",
+      "strike_window": 8,
+      "_note": "Set POLYGON_API_KEY as an environment variable (do NOT paste the key here / into git). Needs an Options tier that includes QUOTES (NBBO). No historical greeks on Polygon, so use contract_selection='nearest_atm'."
+    },
     "thetadata": {
       "base_url": "http://127.0.0.1:25510",
       "_note": "Theta Terminal must be running and logged in. Greeks require a tier that exposes them; if not, the run ABORTS rather than estimating them."
@@ -26,8 +31,11 @@
     "require_retest": true,
     "retest_tolerance_pct": 0.05,
     "direction": "long_call",
+    "contract_selection": "nearest_atm",
+    "_contract_selection_options": ["nearest_atm", "target_delta"],
     "target_delta": 0.45,
     "delta_tolerance": 0.15,
+    "_delta_note": "target_delta only used when contract_selection='target_delta' (needs a feed WITH historical greeks, e.g. ThetaData). Polygon has none -> use nearest_atm.",
     "take_profit_pct": 40,
     "stop_rule": "close_back_below_level",
     "eod_exit_minute": "15:55",

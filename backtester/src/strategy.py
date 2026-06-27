@@ -83,9 +83,10 @@ def select_contract(chain_now: pd.DataFrame, underlying_px: float, cfg: dict):
     calls = chain_now[chain_now["type"] == "C"].copy()
     if calls.empty:
         return None
+    selection = cfg.get("contract_selection", "target_delta")
     target = cfg.get("target_delta", 0.45)
     tol = cfg.get("delta_tolerance", 0.15)
-    if "delta" in calls.columns and calls["delta"].notna().any():
+    if selection == "target_delta" and "delta" in calls.columns and calls["delta"].notna().any():
         calls["score"] = (calls["delta"] - target).abs()
         calls = calls[calls["score"] <= tol] if tol else calls
         if calls.empty:

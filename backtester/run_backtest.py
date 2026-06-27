@@ -25,8 +25,9 @@ def load_config(path: str) -> dict:
 
 def run_real(cfg: dict):
     provider = providers.get_provider(cfg)
-    uses_delta = cfg["strategy"].get("target_delta") is not None and \
-        cfg["strategy"].get("delta_tolerance") is not None
+    # Only require greeks when the strategy actually selects by delta. Polygon has
+    # no historical greeks, so it runs with contract_selection='nearest_atm'.
+    uses_delta = cfg["strategy"].get("contract_selection", "target_delta") == "target_delta"
 
     # Validate the FIRST available trading day's data up front, so schema problems
     # fail fast and loudly instead of silently producing a thin/empty backtest.

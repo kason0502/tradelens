@@ -80,8 +80,18 @@ option **greeks**; if it doesn't, the run **aborts** (it will not invent delta).
 > The bullet-proof path is `LocalFileProvider`: download to CSV/Parquet matching
 > the schema in `src/schema.py` and set `data.provider: "local"`.
 
-Polygon.io / Databento drop in by subclassing `BaseProvider` and normalizing to
-the same schema.
+### Polygon.io (`PolygonProvider`)
+Set `data.provider: "polygon"` and export your key: `setx POLYGON_API_KEY "..."`
+(re-open the shell). Honest limits:
+- Real **NBBO bid/ask** via `/v3/quotes` — needs an **Options tier that includes
+  quotes** (not just trade aggregates). If you only have aggregates, the run
+  **aborts** (it won't fake bid/ask from trades).
+- **No historical greeks** on Polygon — so set `strategy.contract_selection:
+  "nearest_atm"` (strike-based). Greeks are never invented.
+- It pulls quotes only for strikes within `data.polygon.strike_window` of the
+  opening ATM (a full 0DTE chain is huge); fine for an ATM strategy.
+
+Databento drops in the same way by subclassing `BaseProvider`.
 
 ### What breaks if a field is missing (we never estimate)
 - `bid`/`ask` → **abort** (every fill would be fiction).

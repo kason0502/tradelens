@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 24) — Polygon.io provider for the 0DTE backtester
+- **Added `PolygonProvider`** (`backtester/src/providers.py`): real NBBO bid/ask via `/v3/quotes` (minute-resampled), underlying minute bars via `/v2/aggs`, 0DTE call contracts via `/v3/reference/options/contracts` (strikes within `strike_window` of the opening ATM). API key from `POLYGON_API_KEY` env var.
+- **Honest limits enforced:** Polygon has **no historical greeks**, so config uses `strategy.contract_selection: "nearest_atm"` (strike-based, greeks never invented); and if the plan lacks **options QUOTES** entitlement (aggregates only) the run **aborts** rather than faking bid/ask. New `contract_selection` knob honored by `select_contract` + the schema's delta requirement.
+- config.json default provider switched to `polygon`.
+
 ## 2026-06-27 (session 23) — 0DTE options backtester (standalone Python) + STRATA 0DTE Lab
 - **New standalone Python engine in `/backtester`** — an honesty-first intraday 0DTE options backtester. Pessimistic by design: **buy at ask / sell at bid (never mid)**, extra per-contract slippage both legs, $0.65/leg commission, **wide-spread skip** (or explicit `take_worse`). Strict **no-look-ahead** (asof quotes `ts<=` bar, every risk spot marked `# LOOKAHEAD-GUARD`) and **next-bar execution**.
 - **Swappable modules:** `schema.py` (validates data; tells you exactly what breaks per missing field — never estimates), `providers.py` (ThetaData adapter + generic local CSV/Parquet + `BaseProvider`), `strategy.py` (structure / entry / exit / contract-selection — SPY 0DTE ORB first), `fills.py`, `engine.py`, `metrics.py`, `fragility.py`, `report.py`, `run_backtest.py`, `demo_data.py` (labelled synthetic), `tests/` (fill-math + no-look-ahead).
