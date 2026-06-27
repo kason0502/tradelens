@@ -7,7 +7,7 @@
   "timezone": "America/New_York",
 
   "data": {
-    "provider": "polygon",
+    "provider": "thetadata",
     "_provider_options": ["polygon", "thetadata", "local"],
     "polygon": {
       "api_key_env": "POLYGON_API_KEY",
