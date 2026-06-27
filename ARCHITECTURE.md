@@ -1,7 +1,9 @@
 # TradeLens Pro — Architecture
 
 > Living doc. Update when structure, key functions, or data flow change.
-> Last updated: 2026-06-27 (session 20)
+> Last updated: 2026-06-27 (session 21)
+
+**Structure-anchored levels (session 21):** `structurePivots(candles)` merges swing pivots at look=2 (major) + look=1 (minor) → nearby real levels. `structureLevels(candles,dir,atr,cfg,band)` places the stop just beyond a real liquidity pivot and the target at a real opposing supply/demand pivot paying ≥ learned minRR; prefers a real pivot that also fits `band` ([minPct,maxPct] of price); falls back to an R-multiple only when no pivot qualifies and returns `slStruct`/`tpStruct` flags (+`base`). `renderDash` passes `HZ_RISK[currentDTE]` as the band and only runs `clampLevels` when a level isn't on structure or is wildly wide (>1.8×band max) — otherwise real levels are kept exactly; it tracks `dashSlStruct`/`dashTpStruct` to label the plan ("real liquidity"/"real structure" vs "fitted to the horizon"). Probability/EV (session 20) is a separate scoring layer and never moves the levels. Self-tests call `structureLevels` without a band (pure structure + a 5×ATR safety cap).
 
 **Probabilistic edge engine (session 20):** `AI_MEMORY.model[bucket]` = `{w[7],b,n,brierSum,brierN}`, an online logistic-regression win-probability model per timeframe. `setupFeatures(o)` builds a 7-dim direction-relative feature vector (with-trend, price-vs-MA, RSI, Bollinger, R:R ambition, volatility, high-vol regime) from `analyze` output; `modelProb`/`_sigmoid` predict, `trainModel` does one SGD step (lr .06, L2 .001) + folds the pre-update prediction into the Brier score, `winProb(bucket,feat,baseRate)` blends model↔strategy-base-rate by `min(1,n/40)`, `edgeFromProb(p,rr)` → `{ev,kelly,sizePct}` (¼-Kelly, capped 20%). `simulateSetup` computes `feat`+`pPred` at the decision; `applyLearning` calls `trainModel` on resolved trades. `renderDash` shows the **edge block** (EV / win% / size + verdict) from `winProb`/`edgeFromProb`; `modelPanelHTML(bucket)` renders Brier + sorted factor weights (`FEATURE_LABELS`) in the AI Lab. Created lazily for old saved memory.
 

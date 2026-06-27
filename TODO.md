@@ -1,7 +1,12 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-27 (session 20)
+> Last updated: 2026-06-27 (session 21)
+
+## Done (session 21 — stops/targets on real structure)
+- [x] **Rebuilt `structureLevels`** to anchor stop/target on genuine pivots (`structurePivots`, 2 scales), prefer real structure over arithmetic, honor the horizon band by *choosing among real pivots*, and **flag** when a level isn't on structure.
+- [x] **Clamp is now last-resort** — only scales when a level isn't a real pivot (or is wildly wide); real structural levels are left exactly in place.
+- [x] **Plan labels say where levels come from** ("real liquidity" / "real structure" / honest "fitted to the horizon") + comments clarify probability/EV never moves the levels.
 
 ## Done (session 20 — probabilistic edge engine)
 - [x] **Online logistic win-probability model per timeframe** (`AI_MEMORY.model[bucket]`) trained from every self-test on a real-indicator feature vector; direction-relative so one model serves longs/shorts.

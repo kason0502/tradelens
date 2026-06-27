@@ -942,6 +942,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .edge-l{font-size:9.5px;color:var(--ink3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
 .dp-edge-note{font-size:11.5px;font-weight:700;margin-top:8px;text-align:center}
 .dp-edge-note.g{color:var(--gt)}.dp-edge-note.r{color:var(--rt)}
+.dp-struct{font-size:11px;line-height:1.5;margin-top:9px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);color:var(--ink2)}
+.dp-struct.on{border-color:rgba(var(--ac-rgb),.28);background:rgba(var(--ac-rgb),.05)}
+.dp-struct.off{border-color:var(--line);color:var(--ink3)}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .dp-fu{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:7px 13px;color:var(--ink2);background:transparent;cursor:pointer;transition:all .15s;font-family:inherit}
 .dp-fu:hover{border-color:rgba(var(--ac-rgb),.5);color:var(--act)}
@@ -3068,39 +3071,65 @@ function findZones(candles,look){
   }
   return{highs,lows};
 }
-// Build entry/stop/targets from real structure for a given direction.
-// Returns the levels AND the zones (so the chart can shade them).
-function structureLevels(candles,dir,atrVal,cfg){
+// Pivots at TWO scales (major look=2 + minor look=1) so there are both
+// significant and NEARBY real levels to anchor stops/targets to — important
+// for shorter timeframes, which need a close real swing, not a far one.
+function structurePivots(candles){
+  const A=findZones(candles,2), B=findZones(candles,1);
+  const dedup=arr=>{const seen=new Set(),out=[];for(const p of arr){const k=p.price.toFixed(3);if(!seen.has(k)){seen.add(k);out.push(p);}}return out;};
+  return{highs:dedup(A.highs.concat(B.highs)),lows:dedup(A.lows.concat(B.lows))};
+}
+// Build entry/stop/targets from REAL market structure for a given direction.
+// The stop sits just beyond a real swing/liquidity pivot; the target sits AT a
+// real opposing supply/demand pivot that pays at least the learned min R:R.
+// `band` ([minPct,maxPct] of price) lets it PREFER a real pivot that also fits
+// the horizon — so levels stay on structure AND are timeframe-appropriate.
+// slStruct/tpStruct flag whether each level is a genuine pivot (vs a last-
+// resort fallback when structure offers nothing usable). Probability/EV is a
+// SEPARATE scoring layer and never moves these levels.
+function structureLevels(candles,dir,atrVal,cfg,band){
   const a=atrVal||atr(candles,14);
   const last=+candles[candles.length-1].c;
   const stopBuf=(cfg&&cfg.stopBuf)||0.45, minRR=(cfg&&cfg.minRR)||2.0;   // learned construction params
-  const z=findZones(candles), buf=a*stopBuf;
+  const z=structurePivots(candles), buf=a*stopBuf;
   const cap=v=>+v.toFixed(2);
-  if(dir==='long'){
-    const lows=z.lows.map(p=>p.price).filter(p=>p<last-a*0.15).sort((x,y)=>y-x);   // demand zones below, nearest first
-    const base=lows.length?lows[0]:last-a*1.4;
-    let risk=Math.max(a*0.6,Math.min(a*4,(last-base)+buf));                          // stop beyond the liquidity, sane size
-    const sl=last-risk;
-    const highs=z.highs.map(p=>p.price).filter(p=>p>last+a*0.15).sort((x,y)=>x-y);   // supply zones above, nearest first
-    let tp1=highs.find(p=>(p-last)>=risk*minRR);                                      // first supply that pays ≥ minRR
-    if(tp1==null)tp1=highs.length?Math.max(highs[highs.length-1],last+risk*minRR):last+risk*minRR;
-    if((tp1-last)<risk*(minRR*0.9))tp1=last+risk*minRR;                               // floor at the learned min R:R
-    let tp2=highs.find(p=>(p-last)>=risk*(minRR+1.2)); if(tp2==null||tp2<=tp1)tp2=Math.max(last+risk*(minRR+1.4),tp1+risk);
-    return{entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,
-      zones:{buy:[cap(base-buf),cap(base+buf)],sell:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}};
-  }else{
-    const highs=z.highs.map(p=>p.price).filter(p=>p>last+a*0.15).sort((x,y)=>x-y);   // supply zones above
-    const base=highs.length?highs[0]:last+a*1.4;
-    let risk=Math.max(a*0.6,Math.min(a*4,(base-last)+buf));
-    const sl=last+risk;
-    const lows=z.lows.map(p=>p.price).filter(p=>p<last-a*0.15).sort((x,y)=>y-x);     // demand zones below
-    let tp1=lows.find(p=>(last-p)>=risk*minRR);
-    if(tp1==null)tp1=lows.length?Math.min(lows[lows.length-1],last-risk*minRR):last-risk*minRR;
-    if((last-tp1)<risk*(minRR*0.9))tp1=last-risk*minRR;
-    let tp2=lows.find(p=>(last-p)>=risk*(minRR+1.2)); if(tp2==null||tp2>=tp1)tp2=Math.min(last-risk*(minRR+1.4),tp1-risk);
-    return{entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,
-      zones:{sell:[cap(base-buf),cap(base+buf)],buy:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}};
-  }
+  const bandMin=band?last*band[0]/100:0;
+  const bandMax=band?last*band[1]/100:a*5;       // no band → just a sane safety cap
+  const floor=Math.max(a*0.4,bandMin*0.6);       // don't put the stop absurdly tight
+  const isLong=dir==='long';
+  // candidate liquidity pivots on the stop side, each with the risk of stopping just beyond it
+  const stopSide=(isLong?z.lows:z.highs).map(p=>p.price)
+    .filter(p=>isLong?p<last-a*0.08:p>last+a*0.08)
+    .map(p=>({p,risk:Math.abs(last-p)+buf}))
+    .filter(o=>o.risk>=floor)
+    .sort((x,y)=>x.risk-y.risk);                  // nearest real pivot first
+  // pick a real pivot: prefer one that fits the band; else nearest not-absurd; else nearest
+  let pick=stopSide.find(o=>o.risk>=bandMin&&o.risk<=bandMax)
+        || stopSide.find(o=>o.risk<=bandMax*1.6)
+        || stopSide[0] || null;
+  const slStruct=!!pick;
+  const risk=pick?pick.risk:Math.max(a*1.2,bandMin||a*1.4);   // fallback: no usable swing
+  const base=pick?pick.p:(isLong?last-(risk-buf):last+(risk-buf));
+  const sl=isLong?last-risk:last+risk;
+  // target: nearest opposing pivot that pays >= minRR; else furthest real pivot
+  // if it still beats risk; else a last-resort R-multiple (flagged non-structure)
+  const tgtSide=(isLong?z.highs:z.lows).map(p=>p.price)
+    .filter(p=>isLong?p>last+a*0.08:p<last-a*0.08)
+    .sort((x,y)=>isLong?x-y:y-x);                 // nearest opposing pivot first
+  const rewardOf=p=>Math.abs(p-last);
+  let tp1=null,tpStruct=false;
+  const payer=tgtSide.find(p=>rewardOf(p)>=risk*minRR);
+  if(payer!=null){tp1=payer;tpStruct=true;}
+  else if(tgtSide.length&&rewardOf(tgtSide[tgtSide.length-1])>=risk*1.4){tp1=tgtSide[tgtSide.length-1];tpStruct=true;} // furthest real pivot (real, lower RR)
+  else {tp1=isLong?last+risk*minRR:last-risk*minRR;tpStruct=false;}                                                   // no real target pays — extend to keep loss<win
+  // second target: next real opposing pivot beyond tp1, else a wider multiple
+  let tp2=tgtSide.find(p=>rewardOf(p)>=risk*(minRR+1.2));
+  if(tp2==null||(isLong?tp2<=tp1:tp2>=tp1))tp2=isLong?Math.max(last+risk*(minRR+1.4),tp1+risk):Math.min(last-risk*(minRR+1.4),tp1-risk);
+  return isLong
+    ? {entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,slStruct,tpStruct,base:cap(base),
+       zones:{buy:[cap(base-buf),cap(base+buf)],sell:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}}
+    : {entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,slStruct,tpStruct,base:cap(base),
+       zones:{sell:[cap(base-buf),cap(base+buf)],buy:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}};
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -4706,6 +4735,7 @@ async function renderDash(text){
     const a=analyze(ticker,q.price,q.pct,wHi,wLo,cwin);
     const isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
     let entry=0,sl=0,tp1=0,tp2=0,aiPick=null,dashZones=null,dashStructCand=null;
+    let dashSlStruct=false,dashTpStruct=false;   // are the stop/target on a REAL pivot?
     const bucket=tfBucket(currentDTE);   // use the learning for THIS timeframe class
     const cand=horizonCandles(q);   // structure window scaled to the chosen horizon
     let dashRegime='';
@@ -4716,19 +4746,27 @@ async function renderDash(text){
       // target at the next real supply/demand zone — never an arbitrary number.
       try{
         const sc=structCandles(q); dashStructCand=sc; const lastC=+sc[sc.length-1].c;
-        const SLv=structureLevels(sc,dir,atr(sc,14),ensureParams(bucket).pop[bestGenomeIdx(bucket)]);  // most profitable construction learned FOR THIS TIMEFRAME
+        // Levels come from REAL structure, preferring a pivot that also fits the
+        // horizon's risk band (so it's on structure AND timeframe-appropriate).
+        const SLv=structureLevels(sc,dir,atr(sc,14),ensureParams(bucket).pop[bestGenomeIdx(bucket)],HZ_RISK[currentDTE]);
         const shift=px-lastC;                       // re-anchor structure to the live price (predict from now)
         entry=px;
         sl=+(SLv.sl+shift).toFixed(2); tp1=+(SLv.tp1+shift).toFixed(2); tp2=+(SLv.tp2+shift).toFixed(2);
         dashZones={buy:SLv.zones.buy.map(v=>+(v+shift).toFixed(2)),sell:SLv.zones.sell.map(v=>+(v+shift).toFixed(2)),liq:+(SLv.zones.liq+shift).toFixed(2)};
-        // Enforce the horizon's realistic risk band (scales the whole setup around
-        // entry, preserving R:R) so a short-timeframe trade can't sit on a far-off
-        // structure level. clampLevels was defined but never wired in until now.
-        const beforeSl=sl, cl=clampLevels(entry,sl,tp1,tp2); sl=cl.sl; tp1=cl.tp1; tp2=cl.tp2;
-        if(dashZones && beforeSl!==entry){
-          const k=(sl-entry)/(beforeSl-entry);
-          if(isFinite(k)&&k>0&&Math.abs(k-1)>0.001){const z=v=>+(entry+(v-entry)*k).toFixed(2);
-            dashZones={buy:dashZones.buy.map(z),sell:dashZones.sell.map(z),liq:z(dashZones.liq)};}
+        dashSlStruct=!!SLv.slStruct; dashTpStruct=!!SLv.tpStruct;
+        // Honor real structure: only fall back to band-scaling when a level is
+        // NOT on a genuine pivot, or is so far it's clearly impractical. When
+        // both stop & target sit on real structure we leave them exactly there.
+        const riskPctNow=Math.abs(entry-sl)/entry*100, band=HZ_RISK[currentDTE]||HZ_RISK['1m'];
+        const wildlyWide=riskPctNow>band[1]*1.8;
+        if(!dashSlStruct || !dashTpStruct || wildlyWide){
+          const beforeSl=sl, cl=clampLevels(entry,sl,tp1,tp2); sl=cl.sl; tp1=cl.tp1; tp2=cl.tp2;
+          if(beforeSl!==sl){dashSlStruct=false;dashTpStruct=false;}   // scaling moved them off the pivots
+          if(dashZones && beforeSl!==entry){
+            const k=(sl-entry)/(beforeSl-entry);
+            if(isFinite(k)&&k>0&&Math.abs(k-1)>0.001){const z=v=>+(entry+(v-entry)*k).toFixed(2);
+              dashZones={buy:dashZones.buy.map(z),sell:dashZones.sell.map(z),liq:z(dashZones.liq)};}
+          }
         }
       }catch(e){
         // fallback: horizon %-band setup (still asymmetric — target ≥ 2× risk)
@@ -4797,13 +4835,23 @@ async function renderDash(text){
        </div>
        <div class="dp-edge-note ${evCls}">${verdictTxt}</div>`;
     }
+    // Honest labels: do the stop & target actually sit on a real pivot?
+    const slSub=dashSlStruct?`${isShort?'just above the swing high':'just below the swing low'} — real liquidity`:'horizon-fitted — no clean nearby swing';
+    const tpSub=dashTpStruct?`${isShort?'prior demand zone':'prior supply zone'} — real structure`:'extended to keep reward &gt; risk';
+    const structOK=dashSlStruct&&dashTpStruct;
+    const structNote=isNeutral?'':`<div class="dp-struct ${structOK?'on':'off'}">${structOK
+        ? 'Stop &amp; target sit on <b>real market structure</b> (swing liquidity &amp; supply/demand) — not arbitrary numbers.'
+        : dashSlStruct? 'Stop on <b>real structure</b>; target extended to keep reward &gt; risk (no qualifying zone yet).'
+        : dashTpStruct? 'Target on <b>real structure</b>; stop fitted to the horizon (no clean nearby swing).'
+        : 'No clean structure nearby right now — levels fitted to the horizon\'s risk band.'}</div>`;
     const planBody=isNeutral
       ? `<div class="dash-rationale">Mixed signals — no setup until price clears <b>$${a.hi20}</b> (breakout) or <b>$${a.lo20}</b> (breakdown).</div>`
       : `<div class="lv-table">
           <div class="lv-row entry"><div class="lk">Entry${zsub('current price')}</div><div class="lp">$${entry.toFixed(2)}</div><div class="lt">at market · now</div></div>
-          <div class="lv-row risk"><div class="lk">${isShort?'Stop · cover':'Stop'}${zsub(isShort?'above the swing high (liquidity)':'below the swing low (liquidity)')}</div><div class="lp">$${sl.toFixed(2)}</div><div class="lt">${pctOf(sl)} · ${dollarOf(sl)}</div></div>
-          <div class="lv-row rew"><div class="lk">Target${zsub(isShort?'prior support / demand zone':'prior resistance / supply zone')}</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
+          <div class="lv-row risk"><div class="lk">${isShort?'Stop · cover':'Stop'}${zsub(slSub)}</div><div class="lp">$${sl.toFixed(2)}</div><div class="lt">${pctOf(sl)} · ${dollarOf(sl)}</div></div>
+          <div class="lv-row rew"><div class="lk">Target${zsub(tpSub)}</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
         </div>
+        ${structNote}
         <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>
         ${edgeBlock}
         ${aiLabLine}`;
