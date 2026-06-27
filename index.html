@@ -979,6 +979,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .aic-res{font-weight:800;width:90px;flex-shrink:0;text-align:right}
 .aic-conf{color:var(--ink3);width:140px;flex-shrink:0;text-align:right}
 .aic-auto{color:var(--ink3);font-size:9px;border:1px solid var(--line);border-radius:5px;padding:1px 5px;flex-shrink:0}
+.aic-tf{color:var(--ink2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;border:1px solid var(--line);border-radius:5px;padding:1px 5px;flex-shrink:0;background:rgba(255,255,255,.03)}
+.ai-tf-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.ai-tf-btn{flex:1;min-width:120px;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:9px 13px;border:1px solid var(--line);border-radius:var(--rsm);background:var(--s2,rgba(255,255,255,.02));color:var(--ink2);font-weight:800;font-size:13px;cursor:pointer;transition:all .15s}
+.ai-tf-btn:hover{border-color:rgba(var(--ac-rgb),.5);color:var(--ink)}
+.ai-tf-btn.active{border-color:rgba(var(--ac-rgb),.7);background:rgba(var(--ac-rgb),.12);color:var(--act)}
 .rg-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
 .rg-table th{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--line)}
 .rg-table th:first-child,.rg-table .rg-name{text-align:left}
@@ -1633,7 +1638,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <svg class="dash-cmd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <input id="cpInput" type="text" maxlength="6" spellcheck="false" placeholder="Enter a ticker — e.g. AAPL, NVDA, TSLA, SPY" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')" onkeydown="if(event.key==='Enter')cpSend()"/>
           <select class="dash-hz" id="cpHorizon" onchange="cpSetHorizon(this.value)" aria-label="Horizon">
-            <option value="0dte">0DTE</option><option value="1w">1W</option><option value="1m" selected>1M</option><option value="3m">3M</option><option value="6m">6M</option><option value="1y">1Y</option>
+            <option value="0dte" selected>Intraday · 1-min</option><option value="1w">1 Week</option><option value="1m">1 Month</option><option value="3m">3 Month</option><option value="6m">6 Month</option><option value="1y">1 Year</option>
           </select>
           <button class="dash-go" onclick="cpSend()">Analyze</button>
         </div>
@@ -1814,7 +1819,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="tab-pane" id="tab-ailab">
       <div style="margin-bottom:18px">
         <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">AI Lab — Self-Learning Engine</div>
-        <div style="font-size:13px;color:var(--mu);line-height:1.6">The AI picks strategies, <b>back-tests its own picks</b> on historical data, logs each win and loss, and adjusts how much it trusts each strategy. That learned confidence then shapes the <b>strategy pick, entry, stop, and targets</b> you see on the dashboard. Train it more to sharpen its edge.</div>
+        <div style="font-size:13px;color:var(--mu);line-height:1.6">The AI picks strategies, <b>back-tests its own picks</b> on real data, logs each win and loss, and adjusts how much it trusts each strategy. It learns <b>each timeframe separately</b> — Intraday on real 1-/5-min bars, Swing &amp; Position on daily history — so shorter <i>and</i> longer setups both improve. That learned edge shapes the <b>strategy pick, entry, stop and targets</b> on the dashboard for whichever horizon you choose. Train it more to sharpen its edge.</div>
       </div>
       <div class="card">
         <div class="card-title"><span class="pdot"></span>Train the AI</div>
@@ -1827,7 +1832,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div id="aiAutoStatus" style="font-size:12px;color:var(--mu);margin-bottom:12px;min-height:16px"></div>
         <div class="ai-learn-barwrap"><div class="ai-learn-bar" id="aiLearnBar"></div></div>
         <div id="aiLearnStatus" style="font-size:12px;color:var(--mu);margin-top:8px;min-height:16px"></div>
-        <div style="font-size:11px;color:var(--fa);margin-top:6px">Each test reads a random historical chart, picks the fitting strategy, then <b>walks the trade forward bar-by-bar on real data</b> to see whether the target or the stop hit first — and updates that strategy's confidence. Runs on real market data, so it needs a connection and takes a few seconds per test.</div>
+        <div style="font-size:11px;color:var(--fa);margin-top:6px">The manual runs train the <b>timeframe you select below</b>; background auto-learn rotates through all three. Each test reads a random real chart, picks the fitting strategy, then <b>walks the trade forward bar-by-bar on real data</b> to see whether the target or the stop hit first — and updates that timeframe's edge. Needs a connection; a few seconds per test.</div>
       </div>
       <div id="aiLearnStats"></div>
       <div class="card">
@@ -2026,7 +2031,7 @@ function setMood(sent){
 window.FX_MOOD='bull';
 
 // ── DTE CONFIG ────────────────────────────────────────────────────────
-let currentDTE='1m';   // matches the horizon <select> default in the dashboard ask bar
+let currentDTE='0dte';   // matches the horizon <select> default in the dashboard ask bar (Intraday · 1-min)
 const DTE={
   '0dte':{label:'Same-day · scalp',ctx:'ctx-0dte',icon:'⚡',title:'0DTE Scalp',body:'Same-day expiry. Tight intraday levels — exit before the close. Risk a fraction of a percent.',sl:0.6,tp1:1.2,tp2:1.9,defRange:'1d'},
   '1w':{label:'1–5 days · swing',ctx:'ctx-1w',icon:'📅',title:'1-Week Swing',body:'Short swing trade. Enter on pullbacks, hold 2–5 days. Exit by Friday close.',sl:2,tp1:4,tp2:6.5,defRange:'1m'},
@@ -3098,8 +3103,16 @@ function structureLevels(candles,dir,atrVal,cfg){
 // ══════════════════════════════════════════════════════════════════════
 const AI_MEMORY_KEY='tlpro_ai_memory_v1';
 let AI_MEMORY=loadAIMemory();
+// ── TIMEFRAME BUCKETS — the AI learns each horizon class SEPARATELY ──
+// so a short scalp and a long position each get their own trade-construction
+// genome + strategy edge, and the dashboard uses the bucket that matches the
+// horizon you've selected. This is how it improves shorter AND longer setups.
+const TF_BUCKETS=['intraday','swing','position'];
+const TF_LABEL={intraday:'Intraday',swing:'Swing',position:'Position'};
+const TF_SUB={intraday:'0DTE · 1-min',swing:'1W–1M',position:'3M–1Y'};
+function tfBucket(dte){ if(dte==='0dte')return 'intraday'; if(dte==='1w'||dte==='1m')return 'swing'; return 'position'; }
 function defaultMemory(){
-  const m={strats:{},trials:0,wins:0,log:[],params:defaultGenomes()};
+  const m={strats:{},trials:0,wins:0,log:[],params:defaultParams()};
   LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
   return m;
 }
@@ -3119,20 +3132,31 @@ function defaultGenomes(){
     {stopBuf:0.25,minRR:2.5,wins:0,losses:0,pnl:0,bars:0}
   ], evolves:0};
 }
-function ensureParams(){if(!AI_MEMORY.params||!Array.isArray(AI_MEMORY.params.pop)||!AI_MEMORY.params.pop.length)AI_MEMORY.params=defaultGenomes();return AI_MEMORY.params;}
+// One genome population PER timeframe bucket, so each horizon learns its own
+// best way to build a trade (intraday stops are tiny, position stops are wide).
+function defaultParams(){const p={};TF_BUCKETS.forEach(b=>p[b]=defaultGenomes());return p;}
+function ensureParams(bucket){
+  bucket=bucket||'swing';
+  let P=AI_MEMORY.params;
+  // migrate the OLD single-population shape → file it under 'swing'
+  if(P&&Array.isArray(P.pop)){AI_MEMORY.params={swing:{pop:P.pop,evolves:P.evolves||0,n:P.n||0}};P=AI_MEMORY.params;}
+  if(!P||typeof P!=='object'){AI_MEMORY.params=defaultParams();P=AI_MEMORY.params;}
+  if(!P[bucket]||!Array.isArray(P[bucket].pop)||!P[bucket].pop.length)P[bucket]=defaultGenomes();
+  return P[bucket];
+}
 function genomeExp(g){const n=(g.wins||0)+(g.losses||0);if(!n)return 0;return ((g.pnl||0)/n)*Math.min(1,n/10);} // sample-shrunk expectancy
-function bestGenomeIdx(){
-  const pop=ensureParams().pop; let bi=-1,bs=-1e9;
+function bestGenomeIdx(bucket){
+  const pop=ensureParams(bucket).pop; let bi=-1,bs=-1e9;
   pop.forEach((g,i)=>{const n=(g.wins||0)+(g.losses||0);const s=n>=5?genomeExp(g):-1e8;if(s>bs){bs=s;bi=i;}});
   return bi>=0?bi:1;   // until something has a sample, use a sensible middle genome
 }
-function pickGenomeIdx(){
-  const pop=ensureParams().pop;
+function pickGenomeIdx(bucket){
+  const pop=ensureParams(bucket).pop;
   if(Math.random()<0.28)return Math.floor(Math.random()*pop.length);  // explore a variant
-  return bestGenomeIdx();                                              // exploit the best so far
+  return bestGenomeIdx(bucket);                                        // exploit the best so far
 }
-function evolveGenomes(){
-  const P=ensureParams(), pop=P.pop;
+function evolveGenomes(bucket){
+  const P=ensureParams(bucket), pop=P.pop;
   const withN=pop.map((g,i)=>({i,n:(g.wins||0)+(g.losses||0),s:genomeExp(g)})).filter(x=>x.n>=5);
   if(withN.length<3)return;
   const best=withN.reduce((a,b)=>b.s>a.s?b:a), worst=withN.reduce((a,b)=>b.s<a.s?b:a);
@@ -3177,9 +3201,13 @@ async function syncSharedMemory(){
 async function postShared(d){
   try{const r=await fetch(SHARED_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(r.ok){const m=await r.json();mergeShared(m);}}catch(e){}
 }
-function stratConf(key){const s=AI_MEMORY.strats[key];if(!s)return 0.5;const n=s.wins+s.losses;if(n===0)return 0.5;
+function stratConf(key,bucket){const s=AI_MEMORY.strats[key];if(!s)return 0.5;
+  let wins=s.wins||0,n=(s.wins||0)+(s.losses||0);
+  // prefer this timeframe bucket's own record once it has a sample
+  if(bucket&&s.byTF&&s.byTF[bucket]){const c=s.byTF[bucket],cn=(c.wins||0)+(c.losses||0);if(cn>=3){wins=c.wins||0;n=cn;}}
+  if(n===0)return 0.5;
   // Wilson-ish shrink toward 0.5 when sample is small
-  const raw=s.wins/n;return 0.5+(raw-0.5)*Math.min(1,n/12);}
+  const raw=wins/n;return 0.5+(raw-0.5)*Math.min(1,n/12);}
 
 // ── MARKET REGIME — context the AI learns within ─────────────────────
 // So it learns WHEN a setup works (regime), not just whether on average.
@@ -3199,14 +3227,24 @@ function regimeCell(s,regime){
   if(!s.byRegime[regime])s.byRegime[regime]={wins:0,losses:0,pnl:0};
   return s.byRegime[regime];
 }
+// Per-timeframe-bucket record for a strategy (mirrors regimeCell).
+function tfCell(s,bucket){
+  if(!s.byTF)s.byTF={};
+  if(!s.byTF[bucket])s.byTF[bucket]={wins:0,losses:0,pnl:0,bars:0};
+  return s.byTF[bucket];
+}
 
 // Unified "edge" for a strategy — what the AI has actually LEARNED about it.
 // Combines expectancy (avg R), how fast it resolves (efficiency = R per bar),
 // and trust (sample size). Prefers the current regime's record when it exists.
-function stratStats(key,regime){
+function stratStats(key,regime,bucket){
   const s=AI_MEMORY.strats[key]||{};
   let n=(s.wins||0)+(s.losses||0),wins=s.wins||0,pnl=s.pnl||0,bars=s.bars||0;
-  if(regime&&s.byRegime&&s.byRegime[regime]){
+  // the timeframe bucket is the strongest partition (the user's chosen axis):
+  // trust it once sampled; else fall back to the regime cell; else overall.
+  if(bucket&&s.byTF&&s.byTF[bucket]&&((s.byTF[bucket].wins||0)+(s.byTF[bucket].losses||0))>=4){
+    const c=s.byTF[bucket];n=(c.wins||0)+(c.losses||0);wins=c.wins||0;pnl=c.pnl||0;bars=c.bars||0;
+  }else if(regime&&s.byRegime&&s.byRegime[regime]){
     const c=s.byRegime[regime],rn=(c.wins||0)+(c.losses||0);
     if(rn>=4){n=rn;wins=c.wins||0;pnl=c.pnl||0;bars=c.bars||0;}   // trust the regime cell once it has a sample
   }
@@ -3219,7 +3257,7 @@ function stratStats(key,regime){
 }
 
 // Decide which strategy fits the current chart, by structure + learned confidence.
-function classifySetup(candles,a){
+function classifySetup(candles,a,bucket){
   const lv=labLevels(candles);
   const last=candles[candles.length-1].c;
   const up=a.s20s60>0, rsi=+a.rsi;
@@ -3239,12 +3277,12 @@ function classifySetup(candles,a){
   const regime=marketRegime(a,candles);
   let best=null,bestScore=-1;
   Object.keys(cand).forEach(k=>{
-    const st=stratStats(k,regime);
+    const st=stratStats(k,regime,bucket);
     const mul=Math.max(0.45,Math.min(1.9,1+st.edge*0.35));
     const score=cand[k]*mul;
     if(score>bestScore){bestScore=score;best=k;}
   });
-  return{key:best,score:bestScore,structure:cand,levels:lv,regime};
+  return{key:best,score:bestScore,structure:cand,levels:lv,regime,bucket};
 }
 
 // Compute entry/stop/TPs for a chosen strategy from real chart structure.
@@ -3270,15 +3308,16 @@ function aiStrategyLevels(key,candles){
 // ── Simulate a setup on REAL forward data (does target or stop hit first?) ──
 // This is what makes the learning real rather than a coin-flip on direction:
 // the strategy's actual entry/stop/target are walked forward bar-by-bar.
-function simulateSetup(tk,full,cut,q){
+function simulateSetup(tk,full,cut,q,bucket){
+  bucket=bucket||'swing';
   const histWin=full.slice(0,cut+1);
   const win60=histWin.slice(-60);
   const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
-  const setup=classifySetup(win60,a);
+  const setup=classifySetup(win60,a,bucket);
   const lvl=aiStrategyLevels(setup.key,win60);                      // strategy name/colour/direction
   const dir=lvl.dir;
   const structWin=histWin.slice(-120);                             // MORE context for reading real structure/zones
-  const gi=pickGenomeIdx(), cfg=ensureParams().pop[gi];            // pick a construction variant to test
+  const gi=pickGenomeIdx(bucket), cfg=ensureParams(bucket).pop[gi]; // pick a construction variant to test (this bucket)
   const SLv=structureLevels(structWin,dir,atr(structWin,14),cfg);  // stop beyond liquidity, target at the next zone
   const entry=+SLv.entry, sl=+SLv.sl, tp1=+SLv.tp1;               // market entry at the decision close
   const risk=Math.max(0.01,Math.abs(entry-sl));
@@ -3302,38 +3341,55 @@ function simulateSetup(tk,full,cut,q){
   const tail=histWin.slice(-45);
   const snapC=tail.concat(fwd.slice(0,45)).map(c=>({o:+(+c.o).toFixed(2),h:+(+c.h).toFixed(2),l:+(+c.l).toFixed(2),c:+(+c.c).toFixed(2)}));
   const snap={c:snapC,cut:tail.length-1};
-  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime,zones:SLv.zones,genomeIdx:gi,cfg};
+  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime,zones:SLv.zones,genomeIdx:gi,cfg,bucket};
 }
 // Fold one simulated trade into memory + the shared pool, recording the
 // confidence BEFORE→AFTER so the console can show what actually changed.
 function applyLearning(sim,auto){
-  const key=sim.setup.key;
+  const key=sim.setup.key, bucket=sim.bucket||'swing';
   const mem=AI_MEMORY.strats[key]||(AI_MEMORY.strats[key]={name:sim.lvl.name,bias:'',wins:0,losses:0,pnl:0,conf:0.5});
-  const confB=Math.round(stratConf(key)*100);
+  const confB=Math.round(stratConf(key,bucket)*100);
   let counted=false;
   if(sim.outcome!=='no-fill'&&sim.outcome!=='open'){
     if(sim.win)mem.wins++; else mem.losses++;
-    mem.pnl+=sim.r; mem.bars=(mem.bars||0)+(sim.bars||0); mem.conf=stratConf(key);   // track time-in-trade for efficiency
+    mem.pnl+=sim.r; mem.bars=(mem.bars||0)+(sim.bars||0); mem.conf=stratConf(key,bucket);   // track time-in-trade for efficiency
     if(sim.regime){const rc=regimeCell(mem,sim.regime);if(sim.win)rc.wins++;else rc.losses++;rc.pnl+=sim.r;rc.bars=(rc.bars||0)+(sim.bars||0);} // learn per regime
-    if(sim.genomeIdx!=null){const g=ensureParams().pop[sim.genomeIdx];if(g){if(sim.win)g.wins++;else g.losses++;g.pnl+=sim.r;g.bars=(g.bars||0)+(sim.bars||0);}} // learn the construction params
+    const tc=tfCell(mem,bucket);if(sim.win)tc.wins++;else tc.losses++;tc.pnl+=sim.r;tc.bars=(tc.bars||0)+(sim.bars||0);   // learn per timeframe
+    if(sim.genomeIdx!=null){const g=ensureParams(bucket).pop[sim.genomeIdx];if(g){if(sim.win)g.wins++;else g.losses++;g.pnl+=sim.r;g.bars=(g.bars||0)+(sim.bars||0);}} // learn this bucket's construction params
     AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
-    if(AI_MEMORY.trials%25===0)evolveGenomes();   // breed a better construction every 25 resolved trades
+    const P=ensureParams(bucket);P.n=(P.n||0)+1;if(P.n%25===0)evolveGenomes(bucket);   // breed a better construction every 25 resolved trades IN THIS BUCKET
     counted=true;
     if(SHARED_OK)postShared({key,win:sim.win,pnl:sim.r,tk:sim.tk,name:sim.lvl.name,dir:sim.dir});
   }
-  const confA=Math.round(stratConf(key)*100);
+  const confA=Math.round(stratConf(key,bucket)*100);
   AI_MEMORY.log.unshift({t:Date.now(),tk:sim.tk,key,name:sim.lvl.name,color:sim.lvl.color,dir:sim.dir,
-    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,regime:sim.regime,zones:sim.zones,
+    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,regime:sim.regime,bucket,zones:sim.zones,
     confB,confA,score:+(sim.setup.score||0).toFixed(2),auto:!!auto,date:sim.date,snap:sim.snap});
   if(AI_MEMORY.log.length>45)AI_MEMORY.log.length=45;
   return{counted,confB,confA};
 }
+// Fetch the right TRAINING data for a bucket: intraday buckets learn on real
+// intraday bars (5-min over a month), swing/position learn on daily history.
+// Returns {full, q} or null (skip — never silently train intraday on daily).
+async function tfTrainData(tk,bucket){
+  if(bucket==='intraday'){
+    let cs=null;
+    try{const r=await fetchBacktestSeries(tk,'5m');if(r&&r.candles&&r.candles.length>=160)cs=r.candles;}catch(e){}
+    if(!cs){try{const r=await fetchBacktestSeries(tk,'1m');if(r&&r.candles&&r.candles.length>=160)cs=r.candles;}catch(e){}}
+    if(!cs)return null;
+    const hs=cs.map(c=>c.h),ls=cs.map(c=>c.l);
+    return {full:cs,q:{hi52:Math.max(...hs),lo52:Math.min(...ls),name:tk}};
+  }
+  const q=await fetchQuote(tk);
+  const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
+  return (full&&full.length>=130)?{full,q}:null;
+}
 let aiSelfBusy=false;
-async function aiSelfBacktest(rounds){
+async function aiSelfBacktest(rounds,bucket){
   if(aiSelfBusy)return;aiSelfBusy=true;
   rounds=rounds||12;
+  bucket=bucket||window.aiLabBucket||tfBucket(currentDTE);   // train the timeframe you're focused on
   const universe=['AAPL','MSFT','NVDA','AMZN','META','GOOGL','TSLA','AMD','SPY','NFLX','AVGO','JPM'];
-  const log=document.getElementById('aiLearnLog');
   const bar=document.getElementById('aiLearnBar');
   const status=document.getElementById('aiLearnStatus');
   const b12=document.getElementById('aiTrain12'),b30=document.getElementById('aiTrain30');
@@ -3343,18 +3399,18 @@ async function aiSelfBacktest(rounds){
   if(b12){b12.disabled=true;b12.style.opacity='.55';}
   if(b30){b30.disabled=true;b30.style.opacity='.55';}
   setBar(0);
-  setStatus(`<span class="ai-spin"></span> Starting ${rounds} self-tests…`);
+  setStatus(`<span class="ai-spin"></span> Starting ${rounds} ${TF_LABEL[bucket]} self-tests…`);
   let did=0,fail=0;
   for(let i=0;i<rounds;i++){
     const tk=universe[Math.floor(Math.random()*universe.length)];
-    setStatus(`<span class="ai-spin"></span> Testing ${i+1} of ${rounds} on ${tk}… <span style="color:var(--fa)">(${did} done${fail?`, ${fail} skipped`:''})</span>`);
+    setStatus(`<span class="ai-spin"></span> Testing ${i+1} of ${rounds} on ${tk} <span style="color:var(--fa)">(${TF_LABEL[bucket]}, ${did} done${fail?`, ${fail} skipped`:''})</span>`);
     try{
-      const q=await fetchQuote(tk);
-      const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
-      if(!full||full.length<130){fail++;continue;}
+      const data=await tfTrainData(tk,bucket);
+      if(!data){fail++;continue;}
+      const full=data.full;
       const cut=Math.floor(60+Math.random()*Math.max(1,(full.length-120))); // leave plenty of forward bars so the trade can resolve at its stop/target
-      const sim=simulateSetup(tk,full,cut,q);   // walk the real trade forward
-      applyLearning(sim,false);                  // update confidence + log
+      const sim=simulateSetup(tk,full,cut,data.q,bucket);   // walk the real trade forward, in this bucket
+      applyLearning(sim,false);                              // update confidence + log
       did++;
       renderAIConsole();
     }catch(e){fail++;}
@@ -3368,13 +3424,14 @@ async function aiSelfBacktest(rounds){
   if(did===0){
     setStatus(`<span style="color:var(--rt)">⚠ Couldn't load market data for any test.</span> The free data feed is likely rate-limited or markets data is briefly unavailable — wait a moment and try again.`);
   }else{
-    setStatus(`✓ Done — ran ${did} test${did===1?'':'s'}${fail?` (${fail} skipped — data feed was busy)`:''}. Confidence updated below.`);
+    setStatus(`✓ Done — ran ${did} ${TF_LABEL[bucket]} test${did===1?'':'s'}${fail?` (${fail} skipped — data feed was busy)`:''}. ${TF_LABEL[bucket]} edge updated below.`);
   }
   renderAILearnStats();
-  // refresh dashboard so new confidence affects the current ticker
-  if(lastData&&did>0)load(lastData.ticker);
+  // refresh the LIVE dashboard so new confidence/construction affects the
+  // current ticker (renderDash is the active terminal; load() is the disabled legacy renderer).
+  if(lastData&&did>0)renderDash(lastData.ticker);
 }
-function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnStats();renderAIConsole();if(lastData)load(lastData.ticker);}
+function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnStats();renderAIConsole();if(lastData)renderDash(lastData.ticker);}
 
 // ── AUTO self-learning ────────────────────────────────────────────────
 // When idle, the engine quietly runs ONE self-test on a real historical
@@ -3383,16 +3440,18 @@ function resetAIMemory(){AI_MEMORY=defaultMemory();saveAIMemory();renderAILearnS
 // on its own — the manual "Run N self-tests" buttons just accelerate it.
 let AI_AUTO=(localStorage.getItem('tlpro_ai_auto')!=='off');
 const AI_AUTO_UNIVERSE=['AAPL','MSFT','NVDA','AMZN','META','GOOGL','GOOG','TSLA','AMD','SPY','QQQ','NFLX','AVGO','JPM','COIN','CRM'];
+let _autoTfIdx=0;
 async function aiAutoLearnOnce(){
   if(aiSelfBusy||!AI_AUTO)return;
   aiSelfBusy=true;
   try{
     const tk=AI_AUTO_UNIVERSE[Math.floor(Math.random()*AI_AUTO_UNIVERSE.length)];
-    const q=await fetchQuote(tk);
-    const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
-    if(full&&full.length>=130){
+    const bucket=TF_BUCKETS[_autoTfIdx++%TF_BUCKETS.length];   // rotate buckets so SHORT and LONG setups both keep improving
+    const data=await tfTrainData(tk,bucket);
+    if(data){
+      const full=data.full;
       const cut=Math.floor(60+Math.random()*Math.max(1,(full.length-120))); // leave plenty of forward bars so the trade can resolve at its stop/target
-      const sim=simulateSetup(tk,full,cut,q);
+      const sim=simulateSetup(tk,full,cut,data.q,bucket);
       applyLearning(sim,true);
       saveAIMemory();
       const lab=document.getElementById('tab-ailab');
@@ -3412,17 +3471,30 @@ function paintAutoStatus(){
     : `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ink3);margin-right:7px;vertical-align:middle"></span>Auto-learning paused — the AI only learns when you run tests manually.`;
 }
 
+function setAILabBucket(b){window.aiLabBucket=b;renderAILearnStats();}
 function renderAILearnStats(){
   const el=document.getElementById('aiLearnStats');if(!el)return;
-  const trials=AI_MEMORY.trials||0, wins=AI_MEMORY.wins||0, losses=trials-wins;
-  const winPct=trials?Math.round(wins/trials*100):0, lossPct=trials?100-winPct:0;
-  const totalR=Object.values(AI_MEMORY.strats).reduce((p,s)=>p+(s.pnl||0),0);
-  const expOverall=trials?totalR/trials:0;
-  // strategy rows sorted by LEARNED edge (best first), with efficiency (avg bars to resolve)
+  // The whole panel is scoped to ONE timeframe bucket so you can see each
+  // horizon's learning separately (default = the one your dashboard is on).
+  const bucket=window.aiLabBucket||(window.aiLabBucket=tfBucket(currentDTE));
+  // per-bucket aggregates from each strategy's byTF cell
+  let trials=0,wins=0,totalR=0;
   const data=Object.entries(AI_MEMORY.strats).map(([k,s])=>{
-    const n=(s.wins||0)+(s.losses||0), exp=n?(s.pnl||0)/n:0, w=n?Math.round(s.wins/n*100):0, avgB=(n&&s.bars)?s.bars/n:0;
-    return {k,name:s.name,n,exp,w,avgB,edge:stratStats(k).edge};
+    const c=(s.byTF&&s.byTF[bucket])||{wins:0,losses:0,pnl:0,bars:0};
+    const n=(c.wins||0)+(c.losses||0), exp=n?(c.pnl||0)/n:0, w=n?Math.round(c.wins/n*100):0, avgB=(n&&c.bars)?c.bars/n:0;
+    trials+=n; wins+=(c.wins||0); totalR+=(c.pnl||0);
+    return {k,name:s.name,n,exp,w,avgB,edge:stratStats(k,null,bucket).edge};
   }).sort((a,b)=> (b.n?b.edge:-9) - (a.n?a.edge:-9));
+  const losses=trials-wins;
+  const winPct=trials?Math.round(wins/trials*100):0, lossPct=trials?100-winPct:0;
+  const expOverall=trials?totalR/trials:0;
+  // Recent form: expectancy over the last few RESOLVED trades IN THIS BUCKET vs
+  // its lifetime average — shows whether THIS timeframe is getting more accurate.
+  const resolvedLog=(AI_MEMORY.log||[]).filter(e=>(e.bucket||'swing')===bucket&&e.outcome&&e.outcome!=='open'&&e.outcome!=='no-fill'&&typeof e.r==='number');
+  const recN=Math.min(10,resolvedLog.length);
+  const recentExp=recN?resolvedLog.slice(0,recN).reduce((p,e)=>p+e.r,0)/recN:0;
+  const recentWin=recN?Math.round(resolvedLog.slice(0,recN).filter(e=>e.win).length/recN*100):0;
+  const formUp=recN>=3?recentExp>=expOverall:null;
   const rows=data.map((d,idx)=>{
     const col=d.exp>0.1?'var(--gr)':d.exp<-0.1?'var(--rd)':'var(--at)';
     const barW=d.n?Math.max(4,Math.min(100,Math.round((d.exp+1)/2*100))):50;
@@ -3434,24 +3506,29 @@ function renderAILearnStats(){
     </div>`;
   }).join('');
   const best=data.find(d=>d.n>=4);
+  const sel=TF_BUCKETS.map(b=>`<button class="ai-tf-btn${b===bucket?' active':''}" onclick="setAILabBucket('${b}')">${TF_LABEL[b]} <span style="opacity:.55;font-size:10px;font-weight:600">${TF_SUB[b]}</span></button>`).join('');
   el.innerHTML=`
+    <div class="ai-tf-row">${sel}</div>
+    <div style="font-size:12px;color:var(--mu);margin:0 0 13px;line-height:1.6">Showing what the engine has learned for <b style="color:var(--act)">${TF_LABEL[bucket]}</b> trades (${TF_SUB[bucket]}). Each timeframe learns <b>separately</b> and drives the dashboard when you select that horizon. Train buttons below run on this timeframe; auto-learn rotates through all three.</div>
     <div class="bt-scoreboard">
       <div class="bt-score"><div class="bt-score-val">${trials}</div><div class="bt-score-lbl">Trades resolved</div></div>
       <div class="bt-score"><div class="bt-score-val g">${winPct}%</div><div class="bt-score-lbl">Win rate</div></div>
       <div class="bt-score"><div class="bt-score-val r">${lossPct}%</div><div class="bt-score-lbl">Loss rate</div></div>
       <div class="bt-score"><div class="bt-score-val ${expOverall>=0?'g':'r'}" title="Average R per trade — the real edge metric">${expOverall>=0?'+':''}${expOverall.toFixed(2)}R</div><div class="bt-score-lbl">Expectancy</div></div>
       <div class="bt-score"><div class="bt-score-val ${totalR>=0?'g':'r'}">${totalR>=0?'+':''}${totalR.toFixed(1)}R</div><div class="bt-score-lbl">Net result</div></div>
+      <div class="bt-score" title="Expectancy over the last ${recN||0} resolved ${TF_LABEL[bucket]} self-tests vs this timeframe's lifetime average. Up = it's getting more accurate."><div class="bt-score-val ${recN<3?'':recentExp>=0?'g':'r'}">${recN<3?'—':(recentExp>=0?'+':'')+recentExp.toFixed(2)+'R'}${formUp===true?' ▲':formUp===false?' ▼':''}</div><div class="bt-score-lbl">Recent form${recN?` · ${recentWin}% win`:''}</div></div>
     </div>
     <div style="display:flex;height:11px;border-radius:99px;overflow:hidden;margin:0 0 6px;background:var(--s3)" title="${wins} wins · ${losses} losses">${winPct?`<div style="width:${winPct}%;background:var(--gr)"></div>`:''}${lossPct?`<div style="width:${lossPct}%;background:var(--rd)"></div>`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);margin-bottom:18px"><span class="g">${wins} wins (${winPct}%)</span><span class="r">${losses} losses (${lossPct}%)</span></div>
-    <div class="card"><div class="card-title">Strategy leaderboard — best edge first</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> (expectancy × how efficiently it resolves, in the regimes it's seen). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:''} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${genomePanelHTML()}${regimeMatrixHTML()}`;
+    <div class="card"><div class="card-title">${TF_LABEL[bucket]} strategy leaderboard — best edge first</div>${rows}
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> for ${TF_LABEL[bucket]} trades (expectancy × how efficiently it resolves). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:'Run some tests to build an edge.'} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${genomePanelHTML(bucket)}${regimeMatrixHTML()}`;
   renderAIConsole();
   paintAutoStatus();
 }
-// The evolving trade-construction parameters (stop buffer + min R:R).
-function genomePanelHTML(){
-  const P=ensureParams(), pop=P.pop, bi=bestGenomeIdx(), best=pop[bi];
+// The evolving trade-construction parameters (stop buffer + min R:R) for one bucket.
+function genomePanelHTML(bucket){
+  bucket=bucket||'swing';
+  const P=ensureParams(bucket), pop=P.pop, bi=bestGenomeIdx(bucket), best=pop[bi];
   const bn=(best.wins||0)+(best.losses||0), bexp=bn?(best.pnl||0)/bn:0;
   const rows=pop.map((g,i)=>{
     const n=(g.wins||0)+(g.losses||0), exp=n?(g.pnl||0)/n:0, col=exp>0.1?'var(--gr)':exp<-0.1?'var(--rd)':'var(--at)';
@@ -3462,10 +3539,10 @@ function genomePanelHTML(){
       <span style="color:${col};font-weight:700;width:60px;text-align:right">${n?(exp>=0?'+':'')+exp.toFixed(2)+'R':'—'}</span>
     </div>`;
   }).join('');
-  return `<div class="card"><div class="card-title">How it builds the trade — learned by evolution</div>
-    <div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:12px">Best construction found: <b style="color:var(--act)">stop ${best.stopBuf}× ATR beyond liquidity</b> · <b style="color:var(--act)">target ≥ ${best.minRR}R</b>${bn>=5?` → <span class="${bexp>=0?'g':'r'}">${bexp>=0?'+':''}${bexp.toFixed(2)}R</span> over ${bn} trades`:` (still gathering data)`}. Your dashboard uses this.</div>
+  return `<div class="card"><div class="card-title">How it builds a ${TF_LABEL[bucket]} trade — learned by evolution</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:12px">Best ${TF_LABEL[bucket]} construction found: <b style="color:var(--act)">stop ${best.stopBuf}× ATR beyond liquidity</b> · <b style="color:var(--act)">target ≥ ${best.minRR}R</b>${bn>=5?` → <span class="${bexp>=0?'g':'r'}">${bexp>=0?'+':''}${bexp.toFixed(2)}R</span> over ${bn} trades`:` (still gathering data)`}. Your dashboard uses this when on a ${TF_SUB[bucket]} horizon.</div>
     ${rows}
-    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">It tests these <b>${pop.length} variants</b> of where to place the stop &amp; target, keeps the most profitable, and <b>mutates toward better ones</b> (${P.evolves||0} generations bred). This is the bot learning <i>how to trade</i> — not just which strategy to pick.</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">It tests these <b>${pop.length} variants</b> of where to place the stop &amp; target, keeps the most profitable, and <b>mutates toward better ones</b> (${P.evolves||0} generations bred). Separate populations per timeframe — this is the bot learning <i>how to trade</i> each horizon, not just which strategy to pick.</div>
   </div>`;
 }
 // What each strategy has learned PER market regime (expectancy grid).
@@ -3507,6 +3584,7 @@ function renderAIConsole(){
     return `<div class="aic-row" role="button" tabindex="0" onclick="aiWhy(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();aiWhy(${i})}" title="Open the chart + reasoning for this trade">
       <span class="aic-t">${time}</span>
       <span class="aic-tk">${tk}</span>
+      ${e.bucket?`<span class="aic-tf" title="Timeframe this trade trained">${TF_LABEL[e.bucket]||e.bucket}</span>`:''}
       <span class="aic-nm" style="color:${e.color||'var(--act)'}">${name}</span>
       <span class="aic-dir ${dir}">${dir}</span>
       <span class="aic-px">@${(+e.entryP).toFixed(2)} sl ${(+e.sl).toFixed(2)} tp ${(+e.tp1).toFixed(2)}</span>
@@ -4445,12 +4523,25 @@ function horizonCandles(q){
 }
 // A WIDER window for reading structure/zones — more context than the trade
 // window so the AI sees real support/resistance, not just the last few bars.
-const HZ_STRUCT_BARS={'0dte':120,'1w':30,'1m':55,'3m':80,'6m':130,'1y':200};
+// Structure window per horizon. Tightened so a SHORT trade targets the next
+// NEARBY swing — not a multi-month high/low. A 1-week hold reads ~3 weeks of
+// structure, not 6+ weeks; intraday reads real 1-minute bars.
+const HZ_STRUCT_BARS={'0dte':120,'1w':14,'1m':30,'3m':55,'6m':110,'1y':200};
+let dashStructIntraday=false;   // did the last structure read actually use live 1-minute bars?
 function structCandles(q){
-  if(currentDTE==='0dte'){const intr=q.h1d&&q.h1d.length>40?q.h1d:null;if(intr)return intr.slice(-120);}
-  const n=HZ_STRUCT_BARS[currentDTE]||80;
+  dashStructIntraday=false;
+  if(currentDTE==='0dte'){
+    const intr=q.h1d&&q.h1d.length>40?q.h1d:null;
+    if(intr){dashStructIntraday=true;return intr.slice(-Math.min(intr.length,120));}
+    // No live intraday data (market closed / feed blocked) — fall back to the
+    // last few DAILY bars, NOT a year, so the plan still reads near-term and
+    // doesn't snap targets onto a record high / monthly low.
+    const d=(q.h1m&&q.h1m.length)?q.h1m:(q.h3m||[]);
+    return d.slice(-Math.min(d.length,20));
+  }
+  const n=HZ_STRUCT_BARS[currentDTE]||55;
   const wide=(q.h1y&&q.h1y.length)?q.h1y:(q.h6m||q.h3m||q.h1m||[]);
-  return wide.slice(-n);
+  return wide.slice(-Math.min(wide.length,n));
 }
 function clampLevels(entry,sl,tp1,tp2){
   const band=HZ_RISK[currentDTE]||HZ_RISK['1m'];
@@ -4486,21 +4577,31 @@ async function renderDash(text){
     const wHi=currentDTE==='1y'?q.hi52:Math.max(...cwin), wLo=currentDTE==='1y'?q.lo52:Math.min(...cwin);
     const a=analyze(ticker,q.price,q.pct,wHi,wLo,cwin);
     const isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
-    let entry=0,sl=0,tp1=0,tp2=0,aiPick=null,dashZones=null;
+    let entry=0,sl=0,tp1=0,tp2=0,aiPick=null,dashZones=null,dashStructCand=null;
+    const bucket=tfBucket(currentDTE);   // use the learning for THIS timeframe class
     const cand=horizonCandles(q);   // structure window scaled to the chosen horizon
     let dashRegime='';
-    if(cand.length>=20){try{const setup=classifySetup(cand,a);dashRegime=setup.regime||'';aiPick=aiStrategyLevels(setup.key,cand);aiPick.conf=stratConf(setup.key);}catch(e){aiPick=null;}}
+    if(cand.length>=20){try{const setup=classifySetup(cand,a,bucket);dashRegime=setup.regime||'';aiPick=aiStrategyLevels(setup.key,cand);aiPick.conf=stratConf(setup.key,bucket);}catch(e){aiPick=null;}}
     if(!isNeutral){
       const px=+q.price, dir=isShort?'short':'long';
       // STRUCTURE-BASED LEVELS: stop just beyond the nearest swing/liquidity,
       // target at the next real supply/demand zone — never an arbitrary number.
       try{
-        const sc=structCandles(q), lastC=+sc[sc.length-1].c;
-        const SLv=structureLevels(sc,dir,atr(sc,14),ensureParams().pop[bestGenomeIdx()]);  // use the most profitable construction learned
+        const sc=structCandles(q); dashStructCand=sc; const lastC=+sc[sc.length-1].c;
+        const SLv=structureLevels(sc,dir,atr(sc,14),ensureParams(bucket).pop[bestGenomeIdx(bucket)]);  // most profitable construction learned FOR THIS TIMEFRAME
         const shift=px-lastC;                       // re-anchor structure to the live price (predict from now)
         entry=px;
         sl=+(SLv.sl+shift).toFixed(2); tp1=+(SLv.tp1+shift).toFixed(2); tp2=+(SLv.tp2+shift).toFixed(2);
         dashZones={buy:SLv.zones.buy.map(v=>+(v+shift).toFixed(2)),sell:SLv.zones.sell.map(v=>+(v+shift).toFixed(2)),liq:+(SLv.zones.liq+shift).toFixed(2)};
+        // Enforce the horizon's realistic risk band (scales the whole setup around
+        // entry, preserving R:R) so a short-timeframe trade can't sit on a far-off
+        // structure level. clampLevels was defined but never wired in until now.
+        const beforeSl=sl, cl=clampLevels(entry,sl,tp1,tp2); sl=cl.sl; tp1=cl.tp1; tp2=cl.tp2;
+        if(dashZones && beforeSl!==entry){
+          const k=(sl-entry)/(beforeSl-entry);
+          if(isFinite(k)&&k>0&&Math.abs(k-1)>0.001){const z=v=>+(entry+(v-entry)*k).toFixed(2);
+            dashZones={buy:dashZones.buy.map(z),sell:dashZones.sell.map(z),liq:z(dashZones.liq)};}
+        }
       }catch(e){
         // fallback: horizon %-band setup (still asymmetric — target ≥ 2× risk)
         const info=DTE[currentDTE],slP=info.sl/100,tp1P=info.tp1/100,tp2P=info.tp2/100;entry=+px.toFixed(2);
@@ -4544,7 +4645,7 @@ async function renderDash(text){
     const riskAbs=Math.abs(entry-sl),rewAbs=Math.abs(tp1-entry);
     const riskPct=entry?riskAbs/entry*100:0,rewPct=entry?rewAbs/entry*100:0;
     const rr=riskAbs>0?(rewAbs/riskAbs).toFixed(1):'–';
-    const hzLabel=(DTE[currentDTE]&&DTE[currentDTE].short)||currentDTE.toUpperCase();
+    const hzLabel={'0dte':'Intraday','1w':'1 Week','1m':'1 Month','3m':'3 Month','6m':'6 Month','1y':'1 Year'}[currentDTE]||currentDTE.toUpperCase();
     const verdict=isNeutral?`No clear edge on ${ticker} — wait for direction.`:`${isShort?'Short':'Long'} setup · ${convPct}% conviction`;
     const planBody=isNeutral
       ? `<div class="dash-rationale">Mixed signals — no setup until price clears <b>$${a.hi20}</b> (breakout) or <b>$${a.lo20}</b> (breakdown).</div>`
@@ -4555,12 +4656,18 @@ async function renderDash(text){
         </div>
         <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>`;
     // ── PREDICTION CHART (full-width left column, readable) ──
-    let chartCand=(cand&&cand.length>=40)?cand:((q.h1y&&q.h1y.length)?q.h1y:(q.h6m||q.h3m||[]));
+    // Chart the SAME window the levels were read from, so the picture matches
+    // the plan (never fall back to a full year of daily bars on a short trade).
+    let chartCand=(cand&&cand.length>=40)?cand:((dashStructCand&&dashStructCand.length>=20)?dashStructCand:((q.h3m&&q.h3m.length)?q.h3m:(q.h1y||q.h6m||[])));
+    const intradayMode=(currentDTE==='0dte');
+    const tfNote=intradayMode
+      ? (dashStructIntraday?` <span class="tag">live 1-min structure</span>`:` <span class="tag" style="color:var(--at)">no live 1-min — using recent bars</span>`)
+      : '';
     const predPanel=dashEl('dashPredictPanel'), pred=dashEl('dashPredict');
     if(isNeutral){ if(predPanel)predPanel.style.display='none'; }
     else {
       if(predPanel)predPanel.style.display='';
-      if(pred)pred.innerHTML=`<div class="dp-h">AI prediction <span class="tag">${isShort?'Short':'Long'} · ${hzLabel}</span> <span class="tag">from current price</span></div>${predictChartSVG(chartCand,{tk:ticker,dir:isShort?'short':'long',entryP:entry,sl,tp1,zones:dashZones})}`;
+      if(pred)pred.innerHTML=`<div class="dp-h">AI prediction <span class="tag">${isShort?'Short':'Long'} · ${hzLabel}</span>${tfNote} <span class="tag">from current price</span></div>${predictChartSVG(chartCand,{tk:ticker,dir:isShort?'short':'long',entryP:entry,sl,tp1,zones:dashZones})}`;
     }
     dashEl('dashPlan').innerHTML=`
       <div class="dp-h">Trade plan <span class="tag">${hzLabel} horizon</span></div>

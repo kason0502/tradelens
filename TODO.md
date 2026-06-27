@@ -1,7 +1,26 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-26 (session 9)
+> Last updated: 2026-06-27 (session 18)
+
+## Done (session 18 — per-timeframe self-learning)
+- [x] **Self-learning is timeframe-aware** — Intraday / Swing / Position buckets, each with its own genome population + per-strategy edge (`byTF`). Intraday trains on real 5-/1-min data; swing/position on daily.
+- [x] **Dashboard uses the bucket matching the horizon** (`renderDash` → `tfBucket(currentDTE)`), so shorter and longer setups each draw on what was learned for that timeframe.
+- [x] **User chooses which timeframe to study** — AI Lab timeframe selector; per-bucket scoreboard/leaderboard/construction/recent-form; console tags each trade's timeframe; auto-learn rotates all three buckets.
+
+## Next (per-timeframe follow-ups)
+- [ ] **Position bucket could read weekly bars** (currently daily, same as swing) for genuinely longer structure.
+- [ ] **Shared-pool is still global per strategy** — `byTF` buckets are local-only. Extend `api/learn.js` to pool per-timeframe if cross-user intraday learning is wanted.
+- [ ] **Intraday training cost** — each intraday self-test is one `fetchBacktestSeries('5m')` call; if rate-limits bite, cache a few symbols' intraday series for the session.
+
+## Done (session 17 — timeframe-true levels + AI Lab → live prediction)
+- [x] **Short timeframes no longer target monthly lows / record highs** — `structCandles` reads near-term structure per horizon; intraday uses real live 1-minute bars (`h1d`) with a near-term daily fallback (never a full year).
+- [x] **Wired `clampLevels`** (was dead code) so every horizon's stop/target respects its realistic risk band (`HZ_RISK`), R:R preserved; chart zones scale with it.
+- [x] **Honest horizon selector** — relabelled (`Intraday · 1-min`, `1 Month`, …), defaulted to Intraday, friendly panel labels + a "live 1-min structure / using recent bars" tag.
+- [x] **AI Lab now refreshes the live prediction** — `aiSelfBacktest`/`resetAIMemory` were calling the disabled legacy `load()`; switched to `renderDash()`. Added a "Recent form" tile (last-10 expectancy/win, ▲/▼).
+
+## ~~Next (intraday learning — the remaining gap)~~ — DONE in session 18
+- [x] **Self-learning is timeframe-aware** — genomes + strategy edge are bucketed per timeframe; intraday trains on real intraday series (`fetchBacktestSeries`); the dashboard reads the bucket matching the horizon.
 
 ## Done (session 9 — reactive theme + bull/bear + bull logo + index strip)
 - [x] **Sentiment-reactive UI** — whole site (accent, nav, background) flips red when the read is bearish (`setMood`, `--ac-rgb`, `body.bearish`, `FX_MOOD`).

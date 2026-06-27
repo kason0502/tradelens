@@ -1,7 +1,11 @@
 # TradeLens Pro — Architecture
 
 > Living doc. Update when structure, key functions, or data flow change.
-> Last updated: 2026-06-25
+> Last updated: 2026-06-27 (session 18)
+
+**Per-timeframe learning (session 18):** the self-learning engine is partitioned into 3 **timeframe buckets** — `intraday` (0DTE), `swing` (1W/1M), `position` (3M/1Y) via `tfBucket(currentDTE)`. `AI_MEMORY.params` is now `{intraday,swing,position}` (each a genome `{pop,evolves,n}`); strategy edge is bucketed in `strats[k].byTF[bucket]` (mirrors `byRegime`). Bucket-aware fns: `ensureParams(bucket)`, `bestGenomeIdx(bucket)`, `pickGenomeIdx(bucket)`, `evolveGenomes(bucket)`, `stratStats(key,regime,bucket)`, `stratConf(key,bucket)`, `classifySetup(candles,a,bucket)`, `simulateSetup(...,bucket)`, `tfCell(s,bucket)`. **Training data per bucket:** `tfTrainData(tk,bucket)` fetches real intraday 5-/1-min bars (`fetchBacktestSeries`) for `intraday`, daily history for swing/position. `aiSelfBacktest(rounds,bucket)` trains the AI-Lab-selected bucket; `aiAutoLearnOnce` rotates all three. `renderDash` reads `tfBucket(currentDTE)`'s genome + confidence. AI Lab UI: `setAILabBucket`/`window.aiLabBucket` drives a per-bucket scoreboard/leaderboard/`genomePanelHTML(bucket)`; regime matrix stays global. Old single-pop memory migrates into `swing` on load. Shared pool (`api/learn.js`) is still global per strategy.
+
+**Timeframe model (important):** the horizon selector (`currentDTE`, default **`0dte` = Intraday · 1-min**) is a *hold duration*, not a chart timeframe. Data: `fetchQuote` returns `closes`/`h1m`/`h3m`/`h6m`/`h1y` which are all **windows of DAILY candles** (mislabelled — `h1m`=22 *daily* bars, etc.), plus `h1d` = the only real **1-minute** intraday series (today). `structCandles(q)` reads near-term structure per horizon — **intraday uses `h1d`** (live 1-min, with a near-term daily fallback, never a full year); swing horizons read tightened daily windows (`HZ_STRUCT_BARS`). `clampLevels(entry,sl,tp1,tp2)` (now wired into `renderDash`) scales the setup to the horizon's realistic risk band (`HZ_RISK`), preserving R:R; the dashboard scales the shaded zones by the same factor. NOTE: self-learning (`aiSelfBacktest`/`aiAutoLearnOnce`) still trains on daily data only — see TODO "intraday learning".
 
 Everything lives in **`index.html`** (~3,500 lines): one `<style>` block, the landing markup, the app markup + modals, and one inline `<script>`. External deps loaded via CDN: **Chart.js** (mini sparkline) and **TradingView** `tv.js` (main chart).
 
