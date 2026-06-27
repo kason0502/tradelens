@@ -21,7 +21,7 @@ def run_report(provider, cfg: dict, base_metrics: dict) -> dict:
     for m in slip_mults:
         c = copy.deepcopy(cfg)
         c["fills"]["extra_slippage_cents"] = round(base_slip * m, 4)
-        tr = engine.run(provider, c)
+        tr = engine.run(provider, c, quiet=True)
         mt = M.compute(tr, c)
         scenarios.append({
             "label": f"slippage x{m}",
@@ -36,7 +36,7 @@ def run_report(provider, cfg: dict, base_metrics: dict) -> dict:
     for f in cfg["fragility"]["spread_threshold_tighten"]:
         c = copy.deepcopy(cfg)
         c["fills"]["spread_threshold_dollars"] = round(base_thr * f, 4)
-        tr = engine.run(provider, c)
+        tr = engine.run(provider, c, quiet=True)
         mt = M.compute(tr, c)
         scenarios.append({
             "label": f"spread filter x{f}",

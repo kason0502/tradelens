@@ -48,6 +48,7 @@ def run_real(cfg: dict):
 
     trades = engine.run(provider, cfg)
     mt = M.compute(trades, cfg)
+    print("[run] computing fragility report (re-running with harsher costs; uses the cache, so fast)…", flush=True)
     fr = fragility.run_report(provider, cfg, mt)
     return trades, mt, fr, False
 

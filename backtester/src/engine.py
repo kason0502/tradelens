@@ -152,17 +152,29 @@ def _close(position: dict, bar: pd.Series, ex: dict, reason: str) -> dict:
     }
 
 
-def run(provider, cfg: dict) -> list[dict]:
+def run(provider, cfg: dict, quiet: bool = False) -> list[dict]:
     all_trades: list[dict] = []
-    for day in provider.trading_days():
+    days = provider.trading_days()
+    if not quiet:
+        print(f"[engine] processing {len(days)} trading days "
+              f"({cfg.get('start_date')}..{cfg.get('end_date')})… first pass downloads + caches; re-runs are fast.",
+              flush=True)
+    for i, day in enumerate(days, 1):
+        if not quiet:
+            print(f"[engine] {i}/{len(days)}  {day} … ", end="", flush=True)
         try:
             bars = provider.load_underlying(day)
             chain = provider.load_options(day)
         except Exception as e:
-            print(f"[engine] {day}: data load failed ({e}) — day skipped, NOT estimated.")
+            if not quiet:
+                print(f"skip (no data: {str(e)[:60]})", flush=True)
             continue
         if bars is None or len(bars) == 0 or chain is None or len(chain) == 0:
-            print(f"[engine] {day}: no data — skipped.")
+            if not quiet:
+                print("skip (no data)", flush=True)
             continue
-        all_trades.extend(run_day(day, bars, chain, cfg))
+        t = run_day(day, bars, chain, cfg)
+        all_trades.extend(t)
+        if not quiet:
+            print(f"{len(t)} trade(s)", flush=True)
     return all_trades
