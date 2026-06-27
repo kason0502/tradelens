@@ -936,6 +936,12 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dp-rr{font-size:12px;color:var(--ink3);font-family:var(--mono);line-height:1.65}
 .dp-ailab{display:flex;align-items:flex-start;gap:8px;margin-top:11px;padding:9px 11px;border:1px solid rgba(var(--ac-rgb),.22);background:rgba(var(--ac-rgb),.06);border-radius:9px;font-size:11.5px;color:var(--ink2);line-height:1.5}
 .dp-ailab-dot{width:7px;height:7px;border-radius:50%;background:var(--act);box-shadow:0 0 6px rgba(var(--ac-rgb),.7);flex-shrink:0;margin-top:4px}
+.dp-edge{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}
+.edge-cell{border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;background:rgba(255,255,255,.015)}
+.edge-v{font-size:19px;font-weight:900;letter-spacing:-.02em;font-family:var(--mono);line-height:1.1}
+.edge-l{font-size:9.5px;color:var(--ink3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
+.dp-edge-note{font-size:11.5px;font-weight:700;margin-top:8px;text-align:center}
+.dp-edge-note.g{color:var(--gt)}.dp-edge-note.r{color:var(--rt)}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .dp-fu{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:7px 13px;color:var(--ink2);background:transparent;cursor:pointer;transition:all .15s;font-family:inherit}
 .dp-fu:hover{border-color:rgba(var(--ac-rgb),.5);color:var(--act)}
@@ -3119,7 +3125,7 @@ function tfBucket(dte){ if(dte==='0dte')return 'intraday'; if(dte==='1w'||dte===
 // trade gets months. Without it, swing & position would be statistically equal.
 const FWD_CAP={intraday:130,swing:25,position:160};
 function defaultMemory(){
-  const m={strats:{},trials:0,wins:0,log:[],params:defaultParams()};
+  const m={strats:{},trials:0,wins:0,log:[],params:defaultParams(),model:{}};
   LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
   return m;
 }
@@ -3276,6 +3282,73 @@ function tfBucketStats(bucket){
 // dashboard plan you're looking at, in one click.
 function cpTuneBucket(b){ window.aiLabBucket=b; mainTab('ailab'); setTimeout(()=>{try{aiSelfBacktest(12,b);}catch(e){}},160); }
 
+// ══════════════════════════════════════════════════════════════════════
+// ── PROBABILISTIC EDGE ENGINE — online logistic win-probability model ──
+// Beyond "which strategy", the AI learns an actual P(win) for a setup from a
+// small feature vector (real indicators), trained online from every self-test
+// per timeframe. From P(win) + the setup's real R:R it derives EXPECTED VALUE
+// (the metric that actually matters) and a conservative Kelly size — and it
+// tracks its own CALIBRATION (Brier score) so the probabilities are honest.
+// Pure JS, no deps, fully explainable (each feature's weight is inspectable).
+// ══════════════════════════════════════════════════════════════════════
+const FEATURE_LABELS=['With-trend','Price vs MA (aligned)','RSI (aligned)','Bollinger (aligned)','Target ambition (R:R)','Volatility','High-vol regime'];
+// Direction-relative features (so ONE model serves longs and shorts): a
+// positive value means "favourable for the trade's direction".
+function setupFeatures(o){
+  const s=o.dir==='short'?-1:1;
+  const cl=(v,m)=>Math.max(-1,Math.min(1,(v||0)/m));
+  return [
+    s*cl(+o.a.s20s60,3),                 // with the trend
+    s*cl(+o.a.pvs20,8),                  // price extension vs 20-MA, aligned
+    s*(((+o.a.rsi)-50)/50),             // RSI momentum, aligned
+    s*(((+o.a.bbPct)-50)/50),           // Bollinger position, aligned
+    cl((o.rr-2),2),                      // how ambitious the target is (higher R:R = harder)
+    cl((o.atrPct-2),4),                  // volatility
+    o.regime==='volatile'?1:0            // high-vol regime flag
+  ];
+}
+function ensureModel(bucket){
+  if(!AI_MEMORY.model)AI_MEMORY.model={};
+  let m=AI_MEMORY.model[bucket];
+  if(!m||!Array.isArray(m.w)||m.w.length!==FEATURE_LABELS.length){
+    m=AI_MEMORY.model[bucket]={w:new Array(FEATURE_LABELS.length).fill(0),b:0,n:0,brierSum:0,brierN:0};
+  }
+  return m;
+}
+function _sigmoid(z){return 1/(1+Math.exp(-Math.max(-30,Math.min(30,z))));}
+function modelProb(bucket,feat){
+  const m=ensureModel(bucket); let z=m.b;
+  for(let i=0;i<feat.length;i++)z+=m.w[i]*feat[i];
+  return _sigmoid(z);
+}
+// One online gradient step (logistic loss + tiny L2). Also folds the
+// pre-update prediction into the Brier calibration score.
+function trainModel(bucket,feat,y){
+  const m=ensureModel(bucket), lr=0.06, l2=0.001;
+  const p=modelProb(bucket,feat), err=p-y;
+  for(let i=0;i<feat.length;i++)m.w[i]-=lr*(err*feat[i]+l2*m.w[i]);
+  m.b-=lr*err;
+  m.n=(m.n||0)+1;
+  m.brierSum=(m.brierSum||0)+(p-y)*(p-y); m.brierN=(m.brierN||0)+1;
+  return p;
+}
+// Blend the learned model with the strategy's base win-rate, weighted by how
+// much the model has learned — so early on it leans on the base rate, not noise.
+function winProb(bucket,feat,baseRate){
+  const m=ensureModel(bucket), pm=modelProb(bucket,feat);
+  const wm=Math.min(1,(m.n||0)/40);
+  const base=(baseRate==null||!isFinite(baseRate))?0.5:baseRate;
+  return Math.max(0.02,Math.min(0.98,wm*pm+(1-wm)*base));
+}
+// Expected value (R per unit risked) + conservative ¼-Kelly size from a
+// win probability and the trade's reward:risk.
+function edgeFromProb(p,rr){
+  if(!(rr>0)||p==null)return{ev:null,kelly:0,sizePct:0};
+  const ev=p*rr-(1-p);
+  const kelly=Math.max(0,(p*rr-(1-p))/rr);
+  return{ev,kelly,sizePct:Math.min(20,kelly*0.25*100)};   // ¼-Kelly, capped at 20% (educational)
+}
+
 // Decide which strategy fits the current chart, by structure + learned confidence.
 function classifySetup(candles,a,bucket){
   const lv=labLevels(candles);
@@ -3362,7 +3435,17 @@ function simulateSetup(tk,full,cut,q,bucket,maxFwd){
   const tail=histWin.slice(-45);
   const snapC=tail.concat(fwd.slice(0,45)).map(c=>({o:+(+c.o).toFixed(2),h:+(+c.h).toFixed(2),l:+(+c.l).toFixed(2),c:+(+c.c).toFixed(2)}));
   const snap={c:snapC,cut:tail.length-1};
-  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime,zones:SLv.zones,genomeIdx:gi,cfg,bucket};
+  // Probabilistic model: feature vector at the decision + its PRE-update
+  // prediction (so we can score calibration honestly on the real outcome).
+  let feat=null,pPred=null;
+  try{
+    const rrSim=risk>0?Math.abs(tp1-entry)/risk:0;
+    let atrPctSim=0; try{atrPctSim=atr(structWin,14)/entry*100;}catch(_){}
+    feat=setupFeatures({dir,a,rr:rrSim,atrPct:atrPctSim,regime:setup.regime});
+    const bstat=stratStats(setup.key,setup.regime,bucket);
+    pPred=winProb(bucket,feat,bstat.n>=4?bstat.winRate:null);
+  }catch(_){}
+  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime,zones:SLv.zones,genomeIdx:gi,cfg,bucket,feat,pPred};
 }
 // Fold one simulated trade into memory + the shared pool, recording the
 // confidence BEFORE→AFTER so the console can show what actually changed.
@@ -3379,12 +3462,13 @@ function applyLearning(sim,auto){
     if(sim.genomeIdx!=null){const g=ensureParams(bucket).pop[sim.genomeIdx];if(g){if(sim.win)g.wins++;else g.losses++;g.pnl+=sim.r;g.bars=(g.bars||0)+(sim.bars||0);}} // learn this bucket's construction params
     AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
     const P=ensureParams(bucket);P.n=(P.n||0)+1;if(P.n%25===0)evolveGenomes(bucket);   // breed a better construction every 25 resolved trades IN THIS BUCKET
+    if(sim.feat)trainModel(bucket,sim.feat,sim.win?1:0);   // online win-probability model + calibration
     counted=true;
     if(SHARED_OK)postShared({key,win:sim.win,pnl:sim.r,tk:sim.tk,name:sim.lvl.name,dir:sim.dir});
   }
   const confA=Math.round(stratConf(key,bucket)*100);
   AI_MEMORY.log.unshift({t:Date.now(),tk:sim.tk,key,name:sim.lvl.name,color:sim.lvl.color,dir:sim.dir,
-    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,regime:sim.regime,bucket,zones:sim.zones,
+    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,regime:sim.regime,bucket,zones:sim.zones,pPred:sim.pPred!=null?+sim.pPred.toFixed(3):null,
     confB,confA,score:+(sim.setup.score||0).toFixed(2),auto:!!auto,date:sim.date,snap:sim.snap});
   if(AI_MEMORY.log.length>45)AI_MEMORY.log.length=45;
   return{counted,confB,confA};
@@ -3542,9 +3626,32 @@ function renderAILearnStats(){
     <div style="display:flex;height:11px;border-radius:99px;overflow:hidden;margin:0 0 6px;background:var(--s3)" title="${wins} wins · ${losses} losses">${winPct?`<div style="width:${winPct}%;background:var(--gr)"></div>`:''}${lossPct?`<div style="width:${lossPct}%;background:var(--rd)"></div>`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);margin-bottom:18px"><span class="g">${wins} wins (${winPct}%)</span><span class="r">${losses} losses (${lossPct}%)</span></div>
     <div class="card"><div class="card-title">${TF_LABEL[bucket]} strategy leaderboard — best edge first</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> for ${TF_LABEL[bucket]} trades (expectancy × how efficiently it resolves). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:'Run some tests to build an edge.'} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${genomePanelHTML(bucket)}${regimeMatrixHTML()}`;
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> for ${TF_LABEL[bucket]} trades (expectancy × how efficiently it resolves). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:'Run some tests to build an edge.'} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${genomePanelHTML(bucket)}${modelPanelHTML(bucket)}${regimeMatrixHTML()}`;
   renderAIConsole();
   paintAutoStatus();
+}
+// The probabilistic win-model for one bucket: calibration + the factor weights
+// it has learned (explainability — you can audit WHY it likes a setup).
+function modelPanelHTML(bucket){
+  const m=ensureModel(bucket);
+  const brier=m.brierN?m.brierSum/m.brierN:null;
+  const cal=brier==null?'—':brier.toFixed(3);
+  const calNote=brier==null?'no data yet':brier<0.20?'sharp':brier<0.25?'useful':'≈ coin-flip';
+  const maxAbs=Math.max(...m.w.map(w=>Math.abs(w)),0.0001);
+  const ws=m.w.map((w,i)=>({l:FEATURE_LABELS[i],w})).sort((a,b)=>Math.abs(b.w)-Math.abs(a.w));
+  const wrows=ws.map(x=>{
+    const mag=Math.min(100,Math.abs(x.w)/maxAbs*100), col=x.w>=0?'var(--gr)':'var(--rd)';
+    return `<div style="display:flex;align-items:center;gap:10px;font-size:11.5px;padding:5px 0">
+      <span style="width:150px;color:var(--ink2);flex-shrink:0">${x.l}</span>
+      <div style="flex:1;height:7px;background:var(--s3);border-radius:99px;overflow:hidden"><div style="width:${mag}%;height:100%;background:${col}"></div></div>
+      <span style="width:50px;text-align:right;font-family:var(--mono);color:${col}">${x.w>=0?'+':''}${x.w.toFixed(2)}</span>
+    </div>`;
+  }).join('');
+  return `<div class="card"><div class="card-title">${TF_LABEL[bucket]} win-probability model — what it weights</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:12px">An online <b>logistic model</b> trained on <b>${m.n||0}</b> ${TF_LABEL[bucket]} outcomes predicts each setup's <b>win probability</b>, which the dashboard turns into <b>expected value</b> and a Kelly size. Calibration (Brier): <b class="${brier!=null&&brier<0.25?'g':''}">${cal}</b> <span style="color:var(--ink3)">(${calNote}; 0.25 = no skill, lower is better).</span></div>
+    ${m.n>=5?wrows:`<div class="bt-empty" style="padding:12px">Run more ${TF_LABEL[bucket]} self-tests — once it has a sample, the factors it learns to weight (with-trend, RSI, target ambition, volatility…) show here.</div>`}
+    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">Green raises win odds, red lowers them, for a trade in its own direction. This is the bot reasoning about <i>why</i> a setup should work — and the Brier score lets you verify the probabilities are honest, not just confident.</div>
+  </div>`;
 }
 // The evolving trade-construction parameters (stop buffer + min R:R) for one bucket.
 function genomePanelHTML(bucket){
@@ -4673,6 +4780,23 @@ async function renderDash(text){
     const constr=`stop ${bs.best.stopBuf}×ATR · target ≥${bs.best.minRR}R`;
     const aiLabLine=`<div class="dp-ailab" title="The AI Lab learns each timeframe separately and tunes the stop/target construction. This plan uses the ${TF_LABEL[bucket]} model.">
         <span class="dp-ailab-dot"></span><span><b style="color:var(--act)">AI Lab · ${TF_LABEL[bucket]} model</b> ${bs.trials>=4?`— ${bs.trials} self-tests, ${bs.winPct}% win, <b class="${bs.exp>=0?'g':'r'}">${bs.exp>=0?'+':''}${bs.exp.toFixed(2)}R</b> edge`:`— still learning (${bs.trials} test${bs.trials===1?'':'s'})`} · ${constr}</span></div>`;
+    // ── PROBABILISTIC EDGE: the model's win-probability → expected value + size ──
+    let edgeBlock='', dashPWin=null, dashEV=null;
+    if(!isNeutral && riskAbs>0){
+      let edgeAtrPct=0; try{edgeAtrPct=atr(cand&&cand.length>15?cand:(q.h3m||[{h:q.price,l:q.price,c:q.price}]),14)/q.price*100;}catch(e){}
+      const feat=setupFeatures({dir:isShort?'short':'long',a,rr:+rr,atrPct:edgeAtrPct,regime:dashRegime});
+      const bstat=aiPick?stratStats(aiPick.key,dashRegime,bucket):{n:0,winRate:0.5};
+      dashPWin=winProb(bucket,feat,bstat.n>=4?bstat.winRate:null);
+      const eg=edgeFromProb(dashPWin,+rr); dashEV=eg.ev;
+      const evCls=dashEV>=0?'g':'r';
+      const verdictTxt=dashEV>=0.2?'Positive expected value — the math favours this trade.':dashEV>=0?'Slight positive edge — small but in your favour.':'Negative expected value — the model says skip or wait.';
+      edgeBlock=`<div class="dp-edge" title="Win probability = the AI's online logistic model for this timeframe (blended with the strategy's base rate). Expected value = p×reward − (1−p)×risk, in units of risk (R). Size is a conservative ¼-Kelly — educational, not advice.">
+        <div class="edge-cell"><div class="edge-v ${evCls}">${dashEV>=0?'+':''}${dashEV.toFixed(2)}R</div><div class="edge-l">Expected value / $1 risked</div></div>
+        <div class="edge-cell"><div class="edge-v">${Math.round(dashPWin*100)}%</div><div class="edge-l">Model win probability</div></div>
+        <div class="edge-cell"><div class="edge-v">${eg.sizePct.toFixed(1)}%</div><div class="edge-l">Suggested size (¼-Kelly)</div></div>
+       </div>
+       <div class="dp-edge-note ${evCls}">${verdictTxt}</div>`;
+    }
     const planBody=isNeutral
       ? `<div class="dash-rationale">Mixed signals — no setup until price clears <b>$${a.hi20}</b> (breakout) or <b>$${a.lo20}</b> (breakdown).</div>`
       : `<div class="lv-table">
@@ -4681,6 +4805,7 @@ async function renderDash(text){
           <div class="lv-row rew"><div class="lk">Target${zsub(isShort?'prior support / demand zone':'prior resistance / supply zone')}</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
         </div>
         <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>
+        ${edgeBlock}
         ${aiLabLine}`;
     // ── PREDICTION CHART (full-width left column, readable) ──
     // Chart the SAME window the levels were read from, so the picture matches

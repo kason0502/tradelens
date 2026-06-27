@@ -1,7 +1,9 @@
 # TradeLens Pro — Architecture
 
 > Living doc. Update when structure, key functions, or data flow change.
-> Last updated: 2026-06-27 (session 19)
+> Last updated: 2026-06-27 (session 20)
+
+**Probabilistic edge engine (session 20):** `AI_MEMORY.model[bucket]` = `{w[7],b,n,brierSum,brierN}`, an online logistic-regression win-probability model per timeframe. `setupFeatures(o)` builds a 7-dim direction-relative feature vector (with-trend, price-vs-MA, RSI, Bollinger, R:R ambition, volatility, high-vol regime) from `analyze` output; `modelProb`/`_sigmoid` predict, `trainModel` does one SGD step (lr .06, L2 .001) + folds the pre-update prediction into the Brier score, `winProb(bucket,feat,baseRate)` blends model↔strategy-base-rate by `min(1,n/40)`, `edgeFromProb(p,rr)` → `{ev,kelly,sizePct}` (¼-Kelly, capped 20%). `simulateSetup` computes `feat`+`pPred` at the decision; `applyLearning` calls `trainModel` on resolved trades. `renderDash` shows the **edge block** (EV / win% / size + verdict) from `winProb`/`edgeFromProb`; `modelPanelHTML(bucket)` renders Brier + sorted factor weights (`FEATURE_LABELS`) in the AI Lab. Created lazily for old saved memory.
 
 **Dashboard ↔ AI Lab link (session 19):** `renderDash` renders an "AI Lab · {bucket} model" influence strip in the Trade Plan from `tfBucketStats(bucket)` (per-bucket trials/win%/exp + the best genome's construction) and a "{style} style" header tag; `cpTuneBucket(bucket)` jumps to the AI Lab focused on that bucket and starts training it. Self-test outcomes are bucket-differentiated by `FWD_CAP` (max forward hold bars: intraday 130 / swing 25 / position 160) passed through `simulateSetup(...,maxFwd)` — a setup that doesn't resolve within its timeframe is logged "open" (uncounted), so swing and position learn distinct edges from the same daily series.
 

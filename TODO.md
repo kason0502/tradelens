@@ -1,7 +1,18 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-27 (session 19)
+> Last updated: 2026-06-27 (session 20)
+
+## Done (session 20 — probabilistic edge engine)
+- [x] **Online logistic win-probability model per timeframe** (`AI_MEMORY.model[bucket]`) trained from every self-test on a real-indicator feature vector; direction-relative so one model serves longs/shorts.
+- [x] **Expected value + ¼-Kelly size on the dashboard** (edge block: EV in R, win %, suggested size + verdict) — the +EV reframe.
+- [x] **Calibration tracking (Brier) + explainable factor weights** in the AI Lab model panel.
+
+## Next (extend the probabilistic engine)
+- [ ] **Feed it more features** (volume surge, gap, MA50/200 cross, distance-to-structure) — keep the vector small + explainable; watch for overfitting at low samples.
+- [ ] **Active learning:** bias auto-train toward setups where predicted p≈0.5 (max uncertainty) instead of pure random.
+- [ ] **Pool the model cross-user** (`api/learn.js`) — currently the logistic weights + Brier are local per device.
+- [ ] **Let the EV gate the verdict everywhere** (screener/strategy candidates could rank by EV, not just sentiment).
 
 ## Done (session 19 — dashboard ↔ AI Lab per-timeframe link)
 - [x] **Dashboard plan shows the AI Lab model driving it** — "AI Lab · {style} model" strip (tests, win%, edge, learned construction) + a "{style} style" header tag; Intraday/Swing/Position each pull their own learned model.

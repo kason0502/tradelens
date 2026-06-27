@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 20) — probabilistic edge engine (win-probability → expected value)
+- **The AI now predicts a real, calibrated WIN PROBABILITY for each setup — not just a vibe score.** New **online logistic-regression model per timeframe** (`AI_MEMORY.model[bucket]`) trained from every self-test via gradient steps. It reads a direction-relative **feature vector** from real indicators (with-trend, price-vs-MA, RSI, Bollinger, target ambition/R:R, volatility, high-vol regime), so one model serves longs and shorts. `setupFeatures`/`modelProb`/`trainModel`/`winProb`/`edgeFromProb`.
+- **Expected value is now the headline.** The dashboard Trade Plan shows an **edge block**: **Expected value (R per $1 risked)** = p·reward − (1−p)·risk, the **model win probability**, and a conservative **¼-Kelly suggested size** — with a plain-English verdict ("positive expected value" / "skip or wait"). This reframes the whole tool from conviction-vibes to *is this trade +EV?*.
+- **It proves it's honest.** Calibration is tracked via **Brier score** per timeframe; the new AI Lab **"win-probability model"** panel shows the Brier (0.25 = no skill, lower = better) and the **learned factor weights** (green raises win odds, red lowers them) — full explainability, you can audit *why* it likes a setup. (Already measuring ~0.23–0.24 after a handful of tests.)
+- The probability blends the model with the strategy's base win-rate weighted by sample size, so it's stable before it has learned much. Backward-compatible: `AI_MEMORY.model` is created lazily for existing saved memory.
+
 ## 2026-06-27 (session 19) — dashboard shows (and tunes) the timeframe model
 - **The AI Lab's influence is now visible on the dashboard plan.** Each Trade Plan shows an **"AI Lab · {Intraday/Swing/Position} model"** strip — the self-tests run, win%, R-edge, and the learned construction (stop ×ATR · target ≥R) driving that exact plan — plus a **"{style} style"** tag in the header. So you can see that picking 1W/1M (Swing) or 3M–1Y (Position) pulls a *different learned model*.
 - **One-click "Sharpen {model} ↗"** on the plan (`cpTuneBucket`) jumps to the AI Lab focused on that bucket and starts training it — so you can improve the swing/position (or intraday) model that powers the plan you're looking at, right from the dashboard.
