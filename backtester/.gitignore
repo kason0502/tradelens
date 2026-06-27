@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+results.json
+equity_curve.png
+data/
+.venv/
