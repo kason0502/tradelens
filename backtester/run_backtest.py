@@ -99,27 +99,42 @@ def _check(cfg: dict, day_str: str):
 
 
 def _probe_theta(cfg: dict, day_str: str):
-    """Hit the v3 quote + greeks endpoints (small EOD pull) and dump the raw shape
-    so the adapter can be written to match exactly."""
-    import requests, json as _json
+    """Discover which ThetaData v3 endpoints/intervals work + their JSON shape, and
+    where the underlying price comes from. Tries several candidates; print to share."""
+    import requests
     base = cfg["data"]["thetadata"]["base_url"].rstrip("/")
     sym = cfg.get("symbol", "SPY")
-    print(f"\nProbing ThetaData v3 at {base} for {sym} {day_str} (EOD, small)…\n" + "-" * 60)
-    for label, path in [("OPTION QUOTE", "/v3/option/history/quote"),
-                        ("OPTION GREEKS", "/v3/option/history/greeks")]:
-        params = {"symbol": sym, "expiration": day_str, "strike": "*", "right": "call",
-                  "start_date": day_str, "end_date": day_str, "interval": "1d"}
+    d = day_str
+    candidates = [
+        ("list expirations", "/v3/option/list/expirations", {"symbol": sym}),
+        ("list strikes", "/v3/option/list/strikes", {"symbol": sym, "expiration": d}),
+        ("quote EOD all-strikes", "/v3/option/history/quote",
+         {"symbol": sym, "expiration": d, "strike": "*", "right": "call", "start_date": d, "end_date": d, "interval": "eod"}),
+        ("quote 1m all-strikes", "/v3/option/history/quote",
+         {"symbol": sym, "expiration": d, "strike": "*", "right": "call", "start_date": d, "end_date": d, "interval": "1m"}),
+        ("greeks EOD (path)", "/v3/option/history/greeks/eod",
+         {"symbol": sym, "expiration": d, "strike": "*", "right": "call", "start_date": d, "end_date": d}),
+        ("greeks 1m (path)", "/v3/option/history/greeks/1m",
+         {"symbol": sym, "expiration": d, "strike": "*", "right": "call", "start_date": d, "end_date": d}),
+        ("greeks (query ivl)", "/v3/option/history/greeks",
+         {"symbol": sym, "expiration": d, "strike": "*", "right": "call", "start_date": d, "end_date": d, "interval": "eod"}),
+        ("stock ohlc 1m", "/v3/stock/history/ohlc",
+         {"symbol": sym, "start_date": d, "end_date": d, "interval": "1m"}),
+        ("stock quote 1m", "/v3/stock/history/quote",
+         {"symbol": sym, "start_date": d, "end_date": d, "interval": "1m"}),
+        ("stock ohlc eod", "/v3/stock/history/ohlc",
+         {"symbol": sym, "start_date": d, "end_date": d, "interval": "eod"}),
+    ]
+    print(f"\nProbing ThetaData v3 at {base} for {sym} {d}\n" + "=" * 64)
+    for label, path, params in candidates:
         try:
             r = requests.get(base + path, params=params, timeout=60)
-            print(f"\n### {label}  {path}  -> HTTP {r.status_code}")
-            txt = r.text
-            print(txt[:1500])
-            if len(txt) > 1500:
-                print(f"... [truncated, {len(txt)} chars total]")
+            body = r.text.replace("\n", " ")
+            print(f"\n### {label}  [{path}]  HTTP {r.status_code}")
+            print(body[:700] + (f" …[{len(r.text)} chars]" if len(r.text) > 700 else ""))
         except Exception as e:
-            print(f"\n### {label}  {path}  -> ERROR: {e}")
-    print("\n" + "-" * 60)
-    print("Paste the above to your assistant — it reveals the v3 field names/format.")
+            print(f"\n### {label}  [{path}]  ERROR: {e}")
+    print("\n" + "=" * 64 + "\nPaste ALL of this back to your assistant.")
 
 
 def main():
