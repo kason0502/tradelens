@@ -1,0 +1,62 @@
+{
+  "_comment": "All knobs for one backtest run. Pessimistic by design — see README.",
+
+  "symbol": "SPY",
+  "start_date": "2024-01-02",
+  "end_date": "2024-03-28",
+  "timezone": "America/New_York",
+
+  "data": {
+    "provider": "thetadata",
+    "_provider_options": ["thetadata", "local"],
+    "thetadata": {
+      "base_url": "http://127.0.0.1:25510",
+      "_note": "Theta Terminal must be running and logged in. Greeks require a tier that exposes them; if not, the run ABORTS rather than estimating them."
+    },
+    "local": {
+      "quotes_path": "data/spy_0dte_quotes.parquet",
+      "underlying_path": "data/spy_minute.parquet",
+      "_note": "Files must match the normalized schema in src/schema.py."
+    }
+  },
+
+  "strategy": {
+    "name": "orb_breakout_calls",
+    "opening_range_minutes": 15,
+    "require_retest": true,
+    "retest_tolerance_pct": 0.05,
+    "direction": "long_call",
+    "target_delta": 0.45,
+    "delta_tolerance": 0.15,
+    "take_profit_pct": 40,
+    "stop_rule": "close_back_below_level",
+    "eod_exit_minute": "15:55",
+    "max_trades_per_day": 1
+  },
+
+  "fills": {
+    "buy_at": "ask",
+    "sell_at": "bid",
+    "extra_slippage_cents": 1.5,
+    "commission_per_contract": 0.65,
+    "spread_threshold_dollars": 0.10,
+    "wide_spread_policy": "skip",
+    "_wide_spread_policy_options": ["skip", "take_worse"]
+  },
+
+  "account": {
+    "starting_capital": 10000,
+    "contracts_per_trade": 1
+  },
+
+  "fragility": {
+    "slippage_multipliers": [1.0, 1.5, 2.0],
+    "spread_threshold_tighten": [1.0, 0.5]
+  },
+
+  "output": {
+    "results_json": "results.json",
+    "results_into_strata": "../backtester/results.json",
+    "write_png": false
+  }
+}

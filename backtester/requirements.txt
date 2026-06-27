@@ -1,0 +1,8 @@
+# Core (required)
+pandas>=2.0
+numpy>=1.24
+requests>=2.28
+
+# Optional
+pyarrow>=12.0      # only if you load/save Parquet quote files
+matplotlib>=3.7    # only if you want the PNG equity-curve plot (STRATA renders its own)

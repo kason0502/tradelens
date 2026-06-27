@@ -1,7 +1,17 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-27 (session 22)
+> Last updated: 2026-06-27 (session 23)
+
+## Done (session 23 — 0DTE options backtester + STRATA 0DTE Lab)
+- [x] Standalone honesty-first Python 0DTE backtester in `/backtester` (pessimistic fills, no look-ahead, next-bar exec, fragility report, swappable modules, tests, SPY ORB strategy).
+- [x] STRATA **0DTE Lab** tab renders `results.json` (scoreboard, equity curve, fragility verdict, time-of-day, trade log); synthetic sample fallback with a SAMPLE banner.
+
+## Next (0DTE backtester — to make it produce REAL numbers)
+- [ ] **Wire the real feed:** subscribe ThetaData (or Polygon/Databento), run Theta Terminal, verify `providers.ThetaDataProvider` field mapping against your tier (greeks!), set `config.json` → `python run_backtest.py`.
+- [ ] **Intrabar path risk (biggest optimism):** minute bars can credit a TP that intrabar would've hit the stop first — add pessimistic intrabar ordering or finer data (see `ASSUMPTIONS.md` #3).
+- [ ] **Real holiday calendar** (currently Mon–Fri) and **out-of-sample split** to avoid curve-fitting.
+- [ ] **Costs realism:** model size/liquidity (quoted size), partial fills, latency beyond next-minute.
 
 ## Done (session 22 — scorecard + dollars + level rebalance)
 - [x] **Dashboard setup scorecard** — probability/confidence/sample/win-rate/R:R/EV grid + approve-or-skip recommendation banner.

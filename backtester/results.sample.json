@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-27T00:00:00",
+  "synthetic": true,
+  "config": {
+    "symbol": "SPY",
+    "start_date": "2024-01-02",
+    "end_date": "2024-03-28",
+    "strategy": {"name": "orb_breakout_calls", "opening_range_minutes": 15, "require_retest": true, "take_profit_pct": 40, "stop_rule": "close_back_below_level", "target_delta": 0.45},
+    "fills": {"buy_at": "ask", "sell_at": "bid", "extra_slippage_cents": 1.5, "commission_per_contract": 0.65, "spread_threshold_dollars": 0.10, "wide_spread_policy": "skip"},
+    "account": {"starting_capital": 10000, "contracts_per_trade": 1},
+    "data_provider": "synthetic-demo"
+  },
+  "metrics": {
+    "n_trades": 12,
+    "starting_capital": 10000,
+    "total_pnl": 300.0,
+    "total_return_pct": 3.0,
+    "win_rate_pct": 41.7,
+    "profit_factor": 1.36,
+    "sharpe": 0.81,
+    "max_drawdown_pct": -1.95,
+    "avg_trade": 25.0,
+    "avg_win": 228.0,
+    "avg_loss": -120.0,
+    "worst_trade": -160.0,
+    "best_trade": 340.0,
+    "avg_hold_minutes": 74.5,
+    "total_spread_cost": 212.4,
+    "total_commission": 15.6,
+    "equity_curve": [9870, 10130, 10035, 10215, 10075, 10415, 10305, 10455, 10295, 10505, 10420, 10300],
+    "equity_labels": ["2024-01-02T10:14:00-05:00","2024-01-03T10:42:00-05:00","2024-01-05T11:05:00-05:00","2024-01-08T10:20:00-05:00","2024-01-09T13:31:00-05:00","2024-01-11T10:03:00-05:00","2024-01-12T14:22:00-05:00","2024-01-16T10:31:00-05:00","2024-01-18T15:38:00-05:00","2024-01-22T10:11:00-05:00","2024-01-24T12:49:00-05:00","2024-01-26T15:41:00-05:00"],
+    "by_time_of_day": {
+      "open": {"n": 6, "pnl": 540.0, "win_rate_pct": 50.0, "avg_trade": 90.0},
+      "midday": {"n": 3, "pnl": -150.0, "win_rate_pct": 33.3, "avg_trade": -50.0},
+      "power_hour": {"n": 1, "pnl": -110.0, "win_rate_pct": 0.0, "avg_trade": -110.0},
+      "last_30": {"n": 2, "pnl": 20.0, "win_rate_pct": 50.0, "avg_trade": 10.0}
+    },
+    "exit_reasons": {"take_profit": 5, "stop_close_below_level": 6, "eod_forced": 1}
+  },
+  "fragility": {
+    "base_total_pnl": 300.0,
+    "slippage_plus50_total_pnl": -50.0,
+    "degrade_pct_at_plus50_slippage": -116.7,
+    "flips_to_loss": true,
+    "verdict": "⚠ FRAGILE: a 50% wider slippage assumption flips this from profit to LOSS. Do not trust the base result — it lives or dies on the fill model.",
+    "scenarios": [
+      {"label": "slippage x1.0", "slippage_cents": 1.5, "total_pnl": 300.0, "win_rate_pct": 41.7, "profit_factor": 1.36},
+      {"label": "slippage x1.5", "slippage_cents": 2.25, "total_pnl": -50.0, "win_rate_pct": 41.7, "profit_factor": 0.95},
+      {"label": "slippage x2.0", "slippage_cents": 3.0, "total_pnl": -380.0, "win_rate_pct": 41.7, "profit_factor": 0.71},
+      {"label": "spread filter x1.0", "spread_threshold": 0.10, "total_pnl": 300.0, "win_rate_pct": 41.7, "n_trades": 12},
+      {"label": "spread filter x0.5", "spread_threshold": 0.05, "total_pnl": 120.0, "win_rate_pct": 42.9, "n_trades": 7}
+    ]
+  },
+  "trades": [
+    {"day":"2024-01-02","tod":"open","type":"C","strike":472.0,"entry_delta":0.46,"entry_ts":"2024-01-02T09:58:00-05:00","exit_ts":"2024-01-02T10:14:00-05:00","exit_reason":"stop_close_below_level","entry_fill_price":1.34,"entry_ref_bid":1.30,"entry_ref_ask":1.325,"exit_fill_price":1.18,"exit_ref_bid":1.19,"exit_ref_ask":1.22,"entry_cost":135.3,"exit_proceeds":117.35,"spread_cost_paid":8.5,"commission_paid":1.3,"pnl":-130.0,"hold_minutes":16.0},
+    {"day":"2024-01-03","tod":"open","type":"C","strike":470.0,"entry_delta":0.44,"entry_ts":"2024-01-03T10:05:00-05:00","exit_ts":"2024-01-03T10:42:00-05:00","exit_reason":"take_profit","entry_fill_price":1.51,"entry_ref_bid":1.47,"entry_ref_ask":1.495,"exit_fill_price":1.80,"exit_ref_bid":1.81,"exit_ref_ask":1.84,"entry_cost":152.3,"exit_proceeds":178.35,"spread_cost_paid":9.0,"commission_paid":1.3,"pnl":260.0,"hold_minutes":37.0},
+    {"day":"2024-01-05","tod":"midday","type":"C","strike":474.0,"entry_delta":0.41,"entry_ts":"2024-01-05T11:00:00-05:00","exit_ts":"2024-01-05T11:05:00-05:00","exit_reason":"stop_close_below_level","entry_fill_price":1.10,"entry_ref_bid":1.06,"entry_ref_ask":1.085,"exit_fill_price":1.00,"exit_ref_bid":1.01,"exit_ref_ask":1.05,"entry_cost":111.3,"exit_proceeds":101.85,"spread_cost_paid":8.0,"commission_paid":1.3,"pnl":-95.0,"hold_minutes":5.0},
+    {"day":"2024-01-08","tod":"open","type":"C","strike":475.0,"entry_delta":0.47,"entry_ts":"2024-01-08T10:02:00-05:00","exit_ts":"2024-01-08T10:20:00-05:00","exit_reason":"take_profit","entry_fill_price":1.28,"entry_ref_bid":1.24,"entry_ref_ask":1.265,"exit_fill_price":1.48,"exit_ref_bid":1.49,"exit_ref_ask":1.52,"entry_cost":129.3,"exit_proceeds":147.35,"spread_cost_paid":8.5,"commission_paid":1.3,"pnl":180.0,"hold_minutes":18.0},
+    {"day":"2024-01-09","tod":"midday","type":"C","strike":476.0,"entry_delta":0.43,"entry_ts":"2024-01-09T13:20:00-05:00","exit_ts":"2024-01-09T13:31:00-05:00","exit_reason":"stop_close_below_level","entry_fill_price":1.05,"entry_ref_bid":1.01,"entry_ref_ask":1.035,"exit_fill_price":0.93,"exit_ref_bid":0.94,"exit_ref_ask":0.98,"entry_cost":106.3,"exit_proceeds":92.35,"spread_cost_paid":8.5,"commission_paid":1.3,"pnl":-140.0,"hold_minutes":11.0},
+    {"day":"2024-01-11","tod":"open","type":"C","strike":478.0,"entry_delta":0.48,"entry_ts":"2024-01-11T09:51:00-05:00","exit_ts":"2024-01-11T10:03:00-05:00","exit_reason":"take_profit","entry_fill_price":1.62,"entry_ref_bid":1.58,"entry_ref_ask":1.605,"exit_fill_price":1.99,"exit_ref_bid":2.00,"exit_ref_ask":2.03,"entry_cost":163.3,"exit_proceeds":197.35,"spread_cost_paid":9.0,"commission_paid":1.3,"pnl":340.0,"hold_minutes":12.0},
+    {"day":"2024-01-12","tod":"power_hour","type":"C","strike":479.0,"entry_delta":0.42,"entry_ts":"2024-01-12T14:10:00-05:00","exit_ts":"2024-01-12T14:22:00-05:00","exit_reason":"stop_close_below_level","entry_fill_price":0.98,"entry_ref_bid":0.94,"entry_ref_ask":0.965,"exit_fill_price":0.88,"exit_ref_bid":0.89,"exit_ref_ask":0.93,"entry_cost":99.3,"exit_proceeds":86.35,"spread_cost_paid":8.0,"commission_paid":1.3,"pnl":-110.0,"hold_minutes":12.0},
+    {"day":"2024-01-16","tod":"open","type":"C","strike":477.0,"entry_delta":0.45,"entry_ts":"2024-01-16T10:18:00-05:00","exit_ts":"2024-01-16T10:31:00-05:00","exit_reason":"take_profit","entry_fill_price":1.21,"entry_ref_bid":1.17,"entry_ref_ask":1.195,"exit_fill_price":1.38,"exit_ref_bid":1.39,"exit_ref_ask":1.42,"entry_cost":122.3,"exit_proceeds":137.35,"spread_cost_paid":8.5,"commission_paid":1.3,"pnl":150.0,"hold_minutes":13.0},
+    {"day":"2024-01-18","tod":"last_30","type":"C","strike":480.0,"entry_delta":0.40,"entry_ts":"2024-01-18T15:30:00-05:00","exit_ts":"2024-01-18T15:38:00-05:00","exit_reason":"eod_forced","entry_fill_price":0.86,"entry_ref_bid":0.82,"entry_ref_ask":0.845,"exit_fill_price":0.70,"exit_ref_bid":0.71,"exit_ref_ask":0.75,"entry_cost":87.3,"exit_proceeds":70.35,"spread_cost_paid":8.0,"commission_paid":1.3,"pnl":-160.0,"hold_minutes":8.0},
+    {"day":"2024-01-22","tod":"open","type":"C","strike":481.0,"entry_delta":0.46,"entry_ts":"2024-01-22T10:00:00-05:00","exit_ts":"2024-01-22T10:11:00-05:00","exit_reason":"take_profit","entry_fill_price":1.33,"entry_ref_bid":1.29,"entry_ref_ask":1.315,"exit_fill_price":1.55,"exit_ref_bid":1.56,"exit_ref_ask":1.59,"entry_cost":134.3,"exit_proceeds":154.35,"spread_cost_paid":8.5,"commission_paid":1.3,"pnl":210.0,"hold_minutes":11.0},
+    {"day":"2024-01-24","tod":"midday","type":"C","strike":482.0,"entry_delta":0.41,"entry_ts":"2024-01-24T12:40:00-05:00","exit_ts":"2024-01-24T12:49:00-05:00","exit_reason":"stop_close_below_level","entry_fill_price":0.96,"entry_ref_bid":0.92,"entry_ref_ask":0.945,"exit_fill_price":0.87,"exit_ref_bid":0.88,"exit_ref_ask":0.92,"entry_cost":97.3,"exit_proceeds":86.35,"spread_cost_paid":8.0,"commission_paid":1.3,"pnl":-85.0,"hold_minutes":9.0},
+    {"day":"2024-01-26","tod":"last_30","type":"C","strike":483.0,"entry_delta":0.43,"entry_ts":"2024-01-26T15:33:00-05:00","exit_ts":"2024-01-26T15:41:00-05:00","exit_reason":"eod_forced","entry_fill_price":0.90,"entry_ref_bid":0.86,"entry_ref_ask":0.885,"exit_fill_price":0.78,"exit_ref_bid":0.79,"exit_ref_ask":0.83,"entry_cost":91.3,"exit_proceeds":78.35,"spread_cost_paid":8.0,"commission_paid":1.3,"pnl":-120.0,"hold_minutes":8.0}
+  ]
+}
