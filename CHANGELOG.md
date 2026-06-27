@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 25) — ThetaData v3 adapter + put-call-parity underlying
+- **Rewrote `ThetaDataProvider` for the real Terminal v3 API** (port 25503, `/v3/option/history/quote` at `interval=1m`, CSV) after probing a live STANDARD-options/FREE-stock account. Added `--probe-theta` (endpoint/shape discovery) and `--check` diagnostics.
+- **Put-call-parity underlying reconstruction:** that tier blocks stock data and serves greeks EOD-only, so the intraday SPY price is rebuilt from real option quotes — `S(t) = K + call_mid(t) − put_mid(t)` at the anchor ATM strike (exact for 0DTE bar tiny rate/div). Clearly labelled reconstructed, not a feed. Contract selection is nearest-ATM (no intraday greeks).
+- One bulk call-chain pull + one ATM-put pull per day; results cached per day so underlying + chain share the fetch.
+
 ## 2026-06-27 (session 24) — Polygon.io provider for the 0DTE backtester
 - **Added `PolygonProvider`** (`backtester/src/providers.py`): real NBBO bid/ask via `/v3/quotes` (minute-resampled), underlying minute bars via `/v2/aggs`, 0DTE call contracts via `/v3/reference/options/contracts` (strikes within `strike_window` of the opening ATM). API key from `POLYGON_API_KEY` env var.
 - **Honest limits enforced:** Polygon has **no historical greeks**, so config uses `strategy.contract_selection: "nearest_atm"` (strike-based, greeks never invented); and if the plan lacks **options QUOTES** entitlement (aggregates only) the run **aborts** rather than faking bid/ask. New `contract_selection` knob honored by `select_contract` + the schema's delta requirement.

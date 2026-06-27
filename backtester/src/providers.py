@@ -77,82 +77,110 @@ class LocalFileProvider(BaseProvider):
 
 class ThetaDataProvider(BaseProvider):
     """
-    Pulls minute NBBO quotes + greeks from a locally-running Theta Terminal.
-    Endpoints used (v2 REST): /v2/hist/option/quote, /v2/hist/option/greeks,
-    /v2/hist/stock/ohlc. ivl=60000 ms => 1-minute bars.
+    ThetaData Terminal v3 (port 25503, /v3 REST, CSV responses).
+
+    Verified against a live STANDARD options + FREE stock account:
+      * /v3/option/history/quote  interval=1m  -> real NBBO bid/ask (the honest core).  ✓
+      * /v3/option/history/greeks/eod          -> greeks + underlying_price, but EOD only.
+      * minute greeks are NOT available, and stock endpoints are blocked on FREE.
+
+    So intraday greeks and a stock price feed don't exist on this tier. We:
+      - select the contract by NEAREST-ATM strike (no greeks needed), and
+      - RECONSTRUCT the intraday underlying from option quotes via PUT-CALL PARITY:
+        S(t) = K + call_mid(t) - put_mid(t)  (exact for 0DTE up to tiny rate/div terms).
+        This uses only the real quotes you have; it is labelled reconstructed, not a feed.
     """
 
     def __init__(self, cfg: dict):
         super().__init__(cfg)
         self.base = cfg["data"]["thetadata"]["base_url"].rstrip("/")
+        self.window = cfg["data"].get("thetadata", {}).get("strike_window", 8)
+        self._cache = {}   # day -> {"underlying": df, "chain": df}
 
     def _get_csv(self, path: str, params: dict) -> pd.DataFrame:
-        params = dict(params)
-        params.setdefault("use_csv", "true")
-        r = requests.get(f"{self.base}{path}", params=params, timeout=60)
+        r = requests.get(f"{self.base}{path}", params=params, timeout=120)
         if r.status_code != 200:
-            raise RuntimeError(
-                f"ThetaData {path} returned {r.status_code}: {r.text[:200]}\n"
-                "Is Theta Terminal running and logged in? Does your tier cover this endpoint?"
-            )
-        return pd.read_csv(io.StringIO(r.text))
-
-    def load_underlying(self, day: dt.date) -> pd.DataFrame:
-        ds = day.strftime("%Y%m%d")
-        raw = self._get_csv("/v2/hist/stock/ohlc", {
-            "root": self.symbol, "start_date": ds, "end_date": ds, "ivl": 60000,
-        })
-        # Theta returns ms_of_day + date; build a tz-aware ts.
-        ts = self._build_ts(raw, day)
-        out = pd.DataFrame({
-            "ts": ts,
-            "open": raw["open"].astype(float),
-            "high": raw["high"].astype(float),
-            "low": raw["low"].astype(float),
-            "close": raw["close"].astype(float),
-        })
-        return out
-
-    def load_options(self, day: dt.date) -> pd.DataFrame:
-        ds = day.strftime("%Y%m%d")
-        # One bulk pull of the whole same-day-expiry chain (quotes), then greeks, then merge.
-        q = self._get_csv("/v2/bulk_hist/option/quote", {
-            "root": self.symbol, "exp": ds, "start_date": ds, "end_date": ds, "ivl": 60000,
-        })
-        g = self._get_csv("/v2/bulk_hist/option/greeks", {
-            "root": self.symbol, "exp": ds, "start_date": ds, "end_date": ds, "ivl": 60000,
-        })
-        q_ts = self._build_ts(q, day)
-        g_ts = self._build_ts(g, day)
-        quotes = pd.DataFrame({
-            "ts": q_ts,
-            "strike": q["strike"].astype(float) / 1000.0,   # Theta strikes are in 1/10 cents
-            "type": q["right"].str.upper().str[0],
-            "bid": q["bid"].astype(float),
-            "ask": q["ask"].astype(float),
-            "underlying_price": q.get("underlying_price", pd.Series([float("nan")] * len(q))),
-        })
-        greeks = pd.DataFrame({
-            "ts": g_ts,
-            "strike": g["strike"].astype(float) / 1000.0,
-            "type": g["right"].str.upper().str[0],
-            "delta": g.get("delta"),
-            "gamma": g.get("gamma"),
-            "theta": g.get("theta"),
-        })
-        df = quotes.merge(greeks, on=["ts", "strike", "type"], how="left")
-        df["expiration"] = day
+            raise RuntimeError(f"ThetaData {path} -> {r.status_code}: {r.text[:200]}")
+        df = pd.read_csv(io.StringIO(r.text))
+        # follow pagination if the Terminal sets a Next-Page header
+        nxt = r.headers.get("Next-Page") or r.headers.get("next-page")
+        while nxt and nxt.lower() != "null":
+            r = requests.get(nxt, timeout=120)
+            if r.status_code != 200:
+                break
+            df = pd.concat([df, pd.read_csv(io.StringIO(r.text))], ignore_index=True)
+            nxt = r.headers.get("Next-Page") or r.headers.get("next-page")
         return df
 
-    def _build_ts(self, raw: pd.DataFrame, day: dt.date) -> pd.Series:
-        # Theta gives ms_of_day (and sometimes a 'date' column). Build tz-aware ts.
-        if "ms_of_day" not in raw.columns:
-            raise RuntimeError(
-                "ThetaData response missing 'ms_of_day' — cannot build timestamps. "
-                "Verify the endpoint/version; the engine will not guess timestamps."
-            )
-        base = pd.Timestamp(day, tz=self.tz)
-        return base + pd.to_timedelta(raw["ms_of_day"].astype("int64"), unit="ms")
+    def _ts(self, s: pd.Series) -> pd.Series:
+        # v3 timestamps are naive ISO in exchange (ET) time, e.g. 2024-05-15T09:31:00.000
+        return pd.to_datetime(s).dt.tz_localize(self.tz)
+
+    def _quotes(self, day: dt.date, strike, right: str) -> pd.DataFrame:
+        ds = day.strftime("%Y-%m-%d")
+        raw = self._get_csv("/v3/option/history/quote", {
+            "symbol": self.symbol, "expiration": ds, "strike": strike, "right": right,
+            "start_date": ds, "end_date": ds, "interval": "1m",
+        })
+        if raw.empty or "bid" not in raw.columns:
+            return pd.DataFrame(columns=["ts", "strike", "bid", "ask"])
+        out = pd.DataFrame({
+            "ts": self._ts(raw["timestamp"]),
+            "strike": raw["strike"].astype(float),
+            "bid": raw["bid"].astype(float),
+            "ask": raw["ask"].astype(float),
+        })
+        return out[(out["bid"] > 0) & (out["ask"] >= out["bid"])].reset_index(drop=True)
+
+    def _atm_strike(self, day: dt.date) -> float:
+        ds = day.strftime("%Y-%m-%d")
+        g = self._get_csv("/v3/option/history/greeks/eod", {
+            "symbol": self.symbol, "expiration": ds, "strike": "*", "right": "call",
+            "start_date": ds, "end_date": ds,
+        })
+        up = pd.to_numeric(g.get("underlying_price"), errors="coerce").dropna()
+        strikes = pd.to_numeric(g.get("strike"), errors="coerce").dropna().unique()
+        if up.empty or not len(strikes):
+            raise RuntimeError(f"Couldn't anchor ATM for {self.symbol} {day} (greeks/eod empty).")
+        anchor = float(up.median())
+        return float(min(strikes, key=lambda k: abs(k - anchor)))
+
+    def _load_day(self, day: dt.date):
+        if day in self._cache:
+            return self._cache[day]
+        k0 = self._atm_strike(day)                          # ATM anchor (any liquid strike works for parity)
+        calls = self._quotes(day, "*", "call")              # full call chain @1m (real bid/ask)
+        put0 = self._quotes(day, f"{k0:.3f}", "put")        # ATM put @1m, for parity
+        if calls.empty:
+            self._cache[day] = {"underlying": pd.DataFrame(), "chain": pd.DataFrame()}
+            return self._cache[day]
+        call0 = calls[(calls["strike"] - k0).abs() < 1e-3]
+        # ── PUT-CALL PARITY underlying: S = K + call_mid - put_mid (per minute) ──
+        cm = call0.assign(cmid=(call0["bid"] + call0["ask"]) / 2)[["ts", "cmid"]]
+        pm = put0.assign(pmid=(put0["bid"] + put0["ask"]) / 2)[["ts", "pmid"]]
+        par = cm.merge(pm, on="ts", how="inner")
+        par["S"] = k0 + par["cmid"] - par["pmid"]
+        und = pd.DataFrame({
+            "ts": par["ts"], "open": par["S"], "high": par["S"],
+            "low": par["S"], "close": par["S"],
+        }).sort_values("ts").reset_index(drop=True)
+        # restrict the tradeable chain to a window around the anchor; greeks unavailable intraday
+        chain = calls[(calls["strike"] >= k0 - self.window) & (calls["strike"] <= k0 + self.window)].copy()
+        smap = dict(zip(und["ts"], und["close"]))
+        chain["type"] = "C"
+        chain["expiration"] = day
+        chain["underlying_price"] = chain["ts"].map(smap)
+        chain["delta"] = float("nan")
+        chain["gamma"] = float("nan")
+        chain["theta"] = float("nan")
+        self._cache[day] = {"underlying": und, "chain": chain.reset_index(drop=True)}
+        return self._cache[day]
+
+    def load_underlying(self, day: dt.date) -> pd.DataFrame:
+        return self._load_day(day)["underlying"]
+
+    def load_options(self, day: dt.date) -> pd.DataFrame:
+        return self._load_day(day)["chain"]
 
 
 class PolygonProvider(BaseProvider):

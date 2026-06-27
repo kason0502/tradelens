@@ -16,7 +16,8 @@
     },
     "thetadata": {
       "base_url": "http://127.0.0.1:25503",
-      "_note": "Theta Terminal v3 serves on port 25503 with the /v3 REST API. Must be running + logged in."
+      "strike_window": 8,
+      "_note": "Theta Terminal v3 on port 25503 (/v3 REST). Must be running + logged in. On a STANDARD options / FREE stock tier the engine reconstructs the intraday underlying from option quotes via put-call parity (no stock feed)."
     },
     "local": {
       "quotes_path": "data/spy_0dte_quotes.parquet",
