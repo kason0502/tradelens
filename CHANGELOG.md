@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16j) — AI Lab: trades run to their real stop/target
+- **No more early time-exit.** `simulateSetup` previously graded a self-test by a fixed 14-bar window (and guessed by final close if neither level hit). Now it **walks every remaining bar until the stop or target actually hits** — a WIN only if the target is reached first, a LOSS if stopped, in R. Tracks bars-held ("won in 23 bars").
+- **"Open" outcome** for the rare trade that never reaches either level within available history: logged but **not counted** (honest — we don't fabricate a win/loss). Shown as `OPEN` in the console and explained in the proof window.
+- Decision point biased earlier (`cut`) + min history raised to 130 bars so trades have ~60+ forward bars to resolve; snapshot forward bars capped at 45 to keep localStorage small even though the sim may walk 100+ bars.
+
 ## 2026-06-26 (session 16i) — premium polish pass (self-critique, ongoing)
 > Standing directive from the user: continuously self-critique (designer/FE/UX/QA) and fix weaknesses without being told.
 - **Prediction chart was unreadable** — it was squeezed into the 352px right-column plan panel (≈38% scale). Moved it to its own **full-width panel** (`#dashPredictPanel`) in the wide left column (~770px, 2.2× bigger); bumped in-chart fonts (axis 11.5 / labels 12.5 / now-caption 11.5), taller viewBox (348), wider candles (55 bars, body ≤11px). Panel hides on a neutral read. Trimmed TradingView height 430→380 to balance the two stacked charts.

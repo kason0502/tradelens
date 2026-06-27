@@ -3114,7 +3114,6 @@ function aiStrategyLevels(key,candles){
 // This is what makes the learning real rather than a coin-flip on direction:
 // the strategy's actual entry/stop/target are walked forward bar-by-bar.
 function simulateSetup(tk,full,cut,q){
-  const hold=14;
   const histWin=full.slice(0,cut+1);
   const win60=histWin.slice(-60);
   const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
@@ -3122,11 +3121,13 @@ function simulateSetup(tk,full,cut,q){
   const lvl=aiStrategyLevels(setup.key,win60);
   const entry=+lvl.entry, sl=+lvl.sl, tp1=+lvl.tp1, dir=lvl.dir;
   const risk=Math.abs(entry-sl)||Math.max(0.01,entry*0.01);
-  const fwd=full.slice(cut+1,cut+1+hold);
-  let triggered=false, outcome=null, exitR=0, bars=0;
+  const fwd=full.slice(cut+1);            // walk ALL remaining bars — no early time-exit
+  let triggered=false, outcome=null, exitR=0, bars=0, trigK=-1;
   for(let k=0;k<fwd.length;k++){
-    const c=fwd[k]; bars=k+1;
-    if(!triggered){ const hit=dir==='long'?(c.l<=entry):(c.h>=entry); if(hit)triggered=true; else continue; }
+    const c=fwd[k];
+    if(!triggered){ const hit=dir==='long'?(c.l<=entry):(c.h>=entry); if(hit){triggered=true;trigK=k;} else continue; }
+    bars=k-trigK+1;
+    // stop is checked before target so an intrabar tie resolves to the loss (conservative)
     if(dir==='long'){
       if(c.l<=sl){outcome='loss';exitR=-1;break;}
       if(c.h>=tp1){outcome='win';exitR=(tp1-entry)/risk;break;}
@@ -3136,11 +3137,12 @@ function simulateSetup(tk,full,cut,q){
     }
   }
   if(!triggered){outcome='no-fill';exitR=0;}
-  else if(!outcome){ const lc=fwd.length?fwd[fwd.length-1].c:entry; const move=dir==='long'?(lc-entry):(entry-lc); exitR=move/risk; outcome=exitR>=0?'win':'loss'; }
+  else if(!outcome){outcome='open';exitR=0;}   // ran out of history before hitting stop or target — left open, not counted
   const win=(outcome==='win');
-  // compact snapshot so the exact setup can be redrawn later (decision tail + forward bars)
+  // compact snapshot so the setup can be redrawn later — decision tail + a
+  // CAPPED slice of forward bars (the sim may walk 100+ bars; the chart only needs ~45).
   const tail=histWin.slice(-45);
-  const snapC=tail.concat(fwd).map(c=>({o:+(+c.o).toFixed(2),h:+(+c.h).toFixed(2),l:+(+c.l).toFixed(2),c:+(+c.c).toFixed(2)}));
+  const snapC=tail.concat(fwd.slice(0,45)).map(c=>({o:+(+c.o).toFixed(2),h:+(+c.h).toFixed(2),l:+(+c.l).toFixed(2),c:+(+c.c).toFixed(2)}));
   const snap={c:snapC,cut:tail.length-1};
   return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap};
 }
@@ -3151,7 +3153,7 @@ function applyLearning(sim,auto){
   const mem=AI_MEMORY.strats[key]||(AI_MEMORY.strats[key]={name:sim.lvl.name,bias:'',wins:0,losses:0,pnl:0,conf:0.5});
   const confB=Math.round(stratConf(key)*100);
   let counted=false;
-  if(sim.outcome!=='no-fill'){
+  if(sim.outcome!=='no-fill'&&sim.outcome!=='open'){
     if(sim.win)mem.wins++; else mem.losses++;
     mem.pnl+=sim.r; mem.conf=stratConf(key);
     AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
@@ -3188,8 +3190,8 @@ async function aiSelfBacktest(rounds){
     try{
       const q=await fetchQuote(tk);
       const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
-      if(!full||full.length<70){fail++;continue;}
-      const cut=Math.floor(50+Math.random()*(full.length-14-52));
+      if(!full||full.length<130){fail++;continue;}
+      const cut=Math.floor(60+Math.random()*Math.max(1,(full.length-120))); // leave plenty of forward bars so the trade can resolve at its stop/target
       const sim=simulateSetup(tk,full,cut,q);   // walk the real trade forward
       applyLearning(sim,false);                  // update confidence + log
       did++;
@@ -3227,8 +3229,8 @@ async function aiAutoLearnOnce(){
     const tk=AI_AUTO_UNIVERSE[Math.floor(Math.random()*AI_AUTO_UNIVERSE.length)];
     const q=await fetchQuote(tk);
     const full=(q.h1y&&q.h1y.length>80)?q.h1y:q.h6m;
-    if(full&&full.length>=70){
-      const cut=Math.floor(50+Math.random()*(full.length-14-52));
+    if(full&&full.length>=130){
+      const cut=Math.floor(60+Math.random()*Math.max(1,(full.length-120))); // leave plenty of forward bars so the trade can resolve at its stop/target
       const sim=simulateSetup(tk,full,cut,q);
       applyLearning(sim,true);
       saveAIMemory();
@@ -3287,11 +3289,11 @@ function renderAIConsole(){
       const wc=e.win?'var(--gt)':'var(--rt)';
       return `<div class="aic-row" role="button" tabindex="0" onclick="aiWhy(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();aiWhy(${i})}"><span class="aic-t">${time}</span><span class="aic-tk">${tk}</span><span class="aic-nm" style="color:${e.color||'var(--act)'}">${name}</span><span class="aic-dir ${dir}">${dir}</span><span class="aic-px">legacy</span><span class="aic-res" style="color:${wc}">${e.win?'WIN':'LOSS'} ${e.pnl>=0?'+':''}${e.pnl}%</span><span class="aic-why">why ↗</span></div>`;
     }
-    const noFill=e.outcome==='no-fill';
-    const wc=noFill?'var(--ink3)':e.win?'var(--gt)':'var(--rt)';
-    const verdict=noFill?'NO FILL':(e.win?'WIN':'LOSS');
-    const rTxt=noFill?'':` ${e.r>=0?'+':''}${e.r}R`;
-    const conf=(e.confB!=null&&e.confA!=null&&!noFill)?`<span class="aic-conf">conf ${e.confB}%${e.confA!==e.confB?` <b style="color:${e.confA>=e.confB?'var(--gt)':'var(--rt)'}">→ ${e.confA}%</b>`:' ·'}</span>`:'<span class="aic-conf">no fill · no change</span>';
+    const unres=e.outcome==='no-fill'||e.outcome==='open';
+    const wc=unres?'var(--ink3)':e.win?'var(--gt)':'var(--rt)';
+    const verdict=e.outcome==='no-fill'?'NO FILL':e.outcome==='open'?'OPEN':(e.win?'WIN':'LOSS');
+    const rTxt=unres?'':` ${e.r>=0?'+':''}${e.r}R${e.bars?' · '+e.bars+'b':''}`;
+    const conf=(e.confB!=null&&e.confA!=null&&!unres)?`<span class="aic-conf">conf ${e.confB}%${e.confA!==e.confB?` <b style="color:${e.confA>=e.confB?'var(--gt)':'var(--rt)'}">→ ${e.confA}%</b>`:' ·'}</span>`:`<span class="aic-conf">${e.outcome==='open'?'still open · no change':'no fill · no change'}</span>`;
     return `<div class="aic-row" role="button" tabindex="0" onclick="aiWhy(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();aiWhy(${i})}" title="Open the chart + reasoning for this trade">
       <span class="aic-t">${time}</span>
       <span class="aic-tk">${tk}</span>
@@ -3398,7 +3400,7 @@ function setupWhy(e){
 function aiWhy(idx){
   const e=(AI_MEMORY.log||[])[idx];if(!e)return;
   const dirCol=e.dir==='long'?'var(--gt)':'var(--rt)';
-  const resTxt=e.outcome==='no-fill'?'never triggered (no fill — no change to confidence)':e.win?`hit the <b style="color:var(--gt)">target</b> first (+${e.r}R)`:`hit the <b style="color:var(--rt)">stop</b> first (${e.r}R)`;
+  const resTxt=e.outcome==='no-fill'?'never triggered (no fill — no change to confidence)':e.outcome==='open'?'is still open — price never reached the stop or target in the available history, so it was left uncounted':e.win?`hit the <b style="color:var(--gt)">target</b> first (+${e.r}R${e.bars?' in '+e.bars+' bars':''})`:`hit the <b style="color:var(--rt)">stop</b> first (${e.r}R${e.bars?' in '+e.bars+' bars':''})`;
   const chart=(e.snap&&e.snap.c&&e.snap.c.length)?proofChartSVG(e.snap,e,false):`<div style="font-size:12px;color:var(--ink3);padding:18px;text-align:center;border:1px solid var(--line);border-radius:11px">No chart snapshot stored for this entry (older or pooled from the shared model) — reasoning shown below.</div>`;
   const confLine=(e.confB!=null&&e.confA!=null&&e.outcome!=='no-fill')?`This single trade moved <b>${e.name}</b> confidence from <b>${e.confB}%</b> to <b style="color:${e.confA>=e.confB?'var(--gt)':'var(--rt)'}">${e.confA}%</b> — which then changes how it weights this setup on your dashboard.`:'';
   const body=`${chart}
