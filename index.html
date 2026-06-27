@@ -3041,6 +3041,54 @@ function labLevels(d){
   return{resis,lo,support,sma20Val:sma20,range,last,atr:a,swHigh:swHigh??resis,swLow:swLow??support};
 }
 
+// ── MARKET STRUCTURE: every swing pivot = a buy/sell/liquidity zone ──────
+// Collect ALL confirmed swing highs (supply / sell zones) and swing lows
+// (demand / buy zones). Stops sit just BEYOND a pivot (where liquidity rests),
+// targets sit AT the next opposing pivot — never an arbitrary number.
+function findZones(candles,look){
+  look=look||2; const highs=[],lows=[];
+  for(let i=look;i<candles.length-look;i++){
+    let ph=true,pl=true;
+    for(let j=i-look;j<=i+look;j++){ if(j===i)continue; if(candles[j].h>=candles[i].h)ph=false; if(candles[j].l<=candles[i].l)pl=false; }
+    if(ph)highs.push({i,price:+candles[i].h});
+    if(pl)lows.push({i,price:+candles[i].l});
+  }
+  return{highs,lows};
+}
+// Build entry/stop/targets from real structure for a given direction.
+// Returns the levels AND the zones (so the chart can shade them).
+function structureLevels(candles,dir,atrVal){
+  const a=atrVal||atr(candles,14);
+  const last=+candles[candles.length-1].c;
+  const z=findZones(candles), buf=a*0.45;
+  const cap=v=>+v.toFixed(2);
+  if(dir==='long'){
+    const lows=z.lows.map(p=>p.price).filter(p=>p<last-a*0.15).sort((x,y)=>y-x);   // demand zones below, nearest first
+    const base=lows.length?lows[0]:last-a*1.4;
+    let risk=Math.max(a*0.6,Math.min(a*4,(last-base)+buf));                          // stop beyond the liquidity, sane size
+    const sl=last-risk;
+    const highs=z.highs.map(p=>p.price).filter(p=>p>last+a*0.15).sort((x,y)=>x-y);   // supply zones above, nearest first
+    let tp1=highs.find(p=>(p-last)>=risk*1.8);                                        // first supply that pays ≥1.8R
+    if(tp1==null)tp1=highs.length?highs[highs.length-1]:last+risk*2;
+    if((tp1-last)<risk*1.6)tp1=last+risk*2;                                           // floor so reward > risk
+    let tp2=highs.find(p=>(p-last)>=risk*3); if(tp2==null||tp2<=tp1)tp2=Math.max(last+risk*3.2,tp1+risk);
+    return{entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,
+      zones:{buy:[cap(base-buf),cap(base+buf)],sell:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}};
+  }else{
+    const highs=z.highs.map(p=>p.price).filter(p=>p>last+a*0.15).sort((x,y)=>x-y);   // supply zones above
+    const base=highs.length?highs[0]:last+a*1.4;
+    let risk=Math.max(a*0.6,Math.min(a*4,(base-last)+buf));
+    const sl=last+risk;
+    const lows=z.lows.map(p=>p.price).filter(p=>p<last-a*0.15).sort((x,y)=>y-x);     // demand zones below
+    let tp1=lows.find(p=>(last-p)>=risk*1.8);
+    if(tp1==null)tp1=lows.length?lows[lows.length-1]:last-risk*2;
+    if((last-tp1)<risk*1.6)tp1=last-risk*2;
+    let tp2=lows.find(p=>(last-p)>=risk*3); if(tp2==null||tp2>=tp1)tp2=Math.min(last-risk*3.2,tp1-risk);
+    return{entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,
+      zones:{sell:[cap(base-buf),cap(base+buf)],buy:[cap(tp1-buf),cap(tp1+buf)],liq:cap(sl)}};
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════
 // ── AI SELF-LEARNING ENGINE ──────────────────────────────────────────
 // The AI picks strategies, backtests its own picks on history, logs the
@@ -3168,15 +3216,16 @@ function simulateSetup(tk,full,cut,q){
   const win60=histWin.slice(-60);
   const a=analyze(tk,histWin[histWin.length-1].c,0,q.hi52,q.lo52,histWin.map(d=>d.c));
   const setup=classifySetup(win60,a);
-  const lvl=aiStrategyLevels(setup.key,win60);
-  const entry=+lvl.entry, sl=+lvl.sl, tp1=+lvl.tp1, dir=lvl.dir;
-  const risk=Math.abs(entry-sl)||Math.max(0.01,entry*0.01);
-  const fwd=full.slice(cut+1);            // walk ALL remaining bars — no early time-exit
-  let triggered=false, outcome=null, exitR=0, bars=0, trigK=-1;
+  const lvl=aiStrategyLevels(setup.key,win60);                      // strategy name/colour/direction
+  const dir=lvl.dir;
+  const structWin=histWin.slice(-120);                             // MORE context for reading real structure/zones
+  const SLv=structureLevels(structWin,dir,atr(structWin,14));      // stop beyond liquidity, target at the next zone
+  const entry=+SLv.entry, sl=+SLv.sl, tp1=+SLv.tp1;               // market entry at the decision close
+  const risk=Math.max(0.01,Math.abs(entry-sl));
+  const fwd=full.slice(cut+1);            // walk ALL remaining bars until the stop or target hits
+  let outcome=null, exitR=0, bars=0;
   for(let k=0;k<fwd.length;k++){
-    const c=fwd[k];
-    if(!triggered){ const hit=dir==='long'?(c.l<=entry):(c.h>=entry); if(hit){triggered=true;trigK=k;} else continue; }
-    bars=k-trigK+1;
+    const c=fwd[k]; bars=k+1;
     // stop is checked before target so an intrabar tie resolves to the loss (conservative)
     if(dir==='long'){
       if(c.l<=sl){outcome='loss';exitR=-1;break;}
@@ -3186,15 +3235,14 @@ function simulateSetup(tk,full,cut,q){
       if(c.l<=tp1){outcome='win';exitR=(entry-tp1)/risk;break;}
     }
   }
-  if(!triggered){outcome='no-fill';exitR=0;}
-  else if(!outcome){outcome='open';exitR=0;}   // ran out of history before hitting stop or target — left open, not counted
-  const win=(outcome==='win');
+  if(!outcome){outcome='open';exitR=0;}   // ran out of history before hitting stop or target — left open, not counted
+  const win=(outcome==='win'), triggered=true;   // market entry at the decision close — always filled
   // compact snapshot so the setup can be redrawn later — decision tail + a
   // CAPPED slice of forward bars (the sim may walk 100+ bars; the chart only needs ~45).
   const tail=histWin.slice(-45);
   const snapC=tail.concat(fwd.slice(0,45)).map(c=>({o:+(+c.o).toFixed(2),h:+(+c.h).toFixed(2),l:+(+c.l).toFixed(2),c:+(+c.c).toFixed(2)}));
   const snap={c:snapC,cut:tail.length-1};
-  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime};
+  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime,zones:SLv.zones};
 }
 // Fold one simulated trade into memory + the shared pool, recording the
 // confidence BEFORE→AFTER so the console can show what actually changed.
@@ -3213,7 +3261,7 @@ function applyLearning(sim,auto){
   }
   const confA=Math.round(stratConf(key)*100);
   AI_MEMORY.log.unshift({t:Date.now(),tk:sim.tk,key,name:sim.lvl.name,color:sim.lvl.color,dir:sim.dir,
-    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,regime:sim.regime,
+    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,regime:sim.regime,zones:sim.zones,
     confB,confA,score:+(sim.setup.score||0).toFixed(2),auto:!!auto,date:sim.date,snap:sim.snap});
   if(AI_MEMORY.log.length>45)AI_MEMORY.log.length=45;
   return{counted,confB,confA};
@@ -3424,13 +3472,20 @@ function predictChartSVG(candles,e){
   const levels=[{v:lv.resis,col:'#f0a500',lab:'Resistance',dash:'4 3'},{v:lv.support,col:'#22c55e',lab:'Support',dash:'4 3'},
     {v:entry,col:'#e8eaed',lab:'Entry (now)',dash:'0'},{v:sl,col:'#f43f5e',lab:'Stop',dash:'4 3'},{v:tp1,col:'#4ade80',lab:'Target',dash:'2 3'}];
   const lvVals=levels.map(l=>l.v).filter(v=>isFinite(v));
-  const allV=C.map(c=>c.h).concat(C.map(c=>c.l),lvVals);
+  const zoneVals=e.zones?[].concat(e.zones.buy||[],e.zones.sell||[],[e.zones.liq]).filter(v=>isFinite(v)):[];
+  const allV=C.map(c=>c.h).concat(C.map(c=>c.l),lvVals,zoneVals);
   let mn=Math.min(...allV),mx=Math.max(...allV);const pad=(mx-mn)*0.06||1;mn-=pad;mx+=pad;
   const W=820,H=348,padL=62,padR=132,padT=16,padB=28,pw=W-padL-padR,ph=H-padT-padB;
   const projW=Math.round(pw*0.26), candW=pw-projW;          // candles left, projection right
   const slot=candW/n,bodyW=Math.max(3,Math.min(11,slot*0.64));
   const cx=i=>padL+slot*(i+0.5),Y=v=>padT+(1-(v-mn)/((mx-mn)||1))*ph;
   const bx=padL+candW, rx=W-padR;                            // boundary (now) and right edge
+  // shaded supply/demand zones the stop & target sit on (real structure)
+  let zoneSvg='';
+  if(e.zones){
+    const band=(arr,col,lab)=>{if(!arr||arr.length<2||!isFinite(arr[0])||!isFinite(arr[1]))return '';const hi=Math.max(arr[0],arr[1]),lo=Math.min(arr[0],arr[1]),y1=Y(hi),h=Math.max(3,Y(lo)-Y(hi));return `<rect x="${padL}" y="${y1.toFixed(1)}" width="${(rx-padL).toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" opacity=".13"/><text x="${padL+5}" y="${(y1+Math.min(h-3,11)).toFixed(1)}" fill="${col}" font-size="9.5" font-family="${mono}" opacity=".9">${lab}</text>`;};
+    zoneSvg=band(e.zones.buy,'#22c55e',isShort?'demand / target zone':'demand / buy zone')+band(e.zones.sell,'#f0a500',isShort?'supply / sell zone':'supply / target zone');
+  }
   let axisSvg='';for(let k=0;k<=5;k++){const v=mn+(mx-mn)*k/5,y=Y(v);axisSvg+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${rx}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity=".3"/><text x="${padL-8}" y="${(y+3.5).toFixed(1)}" fill="var(--ink3)" font-size="11.5" font-family="${mono}" text-anchor="end">${v.toFixed(2)}</text>`;}
   const candleSvg=C.map((c,i)=>{const up=c.c>=c.o,col=up?'#22c55e':'#f43f5e',x=cx(i),bt=Math.min(Y(c.o),Y(c.c)),bh=Math.max(1,Math.abs(Y(c.c)-Y(c.o)));return`<line x1="${x.toFixed(1)}" y1="${Y(c.h).toFixed(1)}" x2="${x.toFixed(1)}" y2="${Y(c.l).toFixed(1)}" stroke="${col}" stroke-width="1" opacity=".9"/><rect x="${(x-bodyW/2).toFixed(1)}" y="${bt.toFixed(1)}" width="${bodyW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}"/>`;}).join('');
   const lvLines=levels.map(l=>isFinite(l.v)?`<line x1="${padL}" y1="${Y(l.v).toFixed(1)}" x2="${rx}" y2="${Y(l.v).toFixed(1)}" stroke="${l.col}" stroke-width="1.3"${l.dash!=='0'?` stroke-dasharray="${l.dash}"`:''} opacity=".9"/>`:'').join('');
@@ -3448,7 +3503,7 @@ function predictChartSVG(candles,e){
     ${axisSvg}
     <rect x="${padL}" y="${padT}" width="${pw}" height="${ph}" fill="none" stroke="var(--line)" stroke-width="1"/>
     <rect x="${bx.toFixed(1)}" y="${padT}" width="${(rx-bx).toFixed(1)}" height="${ph}" fill="var(--ink)" opacity=".03"/>
-    ${lvLines}${rewardFill}${riskFill}${candleSvg}${projLines}${nowLine}${nowDot}${lvLabels}
+    ${zoneSvg}${lvLines}${rewardFill}${riskFill}${candleSvg}${projLines}${nowLine}${nowDot}${lvLabels}
     <text x="${padL}" y="${(H-8).toFixed(1)}" fill="var(--ink3)" font-size="11.5" font-family="${mono}">real candles up to now · shaded zone = the ${isShort?'short':'long'} prediction from here</text>
   </svg>`;
 }
@@ -4296,6 +4351,15 @@ function horizonCandles(q){
   s=q[cfg.fallback]||q.h3m||q.h6m||[];
   return s.slice(-Math.max(cfg.fbBars,30));
 }
+// A WIDER window for reading structure/zones — more context than the trade
+// window so the AI sees real support/resistance, not just the last few bars.
+const HZ_STRUCT_BARS={'0dte':120,'1w':30,'1m':55,'3m':80,'6m':130,'1y':200};
+function structCandles(q){
+  if(currentDTE==='0dte'){const intr=q.h1d&&q.h1d.length>40?q.h1d:null;if(intr)return intr.slice(-120);}
+  const n=HZ_STRUCT_BARS[currentDTE]||80;
+  const wide=(q.h1y&&q.h1y.length)?q.h1y:(q.h6m||q.h3m||q.h1m||[]);
+  return wide.slice(-n);
+}
 function clampLevels(entry,sl,tp1,tp2){
   const band=HZ_RISK[currentDTE]||HZ_RISK['1m'];
   const riskPct=entry>0?Math.abs(entry-sl)/entry*100:0;
@@ -4330,27 +4394,28 @@ async function renderDash(text){
     const wHi=currentDTE==='1y'?q.hi52:Math.max(...cwin), wLo=currentDTE==='1y'?q.lo52:Math.min(...cwin);
     const a=analyze(ticker,q.price,q.pct,wHi,wLo,cwin);
     const isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
-    let entry=0,sl=0,tp1=0,tp2=0,aiPick=null;
+    let entry=0,sl=0,tp1=0,tp2=0,aiPick=null,dashZones=null;
     const cand=horizonCandles(q);   // structure window scaled to the chosen horizon
     let dashRegime='';
     if(cand.length>=20){try{const setup=classifySetup(cand,a);dashRegime=setup.regime||'';aiPick=aiStrategyLevels(setup.key,cand);aiPick.conf=stratConf(setup.key);}catch(e){aiPick=null;}}
     if(!isNeutral){
-      const px=+q.price;
-      if(aiPick&&aiPick.entry&&aiPick.sl&&aiPick.tp1){
-        // PREDICT FROM NOW: anchor the entry to the CURRENT price (not the
-        // structure level the move may have already passed), keep the
-        // strategy's risk/reward distances, and project stop/target forward.
-        const risk=Math.abs(aiPick.entry-aiPick.sl);
-        // Guarantee an asymmetric setup: target ≥ 2× risk, runner ≥ 3.2× — stop stays closer than target.
-        const r1=Math.max(Math.abs(aiPick.tp1-aiPick.entry),risk*2);
-        const r2=Math.max(Math.abs((aiPick.tp2||aiPick.tp1)-aiPick.entry),risk*3.2,r1*1.4);
+      const px=+q.price, dir=isShort?'short':'long';
+      // STRUCTURE-BASED LEVELS: stop just beyond the nearest swing/liquidity,
+      // target at the next real supply/demand zone — never an arbitrary number.
+      try{
+        const sc=structCandles(q), lastC=+sc[sc.length-1].c;
+        const SLv=structureLevels(sc,dir,atr(sc,14));
+        const shift=px-lastC;                       // re-anchor structure to the live price (predict from now)
         entry=px;
-        if(isShort){sl=+(px+risk).toFixed(2);tp1=+(px-r1).toFixed(2);tp2=+(px-r2).toFixed(2);}
-        else       {sl=+(px-risk).toFixed(2);tp1=+(px+r1).toFixed(2);tp2=+(px+r2).toFixed(2);}
-        const c=clampLevels(entry,sl,tp1,tp2);   // fit a realistic distance for the horizon (preserves R:R)
-        sl=c.sl;tp1=c.tp1;tp2=c.tp2;
+        sl=+(SLv.sl+shift).toFixed(2); tp1=+(SLv.tp1+shift).toFixed(2); tp2=+(SLv.tp2+shift).toFixed(2);
+        dashZones={buy:SLv.zones.buy.map(v=>+(v+shift).toFixed(2)),sell:SLv.zones.sell.map(v=>+(v+shift).toFixed(2)),liq:+(SLv.zones.liq+shift).toFixed(2)};
+      }catch(e){
+        // fallback: horizon %-band setup (still asymmetric — target ≥ 2× risk)
+        const info=DTE[currentDTE],slP=info.sl/100,tp1P=info.tp1/100,tp2P=info.tp2/100;entry=+px.toFixed(2);
+        sl=isShort?+(entry*(1+slP)).toFixed(2):+(entry*(1-slP)).toFixed(2);
+        tp1=isShort?+(entry*(1-tp1P)).toFixed(2):+(entry*(1+tp1P)).toFixed(2);
+        tp2=isShort?+(entry*(1-tp2P)).toFixed(2):+(entry*(1+tp2P)).toFixed(2);
       }
-      else{const info=DTE[currentDTE],slP=info.sl/100,tp1P=info.tp1/100,tp2P=info.tp2/100;entry=+px.toFixed(2);sl=isShort?+(entry*(1+slP)).toFixed(2):+(entry*(1-slP)).toFixed(2);tp1=isShort?+(entry*(1-tp1P)).toFixed(2):+(entry*(1+tp1P)).toFixed(2);tp2=isShort?+(entry*(1-tp2P)).toFixed(2):+(entry*(1+tp2P)).toFixed(2);}
     }
     lastData={ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick};
     setMood(a.sentiment);                       // flip the whole UI red when the read is bearish
@@ -4383,6 +4448,7 @@ async function renderDash(text){
     // Distances read in $ and % from the current price — how traders actually see levels.
     const pctOf=l=>{const d=q.price?(l-q.price)/q.price*100:0;return (d>=0?'+':'−')+Math.abs(d).toFixed(1)+'%';};
     const dollarOf=l=>'$'+Math.abs(l-q.price).toFixed(2);
+    const zsub=t=>dashZones?`<span style="display:block;font-size:9px;color:var(--ink3);font-weight:600;letter-spacing:0;text-transform:none;margin-top:2px">${t}</span>`:'';
     const riskAbs=Math.abs(entry-sl),rewAbs=Math.abs(tp1-entry);
     const riskPct=entry?riskAbs/entry*100:0,rewPct=entry?rewAbs/entry*100:0;
     const rr=riskAbs>0?(rewAbs/riskAbs).toFixed(1):'–';
@@ -4391,9 +4457,9 @@ async function renderDash(text){
     const planBody=isNeutral
       ? `<div class="dash-rationale">Mixed signals — no setup until price clears <b>$${a.hi20}</b> (breakout) or <b>$${a.lo20}</b> (breakdown).</div>`
       : `<div class="lv-table">
-          <div class="lv-row entry"><div class="lk">Entry</div><div class="lp">$${entry.toFixed(2)}</div><div class="lt">at market · now</div></div>
-          <div class="lv-row risk"><div class="lk">${isShort?'Stop · cover':'Stop'}</div><div class="lp">$${sl.toFixed(2)}</div><div class="lt">${pctOf(sl)} · ${dollarOf(sl)}</div></div>
-          <div class="lv-row rew"><div class="lk">Target</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
+          <div class="lv-row entry"><div class="lk">Entry${zsub('current price')}</div><div class="lp">$${entry.toFixed(2)}</div><div class="lt">at market · now</div></div>
+          <div class="lv-row risk"><div class="lk">${isShort?'Stop · cover':'Stop'}${zsub(isShort?'above the swing high (liquidity)':'below the swing low (liquidity)')}</div><div class="lp">$${sl.toFixed(2)}</div><div class="lt">${pctOf(sl)} · ${dollarOf(sl)}</div></div>
+          <div class="lv-row rew"><div class="lk">Target${zsub(isShort?'prior support / demand zone':'prior resistance / supply zone')}</div><div class="lp">$${tp1.toFixed(2)}</div><div class="lt">${pctOf(tp1)} · ${dollarOf(tp1)}</div></div>
         </div>
         <div class="dp-rr">R:R <b>1 : ${rr}</b> · risk <b>${riskPct.toFixed(1)}%</b> (${riskAbs.toFixed(2)}) → reward <b>${rewPct.toFixed(1)}%</b> (${rewAbs.toFixed(2)})<br>If it reaches the target before the stop, you make ${rr}× what you risk.</div>`;
     // ── PREDICTION CHART (full-width left column, readable) ──
@@ -4402,7 +4468,7 @@ async function renderDash(text){
     if(isNeutral){ if(predPanel)predPanel.style.display='none'; }
     else {
       if(predPanel)predPanel.style.display='';
-      if(pred)pred.innerHTML=`<div class="dp-h">AI prediction <span class="tag">${isShort?'Short':'Long'} · ${hzLabel}</span> <span class="tag">from current price</span></div>${predictChartSVG(chartCand,{tk:ticker,dir:isShort?'short':'long',entryP:entry,sl,tp1})}`;
+      if(pred)pred.innerHTML=`<div class="dp-h">AI prediction <span class="tag">${isShort?'Short':'Long'} · ${hzLabel}</span> <span class="tag">from current price</span></div>${predictChartSVG(chartCand,{tk:ticker,dir:isShort?'short':'long',entryP:entry,sl,tp1,zones:dashZones})}`;
     }
     dashEl('dashPlan').innerHTML=`
       <div class="dp-h">Trade plan <span class="tag">${hzLabel} horizon</span></div>

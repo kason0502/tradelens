@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 16m) — levels on real structure (zones), not arbitrary numbers
+- **Stops & targets now sit on meaningful structure, not a random R-multiple.** New `findZones` (every swing high = supply/sell zone, every swing low = demand/buy zone) + `structureLevels(candles,dir,atr)`: the **stop goes just beyond the nearest swing/liquidity**, the **target at the next opposing supply/demand zone** that pays ≥1.8R (floored to keep reward > risk). R:R is now a *result of structure*, not forced.
+- **More context candles:** `structCandles` reads a wider, horizon-scaled window (e.g. ~55 bars for 1M, ~200 for 1Y, intraday for 0DTE) so the AI sees real S/R, not the last few bars.
+- **Dashboard prediction follows the same rules** — re-anchored to the live price, levels from structure; the plan rows now name the structure ("below the swing low (liquidity)", "prior resistance / supply zone"); the prediction chart **shades the demand/supply zones**.
+- **AI Lab learns from structure too:** `simulateSetup` now grades a **market entry at the decision close** against structure-based stop/target over a wider window — so the engine learns whether *structure-based* setups work, per regime. (Removed the old "no-fill" path — market entries always fill.)
+- What it learns still drives selection (regime-aware expectancy multiplier in `classifySetup`).
+
 ## 2026-06-27 (session 16l) — fix risk/reward: stop must be closer than target
 - **Major flaw fixed:** setups were ~1.3:1 (risk ≈ reward — stop and target looked equidistant). Now **asymmetric by design — target ≥ 2× the risk, runner ≥ 3.2×**, so the stop is always closer than the target and a loss is smaller than a win. Fixed in three places: `normTrade` floors (1.3→2.0 / 2.2→3.2), the `DTE` fallback ratios (tighter stops, ~2–3× targets), and a hard safety net in the dashboard re-anchor (`r1≥risk*2`, `r2≥risk*3.2`). The prediction chart's reward cone and the plan's "you make Nx what you risk" update automatically.
 - _Note:_ because targets are now farther, the AI Lab **raw win-rate will read lower** — but the break-even win rate at 1:2 is only 33% (vs 43% at 1.3:1), so the same trades are healthier. **Expectancy (R), not win%, is the real metric** (and is what drives selection).
