@@ -967,6 +967,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .score-rec.no{background:rgba(239,68,68,.14);color:var(--rt)}
 .score-rec.wait{background:rgba(255,255,255,.04);color:var(--ink2)}
 /* 0DTE Lab */
+.opt-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.opt-fresh{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
+.opt-auto{font-size:11.5px;color:var(--ink2);display:inline-flex;align-items:center;gap:5px;cursor:pointer}
 .opt-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:820px){.opt-2col{grid-template-columns:1fr}}
 .opt-log{width:100%}
@@ -3659,12 +3662,12 @@ function paintAutoStatus(){
 let _optlabData=null;
 async function renderOptLab(){
   const el=document.getElementById('optlabBody');if(!el)return;
-  if(_optlabData){paintOptLab(_optlabData);return;}
   el.innerHTML=`<div class="card"><div class="loading-label">Loading backtest results…</div></div>`;
-  // Prefer the real engine output; fall back to the labelled synthetic sample.
+  // Always re-fetch (cache-busted) so a fresh engine run shows up on tab open / Refresh.
   let data=null;
+  const bust='?t='+Date.now();
   for(const url of ['backtester/results.json','backtester/results.sample.json']){
-    try{const r=await fetch(url,{cache:'no-store'});if(r.ok){data=await r.json();break;}}catch(e){}
+    try{const r=await fetch(url+bust,{cache:'no-store'});if(r.ok){data=await r.json();break;}}catch(e){}
   }
   if(!data){
     el.innerHTML=`<div class="card"><div class="card-title">No results yet</div>
@@ -3731,7 +3734,25 @@ function paintOptLab(d){
   }).join('');
   const logCard=`<div class="card"><div class="card-title">Trade log <span class="tag">${(d.trades||[]).length} trades · fills show spread cost paid</span></div>
     <div style="overflow-x:auto"><table class="rg-table opt-log"><tr><th>Entry→Exit</th><th>Session</th><th>Contract</th><th>Buy fill</th><th>Sell fill</th><th>Exit</th><th>Spread cost</th><th>P&L</th></tr>${rows}</table></div></div>`;
-  el.innerHTML=synthBanner+score+frag+equityCard+`<div class="opt-2col">${todCard}${costsCard}</div>`+logCard;
+  const gen=d.generated_at?String(d.generated_at).replace('T',' ').slice(0,16):'';
+  const autoOn=!!window._optLabTimer;
+  const topBar=`<div class="opt-top">
+    <div class="opt-fresh">Last run: <b>${gen||'—'}</b>${d.synthetic?' <span style="color:var(--rt)">(synthetic)</span>':''} · ${cfg.symbol||''} ${(cfg.start_date||'')}→${(cfg.end_date||'')}</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label class="opt-auto"><input type="checkbox" ${autoOn?'checked':''} onchange="optLabToggleAuto(this.checked)"> auto-refresh</label>
+      <button class="dp-fu" onclick="renderOptLab()">↻ Refresh</button>
+    </div>
+  </div>`;
+  el.innerHTML=topBar+synthBanner+score+frag+equityCard+`<div class="opt-2col">${todCard}${costsCard}</div>`+logCard;
+}
+// Auto-refresh: re-pull results.json every 10s while the 0DTE Lab tab is open.
+window._optLabTimer=window._optLabTimer||null;
+function optLabToggleAuto(on){
+  if(window._optLabTimer){clearInterval(window._optLabTimer);window._optLabTimer=null;}
+  if(on){window._optLabTimer=setInterval(()=>{
+    const t=document.getElementById('tab-optlab');
+    if(t&&t.classList.contains('active'))renderOptLab(); else {clearInterval(window._optLabTimer);window._optLabTimer=null;}
+  },10000);}
 }
 function optEquitySVG(eq,cap){
   const W=900,H=200,pad=34;const min=Math.min(cap||eq[0],...eq),max=Math.max(cap||eq[0],...eq);const rng=Math.max(1,max-min);
