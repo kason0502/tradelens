@@ -98,6 +98,30 @@ def _check(cfg: dict, day_str: str):
     print()
 
 
+def _probe_theta(cfg: dict, day_str: str):
+    """Hit the v3 quote + greeks endpoints (small EOD pull) and dump the raw shape
+    so the adapter can be written to match exactly."""
+    import requests, json as _json
+    base = cfg["data"]["thetadata"]["base_url"].rstrip("/")
+    sym = cfg.get("symbol", "SPY")
+    print(f"\nProbing ThetaData v3 at {base} for {sym} {day_str} (EOD, small)…\n" + "-" * 60)
+    for label, path in [("OPTION QUOTE", "/v3/option/history/quote"),
+                        ("OPTION GREEKS", "/v3/option/history/greeks")]:
+        params = {"symbol": sym, "expiration": day_str, "strike": "*", "right": "call",
+                  "start_date": day_str, "end_date": day_str, "interval": "1d"}
+        try:
+            r = requests.get(base + path, params=params, timeout=60)
+            print(f"\n### {label}  {path}  -> HTTP {r.status_code}")
+            txt = r.text
+            print(txt[:1500])
+            if len(txt) > 1500:
+                print(f"... [truncated, {len(txt)} chars total]")
+        except Exception as e:
+            print(f"\n### {label}  {path}  -> ERROR: {e}")
+    print("\n" + "-" * 60)
+    print("Paste the above to your assistant — it reveals the v3 field names/format.")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="config.json")
@@ -106,11 +130,15 @@ def main():
     ap.add_argument("--end", help="override end date (omit = same as --start, i.e. one day)")
     ap.add_argument("--symbol", help="override symbol, e.g. SPY")
     ap.add_argument("--check", action="store_true", help="probe what your Polygon key can access, then exit")
+    ap.add_argument("--probe-theta", action="store_true", help="dump raw ThetaData v3 response shape, then exit")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
     if args.check:
         _check(cfg, args.start or "2024-05-15")
+        return
+    if args.probe_theta:
+        _probe_theta(cfg, args.start or "2024-05-15")
         return
     # Command-line overrides so you never have to hand-edit config.json.
     if args.start:

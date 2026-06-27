@@ -15,8 +15,8 @@
       "_note": "Set POLYGON_API_KEY as an environment variable (do NOT paste the key here / into git). Needs an Options tier that includes QUOTES (NBBO). No historical greeks on Polygon, so use contract_selection='nearest_atm'."
     },
     "thetadata": {
-      "base_url": "http://127.0.0.1:25510",
-      "_note": "Theta Terminal must be running and logged in. Greeks require a tier that exposes them; if not, the run ABORTS rather than estimating them."
+      "base_url": "http://127.0.0.1:25503",
+      "_note": "Theta Terminal v3 serves on port 25503 with the /v3 REST API. Must be running + logged in."
     },
     "local": {
       "quotes_path": "data/spy_0dte_quotes.parquet",
