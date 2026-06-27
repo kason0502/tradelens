@@ -1,7 +1,17 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-27 (session 21)
+> Last updated: 2026-06-27 (session 22)
+
+## Done (session 22 — scorecard + dollars + level rebalance)
+- [x] **Dashboard setup scorecard** — probability/confidence/sample/win-rate/R:R/EV grid + approve-or-skip recommendation banner.
+- [x] **AI Lab "profit in dollars" panel** — $ result of 1 contract / $100-risk, worked math, + always-on "low win rate can still win" principle.
+- [x] **Fixed tight-stop bug** — stops now beyond major swings with a ≥1.1×ATR floor (was anchoring to minor wiggles → ~14% win rate); targets take the nearest reachable real pivot. Loosened `FWD_CAP` so slow winners aren't truncated.
+
+## Next (push expectancy from breakeven → positive, honestly)
+- [ ] **Selectivity / entry quality:** the engine takes every setup in self-tests (→ ~breakeven). Consider only *counting/approving* with-trend + high-feature setups; or wait-for-pullback entries instead of market-at-close. Avoid overfitting.
+- [ ] **Intraday calibration:** 5-min self-tests still win-rate-low (~17%); intraday stops/targets likely need vol-relative tuning distinct from daily.
+- [ ] **Costs:** fold a small slippage/commission into self-test R so the EV shown is net, not gross.
 
 ## Done (session 21 — stops/targets on real structure)
 - [x] **Rebuilt `structureLevels`** to anchor stop/target on genuine pivots (`structurePivots`, 2 scales), prefer real structure over arithmetic, honor the horizon band by *choosing among real pivots*, and **flag** when a level isn't on structure.

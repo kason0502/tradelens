@@ -945,6 +945,27 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dp-struct{font-size:11px;line-height:1.5;margin-top:9px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);color:var(--ink2)}
 .dp-struct.on{border-color:rgba(var(--ac-rgb),.28);background:rgba(var(--ac-rgb),.05)}
 .dp-struct.off{border-color:var(--line);color:var(--ink3)}
+/* AI Lab dollar panel */
+.usd-hero{font-size:34px;font-weight:900;letter-spacing:-.03em;font-family:var(--mono);line-height:1.05;margin:2px 0 4px}
+.usd-hero.g{color:var(--gt)}.usd-hero.r{color:var(--rt)}
+.usd-sub{display:block;font-size:11.5px;font-weight:600;color:var(--ink3);font-family:var(--sans,inherit);letter-spacing:0;margin-top:3px}
+.usd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0 4px}
+.usd-cell{border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;background:rgba(255,255,255,.015)}
+.usd-v{font-size:17px;font-weight:900;font-family:var(--mono);line-height:1.1}
+.usd-l{font-size:9.5px;color:var(--ink3);margin-top:3px;line-height:1.3}
+.usd-math{font-size:12px;font-family:var(--mono);color:var(--ink2);margin-top:12px;padding:9px 11px;border:1px dashed var(--line);border-radius:9px;text-align:center;line-height:1.7}
+.usd-principle{font-size:11.5px;line-height:1.6;margin-top:11px;padding:9px 11px;border-radius:9px;background:rgba(var(--ac-rgb),.06);border:1px solid rgba(var(--ac-rgb),.2);color:var(--ink2)}
+/* Dashboard setup scorecard */
+.score-card{margin:0 0 14px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.sc-cell{background:var(--s1,#0b0d10);padding:11px 8px;text-align:center}
+.sc-v{font-size:18px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em;line-height:1.1}
+.sc-l{font-size:9px;color:var(--ink3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
+.score-rec{padding:11px;text-align:center;font-weight:900;font-size:14px;letter-spacing:.01em}
+.score-rec.ok{background:rgba(34,197,94,.14);color:var(--gt)}
+.score-rec.ok2{background:rgba(34,197,94,.08);color:var(--gt)}
+.score-rec.no{background:rgba(239,68,68,.14);color:var(--rt)}
+.score-rec.wait{background:rgba(255,255,255,.04);color:var(--ink2)}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .dp-fu{font-size:12.5px;border:1px solid var(--line2);border-radius:9px;padding:7px 13px;color:var(--ink2);background:transparent;cursor:pointer;transition:all .15s;font-family:inherit}
 .dp-fu:hover{border-color:rgba(var(--ac-rgb),.5);color:var(--act)}
@@ -3091,39 +3112,46 @@ function structureLevels(candles,dir,atrVal,cfg,band){
   const a=atrVal||atr(candles,14);
   const last=+candles[candles.length-1].c;
   const stopBuf=(cfg&&cfg.stopBuf)||0.45, minRR=(cfg&&cfg.minRR)||2.0;   // learned construction params
-  const z=structurePivots(candles), buf=a*stopBuf;
+  const major=findZones(candles,2);              // SIGNIFICANT swings — protective stops go beyond these
+  const all=structurePivots(candles);            // major + minor — used for targets (nearby resistance is fine)
+  const buf=a*stopBuf;
   const cap=v=>+v.toFixed(2);
   const bandMin=band?last*band[0]/100:0;
   const bandMax=band?last*band[1]/100:a*5;       // no band → just a sane safety cap
-  const floor=Math.max(a*0.4,bandMin*0.6);       // don't put the stop absurdly tight
+  // Floor the stop at ~1.1 ATR (+ the buffer) so normal noise can't trigger it —
+  // a too-tight stop is what tanks the win rate. Honor bandMin if it's wider.
+  const floor=Math.max(a*1.1+buf,bandMin);
   const isLong=dir==='long';
-  // candidate liquidity pivots on the stop side, each with the risk of stopping just beyond it
-  const stopSide=(isLong?z.lows:z.highs).map(p=>p.price)
-    .filter(p=>isLong?p<last-a*0.08:p>last+a*0.08)
-    .map(p=>({p,risk:Math.abs(last-p)+buf}))
-    .filter(o=>o.risk>=floor)
-    .sort((x,y)=>x.risk-y.risk);                  // nearest real pivot first
-  // pick a real pivot: prefer one that fits the band; else nearest not-absurd; else nearest
-  let pick=stopSide.find(o=>o.risk>=bandMin&&o.risk<=bandMax)
-        || stopSide.find(o=>o.risk<=bandMax*1.6)
+  // STOP: just beyond a significant (major) swing/liquidity pivot.
+  const stopSide=(isLong?major.lows:major.highs).map(p=>p.price)
+    .filter(p=>isLong?p<last-a*0.1:p>last+a*0.1)
+    .map(p=>({p,risk:Math.max(floor,Math.abs(last-p)+buf)}))   // never tighter than the floor
+    .sort((x,y)=>x.risk-y.risk);                  // nearest significant pivot first
+  let pick=stopSide.find(o=>o.risk>=bandMin&&o.risk<=bandMax)  // a real swing that also fits the horizon
+        || stopSide.find(o=>o.risk<=bandMax*1.6)               // nearest real swing not absurdly wide
         || stopSide[0] || null;
   const slStruct=!!pick;
-  const risk=pick?pick.risk:Math.max(a*1.2,bandMin||a*1.4);   // fallback: no usable swing
+  const risk=pick?pick.risk:Math.max(floor,bandMin||a*1.6);    // fallback: no usable swing → ATR/band stop
   const base=pick?pick.p:(isLong?last-(risk-buf):last+(risk-buf));
   const sl=isLong?last-risk:last+risk;
-  // target: nearest opposing pivot that pays >= minRR; else furthest real pivot
-  // if it still beats risk; else a last-resort R-multiple (flagged non-structure)
-  const tgtSide=(isLong?z.highs:z.lows).map(p=>p.price)
-    .filter(p=>isLong?p>last+a*0.08:p<last-a*0.08)
-    .sort((x,y)=>isLong?x-y:y-x);                 // nearest opposing pivot first
+  // TARGET: the NEAREST real opposing pivot that still pays > 1R (reachable AND
+  // real → better win rate than forcing a far minRR target). Prefer one paying
+  // the learned minRR if it's not much farther; else take the nearest valid real
+  // level; else extend to minRR (flagged non-structure) to keep loss < win.
+  const tgtSide=(isLong?all.highs:all.lows).map(p=>p.price)
+    .filter(p=>isLong?p>last+a*0.1:p<last-a*0.1)
+    .map(p=>({p,reward:Math.abs(p-last)}))
+    .filter(o=>o.reward>=risk*1.1)               // must clear 1.1R so reward > risk
+    .sort((x,y)=>x.reward-y.reward);             // nearest reachable real target first
   const rewardOf=p=>Math.abs(p-last);
   let tp1=null,tpStruct=false;
-  const payer=tgtSide.find(p=>rewardOf(p)>=risk*minRR);
-  if(payer!=null){tp1=payer;tpStruct=true;}
-  else if(tgtSide.length&&rewardOf(tgtSide[tgtSide.length-1])>=risk*1.4){tp1=tgtSide[tgtSide.length-1];tpStruct=true;} // furthest real pivot (real, lower RR)
-  else {tp1=isLong?last+risk*minRR:last-risk*minRR;tpStruct=false;}                                                   // no real target pays — extend to keep loss<win
+  const payer=tgtSide.find(o=>o.reward>=risk*minRR);
+  if(payer && tgtSide[0] && payer.reward<=tgtSide[0].reward*1.8){tp1=payer.p;tpStruct=true;}   // a minRR target that isn't a huge stretch
+  else if(tgtSide.length){tp1=tgtSide[0].p;tpStruct=true;}                                      // nearest reachable real target
+  else {tp1=isLong?last+risk*minRR:last-risk*minRR;tpStruct=false;}                             // no real target — extend to keep loss<win
   // second target: next real opposing pivot beyond tp1, else a wider multiple
-  let tp2=tgtSide.find(p=>rewardOf(p)>=risk*(minRR+1.2));
+  const tp2o=tgtSide.find(o=>o.reward>rewardOf(tp1)+risk*0.6);
+  let tp2=tp2o?tp2o.p:null;
   if(tp2==null||(isLong?tp2<=tp1:tp2>=tp1))tp2=isLong?Math.max(last+risk*(minRR+1.4),tp1+risk):Math.min(last-risk*(minRR+1.4),tp1-risk);
   return isLong
     ? {entry:cap(last),sl:cap(sl),tp1:cap(tp1),tp2:cap(tp2),risk,slStruct,tpStruct,base:cap(base),
@@ -3149,10 +3177,11 @@ const TF_LABEL={intraday:'Intraday',swing:'Swing',position:'Position'};
 const TF_SUB={intraday:'0DTE · 1-min',swing:'1W–1M',position:'3M–1Y'};
 function tfBucket(dte){ if(dte==='0dte')return 'intraday'; if(dte==='1w'||dte==='1m')return 'swing'; return 'position'; }
 // Max forward bars a self-test will hold before calling it "open" (unresolved).
-// This is what makes the buckets learn DIFFERENT things from the same data: a
-// swing setup only "wins" if it resolves in swing time (~weeks), a position
-// trade gets months. Without it, swing & position would be statistically equal.
-const FWD_CAP={intraday:130,swing:25,position:160};
+// Differentiates the buckets by hold length, but kept GENEROUS: too tight a cap
+// biases the win rate down (a 2R target takes longer to reach than a 1R stop,
+// so a short cap counts fast losses but truncates slow winners). These give
+// targets a fair chance while still capping absurdly long holds.
+const FWD_CAP={intraday:200,swing:50,position:250};
 function defaultMemory(){
   const m={strats:{},trials:0,wins:0,log:[],params:defaultParams(),model:{}};
   LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
@@ -3488,6 +3517,10 @@ function applyLearning(sim,auto){
     mem.pnl+=sim.r; mem.bars=(mem.bars||0)+(sim.bars||0); mem.conf=stratConf(key,bucket);   // track time-in-trade for efficiency
     if(sim.regime){const rc=regimeCell(mem,sim.regime);if(sim.win)rc.wins++;else rc.losses++;rc.pnl+=sim.r;rc.bars=(rc.bars||0)+(sim.bars||0);} // learn per regime
     const tc=tfCell(mem,bucket);if(sim.win)tc.wins++;else tc.losses++;tc.pnl+=sim.r;tc.bars=(tc.bars||0)+(sim.bars||0);   // learn per timeframe
+    // Real $ if you'd traded 1 contract (100 shares of the underlying) at each
+    // setup's actual entry/stop — so the AI Lab can show that a sub-50% win
+    // rate is still PROFITABLE in dollars when winners outweigh losers.
+    {const rPerShare=Math.abs((+sim.entry)-(+sim.sl));tc.dollar=(tc.dollar||0)+(sim.r||0)*rPerShare*100;tc.dollarRisk=(tc.dollarRisk||0)+rPerShare*100;}
     if(sim.genomeIdx!=null){const g=ensureParams(bucket).pop[sim.genomeIdx];if(g){if(sim.win)g.wins++;else g.losses++;g.pnl+=sim.r;g.bars=(g.bars||0)+(sim.bars||0);}} // learn this bucket's construction params
     AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
     const P=ensureParams(bucket);P.n=(P.n||0)+1;if(P.n%25===0)evolveGenomes(bucket);   // breed a better construction every 25 resolved trades IN THIS BUCKET
@@ -3655,7 +3688,7 @@ function renderAILearnStats(){
     <div style="display:flex;height:11px;border-radius:99px;overflow:hidden;margin:0 0 6px;background:var(--s3)" title="${wins} wins · ${losses} losses">${winPct?`<div style="width:${winPct}%;background:var(--gr)"></div>`:''}${lossPct?`<div style="width:${lossPct}%;background:var(--rd)"></div>`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);margin-bottom:18px"><span class="g">${wins} wins (${winPct}%)</span><span class="r">${losses} losses (${lossPct}%)</span></div>
     <div class="card"><div class="card-title">${TF_LABEL[bucket]} strategy leaderboard — best edge first</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> for ${TF_LABEL[bucket]} trades (expectancy × how efficiently it resolves). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:'Run some tests to build an edge.'} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${genomePanelHTML(bucket)}${modelPanelHTML(bucket)}${regimeMatrixHTML()}`;
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Ranked by <b>learned edge</b> for ${TF_LABEL[bucket]} trades (expectancy × how efficiently it resolves). ${best?`Right now its strongest is <b style="color:var(--act)">${best.name}</b>.`:'Run some tests to build an edge.'} The engine deploys the fitting strategy with the best edge and sizes your dashboard stop/target from it. ${SHARED_OK?'Pooled across everyone — every test makes it smarter for all.':'Saved on this device.'}</div></div>${dollarPanelHTML(bucket)}${genomePanelHTML(bucket)}${modelPanelHTML(bucket)}${regimeMatrixHTML()}`;
   renderAIConsole();
   paintAutoStatus();
 }
@@ -3680,6 +3713,39 @@ function modelPanelHTML(bucket){
     <div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:12px">An online <b>logistic model</b> trained on <b>${m.n||0}</b> ${TF_LABEL[bucket]} outcomes predicts each setup's <b>win probability</b>, which the dashboard turns into <b>expected value</b> and a Kelly size. Calibration (Brier): <b class="${brier!=null&&brier<0.25?'g':''}">${cal}</b> <span style="color:var(--ink3)">(${calNote}; 0.25 = no skill, lower is better).</span></div>
     ${m.n>=5?wrows:`<div class="bt-empty" style="padding:12px">Run more ${TF_LABEL[bucket]} self-tests — once it has a sample, the factors it learns to weight (with-trend, RSI, target ambition, volatility…) show here.</div>`}
     <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">Green raises win odds, red lowers them, for a trade in its own direction. This is the bot reasoning about <i>why</i> a setup should work — and the Brier score lets you verify the probabilities are honest, not just confident.</div>
+  </div>`;
+}
+// Dollars, not just win-rate: prove that a sub-50% win rate is still profitable
+// when winners outweigh losers. Shows a "$100 risk per trade" worked example
+// from the bucket's REAL learned stats, plus the actual 1-contract P&L.
+function dollarPanelHTML(bucket){
+  let wins=0,losses=0,pnlR=0,dollar=0;
+  Object.values(AI_MEMORY.strats).forEach(s=>{const c=s.byTF&&s.byTF[bucket];if(c){wins+=c.wins||0;losses+=c.losses||0;pnlR+=c.pnl||0;dollar+=c.dollar||0;}});
+  const n=wins+losses;
+  if(n<3)return `<div class="card"><div class="card-title">${TF_LABEL[bucket]} — profit in dollars</div>
+    <div class="bt-empty" style="padding:14px">Run a few ${TF_LABEL[bucket]} self-tests and this shows the <b>dollar</b> result of trading 1 contract — proving a low win rate can still be profitable.</div></div>`;
+  const wr=Math.round(wins/n*100), exp=pnlR/n;
+  const avgWinR=wins?(pnlR+losses)/wins:0;              // losers are −1R each, so winR total = pnlR + losses
+  const RISK=100;                                       // illustrate at $100 risk / trade
+  const winsUSD=wins*avgWinR*RISK, lossUSD=losses*RISK, netUSD=winsUSD-lossUSD;
+  const perTrade=exp*RISK;
+  const f=v=>(v<0?'−$':'+$')+Math.abs(Math.round(v)).toLocaleString();
+  const fp=v=>(v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString();
+  const good=netUSD>=0;
+  return `<div class="card"><div class="card-title">${TF_LABEL[bucket]} — profit in dollars (a low win rate can still win)</div>
+    <div class="usd-hero ${good?'g':'r'}">${f(netUSD)} <span class="usd-sub">net over ${n} trades · risking $100 each</span></div>
+    <div class="usd-grid">
+      <div class="usd-cell"><div class="usd-v ${wr>=50?'g':''}">${wr}%</div><div class="usd-l">Win rate${wr<50?' (under half!)':''}</div></div>
+      <div class="usd-cell"><div class="usd-v g">+${avgWinR.toFixed(1)}R</div><div class="usd-l">Avg winner (≈ ${fp(avgWinR*RISK)})</div></div>
+      <div class="usd-cell"><div class="usd-v r">−1.0R</div><div class="usd-l">Avg loser (≈ −$100)</div></div>
+      <div class="usd-cell"><div class="usd-v ${exp>=0?'g':'r'}">${exp>=0?'+':''}${exp.toFixed(2)}R</div><div class="usd-l">Edge per trade (≈ ${f(perTrade)})</div></div>
+    </div>
+    <div class="usd-math">${wins} wins × ${fp(avgWinR*RISK)} = <b class="g">${f(winsUSD)}</b> &nbsp;−&nbsp; ${losses} losses × $100 = <b class="r">−$${Math.round(lossUSD).toLocaleString()}</b> &nbsp;=&nbsp; <b class="${good?'g':'r'}">${f(netUSD)}</b></div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.6;margin-top:11px">${good
+      ? `Even though it wins only <b>${wr}%</b> of the time, the average winner (<b>${avgWinR.toFixed(1)}R</b>) is far bigger than the <b>1R</b> loser — so the edge is <b class="g">positive</b>. <b>Win rate isn't profit; expectancy is.</b>`
+      : `Right now the winners aren't big enough to cover the losers at this win rate — expectancy is <b class="r">negative</b>. Train more (it's still learning) or it needs a better reward:risk.`}
+      ${dollar?` <span style="color:var(--ink3)">(Trading 1 real contract at each setup's actual price: <b class="${dollar>=0?'g':'r'}">${f(dollar)}</b>.)</span>`:''}</div>
+    <div class="usd-principle"><b>The principle:</b> a <b>40%</b> win rate at <b>2.5R</b> still earns <b class="g">+0.40R</b> per trade — risk $100, average ≈ <b class="g">+$40</b> every trade. Profit = win rate × reward, <i>not</i> win rate alone. That's why this bot optimizes <b>expectancy</b>, not how often it's right.</div>
   </div>`;
 }
 // The evolving trade-construction parameters (stop buffer + min R:R) for one bucket.
@@ -4844,6 +4910,30 @@ async function renderDash(text){
         : dashSlStruct? 'Stop on <b>real structure</b>; target extended to keep reward &gt; risk (no qualifying zone yet).'
         : dashTpStruct? 'Target on <b>real structure</b>; stop fitted to the horizon (no clean nearby swing).'
         : 'No clean structure nearby right now — levels fitted to the horizon\'s risk band.'}</div>`;
+    // ── SETUP SCORECARD: the at-a-glance verdict (probability · confidence ·
+    //    sample · win rate · R:R · expected value → approve / skip) ──
+    let scoreCard='';
+    if(!isNeutral && dashPWin!=null){
+      const sst=aiPick?stratStats(aiPick.key,dashRegime,bucket):{n:0,winRate:0};
+      const wrPct=sst.n?Math.round(sst.winRate*100):Math.round(dashPWin*100);
+      let rec,recCls;
+      if(dashEV==null){rec='Insufficient data';recCls='wait';}
+      else if(dashEV>=0.15&&structOK){rec='✓ Trade Approved';recCls='ok';}
+      else if(dashEV>=0.15){rec='✓ Approved — levels horizon-fitted';recCls='ok';}
+      else if(dashEV>=0){rec='Tradeable — thin edge';recCls='ok2';}
+      else {rec='✕ Not Approved — negative edge';recCls='no';}
+      scoreCard=`<div class="score-card">
+        <div class="score-grid">
+          <div class="sc-cell"><div class="sc-v" style="color:${sentCol}">${Math.round(dashPWin*100)}%</div><div class="sc-l">${isShort?'Bearish':'Bullish'} probability</div></div>
+          <div class="sc-cell"><div class="sc-v">${convPct}%</div><div class="sc-l">Confidence</div></div>
+          <div class="sc-cell"><div class="sc-v">${sst.n||0}</div><div class="sc-l">Similar setups tested</div></div>
+          <div class="sc-cell"><div class="sc-v ${wrPct>=50?'g':''}">${wrPct}%</div><div class="sc-l">Avg win rate</div></div>
+          <div class="sc-cell"><div class="sc-v">${rr}</div><div class="sc-l">Reward : risk</div></div>
+          <div class="sc-cell"><div class="sc-v ${dashEV>=0?'g':'r'}">${dashEV>=0?'+':''}${dashEV.toFixed(2)}R</div><div class="sc-l">Expected value</div></div>
+        </div>
+        <div class="score-rec ${recCls}">${rec}</div>
+      </div>`;
+    }
     const planBody=isNeutral
       ? `<div class="dash-rationale">Mixed signals — no setup until price clears <b>$${a.hi20}</b> (breakout) or <b>$${a.lo20}</b> (breakdown).</div>`
       : `<div class="lv-table">
@@ -4871,6 +4961,7 @@ async function renderDash(text){
     }
     dashEl('dashPlan').innerHTML=`
       <div class="dp-h">Trade plan <span class="tag">${hzLabel} · ${TF_LABEL[bucket]} style</span></div>
+      ${scoreCard}
       <div class="dash-verdict ${sentClass}">${verdict}</div>
       ${planBody}
       <div class="dp-actions">

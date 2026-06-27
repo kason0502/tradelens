@@ -1,7 +1,9 @@
 # TradeLens Pro — Architecture
 
 > Living doc. Update when structure, key functions, or data flow change.
-> Last updated: 2026-06-27 (session 21)
+> Last updated: 2026-06-27 (session 22)
+
+**Scorecard + dollars + level rebalance (session 22):** `renderDash` builds a **setup scorecard** (`.score-card`: probability=`dashPWin`, confidence=`convPct`, samples=`stratStats.n`, win rate, R:R, EV=`dashEV` + a recommendation banner from EV/structure) prepended into `#dashPlan` for directional setups. AI Lab `dollarPanelHTML(bucket)` shows the $ result (1 contract / $100-risk) with worked math from each bucket's `byTF` stats + accumulated `tc.dollar`/`tc.dollarRisk` (real entry/stop $), plus an always-on principle box. **`structureLevels` rebalanced:** stops now anchor to MAJOR pivots only (`findZones(...,2)`) with a `floor=max(1.1×ATR+buf, bandMin)` so noise can't trigger them; targets use the nearest *reachable* real opposing pivot (`all`=major+minor, reward ≥1.1R, nearest-first) and only force minRR as a flagged fallback. `FWD_CAP` loosened to {intraday:200,swing:50,position:250}. The engine is honestly ~breakeven & selective (EV gates the dashboard recommendation).
 
 **Structure-anchored levels (session 21):** `structurePivots(candles)` merges swing pivots at look=2 (major) + look=1 (minor) → nearby real levels. `structureLevels(candles,dir,atr,cfg,band)` places the stop just beyond a real liquidity pivot and the target at a real opposing supply/demand pivot paying ≥ learned minRR; prefers a real pivot that also fits `band` ([minPct,maxPct] of price); falls back to an R-multiple only when no pivot qualifies and returns `slStruct`/`tpStruct` flags (+`base`). `renderDash` passes `HZ_RISK[currentDTE]` as the band and only runs `clampLevels` when a level isn't on structure or is wildly wide (>1.8×band max) — otherwise real levels are kept exactly; it tracks `dashSlStruct`/`dashTpStruct` to label the plan ("real liquidity"/"real structure" vs "fitted to the horizon"). Probability/EV (session 20) is a separate scoring layer and never moves the levels. Self-tests call `structureLevels` without a band (pure structure + a 5×ATR safety cap).
 
