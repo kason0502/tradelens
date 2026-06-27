@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-26 (session 16k) — regime-aware learning + AI-chat chip fix
+- **The AI learns WHEN each setup works, not just whether.** New `marketRegime(a,candles)` labels each decision point **uptrend / downtrend / range / high-vol** (from trend strength + ATR%). Per-strategy stats now also bucket by regime (`byRegime`, `regimeCell`); `classifySetup` weights its pick by the strategy's **expectancy in the CURRENT regime** (fallback to overall when a regime cell is thin), and returns the regime. So a breakout that's +0.9R in uptrends but −0.5R in ranges gets picked in the former and avoided in the latter.
+- **AI Lab "What works in which market"** — a strategy × regime expectancy matrix (`regimeMatrixHTML`, `.rg-table`) makes the contextual learning visible. The dashboard AI-read header now shows the **{regime} market** tag; the per-trade proof window shows the regime it was learned in.
+- **Bug fix:** the AI Trading Assistant's "What I can explain" topic chips were a **JS template literal (`${…}.map()`) pasted into static HTML**, so it rendered the raw code as text. Replaced with 16 real static chips.
+
 ## 2026-06-26 (session 16j) — AI Lab: trades run to their real stop/target
 - **No more early time-exit.** `simulateSetup` previously graded a self-test by a fixed 14-bar window (and guessed by final close if neither level hit). Now it **walks every remaining bar until the stop or target actually hits** — a WIN only if the target is reached first, a LOSS if stopped, in R. Tracks bars-held ("won in 23 bars").
 - **"Open" outcome** for the rare trade that never reaches either level within available history: logged but **not counted** (honest — we don't fabricate a win/loss). Shown as `OPEN` in the console and explained in the proof window.

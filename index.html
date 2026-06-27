@@ -979,6 +979,12 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .aic-res{font-weight:800;width:90px;flex-shrink:0;text-align:right}
 .aic-conf{color:var(--ink3);width:140px;flex-shrink:0;text-align:right}
 .aic-auto{color:var(--ink3);font-size:9px;border:1px solid var(--line);border-radius:5px;padding:1px 5px;flex-shrink:0}
+.rg-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
+.rg-table th{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--line)}
+.rg-table th:first-child,.rg-table .rg-name{text-align:left}
+.rg-table td{padding:8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+.rg-table .rg-name{color:var(--ink);font-weight:700;font-family:var(--sans,inherit);font-size:12px}
+.rg-table tr:last-child td{border-bottom:none}
 .dm-k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700;margin-bottom:6px}
 .dm-v{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-.01em}
 .dm-s{font-size:10.5px;color:var(--ink3);margin-top:3px}
@@ -1840,7 +1846,22 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">What I can explain — tap a topic</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${[['RSI','rsi'],['Bollinger Bands','bollinger'],['Moving averages','moving averages sma'],['Support & resistance','support'],['MACD','macd'],['Volume','volume'],['Short selling','short'],['Puts','puts'],['Calls','calls'],['Delta','delta'],['Gamma','gamma'],['Theta','theta'],['Position sizing','position sizing'],['Risk / reward','risk reward'],['0DTE options','0dte'],['Earnings & IV','earnings']].map(t=>`<span class="chat-sug" onclick="askAI('${t[1]}')">${t[0]}</span>`).join('')}
+          <span class="chat-sug" onclick="askAI('rsi')">RSI</span>
+          <span class="chat-sug" onclick="askAI('bollinger')">Bollinger Bands</span>
+          <span class="chat-sug" onclick="askAI('moving averages sma')">Moving averages</span>
+          <span class="chat-sug" onclick="askAI('support')">Support &amp; resistance</span>
+          <span class="chat-sug" onclick="askAI('macd')">MACD</span>
+          <span class="chat-sug" onclick="askAI('volume')">Volume</span>
+          <span class="chat-sug" onclick="askAI('short')">Short selling</span>
+          <span class="chat-sug" onclick="askAI('puts')">Puts</span>
+          <span class="chat-sug" onclick="askAI('calls')">Calls</span>
+          <span class="chat-sug" onclick="askAI('delta')">Delta</span>
+          <span class="chat-sug" onclick="askAI('gamma')">Gamma</span>
+          <span class="chat-sug" onclick="askAI('theta')">Theta</span>
+          <span class="chat-sug" onclick="askAI('position sizing')">Position sizing</span>
+          <span class="chat-sug" onclick="askAI('risk reward')">Risk / reward</span>
+          <span class="chat-sug" onclick="askAI('0dte')">0DTE options</span>
+          <span class="chat-sug" onclick="askAI('earnings')">Earnings &amp; IV</span>
         </div>
         <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">Tip:</b> the dashboard already turns these concepts into a concrete entry/stop/target for any ticker — use this assistant to understand the <i>why</i> behind a setup.</div>
       </div>
@@ -3066,6 +3087,25 @@ function stratConf(key){const s=AI_MEMORY.strats[key];if(!s)return 0.5;const n=s
   // Wilson-ish shrink toward 0.5 when sample is small
   const raw=s.wins/n;return 0.5+(raw-0.5)*Math.min(1,n/12);}
 
+// ── MARKET REGIME — context the AI learns within ─────────────────────
+// So it learns WHEN a setup works (regime), not just whether on average.
+const REGIMES=['uptrend','downtrend','range','volatile'];
+const REGIME_LABEL={uptrend:'Uptrend',downtrend:'Downtrend',range:'Range',volatile:'High-vol'};
+function marketRegime(a,candles){
+  let atrPct=0;
+  try{const c=candles&&candles.length?candles:[];if(c.length>5){const v=atr(c,14);const last=c[c.length-1].c;atrPct=last?v/last*100:0;}}catch(e){}
+  if(atrPct>=4.5)return 'volatile';
+  const t=+a.s20s60||0;
+  if(t>1)return 'uptrend';
+  if(t<-1)return 'downtrend';
+  return 'range';
+}
+function regimeCell(s,regime){
+  if(!s.byRegime)s.byRegime={};
+  if(!s.byRegime[regime])s.byRegime[regime]={wins:0,losses:0,pnl:0};
+  return s.byRegime[regime];
+}
+
 // Decide which strategy fits the current chart, by structure + learned confidence.
 function classifySetup(candles,a){
   const lv=labLevels(candles);
@@ -3080,19 +3120,21 @@ function classifySetup(candles,a){
   cand.breakdown= (!up?0.6:0.1) + (last>lv.sma20Val?0.2:0) + (rsi>45&&rsi<62?0.2:0);
   cand.oversold = (rsi<32?0.7:rsi<40?0.3:0) + (nearLow?0.25:0);
   cand.rangefade= (Math.abs(a.s20s60)<1.2?0.5:0.1) + (nearHigh?0.35:0) + (rsi>55?0.15:0);
-  // blend structure score with what it has LEARNED: win-rate confidence AND
-  // expectancy (avg R) — so a profitable-but-lower-win-rate strategy is
-  // favoured over a frequently-right-but-barely-profitable one.
+  // blend structure score with what it has LEARNED — and learn it PER REGIME:
+  // use each strategy's expectancy in the CURRENT market regime when there's a
+  // sample, falling back to its overall expectancy / win-rate otherwise.
+  const regime=marketRegime(a,candles);
   let best=null,bestScore=-1;
   Object.keys(cand).forEach(k=>{
     const conf=stratConf(k);
     const s=AI_MEMORY.strats[k]||{}; const n=(s.wins||0)+(s.losses||0);
-    const exp=n>=4?(s.pnl||0)/n:0;                          // average R per resolved trade
-    const expMul=Math.max(0.7,Math.min(1.4,1+exp*0.12));    // reward + expectancy, dampen losers
+    const rc=(s.byRegime&&s.byRegime[regime])||null; const rn=rc?(rc.wins+rc.losses):0;
+    const exp = rn>=4 ? rc.pnl/rn : (n>=4 ? (s.pnl||0)/n : 0);  // regime expectancy if learned, else overall
+    const expMul=Math.max(0.7,Math.min(1.4,1+exp*0.12));        // reward + expectancy, dampen losers
     const score=cand[k]*(0.6+conf*0.8)*expMul;
     if(score>bestScore){bestScore=score;best=k;}
   });
-  return{key:best,score:bestScore,structure:cand,levels:lv};
+  return{key:best,score:bestScore,structure:cand,levels:lv,regime};
 }
 
 // Compute entry/stop/TPs for a chosen strategy from real chart structure.
@@ -3149,7 +3191,7 @@ function simulateSetup(tk,full,cut,q){
   const tail=histWin.slice(-45);
   const snapC=tail.concat(fwd.slice(0,45)).map(c=>({o:+(+c.o).toFixed(2),h:+(+c.h).toFixed(2),l:+(+c.l).toFixed(2),c:+(+c.c).toFixed(2)}));
   const snap={c:snapC,cut:tail.length-1};
-  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap};
+  return{tk,a,setup,lvl,dir,entry,sl,tp1,risk,outcome,win,r:+exitR.toFixed(2),bars,triggered,date:(full[cut].x||''),snap,regime:setup.regime};
 }
 // Fold one simulated trade into memory + the shared pool, recording the
 // confidence BEFORE→AFTER so the console can show what actually changed.
@@ -3161,13 +3203,14 @@ function applyLearning(sim,auto){
   if(sim.outcome!=='no-fill'&&sim.outcome!=='open'){
     if(sim.win)mem.wins++; else mem.losses++;
     mem.pnl+=sim.r; mem.conf=stratConf(key);
+    if(sim.regime){const rc=regimeCell(mem,sim.regime);if(sim.win)rc.wins++;else rc.losses++;rc.pnl+=sim.r;} // learn per regime
     AI_MEMORY.trials++; if(sim.win)AI_MEMORY.wins++;
     counted=true;
     if(SHARED_OK)postShared({key,win:sim.win,pnl:sim.r,tk:sim.tk,name:sim.lvl.name,dir:sim.dir});
   }
   const confA=Math.round(stratConf(key)*100);
   AI_MEMORY.log.unshift({t:Date.now(),tk:sim.tk,key,name:sim.lvl.name,color:sim.lvl.color,dir:sim.dir,
-    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,
+    entryP:sim.entry,sl:sim.sl,tp1:sim.tp1,win:sim.win,r:sim.r,outcome:sim.outcome,bars:sim.bars,regime:sim.regime,
     confB,confA,score:+(sim.setup.score||0).toFixed(2),auto:!!auto,date:sim.date,snap:sim.snap});
   if(AI_MEMORY.log.length>45)AI_MEMORY.log.length=45;
   return{counted,confB,confA};
@@ -3278,9 +3321,27 @@ function renderAILearnStats(){
       <div class="bt-score"><div class="bt-score-val r">${AI_MEMORY.trials-AI_MEMORY.wins}</div><div class="bt-score-lbl">Losses</div></div>
     </div>
     <div class="card"><div class="card-title">What the AI has learned (confidence per strategy)</div>${rows}
-    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses STRATA — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>`;
+    <div style="font-size:11px;color:var(--fa);margin-top:10px;line-height:1.6">Higher confidence = the AI has seen this setup work more often in its self-tests, so it weights it more heavily when picking a strategy and setting your entry/stop/targets on the dashboard. ${SHARED_OK?'This model is <b style="color:var(--act)">pooled across everyone</b> who uses STRATA — every test anyone runs makes it smarter for all.':'Currently <b>saved on this device</b>. Deploy the <code>/api/learn</code> backend to pool learning across all users.'}</div></div>${regimeMatrixHTML()}`;
   renderAIConsole();
   paintAutoStatus();
+}
+// What each strategy has learned PER market regime (expectancy grid).
+function regimeMatrixHTML(){
+  const anyData=Object.values(AI_MEMORY.strats).some(s=>s.byRegime&&Object.values(s.byRegime).some(c=>(c.wins+c.losses)>0));
+  const head=`<tr><th>Strategy</th>${REGIMES.map(r=>`<th>${REGIME_LABEL[r]}</th>`).join('')}</tr>`;
+  const body=Object.entries(AI_MEMORY.strats).map(([k,s])=>{
+    const cells=REGIMES.map(r=>{
+      const c=(s.byRegime&&s.byRegime[r]); const n=c?(c.wins+c.losses):0;
+      if(!n)return `<td><span style="color:var(--ink3)">—</span></td>`;
+      const exp=c.pnl/n, col=exp>0.15?'var(--gt)':exp<-0.15?'var(--rt)':'var(--ink2)';
+      return `<td><span style="color:${col};font-weight:700">${exp>=0?'+':''}${exp.toFixed(2)}R</span> <span style="font-size:9px;color:var(--ink3)">${n}t</span></td>`;
+    }).join('');
+    return `<tr><td class="rg-name">${s.name}</td>${cells}</tr>`;
+  }).join('');
+  return `<div class="card"><div class="card-title">What works in which market — expectancy by regime</div>
+    ${anyData?`<div style="overflow-x:auto"><table class="rg-table">${head}${body}</table></div>`:`<div class="bt-empty" style="padding:14px">No regime data yet — run more self-tests and each strategy's edge in <b>uptrends, downtrends, ranges and high-vol</b> markets will fill in here.</div>`}
+    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">Each cell is the strategy's <b>average R per trade</b> in that market regime (green = profitable there, red = a loser). The engine now <b>weights its pick by the regime you're currently in</b> — so it learns <i>when</i> each setup works, not just whether it works on average.</div>
+  </div>`;
 }
 // ── AI learning console: streams what the engine learns from each trade ──
 function renderAIConsole(){
@@ -3412,6 +3473,7 @@ function aiWhy(idx){
   const body=`${chart}
     <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;margin:13px 0 14px">
       <span style="color:var(--ink3)">Plan <b style="color:${dirCol}">${(e.dir||'').toUpperCase()}</b></span>
+      ${e.regime?`<span style="color:var(--ink3)">Regime <b style="color:var(--ink)">${REGIME_LABEL[e.regime]||e.regime}</b></span>`:''}
       <span style="color:var(--ink3)">Entry <b style="color:var(--ink)">$${(+e.entryP).toFixed(2)}</b></span>
       <span style="color:var(--ink3)">Stop <b style="color:var(--rt)">$${(+e.sl).toFixed(2)}</b></span>
       <span style="color:var(--ink3)">Target <b style="color:var(--gt)">$${(+e.tp1).toFixed(2)}</b></span>
@@ -4267,7 +4329,8 @@ async function renderDash(text){
     const isShort=a.sentiment==='bearish',isNeutral=a.sentiment==='neutral';
     let entry=0,sl=0,tp1=0,tp2=0,aiPick=null;
     const cand=horizonCandles(q);   // structure window scaled to the chosen horizon
-    if(cand.length>=20){try{const setup=classifySetup(cand,a);aiPick=aiStrategyLevels(setup.key,cand);aiPick.conf=stratConf(setup.key);}catch(e){aiPick=null;}}
+    let dashRegime='';
+    if(cand.length>=20){try{const setup=classifySetup(cand,a);dashRegime=setup.regime||'';aiPick=aiStrategyLevels(setup.key,cand);aiPick.conf=stratConf(setup.key);}catch(e){aiPick=null;}}
     if(!isNeutral){
       const px=+q.price;
       if(aiPick&&aiPick.entry&&aiPick.sl&&aiPick.tp1){
@@ -4364,7 +4427,7 @@ async function renderDash(text){
               :`Long stays valid above <b>$${a.sma20}</b> (20-day avg); invalidated below <b>$${a.lo20}</b>`);
     const CR=coachReadHTML({ticker,q,a,entry,sl,tp1,tp2,isShort,isNeutral,aiPick});
     dashEl('dashConv').innerHTML=`
-      <div class="dp-h">AI read <span class="tag">${hzLabel} bias</span> <span class="tag">${convPct}% conviction</span></div>
+      <div class="dp-h">AI read <span class="tag">${hzLabel} bias</span>${dashRegime?` <span class="tag">${REGIME_LABEL[dashRegime]||dashRegime} market</span>`:''} <span class="tag">${convPct}% conviction</span></div>
       <div class="conv-top">
         <div class="conv-left">
           <div class="conv-verdict ${sentClass}">${isNeutral?'Neutral · no clear edge':(isShort?'Bearish':'Bullish')}</div>

@@ -12,6 +12,10 @@
 - [x] **Dashboard ask bar → ticker-only** (uppercase/strip A–Z, reworded placeholder).
 - [x] **AI auto-learning** — idle trickle (`aiAutoLearnOnce`, every 60s behind `bgIdle`), Pause/Resume toggle + status in AI Lab, posts to the shared pool. (Closes the old "AI auto-learning" TODO from session 6.)
 
+## Done (session 16k — regime-aware learning)
+- [x] **Regime-aware self-learning** — strategies bucket expectancy by uptrend/downtrend/range/high-vol; selection weights by current-regime expectancy; AI Lab regime matrix + dashboard/proof-window regime tags.
+- [x] **Fixed** AI-chat "What I can explain" chips (were unevaluated `${}.map()` in static HTML).
+
 ## Premium polish backlog (standing self-critique — prioritized, ongoing)
 > Per the user's directive to continuously refine toward a TradingView/Bloomberg bar. Fix top items each session.
 - [ ] **Reusable candlestick renderer.** `proofChartSVG`, `predictChartSVG`, `annotatedChartHTML` duplicate ~40 lines of scaling/axis/candle code — extract a shared `drawCandles({candles,levels,...})` helper (DRY; lower regression surface).
