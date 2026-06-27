@@ -3,6 +3,10 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 16l) — fix risk/reward: stop must be closer than target
+- **Major flaw fixed:** setups were ~1.3:1 (risk ≈ reward — stop and target looked equidistant). Now **asymmetric by design — target ≥ 2× the risk, runner ≥ 3.2×**, so the stop is always closer than the target and a loss is smaller than a win. Fixed in three places: `normTrade` floors (1.3→2.0 / 2.2→3.2), the `DTE` fallback ratios (tighter stops, ~2–3× targets), and a hard safety net in the dashboard re-anchor (`r1≥risk*2`, `r2≥risk*3.2`). The prediction chart's reward cone and the plan's "you make Nx what you risk" update automatically.
+- _Note:_ because targets are now farther, the AI Lab **raw win-rate will read lower** — but the break-even win rate at 1:2 is only 33% (vs 43% at 1.3:1), so the same trades are healthier. **Expectancy (R), not win%, is the real metric** (and is what drives selection).
+
 ## 2026-06-26 (session 16k) — regime-aware learning + AI-chat chip fix
 - **The AI learns WHEN each setup works, not just whether.** New `marketRegime(a,candles)` labels each decision point **uptrend / downtrend / range / high-vol** (from trend strength + ATR%). Per-strategy stats now also bucket by regime (`byRegime`, `regimeCell`); `classifySetup` weights its pick by the strategy's **expectancy in the CURRENT regime** (fallback to overall when a regime cell is thin), and returns the regime. So a breakout that's +0.9R in uptrends but −0.5R in ranges gets picked in the former and avoided in the latter.
 - **AI Lab "What works in which market"** — a strategy × regime expectancy matrix (`regimeMatrixHTML`, `.rg-table`) makes the contextual learning visible. The dashboard AI-read header now shows the **{regime} market** tag; the per-trade proof window shows the regime it was learned in.
