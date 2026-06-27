@@ -3080,11 +3080,16 @@ function classifySetup(candles,a){
   cand.breakdown= (!up?0.6:0.1) + (last>lv.sma20Val?0.2:0) + (rsi>45&&rsi<62?0.2:0);
   cand.oversold = (rsi<32?0.7:rsi<40?0.3:0) + (nearLow?0.25:0);
   cand.rangefade= (Math.abs(a.s20s60)<1.2?0.5:0.1) + (nearHigh?0.35:0) + (rsi>55?0.15:0);
-  // blend structure score with learned confidence
+  // blend structure score with what it has LEARNED: win-rate confidence AND
+  // expectancy (avg R) — so a profitable-but-lower-win-rate strategy is
+  // favoured over a frequently-right-but-barely-profitable one.
   let best=null,bestScore=-1;
   Object.keys(cand).forEach(k=>{
     const conf=stratConf(k);
-    const score=cand[k]*(0.6+conf*0.8); // learned confidence amplifies/dampens
+    const s=AI_MEMORY.strats[k]||{}; const n=(s.wins||0)+(s.losses||0);
+    const exp=n>=4?(s.pnl||0)/n:0;                          // average R per resolved trade
+    const expMul=Math.max(0.7,Math.min(1.4,1+exp*0.12));    // reward + expectancy, dampen losers
+    const score=cand[k]*(0.6+conf*0.8)*expMul;
     if(score>bestScore){bestScore=score;best=k;}
   });
   return{key:best,score:bestScore,structure:cand,levels:lv};
@@ -3257,11 +3262,12 @@ function renderAILearnStats(){
   const rows=Object.entries(AI_MEMORY.strats).map(([k,s])=>{
     const n=s.wins+s.losses,conf=Math.round(stratConf(k)*100);
     const w=n?Math.round(s.wins/n*100):0;
+    const exp=n?(s.pnl||0)/n:0;   // expectancy = average R per resolved trade
     const col=conf>=60?'var(--gr)':conf>=45?'var(--at)':'var(--rd)';
     return `<div class="perf-row">
       <div class="perf-row-name">${s.name}</div>
       <div class="perf-bar"><div class="perf-bar-fill" style="width:${conf}%;background:${col}"></div></div>
-      <div class="perf-row-stat">conf ${conf}% · ${n} tests · <span class="${s.pnl>=0?'g':'r'}">${s.pnl>=0?'+':''}${s.pnl.toFixed(1)}%</span></div>
+      <div class="perf-row-stat">${w}% win · ${n} tests · <span class="${exp>=0?'g':'r'}" title="Expectancy: average R won/lost per resolved trade">exp ${exp>=0?'+':''}${exp.toFixed(2)}R</span></div>
     </div>`;
   }).join('');
   el.innerHTML=`
