@@ -67,9 +67,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="config.json")
     ap.add_argument("--demo", action="store_true", help="synthetic data (LABELLED fake)")
+    ap.add_argument("--start", help="override start date, e.g. 2024-05-15")
+    ap.add_argument("--end", help="override end date (omit = same as --start, i.e. one day)")
+    ap.add_argument("--symbol", help="override symbol, e.g. SPY")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
+    # Command-line overrides so you never have to hand-edit config.json.
+    if args.start:
+        cfg["start_date"] = args.start
+        cfg["end_date"] = args.end or args.start
+    if args.end and not args.start:
+        cfg["end_date"] = args.end
+    if args.symbol:
+        cfg["symbol"] = args.symbol
     if args.demo:
         print("[run] DEMO MODE — synthetic data. Numbers are NOT real performance.")
         trades, mt, fr, synth = run_demo(cfg)
