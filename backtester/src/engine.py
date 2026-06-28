@@ -319,10 +319,13 @@ def run_day_futures(day: dt.date, bars: pd.DataFrame, _chain, cfg: dict) -> list
 
         if position is not None:
             cur = float(bar["close"]); reason = None
+            stop_pct = s.get("stop_pct")
             if tp is not None and cur >= position["entry"] * (1 + tp / 100.0):
                 reason = "take_profit"
             elif s.get("stop_rule") == "close_back_below_level" and cur < rng["orh"]:
                 reason = "stop_close_below_level"
+            elif s.get("stop_rule") == "pct" and stop_pct and cur <= position["entry"] * (1 - stop_pct / 100.0):
+                reason = "stop_pct"
             elif (bar["ts"].hour, bar["ts"].minute) >= (eh, em):
                 reason = "eod"
             if reason:
@@ -330,7 +333,7 @@ def run_day_futures(day: dt.date, bars: pd.DataFrame, _chain, cfg: dict) -> list
         elif trades_today < max_trades and not pending_entry:
             allowed = s.get("allowed_sessions")
             in_session = (not allowed) or (_tod_bucket(bar["ts"]) in set(allowed))
-            if in_session and strat.detect_breakout(bars.iloc[: i + 1], rng, s) == "long":
+            if in_session and strat.detect_signal(bars.iloc[: i + 1], rng, s) == "long":
                 pending_entry = True
     return trades
 

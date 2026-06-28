@@ -35,6 +35,14 @@
     "name": "orb_breakout_calls",
     "type": "futures_orb",
     "_type_options": ["long_call", "put_credit_spread", "futures_orb"],
+
+    "signal": "pullback",
+    "_signal_options": ["orb", "pullback", "meanrev"],
+    "pullback_trend_sma": 30,
+    "pullback_sma": 10,
+    "meanrev_sma": 20,
+    "meanrev_k": 2.0,
+    "stop_pct": 0.5,
     "_type_note": "long_call = the ORB buy-calls strategy (loses after costs). put_credit_spread = SELL a defined-risk put spread (collect premium, theta works for you).",
 
     "entry_time": "10:00",
@@ -59,14 +67,15 @@
     "_trend_filter_note": "Only take the long breakout when the day is bullish. 'above_open' = underlying above the day's open; 'above_sma' = above the N-bar average.",
     "trend_sma_period": 20,
 
-    "allowed_sessions": ["open"],
+    "allowed_sessions": ["open", "midday", "power_hour", "last_30"],
     "_allowed_sessions_note": "Restrict entries by time of day. e.g. [\"open\"] = only 09:30-10:30. All four = no restriction.",
 
-    "take_profit_pct": 0.4,
+    "take_profit_pct": 0.5,
     "_take_profit_note": "Percent of price. For options ~15-40; for FUTURES this is a % move of the index, so keep it small (e.g. 0.3-0.8 = a 0.3-0.8% move).",
-    "stop_rule": "close_back_below_level",
+    "stop_rule": "pct",
+    "_stop_rule_options": ["pct", "close_back_below_level", "none"],
     "eod_exit_minute": "15:55",
-    "max_trades_per_day": 1
+    "max_trades_per_day": 3
   },
 
   "futures": {

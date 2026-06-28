@@ -91,6 +91,48 @@ def detect_breakout(bars_so_far: pd.DataFrame, rng: dict, cfg: dict):
     return "long" if (base and _passes_trend(bars_so_far, rng, cfg)) else None
 
 
+def detect_pullback(bars_so_far, rng, cfg):
+    """TREND PULLBACK (long): in an uptrend, buy a dip to the short MA that turns back up.
+    The opposite of chasing breakouts. LOOKAHEAD-GUARD: reads only bars <= now."""
+    c = bars_so_far["close"]
+    nlong = int(cfg.get("pullback_trend_sma", 30))
+    nshort = int(cfg.get("pullback_sma", 10))
+    if len(c) < nlong + 1:
+        return None
+    cur, prev = c.iloc[-1], c.iloc[-2]
+    uptrend = cur > c.tail(nlong).mean()                       # established uptrend
+    dipped = bars_so_far["low"].iloc[-1] <= c.tail(nshort).mean()   # pulled back to the short MA
+    turn_up = cur > prev                                       # and turning back up
+    return "long" if (uptrend and dipped and turn_up) else None
+
+
+def detect_meanrev(bars_so_far, rng, cfg):
+    """MEAN REVERSION (long): buy when price is stretched far BELOW its mean and ticks up.
+    LOOKAHEAD-GUARD: reads only bars <= now."""
+    c = bars_so_far["close"]
+    n = int(cfg.get("meanrev_sma", 20))
+    k = float(cfg.get("meanrev_k", 2.0))
+    if len(c) < n + 1:
+        return None
+    m, sd = c.tail(n).mean(), c.tail(n).std()
+    if not sd or sd <= 0:
+        return None
+    cur, prev = c.iloc[-1], c.iloc[-2]
+    stretched = cur < m - k * sd                               # well below the band
+    turn_up = cur > prev
+    return "long" if (stretched and turn_up) else None
+
+
+def detect_signal(bars_so_far, rng, cfg):
+    """Dispatch to the configured intraday signal."""
+    sig = cfg.get("signal", "orb")
+    if sig == "pullback":
+        return detect_pullback(bars_so_far, rng, cfg)
+    if sig == "meanrev":
+        return detect_meanrev(bars_so_far, rng, cfg)
+    return detect_breakout(bars_so_far, rng, cfg)
+
+
 # ───────────────────── CONTRACT SELECTION ─────────────────────
 def select_contract(chain_now: pd.DataFrame, underlying_px: float, cfg: dict):
     """
