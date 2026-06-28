@@ -3,6 +3,9 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 27) — strategy knobs (trend filter / session filter / TP) for experimentation
+- After the SPY 0DTE ORB strategy lost over full-year 2024 (−7.3%, PF 0.73, 22.6% win), added config switches to test variations without code edits: **`trend_filter`** (none / above_open / above_sma + `trend_sma_period`) so it only longs breakouts on a bullish day; **`allowed_sessions`** to restrict entries by time-of-day; **`take_profit_pct`** flagged for sweeping. `strategy._passes_trend` gates `detect_breakout`; the engine gates entries by session. Variations re-run fast since the per-day data is cached (strategy logic doesn't change the cache).
+
 ## 2026-06-27 (session 26) — backtester speed + noise: disk cache, holiday skip, --publish, refresh
 - **Disk cache:** ThetaData days are pickled to `backtester/.cache/` after first fetch; re-runs (incl. the 5 fragility scenarios) read from disk instead of re-downloading — big speedup on multi-day ranges.
 - **Market-holiday skip:** `trading_days` filters NYSE closures (2023–2026), so the engine stops requesting closed days (kills the Terminal's `No data found` WARN spam).

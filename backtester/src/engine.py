@@ -118,9 +118,12 @@ def run_day(day: dt.date, bars: pd.DataFrame, chain: pd.DataFrame, cfg: dict) ->
                 if reason:
                     pending_exit = reason
         elif trades_today < max_trades and not pending_entry:
-            bars_so_far = bars.iloc[: i + 1]                      # LOOKAHEAD-GUARD: <= i only
-            if strat.detect_breakout(bars_so_far, rng, s_cfg) == "long":
-                pending_entry = True
+            allowed = s_cfg.get("allowed_sessions")
+            in_session = (not allowed) or (_tod_bucket(bar["ts"]) in set(allowed))
+            if in_session:
+                bars_so_far = bars.iloc[: i + 1]                  # LOOKAHEAD-GUARD: <= i only
+                if strat.detect_breakout(bars_so_far, rng, s_cfg) == "long":
+                    pending_entry = True
 
     return trades
 

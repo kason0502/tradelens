@@ -34,7 +34,25 @@ def opening_range(day_bars: pd.DataFrame, minutes: int):
         "orl": float(window["low"].min()),
         "or_end_ts": or_end_ts,
         "open_ts": open_ts,
+        "day_open": float(day_bars["open"].iloc[0]),
     }
+
+
+def _passes_trend(bars_so_far, rng, cfg):
+    """Optional trend filter — only take the long breakout when the day is bullish."""
+    tf = cfg.get("trend_filter", "none")
+    if tf == "none":
+        return True
+    cur = bars_so_far.iloc[-1]
+    if tf == "above_open":
+        return cur["close"] > rng.get("day_open", cur["close"])
+    if tf == "above_sma":
+        p = int(cfg.get("trend_sma_period", 20))
+        closes = bars_so_far["close"]
+        if len(closes) < p:
+            return True                      # not enough history yet — don't block
+        return cur["close"] > closes.tail(p).mean()
+    return True
 
 
 def detect_breakout(bars_so_far: pd.DataFrame, rng: dict, cfg: dict):
@@ -61,15 +79,16 @@ def detect_breakout(bars_so_far: pd.DataFrame, rng: dict, cfg: dict):
         return None
     if not cfg.get("require_retest", True):
         # Plain breakout: fire on the bar that closes above the level.
-        return "long" if cur["close"] > orh else None
-    # Retest-and-hold: after the first break, price must dip back near the level
-    # and the CURRENT bar must close back above it (the hold).
-    tol = orh * (cfg.get("retest_tolerance_pct", 0.05) / 100.0)
-    first_break_idx = post.index[post["close"] > orh][0]
-    after_break = post.loc[first_break_idx:]
-    retested = (after_break["low"] <= orh + tol).any()
-    holds_now = cur["close"] > orh
-    return "long" if (retested and holds_now) else None
+        base = cur["close"] > orh
+    else:
+        # Retest-and-hold: after the first break, price must dip back near the level
+        # and the CURRENT bar must close back above it (the hold).
+        tol = orh * (cfg.get("retest_tolerance_pct", 0.05) / 100.0)
+        first_break_idx = post.index[post["close"] > orh][0]
+        after_break = post.loc[first_break_idx:]
+        retested = (after_break["low"] <= orh + tol).any()
+        base = bool(retested and cur["close"] > orh)
+    return "long" if (base and _passes_trend(bars_so_far, rng, cfg)) else None
 
 
 # ───────────────────── CONTRACT SELECTION ─────────────────────

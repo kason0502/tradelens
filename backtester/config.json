@@ -37,7 +37,17 @@
     "target_delta": 0.45,
     "delta_tolerance": 0.15,
     "_delta_note": "target_delta only used when contract_selection='target_delta' (needs a feed WITH historical greeks, e.g. ThetaData). Polygon has none -> use nearest_atm.",
+
+    "trend_filter": "none",
+    "_trend_filter_options": ["none", "above_open", "above_sma"],
+    "_trend_filter_note": "Only take the long breakout when the day is bullish. 'above_open' = underlying above the day's open; 'above_sma' = above the N-bar average.",
+    "trend_sma_period": 20,
+
+    "allowed_sessions": ["open", "midday", "power_hour", "last_30"],
+    "_allowed_sessions_note": "Restrict entries by time of day. e.g. [\"open\"] = only 09:30-10:30. All four = no restriction.",
+
     "take_profit_pct": 40,
+    "_take_profit_note": "Try sweeping this (e.g. 15, 20, 30) — +40% on a 0DTE call is rare before theta/stop.",
     "stop_rule": "close_back_below_level",
     "eod_exit_minute": "15:55",
     "max_trades_per_day": 1
