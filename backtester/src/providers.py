@@ -20,6 +20,7 @@ import datetime as dt
 import io
 import os
 import pickle
+from urllib.parse import quote as _urlquote
 import pandas as pd
 import requests
 
@@ -167,7 +168,8 @@ class ThetaDataProvider(BaseProvider):
     def _disk_path(self, day: dt.date) -> str:
         d = os.path.join(os.path.dirname(__file__), "..", ".cache")
         os.makedirs(d, exist_ok=True)
-        return os.path.join(d, f"{self.symbol}_{day}_w{self.window}.pkl")
+        # "cp" = calls+puts cache (v2). Bumped from call-only so spreads have put data.
+        return os.path.join(d, f"{self.symbol}_{day}_w{self.window}_cp.pkl")
 
     def _load_day(self, day: dt.date):
         if day in self._cache:                              # in-memory (this run)
@@ -183,11 +185,12 @@ class ThetaDataProvider(BaseProvider):
                 pass
         k0 = self._atm_strike(day)                          # ATM anchor (any liquid strike works for parity)
         calls = self._quotes(day, "*", "call")              # full call chain @1m (real bid/ask)
-        put0 = self._quotes(day, f"{k0:.3f}", "put")        # ATM put @1m, for parity
-        if calls.empty:
+        puts = self._quotes(day, "*", "put")                # full put chain @1m (needed for spreads + parity)
+        if calls.empty or puts.empty:
             self._cache[day] = {"underlying": pd.DataFrame(), "chain": pd.DataFrame()}
             return self._cache[day]
         call0 = calls[(calls["strike"] - k0).abs() < 1e-3]
+        put0 = puts[(puts["strike"] - k0).abs() < 1e-3]
         # ── PUT-CALL PARITY underlying: S = K + call_mid - put_mid (per minute) ──
         cm = call0.assign(cmid=(call0["bid"] + call0["ask"]) / 2)[["ts", "cmid"]]
         pm = put0.assign(pmid=(put0["bid"] + put0["ask"]) / 2)[["ts", "pmid"]]
@@ -197,10 +200,13 @@ class ThetaDataProvider(BaseProvider):
             "ts": par["ts"], "open": par["S"], "high": par["S"],
             "low": par["S"], "close": par["S"],
         }).sort_values("ts").reset_index(drop=True)
-        # restrict the tradeable chain to a window around the anchor; greeks unavailable intraday
-        chain = calls[(calls["strike"] >= k0 - self.window) & (calls["strike"] <= k0 + self.window)].copy()
         smap = dict(zip(und["ts"], und["close"]))
-        chain["type"] = "C"
+        # restrict the tradeable chain to a window around the anchor; greeks unavailable intraday
+        cwin = calls[(calls["strike"] >= k0 - self.window) & (calls["strike"] <= k0 + self.window)].copy()
+        pwin = puts[(puts["strike"] >= k0 - self.window) & (puts["strike"] <= k0 + self.window)].copy()
+        cwin["type"] = "C"
+        pwin["type"] = "P"
+        chain = pd.concat([cwin, pwin], ignore_index=True)
         chain["expiration"] = day
         chain["underlying_price"] = chain["ts"].map(smap)
         chain["delta"] = float("nan")
@@ -400,12 +406,65 @@ class PolygonProvider(BaseProvider):
         return pd.concat(frames, ignore_index=True)
 
 
+class YahooProvider(BaseProvider):
+    """
+    FREE price bars from Yahoo Finance — for FUTURES / stocks / ETFs (no options).
+
+    Honest limits of free data:
+      * Daily bars go back years; 5-min bars ~60 days; 1-min ~7 days. So an
+        intraday futures backtest here only covers the recent weeks Yahoo serves.
+      * OHLC only — there is NO bid/ask, so fills are modeled as bar price ± a
+        slippage assumption (configurable), not a real quote. Futures spreads are
+        tiny, so this is far less of a fudge than it would be for options.
+
+    Use for futures (e.g. symbol "ES=F", "NQ=F", "MES=F", "MNQ=F").
+    """
+    def __init__(self, cfg: dict):
+        super().__init__(cfg)
+        yc = cfg["data"].get("yahoo", {})
+        self.interval = yc.get("interval", "5m")
+        self.range = yc.get("range", "60d")
+        self._df = self._fetch()
+
+    def _fetch(self) -> pd.DataFrame:
+        url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{_urlquote(self.symbol)}"
+               f"?interval={self.interval}&range={self.range}")
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
+        if r.status_code != 200:
+            raise RuntimeError(f"Yahoo {self.symbol} -> {r.status_code}: {r.text[:160]}")
+        res = (r.json().get("chart", {}).get("result") or [None])[0]
+        if not res or "timestamp" not in res:
+            raise RuntimeError(f"Yahoo returned no bars for {self.symbol} (bad symbol or range?).")
+        q = res["indicators"]["quote"][0]
+        df = pd.DataFrame({
+            "ts": pd.to_datetime(res["timestamp"], unit="s", utc=True).tz_convert(self.tz),
+            "open": q.get("open"), "high": q.get("high"), "low": q.get("low"), "close": q.get("close"),
+        }).dropna()
+        # regular cash session only (so the opening-range concept is meaningful)
+        df = df[(df["ts"].dt.time >= dt.time(9, 30)) & (df["ts"].dt.time <= dt.time(16, 0))]
+        return df.sort_values("ts").reset_index(drop=True)
+
+    def trading_days(self) -> list[dt.date]:
+        start = pd.Timestamp(self.cfg["start_date"]).date()
+        end = pd.Timestamp(self.cfg["end_date"]).date()
+        days = sorted(set(self._df["ts"].dt.date))
+        return [d for d in days if start <= d <= end]
+
+    def load_underlying(self, day: dt.date) -> pd.DataFrame:
+        return self._df[self._df["ts"].dt.date == day].reset_index(drop=True)
+
+    def load_options(self, day: dt.date) -> pd.DataFrame:
+        return pd.DataFrame()   # futures mode trades the contract directly — no options
+
+
 def get_provider(cfg: dict) -> BaseProvider:
     name = cfg["data"]["provider"]
     if name == "thetadata":
         return ThetaDataProvider(cfg)
     if name == "polygon":
         return PolygonProvider(cfg)
+    if name == "yahoo":
+        return YahooProvider(cfg)
     if name == "local":
         return LocalFileProvider(cfg)
     raise ValueError(f"Unknown data provider '{name}'. See config.json data.provider.")

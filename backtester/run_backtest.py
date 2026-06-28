@@ -25,6 +25,7 @@ def load_config(path: str) -> dict:
 
 def run_real(cfg: dict):
     provider = providers.get_provider(cfg)
+    is_futures = cfg["strategy"].get("type") == "futures_orb"
     # Only require greeks when the strategy actually selects by delta. Polygon has
     # no historical greeks, so it runs with contract_selection='nearest_atm'.
     uses_delta = cfg["strategy"].get("contract_selection", "target_delta") == "target_delta"
@@ -33,11 +34,14 @@ def run_real(cfg: dict):
     # fail fast and loudly instead of silently producing a thin/empty backtest.
     for day in provider.trading_days():
         try:
-            opt = provider.load_options(day)
             und = provider.load_underlying(day)
+            opt = None if is_futures else provider.load_options(day)
         except Exception as e:
             print(f"[run] {day}: load failed ({e}); trying next day for schema check…")
             continue
+        if is_futures and len(und):
+            schema.validate_underlying(und)
+            break
         if len(opt) and len(und):
             schema.validate_options(opt, target_uses_delta=uses_delta)
             schema.validate_underlying(und)

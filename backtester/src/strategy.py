@@ -143,3 +143,27 @@ def exit_decision(position: dict, bar: pd.Series, opt_quote, rng: dict, cfg: dic
     if (bar["ts"].hour, bar["ts"].minute) >= (hh, mm):
         return "eod"
     return None
+
+
+# ───────────────── PUT CREDIT SPREAD (premium SELLING) ─────────────────
+# Bullish/neutral, defined-risk, theta-positive: SELL a put, BUY a further-OTM
+# put for protection. You collect a credit and keep it if price stays up. The
+# opposite cost profile to buying calls — you're collecting the spread, not paying it.
+def pcs_select(chain_now: pd.DataFrame, S: float, cfg: dict):
+    """Pick the short + long put legs from the asof snapshot. Returns (short_row, long_row) or None.
+    LOOKAHEAD-GUARD: chain_now is the <= entry-ts snapshot built by the engine."""
+    puts = chain_now[chain_now["type"] == "P"].copy()
+    if puts.empty:
+        return None
+    width = float(cfg.get("spread_width", 5))
+    otm = float(cfg.get("short_otm_pct", 0.5)) / 100.0
+    target_short = S * (1.0 - otm)                       # short put a touch OTM (below price)
+    below = puts[puts["strike"] <= target_short]
+    pool = below if not below.empty else puts
+    short_row = pool.iloc[(pool["strike"] - target_short).abs().values.argmin()]
+    short_K = float(short_row["strike"])
+    long_K = short_K - width
+    long_rows = puts[(puts["strike"] - long_K).abs() < 1e-3]
+    if long_rows.empty:                                  # need the exact protective strike to exist
+        return None
+    return short_row, long_rows.iloc[0]

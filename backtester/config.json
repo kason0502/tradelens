@@ -1,14 +1,19 @@
 {
   "_comment": "All knobs for one backtest run. Pessimistic by design — see README.",
 
-  "symbol": "SPY",
-  "start_date": "2024-01-02",
-  "end_date": "2024-03-28",
+  "symbol": "ES=F",
+  "start_date": "2024-01-01",
+  "end_date": "2026-12-31",
   "timezone": "America/New_York",
 
   "data": {
-    "provider": "thetadata",
-    "_provider_options": ["polygon", "thetadata", "local"],
+    "provider": "yahoo",
+    "_provider_options": ["yahoo", "polygon", "thetadata", "local"],
+    "yahoo": {
+      "interval": "5m",
+      "range": "60d",
+      "_note": "FREE futures/stock price bars. 5m -> ~60 days history; 1m -> ~7 days; 1d -> years. So intraday futures backtests only cover the recent weeks Yahoo serves. Symbols: ES=F, NQ=F, MES=F, MNQ=F."
+    },
     "polygon": {
       "api_key_env": "POLYGON_API_KEY",
       "strike_window": 8,
@@ -28,6 +33,17 @@
 
   "strategy": {
     "name": "orb_breakout_calls",
+    "type": "futures_orb",
+    "_type_options": ["long_call", "put_credit_spread", "futures_orb"],
+    "_type_note": "long_call = the ORB buy-calls strategy (loses after costs). put_credit_spread = SELL a defined-risk put spread (collect premium, theta works for you).",
+
+    "entry_time": "10:00",
+    "spread_width": 5,
+    "short_otm_pct": 0.5,
+    "tp_pct_of_credit": 50,
+    "stop_mult_of_credit": 2.0,
+    "_pcs_note": "Put credit spread: at entry_time, SELL a put ~short_otm_pct below price, BUY one spread_width lower. Take profit at tp_pct_of_credit% of the credit; stop if loss hits stop_mult_of_credit x credit; else hold to expiry (settles at intrinsic). Bullish bias — pairs with trend_filter=above_sma.",
+
     "opening_range_minutes": 15,
     "require_retest": true,
     "retest_tolerance_pct": 0.05,
@@ -38,19 +54,27 @@
     "delta_tolerance": 0.15,
     "_delta_note": "target_delta only used when contract_selection='target_delta' (needs a feed WITH historical greeks, e.g. ThetaData). Polygon has none -> use nearest_atm.",
 
-    "trend_filter": "none",
+    "trend_filter": "above_sma",
     "_trend_filter_options": ["none", "above_open", "above_sma"],
     "_trend_filter_note": "Only take the long breakout when the day is bullish. 'above_open' = underlying above the day's open; 'above_sma' = above the N-bar average.",
     "trend_sma_period": 20,
 
-    "allowed_sessions": ["open", "midday", "power_hour", "last_30"],
+    "allowed_sessions": ["open"],
     "_allowed_sessions_note": "Restrict entries by time of day. e.g. [\"open\"] = only 09:30-10:30. All four = no restriction.",
 
-    "take_profit_pct": 40,
-    "_take_profit_note": "Try sweeping this (e.g. 15, 20, 30) — +40% on a 0DTE call is rare before theta/stop.",
+    "take_profit_pct": 0.4,
+    "_take_profit_note": "Percent of price. For options ~15-40; for FUTURES this is a % move of the index, so keep it small (e.g. 0.3-0.8 = a 0.3-0.8% move).",
     "stop_rule": "close_back_below_level",
     "eod_exit_minute": "15:55",
     "max_trades_per_day": 1
+  },
+
+  "futures": {
+    "point_value": 50,
+    "tick_size": 0.25,
+    "slippage_ticks": 1,
+    "commission_per_contract": 2.5,
+    "_note": "Economics for futures_orb. ES=F: point_value 50, tick 0.25. Micro MES=F: point_value 5. NQ=F: 20 (MNQ=F: 2). slippage_ticks = ticks of slippage assumed each side (futures spreads are ~1 tick)."
   },
 
   "fills": {

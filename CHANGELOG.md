@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 28) — put-credit-spread + FREE futures mode (Yahoo)
+- **Put credit spread strategy** (`strategy.type: "put_credit_spread"`): premium-SELLING, defined-risk (sell a put, buy one `spread_width` lower), theta-positive. Pessimistic multi-leg fills (sell short at bid, buy long at ask, + slippage + commission ×legs), TP at % of credit / stop at ×credit / hold-to-expiry intrinsic settle. Provider now also pulls the **put chain** (cache key bumped to `_cp`).
+- **FREE futures mode** (`strategy.type: "futures_orb"`, `data.provider: "yahoo"`): `YahooProvider` pulls free OHLC bars (5m ~60d / 1m ~7d / 1d years) for ES=F/NQ=F/MES=F/MNQ=F — no subscription, no greeks. `run_day_futures` trades the contract directly (point-value P&L, tick slippage, commission). Verified end-to-end. _Finding: the ORB-breakout signal has no edge — it loses on options AND futures, confirming the signal (not the instrument) is the problem._
+- Engine routes on `strategy.type` (long_call / put_credit_spread / futures_orb); `run_real` skips options-schema validation in futures mode.
+
 ## 2026-06-27 (session 27) — strategy knobs (trend filter / session filter / TP) for experimentation
 - After the SPY 0DTE ORB strategy lost over full-year 2024 (−7.3%, PF 0.73, 22.6% win), added config switches to test variations without code edits: **`trend_filter`** (none / above_open / above_sma + `trend_sma_period`) so it only longs breakouts on a bullish day; **`allowed_sessions`** to restrict entries by time-of-day; **`take_profit_pct`** flagged for sweeping. `strategy._passes_trend` gates `detect_breakout`; the engine gates entries by session. Variations re-run fast since the per-day data is cached (strategy logic doesn't change the cache).
 
