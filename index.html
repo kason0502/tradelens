@@ -994,7 +994,17 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fut-chip.ok2 .fc-s{color:var(--gt)}
 .fut-chip.wait .fc-s{color:var(--at)}
 .fut-chip.no .fc-s{color:var(--rt)}
-.fut-alert{border:1px solid rgba(34,197,94,.5);background:rgba(34,197,94,.1);color:var(--gt);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700}
+.fut-alert{display:flex;align-items:center;gap:9px;border:1px solid rgba(34,197,94,.5);background:rgba(34,197,94,.1);color:var(--gt);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700}
+.live-pip{width:9px;height:9px;border-radius:50%;background:var(--gr);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulseDot 1.8s ease-out infinite;flex-shrink:0}
+@media(prefers-reduced-motion:reduce){.live-pip{animation:none}}
+.fut-sig .fs-meta{font-size:11px;color:var(--ink3);margin-top:8px;display:flex;align-items:center;gap:6px;font-family:var(--mono)}
+.ms-dot{width:7px;height:7px;border-radius:50%;background:var(--fa);flex-shrink:0}
+.ms-dot.on{background:var(--gr);box-shadow:0 0 6px rgba(34,197,94,.7)}
+.dp-size{font-size:12.5px;color:var(--ink2);line-height:1.6;margin-top:10px;padding:9px 12px;background:rgba(var(--ac-rgb),.07);border:1px solid rgba(var(--ac-rgb),.18);border-radius:9px}
+.dp-size b{color:var(--ink)}
+.dp-link{color:var(--act);cursor:pointer;font-weight:700;white-space:nowrap}
+.dp-link:hover{text-decoration:underline}
+.mx-unval{margin-top:9px;font-size:10.5px;font-weight:700;color:var(--at);background:rgba(255,201,77,.1);border:1px solid rgba(255,201,77,.3);border-radius:7px;padding:4px 8px;text-align:center}
 /* Toolkit: Playbook · Risk Calculator · Sessions */
 .calc-form{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
 .calc-field label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:700}
@@ -2290,7 +2300,7 @@ async function fetchStooq(ticker){
   const vol=pts[pts.length-1].v||0;
   const volFmt=vol>=1e9?(vol/1e9).toFixed(2)+'B':vol>=1e6?(vol/1e6).toFixed(1)+'M':vol>=1e3?(vol/1e3).toFixed(0)+'K':String(vol||'—');
   const mkH=n=>pts.slice(-n).map(p=>{const d=new Date(p.date);return{x:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),o:+p.o.toFixed(2),h:+p.h.toFixed(2),l:+p.l.toFixed(2),c:+p.c.toFixed(2),v:p.v};});
-  return{price,change,pct,hi52,lo52,vol,volFmt,name:ticker,closes,h1d:[],h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252),_src:'Stooq'};
+  return{price,change,pct,hi52,lo52,vol,volFmt,name:ticker,closes,h1d:[],h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252),_src:'Stooq',asOf:Date.now()};
 }
 
 async function fetchQuote(ticker){
@@ -2309,8 +2319,11 @@ async function fetchQuote(ticker){
   const pts=rawC.map((c,i)=>({c,o:rawO[i]||c,h:rawH[i]||c,l:rawL[i]||c,v:rawV[i]||0,t:rawT[i]})).filter(p=>p.c!=null&&p.t!=null);
   const closes=pts.map(p=>+p.c.toFixed(4));
   const price=meta.regularMarketPrice||closes[closes.length-1];
-  const prev=meta.chartPreviousClose||meta.previousClose||closes[closes.length-2]||price;
-  const change=price-prev,pct=(change/prev)*100;
+  // Day change from the actual prior daily close in the series — the proxy's
+  // meta prev-close is unreliable (esp. for =F futures) and produced bogus % moves.
+  const prevC=closes.length>=2?closes[closes.length-2]:null;
+  const prev=prevC||meta.chartPreviousClose||meta.previousClose||price;
+  const change=price-prev,pct=prev?(change/prev)*100:0;
   const hi52=meta.fiftyTwoWeekHigh||closes.reduce((m,v)=>v>m?v:m,-Infinity);
   const lo52=meta.fiftyTwoWeekLow||closes.reduce((m,v)=>v<m?v:m,Infinity);
   const vol=meta.regularMarketVolume||0;
@@ -2331,7 +2344,7 @@ async function fetchQuote(ticker){
         .map(p=>{const d=new Date(p.t*1000);return{x:d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}),o:+p.o.toFixed(2),h:+p.h.toFixed(2),l:+p.l.toFixed(2),c:+p.c.toFixed(2),v:p.v};});
     }
   }catch(e){h1d=[];}
-  return{price,change,pct,hi52,lo52,vol,volFmt,name,closes,h1d,h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252)};
+  return{price,change,pct,hi52,lo52,vol,volFmt,name,closes,h1d,h1m:mkH(22),h3m:mkH(66),h6m:mkH(130),h1y:mkH(252),asOf:Date.now()};
 }
 
 // Fetch OHLC candles for the backtest at a given timeframe.
@@ -4745,6 +4758,14 @@ function futNotify(buys){
   const day=new Date().toDateString();
   buys.forEach(b=>{const k=b.sym+day;if(_futNotified[k])return;_futNotified[k]=1;try{new Notification('STRATA — BUY SETUP',{body:`${b.label} (${b.name}) is a buy-the-pullback setup today.`});}catch(e){}});
 }
+// Saved account size + risk %, shared by the Futures plan sizing and the Risk Calc.
+function acctGet(){try{const s=JSON.parse(localStorage.getItem('tlpro_acct'));if(s&&+s.acct)return{acct:+s.acct,risk:+s.risk||1};}catch(e){}return{acct:25000,risk:1};}
+function acctSet(acct,risk){try{localStorage.setItem('tlpro_acct',JSON.stringify({acct,risk}));}catch(e){}}
+// Micro-contract sizing for the index futures the Futures tab scans.
+const FUT_MICRO={'ES=F':{sym:'MES',ptVal:5},'NQ=F':{sym:'MNQ',ptVal:2}};
+function fmtAsOf(ts){return ts?'as of '+new Date(ts).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):'';}
+// US cash-equity session state (ET), so a stale/pre-open print is labelled honestly.
+function marketState(){const t=_tzNow('America/New_York');if(t.wd<1||t.wd>5)return{txt:'Weekend · market closed',open:false};const m=t.h*60+t.m;if(m<570)return{txt:'Pre-market',open:false};if(m<960)return{txt:'Market open',open:true};return{txt:'After hours',open:false};}
 function paintFutures(){
   const el=document.getElementById('futBody');if(!el)return;
   const money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
@@ -4756,7 +4777,7 @@ function paintFutures(){
     return `<button class="fut-chip ${s?s.cls:''} ${on?'sel':''}" onclick="selectFutMarket('${m.sym}')">
       <div class="fc-l">${m.label}</div><div class="fc-s">${s?s.short:'—'}</div>
       <div class="fc-p">${s?'$'+s.price.toLocaleString(undefined,{maximumFractionDigits:0}):''}</div></button>`;}).join('')+`</div>`;
-  const alertBanner=buys.length?`<div class="fut-alert">🟢 <b>BUY SETUP right now:</b> ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up.</div>`:'';
+  const alertBanner=buys.length?`<div class="fut-alert"><span class="live-pip"></span> <b>BUY SETUP right now:</b> ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up.</div>`:'';
   const mkt=FUT_MARKETS.find(m=>m.sym===_futSel), s=sigs[_futSel], q=_futCache[_futSel];
   if(!s){el.innerHTML=scan+alertBanner+`<div class="card"><div class="bt-empty" style="padding:16px">Couldn't load ${mkt.label} — hit Refresh.</div></div>`;return;}
   const vs50=(s.price-s.sma50)/s.sma50*100, vs10=(s.price-s.sma10)/s.sma10*100;
@@ -4765,6 +4786,16 @@ function paintFutures(){
   let atrPct=0;try{if(s.ohlc)atrPct=atr(s.ohlc,14)/s.price*100;}catch(e){}
   const mret=s.closes.length>21?(s.price/s.closes[s.closes.length-22]-1)*100:0;
   const up=q.change>=0;
+  const ms=marketState();
+  // inline position size to the actual stop (worse of trend-break / −8% hard stop)
+  const acct=acctGet(), riskD=acct.acct*acct.risk/100, exitLvl=Math.max(s.sma50,hardStop), stopDist=s.price-exitLvl;
+  let sizeLine='';
+  if(stopDist>0){
+    const calcLink=`onclick="mainTab('calc',document.querySelector('.snav[data-tab=&quot;calc&quot;]'))"`;
+    const mic=FUT_MICRO[_futSel];
+    if(mic){const per=stopDist*mic.ptVal,n=Math.floor(riskD/per);sizeLine=`Size: risking <b>${acct.risk}%</b> of $${acct.acct.toLocaleString()} ≈ <b>${n} ${mic.sym}</b> · ~$${Math.round(n*per).toLocaleString()} to the stop. <a class="dp-link" ${calcLink}>Adjust ↗</a>`;}
+    else{const n=Math.floor(riskD/stopDist);sizeLine=`Size: risking <b>${acct.risk}%</b> of $${acct.acct.toLocaleString()} ≈ <b>${n.toLocaleString()} shares</b> of ${mkt.label} · ~$${Math.round(n*stopDist).toLocaleString()} to the stop. <a class="dp-link" ${calcLink}>Adjust ↗</a>`;}
+  }
   const plan=s.uptrend?`
     <div class="card"><div class="card-title">Trade plan — ${s.buySetup?'<span class="g">entry today</span>':'on the next pullback'}</div>
       <div class="lv-table">
@@ -4773,6 +4804,7 @@ function paintFutures(){
         <div class="lv-row risk"><div class="lk">Hard stop</div><div class="lp">$${money(hardStop)}</div><div class="lt">−8% safety net</div></div>
         <div class="lv-row rew"><div class="lk">Target</div><div class="lp">let it run</div><div class="lt">no fixed target — hold the trend</div></div>
       </div>
+      ${sizeLine?`<div class="dp-size">${sizeLine}</div>`:''}
       <div class="dp-rr">Hold time is typically days to weeks. ~5–6 trades a year. Profit comes from a few big winners — most trades are small.</div>
     </div>`:'';
   const edge=`<div class="card"><div class="card-title">Backtested edge — validated, honest</div>
@@ -4788,6 +4820,7 @@ function paintFutures(){
       <div class="fs-px"><div class="fs-price">$${money(s.price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
       <div class="fs-head">${mkt.label} · ${s.head}</div>
       <div class="fs-sub">${mkt.name} — ${s.sub}</div>
+      <div class="fs-meta"><span class="ms-dot ${ms.open?'on':''}"></span>${ms.txt} · ${fmtAsOf(q.asOf)} · daily close data</div>
       <div class="fs-pills">
         <span class="fs-pill ${s.uptrend?'on':'off'}">${s.uptrend?'✓':'✕'} Uptrend (vs 50-day)</span>
         <span class="fs-pill ${s.pulledBack?'on':'off'}">${s.pulledBack?'✓':'•'} Pulled back (to 10-day)</span>
@@ -4889,13 +4922,13 @@ const FUT_SPECS=[
 ];
 function renderCalc(){
   const el=document.getElementById('calcBody');if(!el)return;
-  const es=_futCache['ES=F'], s=es?futSignal(es):null;
+  const es=_futCache['ES=F'], s=es?futSignal(es):null, ac=acctGet();
   const entry=s?+s.price.toFixed(2):5000, stop=s?+s.sma50.toFixed(2):4800;
   el.innerHTML=`
     <div class="card"><div class="card-title">Position size</div>
       <div class="calc-form">
-        <div class="calc-field"><label>Account size ($)</label><input id="cAcct" type="number" value="25000" oninput="calcCompute()"></div>
-        <div class="calc-field"><label>Risk per trade (%)</label><input id="cRisk" type="number" value="1" step="0.1" oninput="calcCompute()"></div>
+        <div class="calc-field"><label>Account size ($)</label><input id="cAcct" type="number" value="${ac.acct}" oninput="calcCompute()"></div>
+        <div class="calc-field"><label>Risk per trade (%)</label><input id="cRisk" type="number" value="${ac.risk}" step="0.1" oninput="calcCompute()"></div>
         <div class="calc-field"><label>Contract</label><select id="cSym" onchange="calcCompute()">${FUT_SPECS.map(f=>`<option value="${f.sym}"${f.sym==='ES'?' selected':''}>${f.sym} — ${f.name}</option>`).join('')}</select></div>
         <div class="calc-field"><label>Entry price</label><input id="cEntry" type="number" value="${entry}" step="0.25" oninput="calcCompute()"></div>
         <div class="calc-field"><label>Stop price</label><input id="cStop" type="number" value="${stop}" step="0.25" oninput="calcCompute()"></div>
@@ -4914,6 +4947,7 @@ function renderCalc(){
 function calcCompute(){
   const g=id=>document.getElementById(id), out=g('calcOut');if(!out)return;
   const acct=+g('cAcct').value||0, risk=+g('cRisk').value||0, entry=+g('cEntry').value||0, stop=+g('cStop').value||0;
+  if(acct>0)acctSet(acct,risk);   // persist so the Futures plan sizing stays in sync
   const spec=FUT_SPECS.find(f=>f.sym===g('cSym').value)||FUT_SPECS[0];
   const ptVal=spec.tickVal/spec.tick, riskDollar=acct*risk/100, ptsRisk=Math.abs(entry-stop);
   const perContract=ptsRisk*ptVal, contracts=perContract>0?Math.floor(riskDollar/perContract):0, actualRisk=contracts*perContract;
@@ -4977,7 +5011,7 @@ function paintSessions(){
       <div class="bt-score"><div class="bt-score-val ${openCount?'g':''}">${openCount}/4</div><div class="bt-score-lbl">Sessions open</div></div>
     </div>
     <div class="card"><div class="card-title">Global sessions</div>${rows}
-      ${overlap?`<div class="fut-alert" style="margin:10px 0 0">🟢 <b>London–New York overlap</b> — the highest-liquidity, highest-volatility window of the day.</div>`:''}
+      ${overlap?`<div class="fut-alert" style="margin:10px 0 0"><span class="live-pip"></span> <b>London–New York overlap</b> — the highest-liquidity, highest-volatility window of the day.</div>`:''}
     </div>
     <div class="card"><div class="card-title">How to use this</div><div class="analysis-text">CME equity-index futures (ES, NQ) trade nearly 24 hours on Globex with a short daily maintenance halt, so you can almost always get a fill. But spreads tighten and the real moves happen when the major financial centers are open — especially the <b>London–New York overlap</b>. This system is a <b>daily</b> swing system, so session timing won't change a signal; use the clock to decide <i>when</i> to place an order, not <i>whether</i> to take it. Windows are the conventional 08:00–17:00 local sessions (daylight-saving handled automatically).</div></div>`;
 }
@@ -4987,13 +5021,15 @@ function paintSessions(){
 // tv = a symbol the FREE TradingView widget can actually render (real CME futures
 // like ES1! require a paid data entitlement → "available only on TradingView").
 // We chart the underlying index/commodity, which tracks the same market.
+// val = the trend-pullback edge is backtest-validated for this market (ES/NQ).
+// The others run the same pattern but are NOT validated — flagged as such.
 const MATRIX_MARKETS=[
-  {sym:'ES=F',label:'ES',name:'S&P 500',tv:'FOREXCOM:SPXUSD'},
-  {sym:'NQ=F',label:'NQ',name:'Nasdaq 100',tv:'FOREXCOM:NSXUSD'},
-  {sym:'YM=F',label:'YM',name:'Dow Jones',tv:'FOREXCOM:DJI'},
-  {sym:'RTY=F',label:'RTY',name:'Russell 2000',tv:'AMEX:IWM'},
-  {sym:'CL=F',label:'CL',name:'Crude Oil',tv:'TVC:USOIL'},
-  {sym:'GC=F',label:'GC',name:'Gold',tv:'TVC:GOLD'},
+  {sym:'ES=F',label:'ES',name:'S&P 500',tv:'FOREXCOM:SPXUSD',val:true},
+  {sym:'NQ=F',label:'NQ',name:'Nasdaq 100',tv:'FOREXCOM:NSXUSD',val:true},
+  {sym:'YM=F',label:'YM',name:'Dow Jones',tv:'FOREXCOM:DJI',val:false},
+  {sym:'RTY=F',label:'RTY',name:'Russell 2000',tv:'AMEX:IWM',val:false},
+  {sym:'CL=F',label:'CL',name:'Crude Oil',tv:'TVC:USOIL',val:false},
+  {sym:'GC=F',label:'GC',name:'Gold',tv:'TVC:GOLD',val:false},
 ];
 let _mxCache={};
 async function renderMatrix(force){
@@ -5012,10 +5048,11 @@ async function renderMatrix(force){
 function paintMatrix(){
   const el=document.getElementById('matrixBody');if(!el)return;
   const rows=MATRIX_MARKETS.map(m=>{const q=_mxCache[m.sym];return {m,q,s:q?futSignal(q):null};});
-  const ok=rows.filter(r=>r.s).length, ups=rows.filter(r=>r.s&&r.s.uptrend).length, buys=rows.filter(r=>r.s&&r.s.buySetup).length;
+  const ok=rows.filter(r=>r.s).length, ups=rows.filter(r=>r.s&&r.s.uptrend).length;
+  const buys=rows.filter(r=>r.s&&r.s.buySetup&&r.m.val).length;   // only count VALIDATED buy setups
   const breadth=`<div class="bt-scoreboard" style="margin-bottom:14px">
     <div class="bt-score"><div class="bt-score-val ${ups?'g':''}">${ups}/${ok||0}</div><div class="bt-score-lbl">In uptrend</div></div>
-    <div class="bt-score"><div class="bt-score-val ${buys?'g':''}">${buys}</div><div class="bt-score-lbl">Buy setups now</div></div>
+    <div class="bt-score"><div class="bt-score-val ${buys?'g':''}">${buys}</div><div class="bt-score-lbl">Validated buy setups</div></div>
     <div class="bt-score"><div class="bt-score-val">${ok}/${MATRIX_MARKETS.length}</div><div class="bt-score-lbl">Markets live</div></div>
   </div>`;
   const cards=rows.map(r=>{
@@ -5032,10 +5069,11 @@ function paintMatrix(){
         <div><span>vs 50-day</span><b class="${vs50>=0?'g':'r'}">${vs50>=0?'+':''}${vs50.toFixed(1)}%</b></div>
         <div><span>vs 10-day</span><b class="${vs10>=0?'g':'r'}">${vs10>=0?'+':''}${vs10.toFixed(1)}%</b></div>
         <div><span>1-month</span><b class="${mret>=0?'g':'r'}">${mret>=0?'+':''}${mret.toFixed(1)}%</b></div>
-      </div></div>`;
+      </div>
+      ${r.m.val?'':'<div class="mx-unval">Pattern only — not backtest-validated</div>'}</div>`;
   }).join('');
   el.innerHTML=breadth+`<div class="mx-grid">${cards}</div>`
-    +`<div style="font-size:11px;color:var(--ink3);margin-top:12px">Click any market to open it on a full TradingView chart. Signal = the same validated trend-pullback read used on the Futures tab.</div>`;
+    +`<div style="font-size:11px;color:var(--ink3);margin-top:12px">Click any market to open its chart. <b>ES &amp; NQ</b> carry the backtest-validated edge; the rest run the same pattern but are <b>not validated</b> (flagged on the card) and are excluded from the buy-setup count.</div>`;
 }
 function matrixOpen(sym){const m=MATRIX_MARKETS.find(x=>x.sym===sym);if(m)_chartSym=m.tv;mainTab('charts',document.querySelector('.snav[data-tab="charts"]'));}
 // Tiny trend sparkline (last ~60 closes); green if higher than the window start.
@@ -5134,7 +5172,7 @@ async function splitRenderPane(i,quiet){
   const p=_splitPanes[i], id='sp-body-'+i, body=document.getElementById(id);if(!body)return;
   if(p.mod==='chart'){mountTVInto(id,p.sym,0,{allowChange:true});return;}
   if(p.mod==='notes'){body.innerHTML=`<textarea class="sp-notes" placeholder="Trade notes, levels, reminders…" oninput="splitSaveNote(${i},this.value)">${(_splitNotes[i]||'').replace(/</g,'&lt;')}</textarea>`;return;}
-  if(p.mod==='sessions'){const sd=_sessionData();body.innerHTML=`<div class="sp-sigwrap"><div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:10px">Session clock · ${sd.openCount}/4 open</div>${sd.rows}${sd.overlap?`<div class="fut-alert" style="margin:10px 0 0">🟢 London–NY overlap — peak liquidity.</div>`:''}</div>`;return;}
+  if(p.mod==='sessions'){const sd=_sessionData();body.innerHTML=`<div class="sp-sigwrap"><div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:10px">Session clock · ${sd.openCount}/4 open</div>${sd.rows}${sd.overlap?`<div class="fut-alert" style="margin:10px 0 0"><span class="live-pip"></span> London–NY overlap — peak liquidity.</div>`:''}</div>`;return;}
   if(p.mod==='grid'){
     if(!Object.keys(_mxCache).length){ if(!quiet){body.innerHTML=`<div class="loading-label" style="padding:16px">Loading markets…</div>`; window.__userFetch=Date.now(); await Promise.all(MATRIX_MARKETS.map(async m=>{try{_mxCache[m.sym]=await fetchQuote(m.sym);}catch(e){_mxCache[m.sym]=null;}})); window.__userFetch=0; } else return; }
     body.innerHTML=`<div class="sp-sigwrap">${MATRIX_MARKETS.map(m=>{const q=_mxCache[m.sym],s=q?futSignal(q):null;if(!s)return `<div class="sp-mxrow"><b>${m.label}</b><span style="color:var(--mu)">—</span></div>`;const up=q.change>=0;return `<div class="sp-mxrow ${s.cls}"><b>${m.label}</b><span class="mono">$${s.price.toLocaleString(undefined,{maximumFractionDigits:2})}</span><span class="chg-badge ${up?'up':'down'}">${up?'+':''}${q.pct.toFixed(2)}%</span><span class="mx-sig ${s.cls}">${s.short}</span></div>`;}).join('')}</div>`;

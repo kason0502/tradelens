@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 37) — acted on the trader-critic robot's quick wins
+- **Fixed the headline day-change bug (was confirmed):** `fetchQuote` now derives `change`/`pct` from the actual prior daily close in the series (the proxy's meta prev-close was unreliable, esp. for `=F` futures → bogus % moves). Every consumer (Futures card, Matrix, Strength) inherits the correct number.
+- **Matrix honesty:** ES/NQ are flagged `val:true` (backtest-validated); YM/RTY/CL/GC now carry a **"Pattern only — not backtest-validated"** badge and are **excluded from the buy-setup count** ("Validated buy setups"). No more mixing proven and unproven signals.
+- **Inline position size in the Futures plan:** "risking N% of $X ≈ N MES · ~$Y to the stop" (micros for ES/NQ, shares for SPY/QQQ), sized to the real stop (worse of trend-break / −8%), with an "Adjust ↗" link to the Risk Calc. Account size + risk % now persist (`tlpro_acct`) and stay in sync between the plan and the calculator.
+- **Data honesty on the signal card:** added a market-state + timestamp line (`Market open/Pre-market/After hours/Weekend · as of H:MM · daily close data`) via `marketState()`/`fmtAsOf()` + `q.asOf`, so a stale/pre-open print can't masquerade as live.
+- **House-rule cleanup:** replaced the `🟢` emoji in the buy-alert / session-overlap banners with a pulsing line-style `.live-pip` dot.
+
 ## 2026-06-29 (session 36) — fix Charts symbols + cooler backdrop
 - **Fixed Charts / Split "available only on TradingView" error:** real CME futures symbols (`CME_MINI:ES1!`, etc.) need a paid data entitlement, so the free widget refused them. Switched `TV_FUTURES` + `MATRIX_MARKETS.tv` + Split defaults to free-widget-friendly symbols for the underlying market (`FOREXCOM:SPXUSD`, `FOREXCOM:NSXUSD`, `FOREXCOM:DJI`, `AMEX:IWM`, `TVC:USOIL`, `TVC:GOLD`, `TVC:SILVER`, `TVC:US10Y`, `FX:EURUSD`, `BITSTAMP:BTCUSD`). Bumped the Split localStorage key (`tlpro_split_v1`→`v2`) so stale saved symbols are dropped. Search still lets you type any custom symbol.
 - **Cooler backdrop:** added a soft **cursor-following light**, a **neon glow** on the market wave ribbons (shadowBlur), and replaced the little "trade print" dots with **drifting candlesticks** floating upward. Plus a subtle **hover-lift** on cards. All reduced-motion-safe.

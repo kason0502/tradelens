@@ -1,7 +1,21 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-29 (session 34)
+> Last updated: 2026-06-29 (session 37)
+
+## Done (session 37 — trader-critic robot + its quick wins)
+- [x] **Built `futures-trader-critic` subagent** (`.claude/agents/`) — reusable site-review robot (flaws + monetization ideas through a trader's eyes).
+- [x] **Fixed headline day-change** to use the close series in `fetchQuote` (was the proxy prev-close bug).
+- [x] **Matrix: validated vs pattern-only** — ES/NQ validated; YM/RTY/CL/GC badged + excluded from the buy count.
+- [x] **Inline position size** in the Futures plan + persisted account settings (`tlpro_acct`) synced with the Risk Calc.
+- [x] **Market-state + timestamp** on the signal card; **swapped 🟢 emoji** for a `.live-pip` dot.
+
+## Next (highest-value from the critic — not yet done)
+- [ ] **Alerts that fire when the app is closed** (email/push via a Vercel cron hitting `/api/yf` + `futSignal`). The robot's #1 "worth money" idea — the real wedge for a ~6-trade/year system.
+- [ ] **Journal with real $ P&L + forward live-edge track record** (resurrect the dead journal infra; grade live signals since launch).
+- [ ] **Edge scoreboard from `results.json`** (replace the hard-coded `FUT_PF` constants; show n-trades + period + drawdown).
+- [ ] **Trim "pro terminal" surface** (Sessions/Split/Strength) so the Futures signal+plan is the clear center of gravity.
+- [ ] **Tell the user on-screen that Charts plot the cash index**, not the future.
 
 ## Done (session 34 — Split expansion + Learn + Strength + animated backdrop)
 - [x] **Animated logo watermark** behind the app (`.bg-logo`, accent-tinted, mood-flipping, reduced-motion-safe) + tab-switch entrance anim.
