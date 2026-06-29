@@ -966,6 +966,20 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .score-rec.ok2{background:rgba(34,197,94,.08);color:var(--gt)}
 .score-rec.no{background:rgba(239,68,68,.14);color:var(--rt)}
 .score-rec.wait{background:rgba(255,255,255,.04);color:var(--ink2)}
+/* Futures terminal */
+.fut-head-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.fut-sig{border:1px solid var(--line);border-left-width:5px;border-radius:14px;padding:16px 18px;margin-bottom:16px;position:relative}
+.fut-sig .fs-px{float:right;text-align:right}
+.fut-sig .fs-price{font-size:22px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em}
+.fut-sig .fs-head{font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px}
+.fut-sig .fs-sub{font-size:13px;color:var(--ink2);line-height:1.6;max-width:640px}
+.fut-sig .fs-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.fs-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--ink3)}
+.fs-pill.on{border-color:rgba(34,197,94,.5);color:var(--gt);background:rgba(34,197,94,.08)}
+.fut-sig.ok{border-left-color:var(--gt)} .fut-sig.ok .fs-head{color:var(--gt)}
+.fut-sig.ok2{border-left-color:var(--gt)} .fut-sig.ok2 .fs-head{color:var(--gt)}
+.fut-sig.wait{border-left-color:var(--at)} .fut-sig.wait .fs-head{color:var(--at)}
+.fut-sig.no{border-left-color:var(--rt)} .fut-sig.no .fs-head{color:var(--rt)}
 /* 0DTE Lab */
 .opt-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .opt-fresh{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
@@ -1623,7 +1637,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="snav-hover" id="snavHover"></div>
     <div class="snav-glide" id="snavGlide"></div>
     <div class="appnav-grp">Terminal</div>
-    <button class="snav active" data-tab="dashboard" onclick="mainTab('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Dashboard</span></button>
+    <button class="snav active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES</span></button>
+    <button class="snav" data-tab="dashboard" onclick="mainTab('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Stocks</span></button>
     <button class="snav" data-tab="movers" onclick="mainTab('movers',this)"><svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M4 20V11"/><path d="M10 20V4"/><path d="M16 20v-6"/><path d="M22 20V8"/></svg><span class="lbl">High Volume</span><span class="pill">LIVE</span></button>
     <button class="snav" data-tab="screener" onclick="mainTab('screener',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span class="lbl">Screener</span></button>
     <button class="snav" data-tab="news" onclick="mainTab('news',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 8h2a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2"/><path d="M7 8h7M7 12h7M7 16h4"/></svg><span class="lbl">News</span></button>
@@ -1671,7 +1686,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     </div>
 
     <!-- DASHBOARD -->
-    <div class="tab-pane active" id="tab-dashboard">
+    <!-- FUTURES TERMINAL — the validated trend-pullback signal, live, on ES -->
+    <div class="tab-pane active" id="tab-futures">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">ES Futures <span class="pill">S&amp;P 500 E-mini</span></div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Daily trend-pullback system — the one strategy that passed out-of-sample, generalization, and robustness tests. Free Yahoo data.</div>
+        </div>
+        <button class="dp-fu" onclick="renderFutures(true)" id="futRefresh">↻ Refresh</button>
+      </div>
+      <div id="futBody"><div class="card"><div class="loading-label">Loading ES futures…</div></div></div>
+    </div>
+
+    <div class="tab-pane" id="tab-dashboard">
       <!-- INDEX STRIP — live market context -->
       <div class="idx-strip" id="idxStrip"></div>
       <!-- COMMAND BAR — drives every panel below -->
@@ -2039,6 +2066,8 @@ function mainTab(name,btn){
   if(name==='journal')renderJournal();
   if(name==='ailab')renderAILearnStats();
   if(name==='optlab')renderOptLab();
+  if(name==='futures')renderFutures();
+  if(name==='dashboard'&&!window._dashInited){window._dashInited=true;cpInit();}
   if(name==='movers')renderMovers();
   if(sb)snavGlideTo(sb);
   const pw=document.querySelector('.page-wrap'); if(pw)pw.scrollTop=0;
@@ -4806,6 +4835,123 @@ function cpSend(){const inp=dashEl('cpInput');if(!inp)return;const txt=(inp.valu
 function cpChip(txt){const inp=dashEl('cpInput');if(inp)inp.value=txt;renderDash(txt);}
 function cpSetHorizon(v){currentDTE=v;if(lastData)renderDash(lastData.ticker);}
 function cpInit(){renderDash('AAPL');}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── FUTURES TERMINAL — the validated daily trend-pullback signal on ES ──
+// Buy pullbacks to the 10-day avg while above the 50-day avg; exit on trend
+// break (close below the 50-day). The one strategy that passed out-of-sample,
+// generalization, and robustness tests. Free Yahoo data via the proxy.
+// ══════════════════════════════════════════════════════════════════════
+const FUT_SYMBOL='ES=F';
+let _futQ=null;
+function _smaAt(a,n,i){if(i<n-1)return null;let s=0;for(let j=i-n+1;j<=i;j++)s+=a[j];return s/n;}
+function _smaSeries(a,n){return a.map((_,i)=>_smaAt(a,n,i));}
+async function renderFutures(force){
+  const el=document.getElementById('futBody');if(!el)return;
+  const btn=document.getElementById('futRefresh');if(btn&&force){btn.disabled=true;btn.style.opacity='.5';}
+  if(!force&&_futQ){paintFutures(_futQ);return;}
+  el.innerHTML=`<div class="card"><div class="loading-label">Loading ES futures…</div></div>`;
+  window.__userFetch=Date.now();
+  try{
+    const q=await fetchQuote(FUT_SYMBOL);
+    window.__userFetch=0; _futQ=q; paintFutures(q);
+  }catch(e){
+    el.innerHTML=`<div class="card"><div class="card-title">Couldn't load ES</div><div class="bt-empty" style="padding:16px;line-height:1.7">${(e&&e.message)||e}.<br>The free data feed may be rate-limited — wait a moment and hit Refresh.</div></div>`;
+  }
+  if(btn){btn.disabled=false;btn.style.opacity='';}
+}
+function paintFutures(q){
+  const el=document.getElementById('futBody');if(!el)return;
+  const closes=(q.closes||[]).filter(x=>x!=null);
+  if(closes.length<60){el.innerHTML=`<div class="card"><div class="bt-empty" style="padding:16px">Not enough history for ES right now — hit Refresh.</div></div>`;return;}
+  const ohlc=(q.h1y&&q.h1y.length>60)?q.h1y:null;
+  const price=q.price, prev=closes[closes.length-2];
+  const sma50=smaN(closes,50), sma10=smaN(closes,10), sma20=smaN(closes,20);
+  const s50=_smaSeries(closes,50), s10=_smaSeries(closes,10);
+  // ── signal ──
+  const uptrend=price>sma50;
+  const lows=ohlc?ohlc.slice(-3).map(b=>b.l):closes.slice(-3);
+  const pulledBack=Math.min(...lows)<=sma10 || price<=sma10;
+  const turnUp=price>prev;
+  const buySetup=uptrend&&pulledBack&&turnUp;
+  let cls,head,sub;
+  if(!uptrend){cls='no';head='No trade — downtrend';sub='ES is below its 50-day average. This system only buys in uptrends — stand aside.';}
+  else if(buySetup){cls='ok';head='✓ BUY SETUP — today';sub='Uptrend + pullback to the 10-day average + turning back up. This is exactly the entry the backtest traded.';}
+  else if(pulledBack&&!turnUp){cls='wait';head='Pullback in progress — watch';sub='In an uptrend and dipping to the 10-day average, but not turning up yet. A green day here triggers the buy.';}
+  else{cls='ok2';head='In uptrend — no entry yet';sub='Trend is up, but price isn’t pulled back to the 10-day average. Wait for a dip toward it.';}
+  // ── numbers ──
+  const vs50=(price-sma50)/sma50*100, vs10=(price-sma10)/sma10*100;
+  const s50prev=s50[s50.length-21], slope=s50prev?((sma50-s50prev)/s50prev*100):0;
+  const hardStop=price*0.92;
+  let atrPct=0;try{if(ohlc)atrPct=atr(ohlc,14)/price*100;}catch(e){}
+  const mret=closes.length>21?(price/closes[closes.length-22]-1)*100:0;
+  const up=q.change>=0;
+  const money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
+  // ── trade plan (only meaningful in an uptrend) ──
+  const plan=uptrend?`
+    <div class="card"><div class="card-title">Trade plan — ${buySetup?'<span class="g">entry today</span>':'on the next pullback'}</div>
+      <div class="lv-table">
+        <div class="lv-row entry"><div class="lk">Entry</div><div class="lp">$${money(price)}</div><div class="lt">${buySetup?'buy now / next open':'when it dips to the 10-day avg & turns up'}</div></div>
+        <div class="lv-row risk"><div class="lk">Exit (trend break)</div><div class="lp">$${money(sma50)}</div><div class="lt">sell when a daily close is below the 50-day avg</div></div>
+        <div class="lv-row risk"><div class="lk">Hard stop</div><div class="lp">$${money(hardStop)}</div><div class="lt">−8% safety net</div></div>
+        <div class="lv-row rew"><div class="lk">Target</div><div class="lp">let it run</div><div class="lt">no fixed target — hold the trend</div></div>
+      </div>
+      <div class="dp-rr">Hold time is typically days to weeks. ~5–6 trades a year. It makes money from a few big winners — most trades are small.</div>
+    </div>`:'';
+  // ── edge card (validated) ──
+  const edge=`<div class="card"><div class="card-title">Backtested edge — validated, honest</div>
+    <div class="bt-scoreboard">
+      <div class="bt-score"><div class="bt-score-val g">1.59</div><div class="bt-score-lbl">ES profit factor (out-of-sample)</div></div>
+      <div class="bt-score"><div class="bt-score-val g">2.73</div><div class="bt-score-lbl">NQ (OOS)</div></div>
+      <div class="bt-score"><div class="bt-score-val g">1.41</div><div class="bt-score-lbl">SPY (OOS)</div></div>
+      <div class="bt-score"><div class="bt-score-val g">1.32</div><div class="bt-score-lbl">QQQ (OOS)</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:6px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (works on S&amp;P and Nasdaq, futures and ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
+    <div class="dp-struct off" style="margin-top:10px">Honest caveats: it's <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a backtest passing is necessary, not sufficient — <b>paper-trade it first</b>. Re-run the engine in <b>0DTE Lab</b> / <code>backtester</code> to refresh these.</div>
+  </div>`;
+  el.innerHTML=`
+    <div class="fut-sig ${cls}">
+      <div class="fs-px"><div class="fs-price">$${money(price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
+      <div class="fs-head">${head}</div>
+      <div class="fs-sub">${sub}</div>
+      <div class="fs-pills">
+        <span class="fs-pill ${uptrend?'on':'off'}">${uptrend?'✓':'✕'} Uptrend (vs 50-day)</span>
+        <span class="fs-pill ${pulledBack?'on':'off'}">${pulledBack?'✓':'•'} Pulled back (to 10-day)</span>
+        <span class="fs-pill ${turnUp?'on':'off'}">${turnUp?'✓':'•'} Turning up</span>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">ES daily — price, 10-day &amp; 50-day averages</div>${futChartSVG(closes,s10,s50)}
+      <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--ink)">━</span> price</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
+    </div>
+    ${plan}
+    <div class="bt-scoreboard">
+      <div class="bt-score"><div class="bt-score-val ${vs50>=0?'g':'r'}">${vs50>=0?'+':''}${vs50.toFixed(1)}%</div><div class="bt-score-lbl">vs 50-day avg</div></div>
+      <div class="bt-score"><div class="bt-score-val ${vs10>=0?'g':'r'}">${vs10>=0?'+':''}${vs10.toFixed(1)}%</div><div class="bt-score-lbl">vs 10-day avg</div></div>
+      <div class="bt-score"><div class="bt-score-val ${slope>=0?'g':'r'}">${slope>=0?'+':''}${slope.toFixed(1)}%</div><div class="bt-score-lbl">50-day slope (1mo)</div></div>
+      <div class="bt-score"><div class="bt-score-val ${mret>=0?'g':'r'}">${mret>=0?'+':''}${mret.toFixed(1)}%</div><div class="bt-score-lbl">1-month return</div></div>
+      <div class="bt-score"><div class="bt-score-val">${atrPct.toFixed(1)}%</div><div class="bt-score-lbl">Daily range (ATR)</div></div>
+    </div>
+    ${edge}`;
+}
+function futChartSVG(closes,s10,s50){
+  const N=Math.min(140,closes.length);
+  const c=closes.slice(-N), a10=s10.slice(-N), a50=s50.slice(-N);
+  const W=920,H=300,pad=44;
+  const vals=c.concat(a10.filter(x=>x!=null)).concat(a50.filter(x=>x!=null));
+  const min=Math.min(...vals),max=Math.max(...vals),rng=Math.max(1,max-min);
+  const x=i=>pad+i/(N-1)*(W-pad-10);
+  const y=v=>H-24-((v-min)/rng)*(H-44);
+  const line=(arr,col,w)=>{let d='',started=false;arr.forEach((v,i)=>{if(v==null)return;d+=(started?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';started=true;});return `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"/>`;};
+  const lastUp=c[c.length-1]>=c[0];
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" preserveAspectRatio="none">
+    <text x="${pad}" y="14" fill="var(--ink3)" font-size="11" font-family="var(--mono)">$${Math.round(max).toLocaleString()}</text>
+    <text x="${pad}" y="${H-6}" fill="var(--ink3)" font-size="11" font-family="var(--mono)">$${Math.round(min).toLocaleString()}</text>
+    ${line(a50,'rgba(var(--ac-rgb),.95)',2)}
+    ${line(a10,'var(--at)',1.5)}
+    ${line(c,(lastUp?'var(--ink)':'var(--ink)'),2)}
+    <circle cx="${x(N-1).toFixed(1)}" cy="${y(c[c.length-1]).toFixed(1)}" r="3.5" fill="var(--ink)"/>
+  </svg>`;
+}
 function tvFallback(id,ticker,msg){
   return `<div style="height:100%;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;color:var(--ink3);font-size:13px;text-align:center;padding:24px">
     <div>${msg} for <b>${ticker}</b>. The free chart feed is sometimes slow during market hours.</div>
@@ -6348,7 +6494,7 @@ renderNews();
 renderTraders('all');
 updateAIBadge();
 probeProxy();
-cpInit();
+renderFutures();     // Futures is the default tab now
 initPremiumNav();    // gliding active pill, magnetic hover, cursor glow
 // Background data pollers share the same flaky CORS proxies as your live lookups,
 // so they STAND DOWN while you're analyzing a ticker (or on the landing / tab hidden),

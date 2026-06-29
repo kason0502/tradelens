@@ -1,7 +1,16 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-27 (session 23)
+> Last updated: 2026-06-27 (session 29)
+
+## Done (session 29 — STRATA refocused on futures)
+- [x] **Futures terminal is the new default tab** — live validated trend-pullback signal on ES (signal card + daily chart w/ 10/50-day MAs + plain trade plan + validated-edge card). Stocks dashboard moved to a "Stocks" tab. Shell kept.
+
+## Next (futures terminal)
+- [ ] **More markets** — add NQ (and SPY/QQQ) with a small selector; the strategy is validated on all of them. (ES-only for now.)
+- [ ] **Live alert** — flag when ES flips to a BUY SETUP (browser notification / banner).
+- [ ] **Wire the edge card to `backtester/results.json`** (swing run) instead of hard-coded numbers, so it refreshes when you re-run the engine.
+- [ ] **Re-theme remaining chrome** toward futures; stock-era tabs (Movers/Screener/Pro Traders) are now secondary.
 
 ## Done (session 23 — 0DTE options backtester + STRATA 0DTE Lab)
 - [x] Standalone honesty-first Python 0DTE backtester in `/backtester` (pessimistic fills, no look-ahead, next-bar exec, fragility report, swappable modules, tests, SPY ORB strategy).
