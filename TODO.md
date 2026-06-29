@@ -1,7 +1,19 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-29 (session 33)
+> Last updated: 2026-06-29 (session 34)
+
+## Done (session 34 — Split expansion + Learn + Strength + animated backdrop)
+- [x] **Animated logo watermark** behind the app (`.bg-logo`, accent-tinted, mood-flipping, reduced-motion-safe) + tab-switch entrance anim.
+- [x] **Split View expanded** — 5 module types (chart/signal/grid/sessions/notes), 1/2/3/4 layouts, localStorage persistence, live-tick timer.
+- [x] **Learn tab** — visual academy with SVG diagrams (candle anatomy, long/short, tick value, MA trend, leverage, the strategy).
+- [x] **Relative Strength tab** — multi-market normalized overlay + leaderboard, selectable window.
+
+## Next (visual / new-tab follow-ups)
+- [ ] **Crosshair/symbol sync across Split panes** (TradingView iframes can't share a crosshair; could at least sync the symbol across chart panes).
+- [ ] **Strength: let the user pick which markets to overlay** (currently all six) + add a relative-to-ES mode.
+- [ ] **Learn: add an interactive candle** (hover a real candle to see its OHLC) and a quick quiz to reinforce.
+- [ ] **Verify the logo watermark contrast** on a real monitor — tune opacity if it's too faint or too busy behind dense tabs.
 
 ## Done (session 33 — playbook diagram + Matrix/Charts/Split View)
 - [x] **Playbook setup diagram** (`playbookDiagramSVG`) — annotated schematic: uptrend → pullback (buy zone) → entry → ride → exit, with a phase legend.

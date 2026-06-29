@@ -136,7 +136,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .nticker.nclk:hover{border-color:rgba(var(--ac-rgb),.5);color:var(--act)}
 
 /* ── TAB SYSTEM ── */
-.tab-pane{display:none}.tab-pane.active{display:block}
+.tab-pane{display:none}.tab-pane.active{display:block;animation:tabIn .34s cubic-bezier(.22,1,.36,1)}
+@keyframes tabIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.tab-pane.active{animation:none}}
 
 /* ── TICKER ROW ── */
 .ticker-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -1079,7 +1081,29 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .sp-sym{flex:1;min-width:0}
 .sp-body{flex:1;min-height:0;position:relative;overflow:auto}
 .sp-sigwrap{padding:14px}
-@media(max-width:760px){.split-grid.n2,.split-grid.n4{grid-template-columns:1fr}}
+.split-grid.n3{grid-template-columns:1fr 1fr 1fr}
+.split-grid.n3 .sp-pane{height:460px}
+@media(max-width:1000px){.split-grid.n3{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.split-grid.n2,.split-grid.n3,.split-grid.n4{grid-template-columns:1fr}}
+.sp-notes{width:100%;height:100%;min-height:200px;border:none;background:transparent;color:var(--tx);font-family:var(--mono);font-size:13px;line-height:1.7;padding:14px;resize:none;outline:none}
+.sp-mxrow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:13px}
+.sp-mxrow:last-child{border-bottom:none}
+.sp-mxrow b{min-width:42px;font-weight:800}
+.sp-mxrow .mono{font-family:var(--mono);color:var(--ink2);flex:1}
+.sp-mxrow .chg-badge{font-size:11px;padding:3px 9px}
+/* Relative Strength */
+.st-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px}
+.st-leg{display:flex;align-items:center;gap:6px;color:var(--ink2)}
+.st-leg i,.st-rank i{width:11px;height:11px;border-radius:3px;flex-shrink:0;display:inline-block}
+.st-leg b.g,.st-rank b.g{color:var(--gt)}.st-leg b.r,.st-rank b.r{color:var(--rt)}
+.st-rank{display:flex;align-items:center;gap:11px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:13.5px}
+.st-rank:last-child{border-bottom:none}
+.st-pos{width:22px;height:22px;border-radius:7px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--mono);color:var(--ink2)}
+/* Learn — visual academy */
+.learn-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.learn-card svg{background:rgba(255,255,255,.012);border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+.learn-text{font-size:13.5px;color:var(--ink2);line-height:1.7}
+@media(min-width:1120px){.learn-grid{grid-template-columns:1fr 1fr}}
 /* 0DTE Lab */
 .opt-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .opt-fresh{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
@@ -1302,10 +1326,18 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 /* keep app surfaces readable above the canvas */
 .page-wrap,.main-col{position:relative;z-index:1}
 .appbar{background:rgba(6,6,8,.74)}
+/* Faint, slightly-animated brand watermark behind the app (accent-tinted, flips with mood) */
+.bg-logo{position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bg-logo::before{content:'';position:absolute;width:min(74vw,860px);height:min(74vw,860px);border-radius:50%;background:radial-gradient(circle,rgba(var(--ac-rgb),.07),transparent 64%);filter:blur(22px);animation:bgGlow 16s ease-in-out infinite}
+.bg-logo img{width:min(46vw,520px);opacity:.05;animation:bgLogoFloat 18s ease-in-out infinite;will-change:transform,opacity;filter:drop-shadow(0 0 32px rgba(var(--ac-rgb),.18))}
+@keyframes bgLogoFloat{0%,100%{transform:translateY(0) scale(1) rotate(0)}50%{transform:translateY(-18px) scale(1.045) rotate(1.4deg);opacity:.085}}
+@keyframes bgGlow{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.bg-logo img,.bg-logo::before{animation:none}}
 </style>
 </head>
 <body>
 <canvas id="fxCanvas" aria-hidden="true"></canvas>
+<div class="bg-logo" aria-hidden="true"><img src="logo.png" alt=""/></div>
 <div class="particles" id="particles"></div>
 
 <!-- ═══════════════════ LANDING ═══════════════════ -->
@@ -1739,6 +1771,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="appnav-grp">Terminal</div>
     <button class="snav active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES·NQ</span></button>
     <button class="snav" data-tab="matrix" onclick="mainTab('matrix',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Matrix</span><span class="pill">live</span></button>
+    <button class="snav" data-tab="strength" onclick="mainTab('strength',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 15l5-6 4 3 7-9"/><circle cx="9" cy="9" r="1"/><circle cx="13" cy="12" r="1"/></svg><span class="lbl">Strength</span></button>
     <div class="appnav-grp">Charts</div>
     <button class="snav" data-tab="charts" onclick="mainTab('charts',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg><span class="lbl">Charts</span></button>
     <button class="snav" data-tab="split" onclick="mainTab('split',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg><span class="lbl">Split View</span></button>
@@ -1746,6 +1779,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <button class="snav" data-tab="playbook" onclick="mainTab('playbook',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg><span class="lbl">Playbook</span></button>
     <button class="snav" data-tab="calc" onclick="mainTab('calc',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15v2"/></svg><span class="lbl">Risk Calc</span></button>
     <button class="snav" data-tab="sessions" onclick="mainTab('sessions',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Sessions</span></button>
+    <button class="snav" data-tab="learn" onclick="mainTab('learn',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M7 9.5V15c0 1.1 2.2 2.5 5 2.5s5-1.4 5-2.5V9.5"/><path d="M21 7v6"/></svg><span class="lbl">Learn</span><span class="pill">visual</span></button>
     <div class="appnav-grp">Assistant</div>
     <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
     <button class="snav" data-tab="feedback" onclick="mainTab('feedback',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7 0l-.8.8-.8-.8a5 5 0 1 0-7 7l7.8 7.8 7.8-7.8a5 5 0 0 0 0-7z"/></svg><span class="lbl">Feedback</span></button>
@@ -1824,12 +1858,36 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div style="font-size:13px;color:var(--mu);line-height:1.6">Watch several markets at once — pick a layout, then set each pane to a chart or a live signal.</div>
         </div>
         <div class="split-layouts">
-          <button class="sl-btn" data-n="1" onclick="setSplitLayout(1)">▢</button>
-          <button class="sl-btn" data-n="2" onclick="setSplitLayout(2)">▢▢</button>
-          <button class="sl-btn" data-n="4" onclick="setSplitLayout(4)">▦</button>
+          <button class="sl-btn" data-n="1" onclick="setSplitLayout(1)" title="1 pane">▢</button>
+          <button class="sl-btn" data-n="2" onclick="setSplitLayout(2)" title="2 panes">▢▢</button>
+          <button class="sl-btn" data-n="3" onclick="setSplitLayout(3)" title="3 panes">▢▢▢</button>
+          <button class="sl-btn" data-n="4" onclick="setSplitLayout(4)" title="4 panes">▦</button>
         </div>
       </div>
       <div id="splitGrid" class="split-grid"></div>
+    </div>
+
+    <!-- STRENGTH — normalized relative performance of every tracked future -->
+    <div class="tab-pane" id="tab-strength">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Relative Strength</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Every market rebased to 100 — see which futures are leading and which are lagging over your chosen window.</div>
+        </div>
+        <button class="dp-fu" onclick="renderStrength(true)" id="stRefresh">↻ Refresh</button>
+      </div>
+      <div id="strengthBody"><div class="card"><div class="loading-label">Loading markets…</div></div></div>
+    </div>
+
+    <!-- LEARN — visual academy for visual learners -->
+    <div class="tab-pane" id="tab-learn">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Learn — Visual Academy</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">The core ideas of futures trading, drawn out. Built for visual learners — every concept has a diagram.</div>
+        </div>
+      </div>
+      <div id="learnBody"></div>
     </div>
 
     <!-- PLAYBOOK — the validated system's rules + a live pre-trade checklist -->
@@ -1966,13 +2024,16 @@ function mainTab(name,btn){
   const sb=document.querySelector('.snav[data-tab="'+name+'"]'); if(sb)sb.classList.add('active');
   if(name==='futures')renderFutures();
   if(name==='matrix')renderMatrix();
+  if(name==='strength')renderStrength();
   if(name==='charts')renderCharts();
   if(name==='split')renderSplit();
   if(name==='playbook')renderPlaybookTab();
   if(name==='calc')renderCalc();
   if(name==='sessions')renderSessions();
+  if(name==='learn')renderLearn();
   if(name==='feedback')renderFeedbackTab();
   if(name!=='sessions')stopSessionClock();
+  if(name!=='split')stopSplitTimer();
   if(sb)snavGlideTo(sb);
   const pw=document.querySelector('.page-wrap'); if(pw)pw.scrollTop=0;
 }
@@ -4884,11 +4945,8 @@ function _tzNow(tz){
 function _fmtDur(mins){const h=Math.floor(mins/60),m=mins%60;return (h?h+'h ':'')+m+'m';}
 function renderSessions(){const el=document.getElementById('sessionsBody');if(!el)return;paintSessions();if(_sessTimer)clearInterval(_sessTimer);_sessTimer=setInterval(paintSessions,1000);}
 function stopSessionClock(){if(_sessTimer){clearInterval(_sessTimer);_sessTimer=null;}}
-function paintSessions(){
-  const el=document.getElementById('sessionsBody');if(!el){stopSessionClock();return;}
-  const now=new Date();
-  const localStr=now.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const utc=new Intl.DateTimeFormat('en-GB',{timeZone:'UTC',hour:'2-digit',minute:'2-digit',hour12:false}).format(now);
+// Shared session math — used by the Sessions tab AND Split View session panes.
+function _sessionData(){
   let openCount=0;
   const rows=SESSIONS.map(se=>{
     const t=_tzNow(se.tz), wkday=t.wd>=1&&t.wd<=5, oM=se.o*60, cM=se.c*60, nowM=t.h*60+t.m;
@@ -4903,6 +4961,14 @@ function paintSessions(){
   const lon=_tzNow('Europe/London'), ny=_tzNow('America/New_York');
   const lonM=lon.h*60+lon.m, nyM=ny.h*60+ny.m;
   const overlap=(lon.wd>=1&&lon.wd<=5&&lonM>=480&&lonM<1020)&&(ny.wd>=1&&ny.wd<=5&&nyM>=480&&nyM<1020);
+  return {rows,openCount,overlap};
+}
+function paintSessions(){
+  const el=document.getElementById('sessionsBody');if(!el){stopSessionClock();return;}
+  const now=new Date();
+  const localStr=now.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const utc=new Intl.DateTimeFormat('en-GB',{timeZone:'UTC',hour:'2-digit',minute:'2-digit',hour12:false}).format(now);
+  const {rows,openCount,overlap}=_sessionData();
   el.innerHTML=`
     <div class="bt-scoreboard" style="margin-bottom:14px">
       <div class="bt-score"><div class="bt-score-val">${localStr}</div><div class="bt-score-lbl">Your local time</div></div>
@@ -5008,41 +5074,68 @@ function renderCharts(){
 function chartPick(sym){_chartSym=sym;document.querySelectorAll('.ch-chip').forEach(c=>c.classList.toggle('on',c.dataset.s===sym));mountTVInto('chartsTV',sym,0,{allowChange:true,sideToolbar:true,details:true,dateRanges:true});}
 function chartLookup(){const i=document.getElementById('chSearch');const v=(i&&i.value||'').trim();if(v)chartPick(v.toUpperCase());}
 
-// ── SPLIT VIEW — side-by-side workspace; each pane = a chart or a live signal ──
-let _splitN=2;
+// ── SPLIT VIEW — a configurable side-by-side workspace ──
+// Each pane independently shows a chart, a live signal, the market grid, the
+// session clock, or a scratch notepad. Layout + pane config persist locally.
+const SPLIT_MODS=[['chart','Chart'],['signal','Live signal'],['grid','Market grid'],['sessions','Session clock'],['notes','Notepad']];
+let _splitN=2, _splitLoaded=false, _splitTimer=null, _splitNotes=['','','',''];
 let _splitPanes=[
   {mod:'chart',sym:'CME_MINI:ES1!',sig:'ES=F'},
   {mod:'chart',sym:'CME_MINI:NQ1!',sig:'NQ=F'},
   {mod:'signal',sym:'CBOT_MINI:YM1!',sig:'YM=F'},
-  {mod:'chart',sym:'COMEX:GC1!',sig:'GC=F'},
+  {mod:'sessions',sym:'COMEX:GC1!',sig:'GC=F'},
 ];
-function setSplitLayout(n){_splitN=n;renderSplit();}
+function loadSplit(){
+  if(_splitLoaded)return;_splitLoaded=true;
+  try{const s=JSON.parse(localStorage.getItem('tlpro_split_v1'));if(s&&Array.isArray(s.panes)&&s.panes.length===4){_splitN=s.n||2;_splitPanes=s.panes;_splitNotes=s.notes||_splitNotes;}}catch(e){}
+}
+function saveSplit(){try{localStorage.setItem('tlpro_split_v1',JSON.stringify({n:_splitN,panes:_splitPanes,notes:_splitNotes}));}catch(e){}}
+function setSplitLayout(n){_splitN=n;saveSplit();renderSplit();}
 function renderSplit(){
+  loadSplit();
   const grid=document.getElementById('splitGrid');if(!grid)return;
   grid.className='split-grid n'+_splitN;
   document.querySelectorAll('.sl-btn').forEach(b=>b.classList.toggle('on',+b.dataset.n===_splitN));
   grid.innerHTML=Array.from({length:_splitN},(_,i)=>splitPaneShell(i)).join('');
   for(let i=0;i<_splitN;i++)splitRenderPane(i);
+  splitTimerSync();
 }
 function splitPaneShell(i){
   const p=_splitPanes[i];
-  const symOpts=p.mod==='chart'
-    ? TV_FUTURES.map(f=>`<option value="${f.s}"${f.s===p.sym?' selected':''}>${f.l}</option>`).join('')
-    : MATRIX_MARKETS.map(m=>`<option value="${m.sym}"${m.sym===p.sig?' selected':''}>${m.label} · ${m.name}</option>`).join('');
+  const modOpts=SPLIT_MODS.map(([v,l])=>`<option value="${v}"${p.mod===v?' selected':''}>${l}</option>`).join('');
+  let symSel='';
+  if(p.mod==='chart') symSel=`<select class="sp-sel sp-sym" onchange="splitSetSym(${i},this.value)">${TV_FUTURES.map(f=>`<option value="${f.s}"${f.s===p.sym?' selected':''}>${f.l}</option>`).join('')}</select>`;
+  else if(p.mod==='signal') symSel=`<select class="sp-sel sp-sym" onchange="splitSetSym(${i},this.value)">${MATRIX_MARKETS.map(m=>`<option value="${m.sym}"${m.sym===p.sig?' selected':''}>${m.label} · ${m.name}</option>`).join('')}</select>`;
   return `<div class="sp-pane">
     <div class="sp-head">
-      <select class="sp-sel" onchange="splitSetMod(${i},this.value)"><option value="chart"${p.mod==='chart'?' selected':''}>Chart</option><option value="signal"${p.mod==='signal'?' selected':''}>Live signal</option></select>
-      <select class="sp-sel sp-sym" onchange="splitSetSym(${i},this.value)">${symOpts}</select>
+      <select class="sp-sel" onchange="splitSetMod(${i},this.value)">${modOpts}</select>
+      ${symSel}
     </div>
     <div class="sp-body" id="sp-body-${i}"></div>
   </div>`;
 }
-function splitSetMod(i,mod){_splitPanes[i].mod=mod;renderSplit();}
-function splitSetSym(i,val){const p=_splitPanes[i];if(p.mod==='chart')p.sym=val;else p.sig=val;splitRenderPane(i);}
-async function splitRenderPane(i){
-  const p=_splitPanes[i], body=document.getElementById('sp-body-'+i);if(!body)return;
-  if(p.mod==='chart'){mountTVInto('sp-body-'+i,p.sym,0,{allowChange:true});return;}
-  body.innerHTML=`<div class="loading-label" style="padding:16px">Loading ${p.sig}…</div>`;
+function splitSetMod(i,mod){_splitPanes[i].mod=mod;saveSplit();renderSplit();}
+function splitSetSym(i,val){const p=_splitPanes[i];if(p.mod==='chart')p.sym=val;else p.sig=val;saveSplit();splitRenderPane(i);}
+function splitSaveNote(i,v){_splitNotes[i]=v;saveSplit();}
+// Repaint live (clock/grid) panes on an interval, only while Split View is open.
+function splitTimerSync(){
+  stopSplitTimer();
+  const live=_splitPanes.slice(0,_splitN).some(p=>p.mod==='sessions'||p.mod==='grid');
+  if(live)_splitTimer=setInterval(()=>{for(let i=0;i<_splitN;i++){const p=_splitPanes[i];if(p.mod==='sessions'||p.mod==='grid')splitRenderPane(i,true);}},1000);
+}
+function stopSplitTimer(){if(_splitTimer){clearInterval(_splitTimer);_splitTimer=null;}}
+async function splitRenderPane(i,quiet){
+  const p=_splitPanes[i], id='sp-body-'+i, body=document.getElementById(id);if(!body)return;
+  if(p.mod==='chart'){mountTVInto(id,p.sym,0,{allowChange:true});return;}
+  if(p.mod==='notes'){body.innerHTML=`<textarea class="sp-notes" placeholder="Trade notes, levels, reminders…" oninput="splitSaveNote(${i},this.value)">${(_splitNotes[i]||'').replace(/</g,'&lt;')}</textarea>`;return;}
+  if(p.mod==='sessions'){const sd=_sessionData();body.innerHTML=`<div class="sp-sigwrap"><div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:10px">Session clock · ${sd.openCount}/4 open</div>${sd.rows}${sd.overlap?`<div class="fut-alert" style="margin:10px 0 0">🟢 London–NY overlap — peak liquidity.</div>`:''}</div>`;return;}
+  if(p.mod==='grid'){
+    if(!Object.keys(_mxCache).length){ if(!quiet){body.innerHTML=`<div class="loading-label" style="padding:16px">Loading markets…</div>`; window.__userFetch=Date.now(); await Promise.all(MATRIX_MARKETS.map(async m=>{try{_mxCache[m.sym]=await fetchQuote(m.sym);}catch(e){_mxCache[m.sym]=null;}})); window.__userFetch=0; } else return; }
+    body.innerHTML=`<div class="sp-sigwrap">${MATRIX_MARKETS.map(m=>{const q=_mxCache[m.sym],s=q?futSignal(q):null;if(!s)return `<div class="sp-mxrow"><b>${m.label}</b><span style="color:var(--mu)">—</span></div>`;const up=q.change>=0;return `<div class="sp-mxrow ${s.cls}"><b>${m.label}</b><span class="mono">$${s.price.toLocaleString(undefined,{maximumFractionDigits:2})}</span><span class="chg-badge ${up?'up':'down'}">${up?'+':''}${q.pct.toFixed(2)}%</span><span class="mx-sig ${s.cls}">${s.short}</span></div>`;}).join('')}</div>`;
+    return;
+  }
+  // signal
+  if(!quiet)body.innerHTML=`<div class="loading-label" style="padding:16px">Loading ${p.sig}…</div>`;
   let q=_futCache[p.sig]||_mxCache[p.sig];
   if(!q){try{window.__userFetch=Date.now();q=await fetchQuote(p.sig);_mxCache[p.sig]=q;window.__userFetch=0;}catch(e){}}
   const s=q?futSignal(q):null;
@@ -5062,6 +5155,138 @@ async function splitRenderPane(i){
     </div>
     <div style="margin-top:10px">${s.ohlc?futCandleSVG(s.ohlc,s.s10,s.s50):futSparkSVG(s.closes)}</div>
   </div>`;
+}
+
+// ── RELATIVE STRENGTH — every market rebased to 100 over a window ──
+let _stWin=66;   // ~3 months of daily bars
+function renderStrength(force){
+  const el=document.getElementById('strengthBody');if(!el)return;
+  const btn=document.getElementById('stRefresh');if(btn&&force){btn.disabled=true;btn.style.opacity='.5';}
+  const go=()=>{paintStrength();if(btn){btn.disabled=false;btn.style.opacity='';}};
+  if(force||!Object.keys(_mxCache).length){
+    el.innerHTML=`<div class="card"><div class="loading-label">Loading markets…</div></div>`;
+    window.__userFetch=Date.now();
+    Promise.all(MATRIX_MARKETS.map(async m=>{try{_mxCache[m.sym]=await fetchQuote(m.sym);}catch(e){_mxCache[m.sym]=null;}})).then(()=>{window.__userFetch=0;go();});
+  } else go();
+}
+function setStWin(n){_stWin=n;paintStrength();}
+const ST_COLORS=['#22c55e','#38bdf8','#a78bfa','#f59e0b','#f43f5e','#e8eaed'];
+function paintStrength(){
+  const el=document.getElementById('strengthBody');if(!el)return;
+  const series=MATRIX_MARKETS.map((m,idx)=>{
+    const q=_mxCache[m.sym];if(!q||!q.closes||q.closes.length<5)return null;
+    const c=q.closes.slice(-_stWin), base=c[0];
+    return {m,idx,col:ST_COLORS[idx%ST_COLORS.length],norm:c.map(v=>v/base*100-100), last:c[c.length-1]/base*100-100};
+  }).filter(Boolean);
+  if(!series.length){el.innerHTML=`<div class="card"><div class="bt-empty" style="padding:16px">No market data — hit Refresh.</div></div>`;return;}
+  const ranked=[...series].sort((a,b)=>b.last-a.last);
+  const wins=[['1M',22],['3M',66],['6M',130],['1Y',252]];
+  const winBar=`<div class="ch-chips" style="margin-bottom:12px">${wins.map(([l,n])=>`<button class="ch-chip ${n===_stWin?'on':''}" onclick="setStWin(${n})">${l}</button>`).join('')}</div>`;
+  el.innerHTML=winBar
+    +`<div class="card"><div class="card-title">Performance — rebased to 0% at the start of the window</div>${strengthChartSVG(series)}
+      <div class="st-legend">${series.map(s=>`<span class="st-leg"><i style="background:${s.col}"></i>${s.m.label} <b class="${s.last>=0?'g':'r'}">${s.last>=0?'+':''}${s.last.toFixed(1)}%</b></span>`).join('')}</div>
+    </div>`
+    +`<div class="card"><div class="card-title">Leaderboard</div>${ranked.map((s,i)=>`<div class="st-rank"><span class="st-pos">${i+1}</span><i style="background:${s.col}"></i><b>${s.m.label}</b><span style="color:var(--mu);flex:1">${s.m.name}</span><b class="${s.last>=0?'g':'r'}" style="font-family:var(--mono)">${s.last>=0?'+':''}${s.last.toFixed(1)}%</b></div>`).join('')}
+      <div style="font-size:11px;color:var(--ink3);margin-top:10px">Leaders tend to keep leading — this system only buys the strongest markets that are also in an uptrend. Click a market on the <b>Matrix</b> to chart it.</div></div>`;
+}
+function strengthChartSVG(series){
+  const W=920,H=340,padL=46,padR=14,padT=16,padB=26;
+  const N=Math.max(...series.map(s=>s.norm.length));
+  let min=0,max=0;series.forEach(s=>s.norm.forEach(v=>{if(v<min)min=v;if(v>max)max=v;}));
+  const pad=(max-min)*0.08||1;min-=pad;max+=pad;const rng=Math.max(1e-6,max-min);
+  const x=i=>padL+(N<=1?0:i/(N-1)*(W-padL-padR));
+  const y=v=>padT+(1-(v-min)/rng)*(H-padT-padB);
+  let grid='';for(let g=0;g<=4;g++){const v=min+rng*g/4,yy=y(v);grid+=`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.05)"/><text x="6" y="${(yy+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10.5" font-family="var(--mono)">${v>=0?'+':''}${v.toFixed(0)}%</text>`;}
+  const zeroY=y(0);
+  const lines=series.map(s=>{let d='';const off=N-s.norm.length;s.norm.forEach((v,i)=>d+=(i?'L':'M')+x(i+off).toFixed(1)+' '+y(v).toFixed(1)+' ');
+    return `<path d="${d}" fill="none" stroke="${s.col}" stroke-width="2" stroke-linejoin="round" opacity=".95"/><circle cx="${x(N-1).toFixed(1)}" cy="${y(s.last).toFixed(1)}" r="3" fill="${s.col}"/>`;}).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${grid}<line x1="${padL}" y1="${zeroY.toFixed(1)}" x2="${W-padR}" y2="${zeroY.toFixed(1)}" stroke="rgba(255,255,255,.18)" stroke-dasharray="4 4"/>${lines}</svg>`;
+}
+
+// ── LEARN — visual academy (every concept gets a diagram) ──
+function renderLearn(){
+  const el=document.getElementById('learnBody');if(!el)return;
+  const card=(title,svg,body)=>`<div class="card learn-card"><div class="card-title">${title}</div>${svg}<div class="learn-text">${body}</div></div>`;
+  el.innerHTML=`<div class="learn-grid">
+    ${card('Anatomy of a candle',candleAnatomySVG(),'Each candle packs four prices into one shape. The thick <b>body</b> spans the open and close; the thin <b>wicks</b> reach to the high and low. <b style="color:var(--gt)">Green</b> means it closed above where it opened (buyers won the period); <b style="color:var(--rt)">red</b> means it closed below (sellers won).')}
+    ${card('Long vs short',longShortSVG(),'Go <b style="color:var(--gt)">long</b> and you profit when price rises — buy low, sell higher. Go <b>short</b> and you profit when price falls — sell first, buy back lower. This system is <b>long-only</b>: it only buys, and only in uptrends.')}
+    ${card('What a tick is worth',tickValueSVG(),'Futures move in fixed increments. For the E-mini S&amp;P (ES), the smallest move is <b>0.25 (one tick) = $12.50</b>, and a full <b>1.00 point = $50</b> per contract. Knowing your $/point is how you turn a stop distance into real dollars — that\'s what the <b>Risk Calculator</b> does.')}
+    ${card('Reading the trend',maTrendSVG(),'A moving average smooths price into a trend line. When price holds <b style="color:var(--gt)">above</b> its 50-day average, the trend is up; <b style="color:var(--rt)">below</b> it, the trend is down. The whole strategy starts here: it only takes trades while price is above the 50-day.')}
+    ${card('Leverage cuts both ways',leverageSVG(),'One ES contract near 5000 controls about <b>$250,000</b> of index exposure for a small margin deposit. That leverage magnifies <b>both</b> sides — a 2% move is roughly <b>$5,000</b> per contract. It\'s why position sizing (risking a fixed small % per trade) matters more than picking winners.')}
+    ${card('The strategy, visualized',playbookDiagramSVG(),'Put it together: wait for an uptrend, let price pull back to the 10-day average (the <b style="color:var(--gt)">buy zone</b>), enter on the first green day, ride the trend, and exit when price closes back below the 50-day. See the live read on the <b>Playbook</b> tab.')}
+  </div>`;
+}
+function candleAnatomySVG(){
+  const W=920,H=300,cx=220,cw=72,hi=34,bt=96,bb=214,lo=268;
+  const row=(y,txt)=>`<line x1="${cx+cw/2}" y1="${y}" x2="${cx+cw/2+118}" y2="${y}" stroke="var(--line2)" stroke-dasharray="2 3"/><circle cx="${cx+cw/2}" cy="${y}" r="3" fill="var(--ink)"/><text x="${cx+cw/2+130}" y="${y+4}" fill="var(--ink2)" font-size="13" font-weight="700">${txt}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <line x1="${cx}" y1="${hi}" x2="${cx}" y2="${lo}" stroke="var(--gr)" stroke-width="2.5"/>
+    <rect x="${cx-cw/2}" y="${bt}" width="${cw}" height="${bb-bt}" rx="4" fill="var(--gr)"/>
+    <text x="${cx-cw/2-14}" y="${(bt+bb)/2+4}" fill="var(--gt)" font-size="11" font-weight="800" text-anchor="end">BODY ▸</text>
+    ${row(hi,'High — the peak price traded (upper wick)')}
+    ${row(bt,'Close — where price ended')}
+    ${row(bb,'Open — where price started')}
+    ${row(lo,'Low — the lowest price traded (lower wick)')}
+    <text x="${cx}" y="${H-8}" fill="var(--gt)" font-size="13" font-weight="800" text-anchor="middle">GREEN · close above open</text>
+  </svg>`;
+}
+function longShortSVG(){
+  const W=920,H=240;
+  const panel=(ox,title,col,rising,desc)=>{
+    const px0=ox+30,px1=ox+390,y0=180,y1=60;
+    const ay=rising?y1:y0+0, by=rising?y0:y1;   // start/end
+    const sx=px0,ex=px1,sy=rising?y0:y1,eyv=rising?y1:y0;
+    const head=rising?`${ex},${eyv} ${ex-12},${eyv+4} ${ex-4},${eyv+13}`:`${ex},${eyv} ${ex-13},${eyv-3} ${ex-3},${eyv-13}`;
+    return `<rect x="${ox+10}" y="30" width="420" height="${H-50}" rx="14" fill="rgba(255,255,255,.018)" stroke="var(--line)"/>
+      <text x="${ox+30}" y="54" fill="${col}" font-size="14" font-weight="900">${title}</text>
+      <line x1="${sx}" y1="${sy}" x2="${ex}" y2="${eyv}" stroke="${col}" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="${head}" fill="${col}"/>
+      <text x="${ox+30}" y="${H-30}" fill="var(--ink2)" font-size="12.5" font-weight="600">${desc}</text>`;
+  };
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    ${panel(0,'LONG ▲ profit as price rises','var(--gt)',true,'Buy low → sell higher')}
+    ${panel(460,'SHORT ▼ profit as price falls','var(--rt)',false,'Sell high → buy back lower')}
+  </svg>`;
+}
+function tickValueSVG(){
+  const W=920,H=210,x0=90,x1=830,y=120,seg=(x1-x0)/4;
+  let ticks='';
+  for(let i=0;i<4;i++){const sx=x0+i*seg;ticks+=`<rect x="${(sx+4).toFixed(1)}" y="${y-28}" width="${(seg-8).toFixed(1)}" height="56" rx="7" fill="rgba(var(--ac-rgb),.12)" stroke="rgba(var(--ac-rgb),.45)"/><text x="${(sx+seg/2).toFixed(1)}" y="${y+5}" fill="var(--act)" font-size="14" font-weight="800" text-anchor="middle" font-family="var(--mono)">$12.50</text><text x="${(sx+seg/2).toFixed(1)}" y="${y-36}" fill="var(--ink3)" font-size="11" text-anchor="middle">0.25 tick</text>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <text x="${(x0+x1)/2}" y="44" fill="var(--ink)" font-size="15" font-weight="800" text-anchor="middle">ES — one full point = $50 = four ticks of 0.25</text>
+    ${ticks}
+    <text x="${(x0+x1)/2}" y="${y+62}" fill="var(--ink2)" font-size="12.5" text-anchor="middle">Price ticks 5000.00 → 5001.00 and one contract gains or loses $50.</text>
+  </svg>`;
+}
+function maTrendSVG(){
+  const v=[];for(let i=0;i<30;i++)v.push(92+i*1.5+Math.sin(i/3)*2);for(let i=0;i<30;i++)v.push(v[v.length-1]-1.5+Math.sin(i/3)*2);
+  const ma=v.map((_,i)=>{let s=0,c=0;for(let j=Math.max(0,i-12);j<=i;j++){s+=v[j];c++;}return s/c;});
+  const N=v.length,W=920,H=280,padL=16,padR=16,padT=40,padB=20;
+  const all=v.concat(ma),min=Math.min(...all),max=Math.max(...all),rng=max-min;
+  const x=i=>padL+i/(N-1)*(W-padL-padR),y=val=>padT+(1-(val-min)/rng)*(H-padT-padB);
+  const path=a=>{let d='';a.forEach((val,i)=>d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(val).toFixed(1)+' ');return d;};
+  const mid=W/2;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <rect x="0" y="0" width="${mid}" height="${H}" fill="rgba(38,194,129,.06)"/>
+    <rect x="${mid}" y="0" width="${mid}" height="${H}" fill="rgba(240,68,90,.06)"/>
+    <text x="${mid/2}" y="26" fill="var(--gt)" font-size="13" font-weight="800" text-anchor="middle">Price ABOVE average → UPTREND (buy)</text>
+    <text x="${mid+mid/2}" y="26" fill="var(--rt)" font-size="13" font-weight="800" text-anchor="middle">Price BELOW average → DOWNTREND (wait)</text>
+    <path d="${path(ma)}" fill="none" stroke="rgba(var(--ac-rgb),.9)" stroke-width="2.4"/>
+    <path d="${path(v)}" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linejoin="round"/>
+    <text x="${(W-padR).toFixed(0)}" y="${(y(ma[N-1])+16).toFixed(1)}" fill="var(--act)" font-size="11" font-weight="800" text-anchor="end">50-day average</text>
+  </svg>`;
+}
+function leverageSVG(){
+  const W=920,H=210,x0=40,bw=W-80;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <text x="${x0}" y="34" fill="var(--ink2)" font-size="12.5" font-weight="700">Notional you control — 1 ES contract near 5000</text>
+    <rect x="${x0}" y="44" width="${bw}" height="40" rx="8" fill="rgba(var(--ac-rgb),.16)" stroke="rgba(var(--ac-rgb),.5)"/>
+    <text x="${x0+14}" y="70" fill="var(--act)" font-size="16" font-weight="900" font-family="var(--mono)">$250,000</text>
+    <text x="${x0}" y="122" fill="var(--ink2)" font-size="12.5" font-weight="700">Margin to hold it (set by your broker — a small fraction)</text>
+    <rect x="${x0}" y="132" width="${(bw*0.07).toFixed(0)}" height="40" rx="8" fill="rgba(255,255,255,.1)" stroke="var(--line2)"/>
+    <text x="${x0+(bw*0.07)+12}" y="158" fill="var(--ink2)" font-size="13" font-weight="800" font-family="var(--mono)">≈ a few % down</text>
+    <text x="${x0}" y="${H-8}" fill="var(--rt)" font-size="12.5" font-weight="700">⚠ A 2% move ≈ $5,000 per contract — leverage magnifies losses as much as gains.</text>
+  </svg>`;
 }
 
 // ── PLAYBOOK setup diagram — an illustrative schematic of the rules (not live price) ──

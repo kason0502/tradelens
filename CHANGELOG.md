@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 34) — Split View expansion + Learn academy + Relative Strength + animated logo backdrop
+- **Animated brand watermark** behind the app: a faint, accent-tinted `logo.png` that slowly floats/breathes (`.bg-logo`, `bgLogoFloat`/`bgGlow`), flips red with bearish mood (uses `--ac-rgb`), and respects reduced-motion. Plus a subtle tab-switch entrance animation (`tabIn`).
+- **Split View — expanded** from chart/signal to **five module types** per pane: Chart · Live signal · **Market grid** · **Session clock** · **Notepad**; added a **3-pane** layout (now 1/2/3/4); **state persists** to localStorage (`tlpro_split_v1`: layout + per-pane config + notes); live panes (clock/grid) tick on a 1s timer that stops when you leave the tab (`splitTimerSync`/`stopSplitTimer`). Session math extracted to shared `_sessionData()`.
+- **Learn tab** (`renderLearn`) — a **visual academy for visual learners**: hand-drawn SVG diagrams for candle anatomy (`candleAnatomySVG`), long vs short (`longShortSVG`), tick/point value (`tickValueSVG`), reading the trend with a moving average (`maTrendSVG`), leverage & margin (`leverageSVG`), and the strategy itself (reuses `playbookDiagramSVG`), each with a plain-language explainer.
+- **Relative Strength tab** (`renderStrength`/`paintStrength`/`strengthChartSVG`) — every tracked future rebased to 0% over a selectable window (1M/3M/6M/1Y), drawn as a multi-line overlay + a ranked leaderboard. Reuses the Matrix quote cache.
+- Nav: Terminal (Futures · Matrix · Strength) · Charts (Charts · Split View) · Toolkit (Playbook · Risk Calc · Sessions · Learn) · Assistant.
+
 ## 2026-06-29 (session 33) — Playbook setup diagram + Matrix / Charts / Split View tabs
 - **Playbook now visualizes the strategy:** new `playbookDiagramSVG()` draws an annotated schematic of the trend-pullback setup — rising 10/50-day averages, a shaded **buy zone**, a green **ENTRY** marker at the pullback turn-up, and a red **EXIT ✕** where price closes back below the 50-day — plus a 5-phase legend (uptrend → pullback → entry → ride → exit). Clearly labelled "illustrative, not live price".
 - **Market Matrix tab** (`renderMatrix`/`paintMatrix`, `MATRIX_MARKETS`) — a live command-center grid across ES/NQ/YM/RTY/CL/GC: per-card price, day %, a trend sparkline (`futSparkSVG`), vs-10/50-day and 1-month stats, and the validated signal chip; a breadth header (in-uptrend / buy-setups / markets-live). Click a card → opens it on the Charts tab.

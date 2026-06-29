@@ -1,7 +1,9 @@
 # TradeLens Pro — Design System
 
 > Living doc. Update when tokens, components, or visual conventions change.
-> Last updated: 2026-06-29 (session 33)
+> Last updated: 2026-06-29 (session 34)
+
+**Animated logo backdrop (session 34):** `.bg-logo` — a faint `logo.png` watermark behind the app (z-0, below z-1 content), accent-tinted glow via `--ac-rgb` (so it flips red in bearish mood), slow float/breathe (`bgLogoFloat`/`bgGlow`), reduced-motion-safe. This is a sanctioned backdrop layer like `#fxCanvas` — keep it faint (opacity ~.05). `.tab-pane.active` uses a short `tabIn` fade-up. New tab components: `.learn-grid`/`.learn-card`/`.learn-text` (visual-academy cards; each SVG diagram framed). `.st-legend`/`.st-leg`/`.st-rank`/`.st-pos` (relative-strength legend + leaderboard) — multi-series lines use a small distinct palette `ST_COLORS` (data-viz exception to the one-accent rule; first series is the accent). Split additions: `.split-grid.n3`, `.sp-notes` (notepad textarea), `.sp-mxrow` (compact market-grid row).
 
 **Matrix / Charts / Split components (session 33):** `.mx-grid`/`.mx-card` (auto-fill market cards, accent left-border keyed to signal class ok/wait/no, hover-lift, `futSparkSVG` trend line, `.mx-stats` 3-up) → click opens Charts. `.ch-bar`/`.ch-search`/`.ch-chip` (TradingView lookup: search input + selectable symbol chips, `.on` = active). `.split-grid.n1|n2|n4` + `.sp-pane`/`.sp-head`/`.sp-sel`/`.sp-body` (side-by-side panes, fixed heights per layout, `<select>`s use `--s3` fill; collapses to 1 col <760px). `.split-layouts`/`.sl-btn` layout toggle. `.pb-phases`/`.pb-phase` (numbered phase legend under the playbook diagram). All from existing tokens; sparkline/diagram use semantic `--gr`/`--rd` for up/down, accent only for the slow MA / chrome.
 
