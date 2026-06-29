@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 39) — Backtester tab + backtest emphasis (toward the reference mockup)
+- **New Backtester tab** (`renderBacktester`, nav "Backtester · proof") reading the real `backtester/results.json`: a 12-tile **statistics grid** (total return +114%, net P&L, profit factor 1.99, win rate 32.2%, expectancy, Sharpe, max drawdown −25%, avg win/loss, best/worst, avg hold), an **equity curve** (`btEquitySVG` over `metrics.equity_curve` with the starting-capital baseline), a **real trade example** (`btTradeBlock`/`btTradeChartSVG`: entry→exit on real fills + dates + reason + hold + P&L; defaults to the best trade), and the **full 59-trade log** (`#btLog`) — click any row to replay it in the example (`btShowTrade`). Honest caveats inline.
+- **Strategy Performance card on the Futures dashboard** (`futStratPerfFill` → `#futStratPerf`, `.sp-card`) — leads with the backtested total return + win rate / profit factor / trades / expectancy and a "See the full backtest" button. Matches the reference mockup's panel and emphasizes the edge.
+- **Instrument cards restyled** larger + left-aligned (toward the mockup): bigger ticker, signal-coloured BUY SETUP line, mono price, hover-lift.
+- Shared `loadBacktest()` cache feeds both surfaces. NOTE: a 1:1 mockup match (economic calendar, sentiment gauge, journal-streak ring, account bar) is deferred — those would need fabricated data or new real feeds.
+
 ## 2026-06-29 (session 38) — critic round 2: priority tabs + futures honesty fixes
 - **Priority tabs are bigger.** Nav regrouped into **Trade** (Futures · Matrix · Playbook — now `.snav-pri`: larger text/icon + an accent rail so they read as the core spine), **Markets** (Charts · Split · Strength), **Tools** (Risk Calc · Sessions · Learn), Assistant. Demotes the breadth the critic said diluted the edge.
 - **Fixed `marketState()` for futures (regression):** it was labelling ES/NQ with cash-equity hours ("Market closed" at 8pm ET on a 23h market). Now uses **CME Globex** hours for `=F` (Sun 6pm→Fri 5pm ET, daily 5–6pm halt) and RTH only for ETFs.

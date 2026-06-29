@@ -983,13 +983,16 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fut-sig.ok2{border-left-color:var(--gt)} .fut-sig.ok2 .fs-head{color:var(--gt)}
 .fut-sig.wait{border-left-color:var(--at)} .fut-sig.wait .fs-head{color:var(--at)}
 .fut-sig.no{border-left-color:var(--rt)} .fut-sig.no .fs-head{color:var(--rt)}
-.fut-scan{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.fut-chip{border:1px solid var(--line);border-radius:11px;padding:10px 8px;text-align:center;cursor:pointer;background:rgba(255,255,255,.015);transition:all .14s}
-.fut-chip:hover{border-color:rgba(var(--ac-rgb),.5)}
+.fut-scan{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.fut-chip{border:1px solid var(--line);border-radius:14px;padding:15px 16px;text-align:left;cursor:pointer;background:rgba(255,255,255,.015);transition:transform .14s,border-color .14s,background .14s}
+.fut-chip:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
 .fut-chip.sel{border-color:rgba(var(--ac-rgb),.8);background:rgba(var(--ac-rgb),.1)}
-.fut-chip .fc-l{font-size:15px;font-weight:900;letter-spacing:-.02em}
-.fut-chip .fc-s{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-top:3px;color:var(--ink3)}
-.fut-chip .fc-p{font-size:11px;color:var(--ink3);font-family:var(--mono);margin-top:2px}
+.fut-chip .fc-l{font-size:18px;font-weight:900;letter-spacing:-.02em}
+.fut-chip .fc-s{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;color:var(--ink3)}
+.fut-chip.ok .fc-s,.fut-chip.ok2 .fc-s{color:var(--gt)}
+.fut-chip.wait .fc-s{color:var(--at)}
+.fut-chip.no .fc-s{color:var(--rt)}
+.fut-chip .fc-p{font-size:15px;color:var(--ink);font-family:var(--mono);font-weight:700;margin-top:5px}
 .fut-chip.ok{border-color:rgba(34,197,94,.6)} .fut-chip.ok .fc-s{color:var(--gt)}
 .fut-chip.ok2 .fc-s{color:var(--gt)}
 .fut-chip.wait .fc-s{color:var(--at)}
@@ -1011,6 +1014,37 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   .fut-sig .fs-head{font-size:17px}
   .fut-sig .fs-price{font-size:20px}
 }
+/* Strategy-performance card (Futures dashboard) */
+.sp-card .sp-hero{text-align:center;padding:6px 0 14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.sp-hero-v{font-size:40px;font-weight:900;letter-spacing:-.03em;font-family:var(--mono);line-height:1}
+.sp-hero-v.g{color:var(--gt)}.sp-hero-v.r{color:var(--rt)}
+.sp-hero-l{font-size:11.5px;color:var(--mu);margin-top:6px}
+.sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sp-grid .sp-l{font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.sp-grid .sp-v{font-size:20px;font-weight:900;font-family:var(--mono);margin-top:2px;letter-spacing:-.02em}
+.sp-grid .sp-v.g{color:var(--gt)}.sp-grid .sp-v.r{color:var(--rt)}
+/* Backtester tab */
+.bt-statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bt-stat{background:var(--s1);padding:14px 16px}
+.bt-stat-v{font-size:23px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em;line-height:1.1}
+.bt-stat-v.g{color:var(--gt)}.bt-stat-v.r{color:var(--rt)}
+.bt-stat-l{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:5px}
+.bt-stat-s{font-size:10.5px;color:var(--ink3);margin-top:2px}
+.bt-trade-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bt-ti{background:var(--s2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.bt-ti span{display:block;font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:3px}
+.bt-ti b{font-size:14px;font-family:var(--mono)}
+.bt-ti b.g{color:var(--gt)}.bt-ti b.r{color:var(--rt)}
+.bt-log-wrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.bt-log{width:100%;border-collapse:collapse;font-size:12.5px}
+.bt-log th{position:sticky;top:0;background:var(--s2);color:var(--mu);font-size:10px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);z-index:1}
+.bt-log td{padding:8px 10px;border-bottom:1px solid var(--line)}
+.bt-log .num{text-align:right;font-family:var(--mono)}
+.bt-log th.num{text-align:right}
+.bt-log td.g{color:var(--gt)}.bt-log td.r{color:var(--rt)}
+.bt-log tbody tr{cursor:pointer;transition:background .12s}
+.bt-log tbody tr:hover{background:rgba(var(--ac-rgb),.06)}
+.bt-log tbody tr.sel{background:rgba(var(--ac-rgb),.12)}
 /* Toolkit: Playbook · Risk Calculator · Sessions */
 .calc-form{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
 .calc-field label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:700}
@@ -1802,6 +1836,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="appnav-grp">Tools</div>
     <button class="snav" data-tab="calc" onclick="mainTab('calc',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15v2"/></svg><span class="lbl">Risk Calc</span></button>
     <button class="snav" data-tab="sessions" onclick="mainTab('sessions',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Sessions</span></button>
+    <button class="snav" data-tab="backtester" onclick="mainTab('backtester',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M4 14l4-4 3 3 5-6 4 4"/><circle cx="8" cy="10" r="1"/></svg><span class="lbl">Backtester</span><span class="pill">proof</span></button>
     <button class="snav" data-tab="learn" onclick="mainTab('learn',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M7 9.5V15c0 1.1 2.2 2.5 5 2.5s5-1.4 5-2.5V9.5"/><path d="M21 7v6"/></svg><span class="lbl">Learn</span><span class="pill">visual</span></button>
     <div class="appnav-grp">Assistant</div>
     <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
@@ -1900,6 +1935,18 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <button class="dp-fu" onclick="renderStrength(true)" id="stRefresh">↻ Refresh</button>
       </div>
       <div id="strengthBody"><div class="card"><div class="loading-label">Loading markets…</div></div></div>
+    </div>
+
+    <!-- BACKTESTER — full real stats + a real trade example from the engine -->
+    <div class="tab-pane" id="tab-backtester">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Backtester <span class="pill">the proof</span></div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">The full record of how the validated trend-pullback edge actually traded — every statistic, the equity curve, and real trades from the engine.</div>
+        </div>
+        <button class="dp-fu" onclick="renderBacktester(true)" id="btxRefresh">↻ Reload</button>
+      </div>
+      <div id="backtesterBody"><div class="card"><div class="loading-label">Loading backtest results…</div></div></div>
     </div>
 
     <!-- LEARN — visual academy for visual learners -->
@@ -2053,6 +2100,7 @@ function mainTab(name,btn){
   if(name==='playbook')renderPlaybookTab();
   if(name==='calc')renderCalc();
   if(name==='sessions')renderSessions();
+  if(name==='backtester')renderBacktester();
   if(name==='learn')renderLearn();
   if(name==='feedback')renderFeedbackTab();
   if(name!=='sessions')stopSessionClock();
@@ -4857,6 +4905,7 @@ function paintFutures(){
         <span class="fs-pill ${s.turnUp?'on':'off'}">${s.turnUp?'✓':'•'} Turning up</span>
       </div>
     </div>
+    <div id="futStratPerf"></div>
     <div class="card"><div class="card-title">${mkt.label} daily candles — with 10-day &amp; 50-day averages</div>${s.ohlc?futCandleSVG(s.ohlc,s.s10,s.s50):futChartSVG(s.closes,s.s10,s.s50)}
       <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--gr)">▮</span><span style="color:var(--rd)">▮</span> up / down day</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
     </div>
@@ -4870,6 +4919,7 @@ function paintFutures(){
     </div>
     ${edge}`;
   futLoadEdge();
+  futStratPerfFill();
 }
 async function futLoadEdge(){
   const el=document.getElementById('futLatestRun');if(!el)return;
@@ -4883,6 +4933,120 @@ async function futLoadEdge(){
       +`<b class="${m.total_pnl>=0?'g':'r'}">${m.total_pnl>=0?'+':''}$${Math.round(m.total_pnl).toLocaleString()}</b>`
       +(d.synthetic?' <span style="color:var(--rt)">(sample)</span>':'');
   }catch(e){el.textContent='';}
+}
+// ── BACKTESTER — real stats, equity curve, and real trades from results.json ──
+let _btCache=null, _btTradesArr=[];
+async function loadBacktest(force){
+  if(_btCache&&!force)return _btCache;
+  try{const r=await fetch('backtester/results.json?t='+Date.now(),{cache:'no-store'});if(r.ok)_btCache=await r.json();}catch(e){}
+  return _btCache;
+}
+const _bt$=v=>(v<0?'-$':'$')+Math.abs(Math.round(v)).toLocaleString();
+async function renderBacktester(force){
+  const el=document.getElementById('backtesterBody');if(!el)return;
+  if(force)_btCache=null;
+  el.innerHTML=`<div class="card"><div class="loading-label">Loading backtest results…</div></div>`;
+  const d=await loadBacktest();
+  if(!d||!d.metrics||!d.metrics.n_trades){el.innerHTML=`<div class="card"><div class="bt-empty" style="padding:20px">No backtest results yet. Run the engine in <b>/backtester</b> (<code>python run_backtest.py</code>) to populate <code>results.json</code>.</div></div>`;return;}
+  const m=d.metrics,c=d.config||{},trades=(d.trades||[]).slice();
+  _btTradesArr=trades;
+  const per=`${(c.start_date||'').slice(0,4)}–${(c.end_date||'').slice(0,4)}`;
+  let bi=0;trades.forEach((t,i)=>{if(t.pnl>trades[bi].pnl)bi=i;});
+  const stat=(lbl,val,cls,sub)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div>${sub?`<div class="bt-stat-s">${sub}</div>`:''}</div>`;
+  const grid=`<div class="bt-statgrid">
+    ${stat('Total return',(m.total_return_pct>=0?'+':'')+m.total_return_pct.toFixed(1)+'%',m.total_return_pct>=0?'g':'r','on $'+(m.starting_capital||0).toLocaleString())}
+    ${stat('Net P&L',_bt$(m.total_pnl),m.total_pnl>=0?'g':'r','per contract')}
+    ${stat('Profit factor',m.profit_factor,m.profit_factor>=1?'g':'r','gross win ÷ loss')}
+    ${stat('Win rate',m.win_rate_pct.toFixed(1)+'%','',m.n_trades+' trades')}
+    ${stat('Expectancy',_bt$(m.avg_trade),m.avg_trade>=0?'g':'r','avg / trade')}
+    ${stat('Sharpe',m.sharpe,m.sharpe>=1?'g':'')}
+    ${stat('Max drawdown',m.max_drawdown_pct.toFixed(1)+'%','r','peak-to-trough')}
+    ${stat('Avg hold',Math.round((m.avg_hold_minutes||0)/1440)+'d')}
+    ${stat('Avg win',_bt$(m.avg_win),'g')}
+    ${stat('Avg loss',_bt$(m.avg_loss),'r')}
+    ${stat('Best trade',_bt$(m.best_trade),'g')}
+    ${stat('Worst trade',_bt$(m.worst_trade),'r')}
+  </div>`;
+  const logRows=trades.map((t,i)=>{const mv=(t.exit_fill_price-t.entry_fill_price)/t.entry_fill_price*100,win=t.pnl>=0;
+    return `<tr onclick="btShowTrade(${i})" class="${i===bi?'sel':''}"><td>${i+1}</td><td>${t.day}</td><td>${(t.exit_ts||'').slice(0,10)}</td><td>Long</td><td class="num">$${t.entry_fill_price.toLocaleString()}</td><td class="num">$${t.exit_fill_price.toLocaleString()}</td><td class="num ${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</td><td class="num ${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</td><td class="num">${Math.round((t.hold_minutes||0)/1440)}d</td><td style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</td></tr>`;}).join('');
+  el.innerHTML=`
+    <div class="card"><div class="card-title">Backtest statistics — ${c.symbol||'ES=F'} · ${per}</div>${grid}</div>
+    <div class="card"><div class="card-title">Equity curve — grew $${(m.starting_capital||0).toLocaleString()} → $${Math.round((m.starting_capital||0)+m.total_pnl).toLocaleString()}</div>${btEquitySVG(m.equity_curve,m.starting_capital)}
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Dashed line = starting capital. One contract, compounding off, after pessimistic fills + slippage + commission.</div>
+    </div>
+    <div class="card"><div class="card-title">Real trade example <span class="pill">click any trade below to replay it</span></div>
+      <div id="btTradeWrap">${btTradeBlock(trades[bi],bi)}</div>
+    </div>
+    <div class="card"><div class="card-title">All ${trades.length} trades</div>
+      <div class="bt-log-wrap"><table class="bt-log" id="btLog"><thead><tr><th>#</th><th>Entry</th><th>Exit</th><th>Dir</th><th class="num">Entry</th><th class="num">Exit</th><th class="num">P&L</th><th class="num">Move</th><th class="num">Held</th><th>Exit reason</th></tr></thead><tbody>${logRows}</tbody></table></div>
+    </div>
+    <div class="card"><div class="card-title">About this run</div>
+      <div style="font-size:13px;color:var(--ink2);line-height:1.7">Symbol <b>${c.symbol||'ES=F'}</b> · Period <b>${per}</b> · Strategy <b>daily trend-pullback</b> — buy pullbacks to the 10-day average while above the 50-day, exit on a daily close below the 50-day. Tested with pessimistic fills + slippage + commission.</div>
+      <div class="dp-struct off" style="margin-top:10px">Honest caveats: the <b>${m.win_rate_pct.toFixed(0)}% win rate</b> is low by design — this edge profits from a few big winners (avg win <b>${_bt$(m.avg_win)}</b> vs avg loss <b>${_bt$(m.avg_loss)}</b>), not hit rate. Drawdowns reached <b>${m.max_drawdown_pct.toFixed(0)}%</b>. A passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
+      ${d.synthetic?'<div class="fut-alert" style="margin-top:10px;color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)">Sample data — run the engine for real numbers.</div>':''}
+    </div>`;
+}
+function btShowTrade(i){const t=_btTradesArr[i];if(!t)return;const w=document.getElementById('btTradeWrap');if(w)w.innerHTML=btTradeBlock(t,i);document.querySelectorAll('#btLog tbody tr').forEach((r,idx)=>r.classList.toggle('sel',idx===i));}
+function btTradeBlock(t,i){
+  const e=t.entry_fill_price,x=t.exit_fill_price,win=t.pnl>=0,mv=(x-e)/e*100,holdD=Math.round((t.hold_minutes||0)/1440);
+  return `${btTradeChartSVG(t)}
+    <div style="font-size:11px;color:var(--ink3);margin:8px 0 12px">The line connects the real entry and exit fills — the position was held ${holdD} days through the trend (intrabar path not shown).</div>
+    <div class="bt-trade-info">
+      <div class="bt-ti"><span>Entry</span><b>${t.day} · $${e.toLocaleString()}</b></div>
+      <div class="bt-ti"><span>Exit</span><b>${(t.exit_ts||'').slice(0,10)} · $${x.toLocaleString()}</b></div>
+      <div class="bt-ti"><span>Exit reason</span><b style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</b></div>
+      <div class="bt-ti"><span>Held</span><b>${holdD} days</b></div>
+      <div class="bt-ti"><span>Price move</span><b class="${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</b></div>
+      <div class="bt-ti"><span>P&L · 1 contract</span><b class="${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</b></div>
+    </div>`;
+}
+function btTradeChartSVG(t){
+  const e=t.entry_fill_price,x=t.exit_fill_price,win=t.pnl>=0;
+  const W=900,H=210,padL=20,padR=20,padT=26,padB=34;
+  const lo=Math.min(e,x),hi=Math.max(e,x),rng=Math.max(1,hi-lo),pd=rng*0.6||1,min=lo-pd,max=hi+pd,R=max-min;
+  const yv=v=>padT+(1-(v-min)/R)*(H-padT-padB), x0=padL+30, x1=W-padR-30, ey=yv(e), xy=yv(x), col=win?'var(--gr)':'var(--rd)';
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <line x1="${x0}" y1="${ey.toFixed(1)}" x2="${x1}" y2="${ey.toFixed(1)}" stroke="rgba(255,255,255,.16)" stroke-dasharray="4 4"/>
+    <line x1="${x0}" y1="${ey.toFixed(1)}" x2="${x1}" y2="${xy.toFixed(1)}" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${x0}" cy="${ey.toFixed(1)}" r="5" fill="var(--ink)"/>
+    <circle cx="${x1}" cy="${xy.toFixed(1)}" r="5" fill="${col}"/>
+    <text x="${x0}" y="${(ey-12).toFixed(1)}" fill="var(--ink2)" font-size="12.5" font-weight="800">ENTRY · $${e.toLocaleString()}</text>
+    <text x="${x0}" y="${(ey+22).toFixed(1)}" fill="var(--ink3)" font-size="10.5">${t.day}</text>
+    <text x="${x1}" y="${(win?xy-14:xy+24).toFixed(1)}" fill="${col}" font-size="12.5" font-weight="800" text-anchor="end">EXIT · $${x.toLocaleString()}</text>
+    <text x="${x1}" y="${(win?xy+2:xy+38).toFixed(1)}" fill="var(--ink3)" font-size="10.5" text-anchor="end">${(t.exit_ts||'').slice(0,10)}</text>
+  </svg>`;
+}
+function btEquitySVG(curve,start){
+  const c=curve||[];if(c.length<2)return '<div class="bt-empty" style="padding:14px">No equity data.</div>';
+  const W=900,H=260,padL=56,padR=12,padT=14,padB=14;
+  const min=Math.min(...c,start),max=Math.max(...c,start),rng=Math.max(1,max-min);
+  const x=i=>padL+i/(c.length-1)*(W-padL-padR), y=v=>padT+(1-(v-min)/rng)*(H-padT-padB);
+  let line='',area='';
+  c.forEach((v,i)=>{const xx=x(i).toFixed(1),yy=y(v).toFixed(1);line+=(i?'L':'M')+xx+' '+yy+' ';area+=(i?'L':'M')+xx+' '+yy+' ';});
+  area+=`L${x(c.length-1).toFixed(1)} ${(H-padB).toFixed(1)} L${x(0).toFixed(1)} ${(H-padB).toFixed(1)} Z`;
+  let grid='';for(let g=0;g<=3;g++){const v=min+rng*g/3,yy=y(v);grid+=`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.05)"/><text x="6" y="${(yy+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10.5" font-family="var(--mono)">$${Math.round(v).toLocaleString()}</text>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <defs><linearGradient id="bteq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,197,94,.3)"/><stop offset="1" stop-color="rgba(34,197,94,0)"/></linearGradient></defs>
+    ${grid}<path d="${area}" fill="url(#bteq)"/>
+    <line x1="${padL}" y1="${y(start).toFixed(1)}" x2="${W-padR}" y2="${y(start).toFixed(1)}" stroke="rgba(255,255,255,.25)" stroke-dasharray="4 4"/>
+    <path d="${line}" fill="none" stroke="var(--gr)" stroke-width="2"/>
+  </svg>`;
+}
+// Strategy-performance card (real backtest numbers) for the Futures dashboard.
+async function futStratPerfFill(){
+  const el=document.getElementById('futStratPerf');if(!el)return;
+  const d=await loadBacktest();if(!d||!d.metrics||!d.metrics.n_trades){el.style.display='none';return;}
+  const m=d.metrics,c=d.config||{},per=`${(c.start_date||'').slice(0,4)}–${(c.end_date||'').slice(0,4)}`;
+  el.innerHTML=`<div class="card sp-card"><div class="card-title">Strategy performance <span class="pill">backtest · ${c.symbol||'ES'} ${per}</span></div>
+    <div class="sp-hero"><div class="sp-hero-v ${m.total_return_pct>=0?'g':'r'}">${m.total_return_pct>=0?'+':''}${m.total_return_pct.toFixed(1)}%</div><div class="sp-hero-l">total return on $${(m.starting_capital||0).toLocaleString()}</div></div>
+    <div class="sp-grid">
+      <div><div class="sp-l">Win rate</div><div class="sp-v">${m.win_rate_pct.toFixed(1)}%</div></div>
+      <div><div class="sp-l">Profit factor</div><div class="sp-v ${m.profit_factor>=1?'g':'r'}">${m.profit_factor}</div></div>
+      <div><div class="sp-l">Total trades</div><div class="sp-v">${m.n_trades}</div></div>
+      <div><div class="sp-l">Expectancy</div><div class="sp-v ${m.avg_trade>=0?'g':'r'}">${_bt$(m.avg_trade)}</div></div>
+    </div>
+    <button class="dp-fu" style="margin-top:13px;width:100%" onclick="mainTab('backtester',document.querySelector('.snav[data-tab=&quot;backtester&quot;]'))">See the full backtest &amp; real trades →</button>
+  </div>`;
 }
 // Make sure a live ES quote exists (Playbook/Calc may open before the Futures tab fetched).
 async function _ensureES(){

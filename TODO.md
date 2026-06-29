@@ -10,6 +10,18 @@
 - [x] **Inline position size** in the Futures plan + persisted account settings (`tlpro_acct`) synced with the Risk Calc.
 - [x] **Market-state + timestamp** on the signal card; **swapped 🟢 emoji** for a `.live-pip` dot.
 
+## Done (session 39 — Backtester tab + backtest emphasis)
+- [x] **Backtester tab** — real stats grid, equity curve, a real trade example (click-to-replay), full 59-trade log, from `results.json`.
+- [x] **Strategy Performance card** on the Futures tab (backtest return/win/PF/trades/expectancy) + link to the Backtester.
+- [x] **Instrument cards restyled** larger/left-aligned toward the reference mockup.
+
+## Next (finish matching the reference mockup — bigger lift)
+- [ ] **Top account bar** (search + notifications + settings + user) above the main column.
+- [ ] **Right rail panels:** sentiment gauge (derive from the live signal, real), economic calendar (NEEDS a real feed — avoid faking), strategy-performance (done, could move to the rail).
+- [ ] **Bottom dashboard panels** (AI Signal / Market Breadth donut / Top Performers / Risk Status / Journal streak) — Market Breadth + Top Performers are real (from Matrix data); Journal-streak needs the journal feature.
+- [ ] **Recent Trades table on the dashboard** — real once the live journal exists; until then it can show the backtest's recent trades.
+- [ ] **Chart timeframe tabs (1D/5D/1M…)** — only if backed by real data per timeframe (don't add dead chrome).
+
 ## Done (session 38 — critic round 2)
 - [x] **Priority tabs bigger + nav regrouped** (Trade spine: Futures/Matrix/Playbook = `.snav-pri`).
 - [x] **`marketState()` Globex hours for futures** (fixed the cash-hours regression).
