@@ -1005,6 +1005,12 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dp-link{color:var(--act);cursor:pointer;font-weight:700;white-space:nowrap}
 .dp-link:hover{text-decoration:underline}
 .mx-unval{margin-top:9px;font-size:10.5px;font-weight:700;color:var(--at);background:rgba(255,201,77,.1);border:1px solid rgba(255,201,77,.3);border-radius:7px;padding:4px 8px;text-align:center}
+@media(max-width:520px){
+  .fut-scan{grid-template-columns:1fr 1fr}
+  .fut-sig .fs-px{float:none;text-align:left;margin:0 0 8px}
+  .fut-sig .fs-head{font-size:17px}
+  .fut-sig .fs-price{font-size:20px}
+}
 /* Toolkit: Playbook · Risk Calculator · Sessions */
 .calc-form{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
 .calc-field label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:700}
@@ -1258,6 +1264,12 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .snav:hover svg{transform:scale(1.18) rotate(-7deg)}
 .snav.active{color:#eafff3}
 .snav.active svg{stroke:var(--act)}
+/* priority tabs — bigger, bolder, with an accent rail so they read as the core spine */
+.snav-pri{padding:14px 12px;font-size:15.5px;font-weight:800;letter-spacing:-.01em}
+.snav-pri svg{width:22px;height:22px;stroke-width:2}
+.snav-pri .lbl{font-weight:800}
+.snav-pri::before{content:'';position:absolute;left:-6px;top:50%;transform:translateY(-50%);width:3px;height:0;border-radius:3px;background:var(--ac);transition:height .3s cubic-bezier(.34,1.56,.5,1)}
+.snav-pri:hover::before,.snav-pri.active::before{height:60%}
 .snav .pill{font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(var(--ac-rgb),.18);color:var(--gt);letter-spacing:.04em;margin-left:auto}
 .appnav-foot{border-top:1px solid rgba(255,255,255,.05);padding:10px 12px 14px;display:flex;flex-direction:column;gap:2px}
 .appnav-foot .snav:hover{background:rgba(255,255,255,.05)}
@@ -1779,15 +1791,15 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="snav-cursor" id="snavCursor"></div>
     <div class="snav-hover" id="snavHover"></div>
     <div class="snav-glide" id="snavGlide"></div>
-    <div class="appnav-grp">Terminal</div>
-    <button class="snav active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES·NQ</span></button>
-    <button class="snav" data-tab="matrix" onclick="mainTab('matrix',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Matrix</span><span class="pill">live</span></button>
-    <button class="snav" data-tab="strength" onclick="mainTab('strength',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 15l5-6 4 3 7-9"/><circle cx="9" cy="9" r="1"/><circle cx="13" cy="12" r="1"/></svg><span class="lbl">Strength</span></button>
-    <div class="appnav-grp">Charts</div>
+    <div class="appnav-grp">Trade</div>
+    <button class="snav snav-pri active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES·NQ</span></button>
+    <button class="snav snav-pri" data-tab="matrix" onclick="mainTab('matrix',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Matrix</span><span class="pill">live</span></button>
+    <button class="snav snav-pri" data-tab="playbook" onclick="mainTab('playbook',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg><span class="lbl">Playbook</span></button>
+    <div class="appnav-grp">Markets</div>
     <button class="snav" data-tab="charts" onclick="mainTab('charts',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg><span class="lbl">Charts</span></button>
     <button class="snav" data-tab="split" onclick="mainTab('split',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg><span class="lbl">Split View</span></button>
-    <div class="appnav-grp">Toolkit</div>
-    <button class="snav" data-tab="playbook" onclick="mainTab('playbook',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg><span class="lbl">Playbook</span></button>
+    <button class="snav" data-tab="strength" onclick="mainTab('strength',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 15l5-6 4 3 7-9"/><circle cx="9" cy="9" r="1"/><circle cx="13" cy="12" r="1"/></svg><span class="lbl">Strength</span></button>
+    <div class="appnav-grp">Tools</div>
     <button class="snav" data-tab="calc" onclick="mainTab('calc',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15v2"/></svg><span class="lbl">Risk Calc</span></button>
     <button class="snav" data-tab="sessions" onclick="mainTab('sessions',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Sessions</span></button>
     <button class="snav" data-tab="learn" onclick="mainTab('learn',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M7 9.5V15c0 1.1 2.2 2.5 5 2.5s5-1.4 5-2.5V9.5"/><path d="M21 7v6"/></svg><span class="lbl">Learn</span><span class="pill">visual</span></button>
@@ -4764,8 +4776,22 @@ function acctSet(acct,risk){try{localStorage.setItem('tlpro_acct',JSON.stringify
 // Micro-contract sizing for the index futures the Futures tab scans.
 const FUT_MICRO={'ES=F':{sym:'MES',ptVal:5},'NQ=F':{sym:'MNQ',ptVal:2}};
 function fmtAsOf(ts){return ts?'as of '+new Date(ts).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):'';}
-// US cash-equity session state (ET), so a stale/pre-open print is labelled honestly.
-function marketState(){const t=_tzNow('America/New_York');if(t.wd<1||t.wd>5)return{txt:'Weekend · market closed',open:false};const m=t.h*60+t.m;if(m<570)return{txt:'Pre-market',open:false};if(m<960)return{txt:'Market open',open:true};return{txt:'After hours',open:false};}
+// Session state (ET) so a stale/pre-open print is labelled honestly. Futures (=F)
+// trade CME Globex ~23h (Sun 6pm → Fri 5pm ET, daily 5–6pm halt); ETFs use RTH.
+function marketState(sym){
+  const t=_tzNow('America/New_York'), wd=t.wd, m=t.h*60+t.m;   // 1020=17:00, 1080=18:00, 570=9:30, 960=16:00
+  if(/=F$/.test(sym||'')){
+    if(wd===6) return {txt:'Globex closed · weekend',open:false};
+    if(wd===0 && m<1080) return {txt:'Globex opens 6:00 PM ET',open:false};
+    if(wd===5 && m>=1020) return {txt:'Globex closed · weekend',open:false};
+    if(m>=1020 && m<1080) return {txt:'Daily maintenance halt',open:false};
+    return {txt:'Globex open',open:true};
+  }
+  if(wd<1||wd>5) return {txt:'Weekend · market closed',open:false};
+  if(m<570) return {txt:'Pre-market',open:false};
+  if(m<960) return {txt:'Market open',open:true};
+  return {txt:'After hours',open:false};
+}
 function paintFutures(){
   const el=document.getElementById('futBody');if(!el)return;
   const money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
@@ -4777,7 +4803,7 @@ function paintFutures(){
     return `<button class="fut-chip ${s?s.cls:''} ${on?'sel':''}" onclick="selectFutMarket('${m.sym}')">
       <div class="fc-l">${m.label}</div><div class="fc-s">${s?s.short:'—'}</div>
       <div class="fc-p">${s?'$'+s.price.toLocaleString(undefined,{maximumFractionDigits:0}):''}</div></button>`;}).join('')+`</div>`;
-  const alertBanner=buys.length?`<div class="fut-alert"><span class="live-pip"></span> <b>BUY SETUP right now:</b> ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up.</div>`:'';
+  const alertBanner=buys.length?`<div class="fut-alert"><span class="live-pip"></span> <b>BUY SETUP:</b> ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up. <span style="font-weight:600;opacity:.85">Confirms on today's daily close.</span></div>`:'';
   const mkt=FUT_MARKETS.find(m=>m.sym===_futSel), s=sigs[_futSel], q=_futCache[_futSel];
   if(!s){el.innerHTML=scan+alertBanner+`<div class="card"><div class="bt-empty" style="padding:16px">Couldn't load ${mkt.label} — hit Refresh.</div></div>`;return;}
   const vs50=(s.price-s.sma50)/s.sma50*100, vs10=(s.price-s.sma10)/s.sma10*100;
@@ -4786,7 +4812,10 @@ function paintFutures(){
   let atrPct=0;try{if(s.ohlc)atrPct=atr(s.ohlc,14)/s.price*100;}catch(e){}
   const mret=s.closes.length>21?(s.price/s.closes[s.closes.length-22]-1)*100:0;
   const up=q.change>=0;
-  const ms=marketState();
+  const ms=marketState(_futSel);
+  // The signal reads DAILY closes; while the session is live today's bar is still
+  // forming, so a setup isn't confirmed until the close.
+  const forming=ms.open;
   // inline position size to the actual stop (worse of trend-break / −8% hard stop)
   const acct=acctGet(), riskD=acct.acct*acct.risk/100, exitLvl=Math.max(s.sma50,hardStop), stopDist=s.price-exitLvl;
   let sizeLine='';
@@ -4811,7 +4840,8 @@ function paintFutures(){
     <div class="bt-scoreboard">
       ${FUT_MARKETS.map(m=>`<div class="bt-score"><div class="bt-score-val ${FUT_PF[m.sym]>=1?'g':'r'}">${FUT_PF[m.sym]}</div><div class="bt-score-lbl">${m.label} profit factor (OOS)${m.sym===_futSel?' ·now':''}</div></div>`).join('')}
     </div>
-    <div id="futLatestRun" style="font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:8px">Latest engine run: (run the backtester to populate)…</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:7px">Out-of-sample profit factors from the <b>/backtester</b> runs (2021–2026, never tuned on). Trade count &amp; exact period for the latest run are below — a PF without a sample size means little.</div>
+    <div id="futLatestRun" style="font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:6px">Latest engine run: (run the backtester to populate)…</div>
     <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (S&amp;P &amp; Nasdaq, futures &amp; ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
     <div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
   </div>`;
@@ -4820,7 +4850,7 @@ function paintFutures(){
       <div class="fs-px"><div class="fs-price">$${money(s.price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
       <div class="fs-head">${mkt.label} · ${s.head}</div>
       <div class="fs-sub">${mkt.name} — ${s.sub}</div>
-      <div class="fs-meta"><span class="ms-dot ${ms.open?'on':''}"></span>${ms.txt} · ${fmtAsOf(q.asOf)} · daily close data</div>
+      <div class="fs-meta"><span class="ms-dot ${ms.open?'on':''}"></span>${ms.txt} · ${fmtAsOf(q.asOf)} · ${forming?'<span style="color:var(--at)">forming — confirms at the daily close</span>':'confirmed on the close'}</div>
       <div class="fs-pills">
         <span class="fs-pill ${s.uptrend?'on':'off'}">${s.uptrend?'✓':'✕'} Uptrend (vs 50-day)</span>
         <span class="fs-pill ${s.pulledBack?'on':'off'}">${s.pulledBack?'✓':'•'} Pulled back (to 10-day)</span>
@@ -5110,7 +5140,9 @@ function renderCharts(){
         <div class="ch-bar"><input id="chSearch" class="ch-search" placeholder="Search any symbol — e.g. ES1!, CL1!, BTCUSD, AAPL…" onkeydown="if(event.key==='Enter')chartLookup()"><button class="dp-fu" onclick="chartLookup()">Load</button></div>
         <div class="ch-chips">${TV_FUTURES.map(f=>`<button class="ch-chip" data-s="${f.s}" onclick="chartPick('${f.s}')">${f.l}</button>`).join('')}</div>
       </div>
-      <div class="card" style="padding:8px"><div id="chartsTV" style="height:620px"></div></div>`;
+      <div class="card" style="padding:8px"><div id="chartsTV" style="height:620px"></div>
+        <div style="font-size:11px;color:var(--ink3);padding:8px 6px 2px;line-height:1.6">These chart the <b>cash index / spot</b> (e.g. S&amp;P 500, Gold), which tracks the matching future but isn't identical — no overnight session and a small basis difference. Real CME futures need a paid data feed. Levels are close, not exact.</div>
+      </div>`;
     el.dataset.built='1';
   }
   chartPick(_chartSym);

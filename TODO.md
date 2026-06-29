@@ -10,12 +10,19 @@
 - [x] **Inline position size** in the Futures plan + persisted account settings (`tlpro_acct`) synced with the Risk Calc.
 - [x] **Market-state + timestamp** on the signal card; **swapped 🟢 emoji** for a `.live-pip` dot.
 
-## Next (highest-value from the critic — not yet done)
-- [ ] **Alerts that fire when the app is closed** (email/push via a Vercel cron hitting `/api/yf` + `futSignal`). The robot's #1 "worth money" idea — the real wedge for a ~6-trade/year system.
-- [ ] **Journal with real $ P&L + forward live-edge track record** (resurrect the dead journal infra; grade live signals since launch).
-- [ ] **Edge scoreboard from `results.json`** (replace the hard-coded `FUT_PF` constants; show n-trades + period + drawdown).
-- [ ] **Trim "pro terminal" surface** (Sessions/Split/Strength) so the Futures signal+plan is the clear center of gravity.
-- [ ] **Tell the user on-screen that Charts plot the cash index**, not the future.
+## Done (session 38 — critic round 2)
+- [x] **Priority tabs bigger + nav regrouped** (Trade spine: Futures/Matrix/Playbook = `.snav-pri`).
+- [x] **`marketState()` Globex hours for futures** (fixed the cash-hours regression).
+- [x] **Confirmed-vs-forming** signal label (daily-close honesty).
+- [x] **Charts cash-index caption** on-screen.
+- [x] **Edge scoreboard** clarified as OOS runs w/ pointer to trade count + period.
+- [x] **Mobile**: `.fut-scan` 2×2 + drop `.fs-px` float under 520px.
+
+## Next (highest-value from the critic — need a backend or bigger lift)
+- [ ] **Alerts that fire when the app is closed** (email/push via a Vercel cron hitting `/api/yf` + `futSignal`). The robot's #1 "worth money" idea — the real wedge for a ~6-trade/year system. Needs `api/cron-alert.js` + an email/push provider + subscriber storage.
+- [ ] **Server-side forward live-edge track record / journal** (grade live `futSignal` flips since launch; show real $ P&L). Partial in-file version possible but only logs while the app is open.
+- [ ] **Per-symbol edge scoreboard from real `results.json`** (needs a backtester run per symbol so each PF carries its own n-trades/period/drawdown; currently one run + hard-coded `FUT_PF`).
+- [ ] **Close-aware `buySetup`**: only flip to confirmed on the last *closed* daily bar (currently labelled forming/confirmed, but the boolean still evaluates intraday).
 
 ## Done (session 34 — Split expansion + Learn + Strength + animated backdrop)
 - [x] **Animated logo watermark** behind the app (`.bg-logo`, accent-tinted, mood-flipping, reduced-motion-safe) + tab-switch entrance anim.

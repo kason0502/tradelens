@@ -3,6 +3,15 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 38) — critic round 2: priority tabs + futures honesty fixes
+- **Priority tabs are bigger.** Nav regrouped into **Trade** (Futures · Matrix · Playbook — now `.snav-pri`: larger text/icon + an accent rail so they read as the core spine), **Markets** (Charts · Split · Strength), **Tools** (Risk Calc · Sessions · Learn), Assistant. Demotes the breadth the critic said diluted the edge.
+- **Fixed `marketState()` for futures (regression):** it was labelling ES/NQ with cash-equity hours ("Market closed" at 8pm ET on a 23h market). Now uses **CME Globex** hours for `=F` (Sun 6pm→Fri 5pm ET, daily 5–6pm halt) and RTH only for ETFs.
+- **Confirmed vs forming signal:** the signal reads daily closes, so while the session is live the card now says "**forming — confirms at the daily close**" (amber), and the BUY banner notes "Confirms on today's daily close." No more implying an unconfirmed intraday print is actionable.
+- **Charts honesty caption:** an on-screen note that the widget charts the **cash index/spot** (tracks the future, not identical — no overnight session, small basis), not just a code comment.
+- **Edge scoreboard honesty:** added a line clarifying the PFs are out-of-sample `/backtester` runs and pointing to the live run's trade count + period ("a PF without a sample size means little").
+- **Mobile:** `.fut-scan` goes 2×2 and the signal-card price drops its float under 520px (the default tab no longer breaks on a phone).
+- Deferred (need a backend, logged in TODO): **alerts that fire when the app is closed** and a **server-side forward track record** — the two genuine "worth money" items.
+
 ## 2026-06-29 (session 37) — acted on the trader-critic robot's quick wins
 - **Fixed the headline day-change bug (was confirmed):** `fetchQuote` now derives `change`/`pct` from the actual prior daily close in the series (the proxy's meta prev-close was unreliable, esp. for `=F` futures → bogus % moves). Every consumer (Futures card, Matrix, Strength) inherits the correct number.
 - **Matrix honesty:** ES/NQ are flagged `val:true` (backtest-validated); YM/RTY/CL/GC now carry a **"Pattern only — not backtest-validated"** badge and are **excluded from the buy-setup count** ("Validated buy setups"). No more mixing proven and unproven signals.
