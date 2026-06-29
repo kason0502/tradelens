@@ -1047,6 +1047,15 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bt-log tbody tr.sel{background:rgba(var(--ac-rgb),.12)}
 .btrun-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .bt-canvas-box{min-height:120px}
+/* Futures dashboard: main + right rail (toward the reference mockup) */
+.fut-layout{display:grid;grid-template-columns:1fr 322px;gap:16px;align-items:start}
+.fut-rail{display:flex;flex-direction:column;gap:16px}
+.fut-rail .card{margin-bottom:0}
+@media(max-width:1100px){.fut-layout{grid-template-columns:1fr}}
+.sent-split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-top:4px}
+.sent-split .ss-v{font-size:17px;font-weight:900;font-family:var(--mono)}
+.sent-split .ss-v.g{color:var(--gt)}.sent-split .ss-v.r{color:var(--rt)}
+.sent-split .ss-l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
 /* Toolkit: Playbook · Risk Calculator · Sessions */
 .calc-form{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
 .calc-field label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:700}
@@ -4842,6 +4851,29 @@ function marketState(sym){
   if(m<960) return {txt:'Market open',open:true};
   return {txt:'After hours',open:false};
 }
+// AI market sentiment gauge — derived purely from how many tracked markets are
+// bullish / neutral / bearish right now (real breadth, not an opinion).
+function futSentimentGauge(sigs){
+  const arr=Object.values(sigs).filter(Boolean), n=arr.length||1;
+  let bull=0,neu=0;arr.forEach(s=>{if(s.cls==='no'){}else if(s.cls==='wait')neu++;else bull++;});
+  const bp=Math.round(bull/n*100), np=Math.round(neu/n*100), brp=Math.max(0,100-bp-np);
+  const mood=bp>=60?'BULLISH':(bp<=33?'BEARISH':'MIXED'), col=bp>=60?'var(--gt)':(bp<=33?'var(--rt)':'var(--at)');
+  const cx=110,cy=112,r=82,len=Math.PI*r,fill=(bp/100)*len, arc=`M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}`;
+  return `<div class="card sent-card"><div class="card-title">AI market sentiment <span class="pill">${n} markets</span></div>
+    <svg viewBox="0 0 220 138" style="width:100%;height:auto;display:block">
+      <path d="${arc}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="14" stroke-linecap="round"/>
+      <path d="${arc}" fill="none" stroke="${col}" stroke-width="14" stroke-linecap="round" stroke-dasharray="${fill.toFixed(1)} ${len.toFixed(1)}"/>
+      <text x="110" y="100" text-anchor="middle" fill="${col}" font-size="36" font-weight="900" font-family="var(--mono)">${bp}%</text>
+      <text x="110" y="126" text-anchor="middle" fill="var(--ink2)" font-size="13" font-weight="800" letter-spacing="2">${mood}</text>
+    </svg>
+    <div class="sent-split">
+      <div><div class="ss-v g">${bp}%</div><div class="ss-l">Bullish</div></div>
+      <div><div class="ss-v" style="color:var(--at)">${np}%</div><div class="ss-l">Neutral</div></div>
+      <div><div class="ss-v r">${brp}%</div><div class="ss-l">Bearish</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.5">Share of tracked markets in an uptrend vs pulled-back vs down — live breadth, not a guess.</div>
+  </div>`;
+}
 function paintFutures(){
   const el=document.getElementById('futBody');if(!el)return;
   const money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
@@ -4895,7 +4927,7 @@ function paintFutures(){
     <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (S&amp;P &amp; Nasdaq, futures &amp; ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
     <div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
   </div>`;
-  el.innerHTML=scan+alertBanner+`
+  el.innerHTML=scan+alertBanner+`<div class="fut-layout"><div class="fut-main">
     <div class="fut-sig ${s.cls}">
       <div class="fs-px"><div class="fs-price">$${money(s.price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
       <div class="fs-head">${mkt.label} · ${s.head}</div>
@@ -4907,7 +4939,6 @@ function paintFutures(){
         <span class="fs-pill ${s.turnUp?'on':'off'}">${s.turnUp?'✓':'•'} Turning up</span>
       </div>
     </div>
-    <div id="futStratPerf"></div>
     <div class="card"><div class="card-title">${mkt.label} daily candles — with 10-day &amp; 50-day averages</div>${s.ohlc?futCandleSVG(s.ohlc,s.s10,s.s50):futChartSVG(s.closes,s.s10,s.s50)}
       <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--gr)">▮</span><span style="color:var(--rd)">▮</span> up / down day</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
     </div>
@@ -4919,7 +4950,8 @@ function paintFutures(){
       <div class="bt-score"><div class="bt-score-val ${mret>=0?'g':'r'}">${mret>=0?'+':''}${mret.toFixed(1)}%</div><div class="bt-score-lbl">1-month return</div></div>
       <div class="bt-score"><div class="bt-score-val">${atrPct.toFixed(1)}%</div><div class="bt-score-lbl">Daily range (ATR)</div></div>
     </div>
-    ${edge}`;
+    ${edge}
+    </div><div class="fut-rail">${futSentimentGauge(sigs)}<div id="futStratPerf"></div></div></div>`;
   futLoadEdge();
   futStratPerfFill();
 }
@@ -5067,15 +5099,16 @@ function btEquityPctSVG(curve){
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block"><defs><linearGradient id="bteqp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,197,94,.26)"/><stop offset="1" stop-color="rgba(34,197,94,0)"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#bteqp)"/><path d="${line}" fill="none" stroke="${up?'var(--gr)':'var(--rd)'}" stroke-width="2"/></svg>`;
 }
 function btTradeInfoHTML(t){
-  const e=t.entry_fill_price,x=t.exit_fill_price,win=t.pnl>=0,mv=(x-e)/e*100,holdD=Math.round((t.hold_minutes||0)/1440);
-  const pnl=(t.pnl!=null)?(win?'+':'')+_bt$(t.pnl):((mv>=0?'+':'')+mv.toFixed(1)+'%');
+  const e=t.entry_fill_price,x=t.exit_fill_price,hasD=t.pnl!=null,win=(hasD?t.pnl>=0:x>=e),mv=(x-e)/e*100,holdD=Math.round((t.hold_minutes||0)/1440),pts=x-e;
+  const perPt=hasD&&Math.abs(pts)>1e-6?(t.pnl/pts):null;   // implied $/point so the math reconciles
   return `<div class="bt-trade-info">
     <div class="bt-ti"><span>Entry</span><b>${t.day} · $${e.toLocaleString()}</b></div>
     <div class="bt-ti"><span>Exit</span><b>${(t.exit_ts||'').slice(0,10)} · $${x.toLocaleString()}</b></div>
     <div class="bt-ti"><span>Exit reason</span><b style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</b></div>
     <div class="bt-ti"><span>Held</span><b>${holdD} days</b></div>
+    <div class="bt-ti"><span>Points moved</span><b class="${pts>=0?'g':'r'}">${pts>=0?'+':''}${pts.toFixed(2)}</b></div>
     <div class="bt-ti"><span>Price move</span><b class="${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</b></div>
-    <div class="bt-ti"><span>${t.pnl!=null?'P&L · 1 contract':'Return'}</span><b class="${win?'g':'r'}">${pnl}</b></div>
+    ${hasD?`<div class="bt-ti"><span>P&L · 1 contract (≈$${perPt.toFixed(0)}/pt)</span><b class="${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</b></div>`:`<div class="bt-ti"><span>Return</span><b class="${win?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</b></div>`}
   </div>`;
 }
 function btTradeBlock(t,i){
@@ -5109,21 +5142,25 @@ async function btLoadTrade(i){
 // Candlesticks + horizontal Entry / Stop / Take-profit lines + entry/exit verticals.
 function btCandleTradeSVG(candles,L){
   const N=candles.length;if(N<2)return '<div class="bt-empty" style="padding:14px">No candles.</div>';
-  const W=900,H=330,padL=8,padR=92,padT=16,padB=24;
-  let min=Math.min(L.stop,L.entry,L.exit),max=Math.max(L.entry,L.exit);
+  const W=900,H=330,padL=8,padR=98,padT=16,padB=24;
+  // Scale to the candles + entry/exit only — NOT the −8% stop (it's usually far
+  // below and would squish the price action). The stop is clamped to the edge.
+  let min=Math.min(L.entry,L.exit),max=Math.max(L.entry,L.exit);
   candles.forEach(c=>{if(c.l<min)min=c.l;if(c.h>max)max=c.h;});
+  const padv=(max-min)*0.06||1; min-=padv; max+=padv;
   const rng=Math.max(1e-6,max-min),plotW=W-padL-padR,plotH=H-padT-padB;
   const x=i=>padL+(N<=1?plotW/2:i/(N-1)*plotW), y=v=>padT+(1-(v-min)/rng)*plotH;
   const cw=Math.max(1.4,Math.min(8,plotW/N*0.62));
   let cands='';candles.forEach((b,i)=>{const up=b.c>=b.o,col=up?'var(--gr)':'var(--rd)',cx=x(i);const yo=y(b.o),yc=y(b.c),top=Math.min(yo,yc),bh=Math.max(1,Math.abs(yc-yo));cands+=`<line x1="${cx.toFixed(1)}" y1="${y(b.h).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${y(b.l).toFixed(1)}" stroke="${col}" stroke-width="1"/><rect x="${(cx-cw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${cw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}"/>`;});
   const idxAt=ts=>{let bi=0,bd=1e18;candles.forEach((b,i)=>{const d=Math.abs(b.t-ts);if(d<bd){bd=d;bi=i;}});return bi;};
   const ei=idxAt(L.entryT),xi=idxAt(L.exitT);
-  const lvl=(v,col,label,dash)=>`<line x1="${padL}" y1="${y(v).toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${col}" stroke-width="1.3" ${dash?`stroke-dasharray="${dash}"`:''} opacity=".9"/><text x="${(W-padR+5).toFixed(1)}" y="${(y(v)+3.5).toFixed(1)}" fill="${col}" font-size="11" font-weight="700" font-family="var(--mono)">${label}</text><text x="${(W-padR+5).toFixed(1)}" y="${(y(v)+16).toFixed(1)}" fill="${col}" font-size="10" font-family="var(--mono)" opacity=".8">$${Math.round(v).toLocaleString()}</text>`;
+  const lvl=(v,col,label,sub,dash)=>{const yy=Math.max(padT+2,Math.min(H-padB-2,y(v)));return `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${yy.toFixed(1)}" stroke="${col}" stroke-width="1.3" ${dash?`stroke-dasharray="${dash}"`:''} opacity=".9"/><text x="${(W-padR+5).toFixed(1)}" y="${(yy+3.5).toFixed(1)}" fill="${col}" font-size="11" font-weight="700" font-family="var(--mono)">${label}</text><text x="${(W-padR+5).toFixed(1)}" y="${(yy+16).toFixed(1)}" fill="${col}" font-size="10" font-family="var(--mono)" opacity=".8">${sub}</text>`;};
   const vmark=(i,col,lbl)=>`<line x1="${x(i).toFixed(1)}" y1="${padT}" x2="${x(i).toFixed(1)}" y2="${(H-padB).toFixed(1)}" stroke="${col}" stroke-width="1" stroke-dasharray="2 4" opacity=".65"/><text x="${x(i).toFixed(1)}" y="${(H-padB+15).toFixed(1)}" fill="${col}" font-size="10" font-weight="800" text-anchor="middle">${lbl}</text>`;
+  const stopOff=L.stop<min;
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${cands}
-    ${lvl(L.exit,L.win?'var(--gt)':'var(--rt)','Take-profit')}
-    ${lvl(L.entry,'var(--ink)','Entry')}
-    ${lvl(L.stop,'var(--rt)','Stop −8%','5 4')}
+    ${lvl(L.exit,L.win?'var(--gt)':'var(--rt)','Take-profit','$'+Math.round(L.exit).toLocaleString())}
+    ${lvl(L.entry,'var(--ink)','Entry','$'+Math.round(L.entry).toLocaleString())}
+    ${lvl(L.stop,'var(--rt)','Stop −8%',(stopOff?'↓ $':'$')+Math.round(L.stop).toLocaleString()+(stopOff?' (off-chart)':''),'5 4')}
     ${vmark(ei,'var(--ink2)','ENTRY')}${vmark(xi,L.win?'var(--gt)':'var(--rt)','EXIT')}
   </svg>`;
 }

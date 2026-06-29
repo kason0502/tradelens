@@ -10,6 +10,16 @@
 - [x] **Inline position size** in the Futures plan + persisted account settings (`tlpro_acct`) synced with the Risk Calc.
 - [x] **Market-state + timestamp** on the signal card; **swapped 🟢 emoji** for a `.live-pip` dot.
 
+## Done (session 41 — trade-math fix + Futures right rail)
+- [x] **Fixed trade example math** — show points + implied $/pt so P&L reconciles; stop excluded from chart scaling (no more squished candles).
+- [x] **Futures main + right rail** with the AI Market Sentiment gauge (real breadth) + Strategy Performance, toward the mockup.
+
+## Next (finish the mockup — real-data pieces only)
+- [ ] **Bottom panel row:** Market Breadth donut (% above 200-day, real from Matrix), Top Performers (real day %), Risk Status (from ATR/vol). All derivable without faking.
+- [ ] **Recent Trades table on the dashboard** — show the backtest's most recent trades until a live journal exists.
+- [ ] **Top account/search bar** above the main column (cosmetic).
+- [ ] **Skip unless real:** economic calendar (needs a feed), journal-streak ring (needs the journal).
+
 ## Done (session 40 — candlestick trade replay + in-browser backtester)
 - [x] **Candlestick trade viz** — fetch real OHLC around any backtest trade (proxy period1/period2) + Entry/Stop/Take-profit lines; click-to-replay.
 - [x] **In-browser backtest runner** — run the rule live on real data (ES/NQ/YM/RTY/CL/GC/SPY/QQQ, 5y/10y/max) → stats + equity + verdict.
