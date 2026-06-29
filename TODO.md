@@ -6,11 +6,16 @@
 ## Done (session 29 — STRATA refocused on futures)
 - [x] **Futures terminal is the new default tab** — live validated trend-pullback signal on ES (signal card + daily chart w/ 10/50-day MAs + plain trade plan + validated-edge card). Stocks dashboard moved to a "Stocks" tab. Shell kept.
 
+## Done (session 30 — futures terminal v2)
+- [x] **Multi-market scan strip** (ES/NQ/SPY/QQQ) = selector + at-a-glance signal alert.
+- [x] **BUY-SETUP alerts** (banner + opt-in browser notification).
+- [x] **Edge card wired to `backtester/results.json`** (latest run line).
+- [x] **Removed options-focused 0DTE Lab tab**; logo retheme → "Futures Terminal".
+
 ## Next (futures terminal)
-- [ ] **More markets** — add NQ (and SPY/QQQ) with a small selector; the strategy is validated on all of them. (ES-only for now.)
-- [ ] **Live alert** — flag when ES flips to a BUY SETUP (browser notification / banner).
-- [ ] **Wire the edge card to `backtester/results.json`** (swing run) instead of hard-coded numbers, so it refreshes when you re-run the engine.
-- [ ] **Re-theme remaining chrome** toward futures; stock-era tabs (Movers/Screener/Pro Traders) are now secondary.
+- [ ] **Prune dead options code** — `renderOptLab`/`paintOptLab`/`optEquitySVG` are now unreferenced (the tab is gone); safe to delete. Also the stock-era tabs (Movers/Screener/Pro Traders/Strategy) remain — decide keep vs remove.
+- [ ] **Commodities/metals** (CL, GC) once validated in the backtester.
+- [ ] **Auto-refresh the scan** on an interval while the Futures tab is open.
 
 ## Done (session 23 — 0DTE options backtester + STRATA 0DTE Lab)
 - [x] Standalone honesty-first Python 0DTE backtester in `/backtester` (pessimistic fills, no look-ahead, next-bar exec, fragility report, swappable modules, tests, SPY ORB strategy).

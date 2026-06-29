@@ -980,6 +980,18 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fut-sig.ok2{border-left-color:var(--gt)} .fut-sig.ok2 .fs-head{color:var(--gt)}
 .fut-sig.wait{border-left-color:var(--at)} .fut-sig.wait .fs-head{color:var(--at)}
 .fut-sig.no{border-left-color:var(--rt)} .fut-sig.no .fs-head{color:var(--rt)}
+.fut-scan{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.fut-chip{border:1px solid var(--line);border-radius:11px;padding:10px 8px;text-align:center;cursor:pointer;background:rgba(255,255,255,.015);transition:all .14s}
+.fut-chip:hover{border-color:rgba(var(--ac-rgb),.5)}
+.fut-chip.sel{border-color:rgba(var(--ac-rgb),.8);background:rgba(var(--ac-rgb),.1)}
+.fut-chip .fc-l{font-size:15px;font-weight:900;letter-spacing:-.02em}
+.fut-chip .fc-s{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-top:3px;color:var(--ink3)}
+.fut-chip .fc-p{font-size:11px;color:var(--ink3);font-family:var(--mono);margin-top:2px}
+.fut-chip.ok{border-color:rgba(34,197,94,.6)} .fut-chip.ok .fc-s{color:var(--gt)}
+.fut-chip.ok2 .fc-s{color:var(--gt)}
+.fut-chip.wait .fc-s{color:var(--at)}
+.fut-chip.no .fc-s{color:var(--rt)}
+.fut-alert{border:1px solid rgba(34,197,94,.5);background:rgba(34,197,94,.1);color:var(--gt);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700}
 /* 0DTE Lab */
 .opt-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .opt-fresh{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
@@ -1217,7 +1229,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="lx-nav-in">
       <div class="logo-wrap" onclick="lpScroll('lxTop')" style="cursor:pointer">
         <div class="logo-mark"><img src="logo.png" class="logo-pic" alt="STRATA logo"/></div>
-        <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Structure Terminal</div></div>
+        <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Futures Terminal</div></div>
       </div>
       <nav class="lx-nav-links">
         <a class="nl" onclick="lpScroll('lxFeatures')">Platform</a>
@@ -1543,7 +1555,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="lx-foot-brand">
         <div class="logo-wrap" style="cursor:default">
           <div class="logo-mark"><img src="logo.png" class="logo-pic" alt="STRATA logo"/></div>
-          <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Structure Terminal</div></div>
+          <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Futures Terminal</div></div>
         </div>
         <p>Precision market analysis and AI strategy tools for serious, independent traders.</p>
       </div>
@@ -1629,7 +1641,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     </div>
     <div class="logo-text">
       <div class="logo-name">STRATA</div>
-      <div class="logo-sub">Structure Terminal</div>
+      <div class="logo-sub">Futures Terminal</div>
     </div>
   </div>
   <div class="appnav-scroll">
@@ -1649,7 +1661,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <button class="snav" data-tab="performance" onclick="mainTab('performance',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7 15l4-4 3 2 5-6"/></svg><span class="lbl">Performance</span></button>
     <button class="snav" data-tab="journal" onclick="mainTab('journal',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4a2 2 0 0 1 2-2h10l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 7h6M8 11h8M8 15h5"/></svg><span class="lbl">Journal</span><span class="pill" id="jrnPill" style="display:none"></span></button>
     <button class="snav" data-tab="ailab" onclick="mainTab('ailab',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.5L4.8 17a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 8.5V3"/></svg><span class="lbl">AI Lab</span></button>
-    <button class="snav" data-tab="optlab" onclick="mainTab('optlab',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M4 16l5-5 3 3 6-7"/><circle cx="9" cy="11" r="1.3"/><circle cx="12" cy="14" r="1.3"/></svg><span class="lbl">0DTE Lab</span><span class="pill">BACKTEST</span></button>
     <div class="appnav-grp">Assistant</div>
     <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
     <button class="snav" data-tab="alerts" onclick="mainTab('alerts',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="lbl">Alerts</span></button>
@@ -1911,15 +1922,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       </div>
     </div>
 
-    <!-- 0DTE OPTIONS BACKTEST LAB -->
-    <div class="tab-pane" id="tab-optlab">
-      <div style="margin-bottom:18px">
-        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">0DTE Lab — Options Backtest <span class="pill">HONESTY-FIRST</span></div>
-        <div style="font-size:13px;color:var(--mu);line-height:1.6">Results from the standalone Python backtesting engine (<code>/backtester</code>) — pessimistic fills (buy ask / sell bid + slippage + commission), strict no-look-ahead, next-bar execution, and a fragility report. This view <b>renders</b> what the engine produced; run the engine to refresh it.</div>
-      </div>
-      <div id="optlabBody"></div>
-    </div>
-
     <!-- AI CHAT -->
     <div class="tab-pane" id="tab-ai">
       <div style="margin-bottom:16px">
@@ -2065,7 +2067,6 @@ function mainTab(name,btn){
   if(name==='performance')renderPerformance();
   if(name==='journal')renderJournal();
   if(name==='ailab')renderAILearnStats();
-  if(name==='optlab')renderOptLab();
   if(name==='futures')renderFutures();
   if(name==='dashboard'&&!window._dashInited){window._dashInited=true;cpInit();}
   if(name==='movers')renderMovers();
@@ -4842,85 +4843,108 @@ function cpInit(){renderDash('AAPL');}
 // break (close below the 50-day). The one strategy that passed out-of-sample,
 // generalization, and robustness tests. Free Yahoo data via the proxy.
 // ══════════════════════════════════════════════════════════════════════
-const FUT_SYMBOL='ES=F';
-let _futQ=null;
+const FUT_MARKETS=[
+  {sym:'ES=F',label:'ES',name:'S&P 500 E-mini'},
+  {sym:'NQ=F',label:'NQ',name:'Nasdaq 100 E-mini'},
+  {sym:'SPY',label:'SPY',name:'S&P 500 ETF'},
+  {sym:'QQQ',label:'QQQ',name:'Nasdaq 100 ETF'},
+];
+const FUT_PF={'ES=F':1.59,'NQ=F':2.73,'SPY':1.41,'QQQ':1.32};   // validated out-of-sample profit factors
+let _futSel='ES=F', _futCache={}, _futNotified={};
 function _smaAt(a,n,i){if(i<n-1)return null;let s=0;for(let j=i-n+1;j<=i;j++)s+=a[j];return s/n;}
 function _smaSeries(a,n){return a.map((_,i)=>_smaAt(a,n,i));}
+// The validated trend-pullback signal for one market.
+function futSignal(q){
+  const closes=(q.closes||[]).filter(x=>x!=null);
+  if(closes.length<60)return null;
+  const ohlc=(q.h1y&&q.h1y.length>60)?q.h1y:null;
+  const price=q.price, prev=closes[closes.length-2];
+  const sma50=smaN(closes,50), sma10=smaN(closes,10);
+  const s50=_smaSeries(closes,50), s10=_smaSeries(closes,10);
+  const uptrend=price>sma50;
+  const lows=ohlc?ohlc.slice(-3).map(b=>b.l):closes.slice(-3);
+  const pulledBack=Math.min(...lows)<=sma10||price<=sma10;
+  const turnUp=price>prev;
+  const buySetup=uptrend&&pulledBack&&turnUp;
+  let cls,head,sub,short;
+  if(!uptrend){cls='no';head='No trade — downtrend';short='Downtrend';sub='Below its 50-day average. This system only buys in uptrends — stand aside.';}
+  else if(buySetup){cls='ok';head='✓ BUY SETUP — today';short='BUY SETUP';sub='Uptrend + pullback to the 10-day average + turning back up. Exactly the entry the backtest traded.';}
+  else if(pulledBack&&!turnUp){cls='wait';head='Pullback in progress — watch';short='Watch';sub='In an uptrend and dipping to the 10-day average, but not turning up yet. A green day here triggers the buy.';}
+  else{cls='ok2';head='In uptrend — no entry yet';short='Uptrend';sub='Trend is up, but price isn’t pulled back to the 10-day average. Wait for a dip toward it.';}
+  return {q,closes,ohlc,price,prev,sma50,sma10,s50,s10,uptrend,pulledBack,turnUp,buySetup,cls,head,sub,short};
+}
 async function renderFutures(force){
   const el=document.getElementById('futBody');if(!el)return;
   const btn=document.getElementById('futRefresh');if(btn&&force){btn.disabled=true;btn.style.opacity='.5';}
-  if(!force&&_futQ){paintFutures(_futQ);return;}
-  el.innerHTML=`<div class="card"><div class="loading-label">Loading ES futures…</div></div>`;
-  window.__userFetch=Date.now();
-  try{
-    const q=await fetchQuote(FUT_SYMBOL);
-    window.__userFetch=0; _futQ=q; paintFutures(q);
-  }catch(e){
-    el.innerHTML=`<div class="card"><div class="card-title">Couldn't load ES</div><div class="bt-empty" style="padding:16px;line-height:1.7">${(e&&e.message)||e}.<br>The free data feed may be rate-limited — wait a moment and hit Refresh.</div></div>`;
+  if(force)_futCache={};
+  if(!Object.keys(_futCache).length){
+    el.innerHTML=`<div class="card"><div class="loading-label">Loading futures (ES · NQ · SPY · QQQ)…</div></div>`;
+    window.__userFetch=Date.now();
+    await Promise.all(FUT_MARKETS.map(async m=>{try{_futCache[m.sym]=await fetchQuote(m.sym);}catch(e){_futCache[m.sym]=null;}}));
+    window.__userFetch=0;
   }
+  paintFutures();
   if(btn){btn.disabled=false;btn.style.opacity='';}
 }
-function paintFutures(q){
+function selectFutMarket(sym){_futSel=sym;paintFutures();}
+// Browser notification once per market per day when a BUY SETUP appears.
+function futNotify(buys){
+  if(!buys.length||typeof Notification==='undefined')return;
+  if(Notification.permission==='default'){Notification.requestPermission();return;}
+  if(Notification.permission!=='granted')return;
+  const day=new Date().toDateString();
+  buys.forEach(b=>{const k=b.sym+day;if(_futNotified[k])return;_futNotified[k]=1;try{new Notification('STRATA — BUY SETUP',{body:`${b.label} (${b.name}) is a buy-the-pullback setup today.`});}catch(e){}});
+}
+function paintFutures(){
   const el=document.getElementById('futBody');if(!el)return;
-  const closes=(q.closes||[]).filter(x=>x!=null);
-  if(closes.length<60){el.innerHTML=`<div class="card"><div class="bt-empty" style="padding:16px">Not enough history for ES right now — hit Refresh.</div></div>`;return;}
-  const ohlc=(q.h1y&&q.h1y.length>60)?q.h1y:null;
-  const price=q.price, prev=closes[closes.length-2];
-  const sma50=smaN(closes,50), sma10=smaN(closes,10), sma20=smaN(closes,20);
-  const s50=_smaSeries(closes,50), s10=_smaSeries(closes,10);
-  // ── signal ──
-  const uptrend=price>sma50;
-  const lows=ohlc?ohlc.slice(-3).map(b=>b.l):closes.slice(-3);
-  const pulledBack=Math.min(...lows)<=sma10 || price<=sma10;
-  const turnUp=price>prev;
-  const buySetup=uptrend&&pulledBack&&turnUp;
-  let cls,head,sub;
-  if(!uptrend){cls='no';head='No trade — downtrend';sub='ES is below its 50-day average. This system only buys in uptrends — stand aside.';}
-  else if(buySetup){cls='ok';head='✓ BUY SETUP — today';sub='Uptrend + pullback to the 10-day average + turning back up. This is exactly the entry the backtest traded.';}
-  else if(pulledBack&&!turnUp){cls='wait';head='Pullback in progress — watch';sub='In an uptrend and dipping to the 10-day average, but not turning up yet. A green day here triggers the buy.';}
-  else{cls='ok2';head='In uptrend — no entry yet';sub='Trend is up, but price isn’t pulled back to the 10-day average. Wait for a dip toward it.';}
-  // ── numbers ──
-  const vs50=(price-sma50)/sma50*100, vs10=(price-sma10)/sma10*100;
-  const s50prev=s50[s50.length-21], slope=s50prev?((sma50-s50prev)/s50prev*100):0;
-  const hardStop=price*0.92;
-  let atrPct=0;try{if(ohlc)atrPct=atr(ohlc,14)/price*100;}catch(e){}
-  const mret=closes.length>21?(price/closes[closes.length-22]-1)*100:0;
-  const up=q.change>=0;
   const money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
-  // ── trade plan (only meaningful in an uptrend) ──
-  const plan=uptrend?`
-    <div class="card"><div class="card-title">Trade plan — ${buySetup?'<span class="g">entry today</span>':'on the next pullback'}</div>
+  const sigs={}; FUT_MARKETS.forEach(m=>{const q=_futCache[m.sym];sigs[m.sym]=q?futSignal(q):null;});
+  const buys=FUT_MARKETS.filter(m=>sigs[m.sym]&&sigs[m.sym].buySetup);
+  futNotify(buys);
+  // ── market scan strip = selector + at-a-glance alert ──
+  const scan=`<div class="fut-scan">`+FUT_MARKETS.map(m=>{const s=sigs[m.sym],on=m.sym===_futSel;
+    return `<button class="fut-chip ${s?s.cls:''} ${on?'sel':''}" onclick="selectFutMarket('${m.sym}')">
+      <div class="fc-l">${m.label}</div><div class="fc-s">${s?s.short:'—'}</div>
+      <div class="fc-p">${s?'$'+s.price.toLocaleString(undefined,{maximumFractionDigits:0}):''}</div></button>`;}).join('')+`</div>`;
+  const alertBanner=buys.length?`<div class="fut-alert">🟢 <b>BUY SETUP right now:</b> ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up.</div>`:'';
+  const mkt=FUT_MARKETS.find(m=>m.sym===_futSel), s=sigs[_futSel], q=_futCache[_futSel];
+  if(!s){el.innerHTML=scan+alertBanner+`<div class="card"><div class="bt-empty" style="padding:16px">Couldn't load ${mkt.label} — hit Refresh.</div></div>`;return;}
+  const vs50=(s.price-s.sma50)/s.sma50*100, vs10=(s.price-s.sma10)/s.sma10*100;
+  const s50prev=s.s50[s.s50.length-21], slope=s50prev?((s.sma50-s50prev)/s50prev*100):0;
+  const hardStop=s.price*0.92;
+  let atrPct=0;try{if(s.ohlc)atrPct=atr(s.ohlc,14)/s.price*100;}catch(e){}
+  const mret=s.closes.length>21?(s.price/s.closes[s.closes.length-22]-1)*100:0;
+  const up=q.change>=0;
+  const plan=s.uptrend?`
+    <div class="card"><div class="card-title">Trade plan — ${s.buySetup?'<span class="g">entry today</span>':'on the next pullback'}</div>
       <div class="lv-table">
-        <div class="lv-row entry"><div class="lk">Entry</div><div class="lp">$${money(price)}</div><div class="lt">${buySetup?'buy now / next open':'when it dips to the 10-day avg & turns up'}</div></div>
-        <div class="lv-row risk"><div class="lk">Exit (trend break)</div><div class="lp">$${money(sma50)}</div><div class="lt">sell when a daily close is below the 50-day avg</div></div>
+        <div class="lv-row entry"><div class="lk">Entry</div><div class="lp">$${money(s.price)}</div><div class="lt">${s.buySetup?'buy now / next open':'when it dips to the 10-day avg & turns up'}</div></div>
+        <div class="lv-row risk"><div class="lk">Exit (trend break)</div><div class="lp">$${money(s.sma50)}</div><div class="lt">sell when a daily close is below the 50-day avg</div></div>
         <div class="lv-row risk"><div class="lk">Hard stop</div><div class="lp">$${money(hardStop)}</div><div class="lt">−8% safety net</div></div>
         <div class="lv-row rew"><div class="lk">Target</div><div class="lp">let it run</div><div class="lt">no fixed target — hold the trend</div></div>
       </div>
-      <div class="dp-rr">Hold time is typically days to weeks. ~5–6 trades a year. It makes money from a few big winners — most trades are small.</div>
+      <div class="dp-rr">Hold time is typically days to weeks. ~5–6 trades a year. Profit comes from a few big winners — most trades are small.</div>
     </div>`:'';
-  // ── edge card (validated) ──
   const edge=`<div class="card"><div class="card-title">Backtested edge — validated, honest</div>
     <div class="bt-scoreboard">
-      <div class="bt-score"><div class="bt-score-val g">1.59</div><div class="bt-score-lbl">ES profit factor (out-of-sample)</div></div>
-      <div class="bt-score"><div class="bt-score-val g">2.73</div><div class="bt-score-lbl">NQ (OOS)</div></div>
-      <div class="bt-score"><div class="bt-score-val g">1.41</div><div class="bt-score-lbl">SPY (OOS)</div></div>
-      <div class="bt-score"><div class="bt-score-val g">1.32</div><div class="bt-score-lbl">QQQ (OOS)</div></div>
+      ${FUT_MARKETS.map(m=>`<div class="bt-score"><div class="bt-score-val ${FUT_PF[m.sym]>=1?'g':'r'}">${FUT_PF[m.sym]}</div><div class="bt-score-lbl">${m.label} profit factor (OOS)${m.sym===_futSel?' ·now':''}</div></div>`).join('')}
     </div>
-    <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:6px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (works on S&amp;P and Nasdaq, futures and ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
-    <div class="dp-struct off" style="margin-top:10px">Honest caveats: it's <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a backtest passing is necessary, not sufficient — <b>paper-trade it first</b>. Re-run the engine in <b>0DTE Lab</b> / <code>backtester</code> to refresh these.</div>
+    <div id="futLatestRun" style="font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:8px">Latest engine run: (run the backtester to populate)…</div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (S&amp;P &amp; Nasdaq, futures &amp; ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
+    <div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
   </div>`;
-  el.innerHTML=`
-    <div class="fut-sig ${cls}">
-      <div class="fs-px"><div class="fs-price">$${money(price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
-      <div class="fs-head">${head}</div>
-      <div class="fs-sub">${sub}</div>
+  el.innerHTML=scan+alertBanner+`
+    <div class="fut-sig ${s.cls}">
+      <div class="fs-px"><div class="fs-price">$${money(s.price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
+      <div class="fs-head">${mkt.label} · ${s.head}</div>
+      <div class="fs-sub">${mkt.name} — ${s.sub}</div>
       <div class="fs-pills">
-        <span class="fs-pill ${uptrend?'on':'off'}">${uptrend?'✓':'✕'} Uptrend (vs 50-day)</span>
-        <span class="fs-pill ${pulledBack?'on':'off'}">${pulledBack?'✓':'•'} Pulled back (to 10-day)</span>
-        <span class="fs-pill ${turnUp?'on':'off'}">${turnUp?'✓':'•'} Turning up</span>
+        <span class="fs-pill ${s.uptrend?'on':'off'}">${s.uptrend?'✓':'✕'} Uptrend (vs 50-day)</span>
+        <span class="fs-pill ${s.pulledBack?'on':'off'}">${s.pulledBack?'✓':'•'} Pulled back (to 10-day)</span>
+        <span class="fs-pill ${s.turnUp?'on':'off'}">${s.turnUp?'✓':'•'} Turning up</span>
       </div>
     </div>
-    <div class="card"><div class="card-title">ES daily — price, 10-day &amp; 50-day averages</div>${futChartSVG(closes,s10,s50)}
+    <div class="card"><div class="card-title">${mkt.label} daily — price, 10-day &amp; 50-day averages</div>${futChartSVG(s.closes,s.s10,s.s50)}
       <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--ink)">━</span> price</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
     </div>
     ${plan}
@@ -4932,6 +4956,20 @@ function paintFutures(q){
       <div class="bt-score"><div class="bt-score-val">${atrPct.toFixed(1)}%</div><div class="bt-score-lbl">Daily range (ATR)</div></div>
     </div>
     ${edge}`;
+  futLoadEdge();
+}
+async function futLoadEdge(){
+  const el=document.getElementById('futLatestRun');if(!el)return;
+  try{
+    const r=await fetch('backtester/results.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok){el.textContent='';return;}
+    const d=await r.json(), m=d.metrics||{}, c=d.config||{};
+    if(!m.n_trades){el.textContent='';return;}
+    el.innerHTML=`Latest engine run — ${c.symbol||''} ${(c.start_date||'').slice(0,7)}→${(c.end_date||'').slice(0,7)}: `
+      +`<b>${m.n_trades}</b> trades · PF <b class="${m.profit_factor>=1?'g':'r'}">${m.profit_factor}</b> · `
+      +`<b class="${m.total_pnl>=0?'g':'r'}">${m.total_pnl>=0?'+':''}$${Math.round(m.total_pnl).toLocaleString()}</b>`
+      +(d.synthetic?' <span style="color:var(--rt)">(sample)</span>':'');
+  }catch(e){el.textContent='';}
 }
 function futChartSVG(closes,s10,s50){
   const N=Math.min(140,closes.length);

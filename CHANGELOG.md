@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 30) — futures terminal: multi-market scan, alerts, live edge; options tab removed
+- **Removed the options-focused 0DTE Lab tab** (nav + pane + hook) — STRATA is futures-first now.
+- **Market scan strip = selector + at-a-glance alert:** the Futures tab fetches **ES · NQ · SPY · QQQ** in parallel and shows a chip per market with its live signal (BUY SETUP / Watch / Uptrend / Downtrend + price); click to drill in. `FUT_MARKETS`, `futSignal(q)` (extracted), `selectFutMarket`.
+- **BUY-SETUP alerts:** a green banner lists every market currently in a buy setup, plus an opt-in **browser notification** (once per market per day, `futNotify`).
+- **Edge card wired to `backtester/results.json`** (`futLoadEdge`): shows the latest engine run (symbol, dates, trades, PF, $) under the validated per-market OOS profit factors — refreshes when you re-run the backtester.
+- **Re-theme:** logo subtitle "Structure Terminal" → "Futures Terminal" (app + landing).
+
 ## 2026-06-27 (session 29) — STRATA refocused on FUTURES (new default Futures terminal)
 - **New "Futures" tab is the default app view**, built around the *validated* daily trend-pullback edge (the only strategy that passed OOS + generalization + robustness). The old stock dashboard moved to a "Stocks" tab (lazy-loaded on first visit). Shell/infra kept.
 - `renderFutures`/`paintFutures`/`futChartSVG`: fetch **ES=F** daily via the existing proxy (`fetchQuote('ES=F')` — verified it loads), compute the live signal (uptrend vs 50-day, pulled back to 10-day, turning up), and render: a big **signal card** (BUY SETUP / pullback-watch / in-uptrend / downtrend + ✓ condition pills), a **daily SVG chart** with 10- & 50-day averages, a plain-English **trade plan** (entry · exit on close below 50-day · 8% hard stop · let winners run), a **metrics** strip (vs 50/10-day, 50-day slope, 1-mo return, ATR), and a **validated-edge** card (ES/NQ/SPY/QQQ OOS profit factors + honest long-only/drawdown/paper-trade caveats).
