@@ -1045,6 +1045,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bt-log tbody tr{cursor:pointer;transition:background .12s}
 .bt-log tbody tr:hover{background:rgba(var(--ac-rgb),.06)}
 .bt-log tbody tr.sel{background:rgba(var(--ac-rgb),.12)}
+.btrun-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bt-canvas-box{min-height:120px}
 /* Toolkit: Playbook · Risk Calculator · Sessions */
 .calc-form{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
 .calc-field label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:700}
@@ -4970,7 +4972,16 @@ async function renderBacktester(force){
   const logRows=trades.map((t,i)=>{const mv=(t.exit_fill_price-t.entry_fill_price)/t.entry_fill_price*100,win=t.pnl>=0;
     return `<tr onclick="btShowTrade(${i})" class="${i===bi?'sel':''}"><td>${i+1}</td><td>${t.day}</td><td>${(t.exit_ts||'').slice(0,10)}</td><td>Long</td><td class="num">$${t.entry_fill_price.toLocaleString()}</td><td class="num">$${t.exit_fill_price.toLocaleString()}</td><td class="num ${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</td><td class="num ${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</td><td class="num">${Math.round((t.hold_minutes||0)/1440)}d</td><td style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</td></tr>`;}).join('');
   el.innerHTML=`
-    <div class="card"><div class="card-title">Backtest statistics — ${c.symbol||'ES=F'} · ${per}</div>${grid}</div>
+    <div class="card"><div class="card-title">Run a fresh backtest <span class="pill">in-browser · real daily data</span></div>
+      <div class="btrun-bar">
+        <select id="btRunSym" class="sp-sel">${[['ES=F','S&P 500 (ES)'],['NQ=F','Nasdaq 100 (NQ)'],['YM=F','Dow (YM)'],['RTY=F','Russell 2000 (RTY)'],['CL=F','Crude Oil (CL)'],['GC=F','Gold (GC)'],['SPY','SPY ETF'],['QQQ','QQQ ETF']].map(([v,l])=>`<option value="${v}"${v===(c.symbol||'ES=F')?' selected':''}>${l}</option>`).join('')}</select>
+        <select id="btRunYears" class="sp-sel"><option value="5">5 years</option><option value="10" selected>10 years</option><option value="max">Max history</option></select>
+        <button class="dp-fu" onclick="btRunLive()" id="btRunBtn">▶ Run backtest</button>
+      </div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Runs the exact trend-pullback rule on real daily candles, live. Results are in <b>% per trade</b> and <b>gross of costs</b> — an honest cross-check of the Python engine below (which adds pessimistic fills + slippage + commission).</div>
+      <div id="btLiveResults"></div>
+    </div>
+    <div class="card"><div class="card-title">Python engine results — ${c.symbol||'ES=F'} · ${per} <span class="pill">net of costs</span></div>${grid}</div>
     <div class="card"><div class="card-title">Equity curve — grew $${(m.starting_capital||0).toLocaleString()} → $${Math.round((m.starting_capital||0)+m.total_pnl).toLocaleString()}</div>${btEquitySVG(m.equity_curve,m.starting_capital)}
       <div style="font-size:11px;color:var(--ink3);margin-top:8px">Dashed line = starting capital. One contract, compounding off, after pessimistic fills + slippage + commission.</div>
     </div>
@@ -4985,20 +4996,136 @@ async function renderBacktester(force){
       <div class="dp-struct off" style="margin-top:10px">Honest caveats: the <b>${m.win_rate_pct.toFixed(0)}% win rate</b> is low by design — this edge profits from a few big winners (avg win <b>${_bt$(m.avg_win)}</b> vs avg loss <b>${_bt$(m.avg_loss)}</b>), not hit rate. Drawdowns reached <b>${m.max_drawdown_pct.toFixed(0)}%</b>. A passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
       ${d.synthetic?'<div class="fut-alert" style="margin-top:10px;color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)">Sample data — run the engine for real numbers.</div>':''}
     </div>`;
+  btLoadTrade(bi);   // draw the featured trade on real candles
 }
-function btShowTrade(i){const t=_btTradesArr[i];if(!t)return;const w=document.getElementById('btTradeWrap');if(w)w.innerHTML=btTradeBlock(t,i);document.querySelectorAll('#btLog tbody tr').forEach((r,idx)=>r.classList.toggle('sel',idx===i));}
-function btTradeBlock(t,i){
+function btShowTrade(i){const t=_btTradesArr[i];if(!t)return;const w=document.getElementById('btTradeWrap');if(w)w.innerHTML=btTradeBlock(t,i);document.querySelectorAll('#btLog tbody tr').forEach((r,idx)=>r.classList.toggle('sel',idx===i));btLoadTrade(i);}
+// ── IN-BROWSER backtest runner — run the trend-pullback rule on real daily data ──
+async function btRunLive(){
+  const out=document.getElementById('btLiveResults');if(!out)return;
+  const sym=(document.getElementById('btRunSym')||{}).value||'ES=F';
+  const yrs=(document.getElementById('btRunYears')||{}).value||'10';
+  const btn=document.getElementById('btRunBtn');if(btn){btn.disabled=true;btn.textContent='Running…';}
+  out.innerHTML=`<div class="loading-label" style="padding:18px">Fetching ${yrs==='max'?'max history':yrs+'y'} of ${sym} & simulating…</div>`;
+  try{
+    const now=Math.floor(Date.now()/1000), from=yrs==='max'?0:now-(parseInt(yrs)+1)*365*86400;
+    window.__userFetch=Date.now();
+    const candles=await btFetchOHLC(sym,from,now);
+    window.__userFetch=0;
+    if(!candles||candles.length<80){out.innerHTML='<div class="bt-empty" style="padding:16px">Not enough data returned — try a different symbol or window.</div>';return;}
+    const {trades,metrics:m}=btSimulate(candles);
+    if(!trades.length){out.innerHTML='<div class="bt-empty" style="padding:16px">No trades triggered in this window.</div>';return;}
+    const pf=isFinite(m.profit_factor)?m.profit_factor.toFixed(2):'∞';
+    const tile=(lbl,val,cls)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div></div>`;
+    const verdict=(m.profit_factor>=1.3&&m.total_return_pct>0)?'<span style="color:var(--gt);font-weight:800">edge holds</span> — profit factor '+pf:(m.profit_factor>=1?'<span style="color:var(--at);font-weight:800">marginal edge</span>':'<span style="color:var(--rt);font-weight:800">no edge in this window</span>');
+    out.innerHTML=`<div class="bt-statgrid" style="margin-top:14px">
+        ${tile('Total return',(m.total_return_pct>=0?'+':'')+m.total_return_pct.toFixed(0)+'%',m.total_return_pct>=0?'g':'r')}
+        ${tile('Win rate',m.win_rate_pct.toFixed(1)+'%')}
+        ${tile('Profit factor',pf,m.profit_factor>=1?'g':'r')}
+        ${tile('Trades',m.n_trades)}
+        ${tile('Avg / trade',(m.avg_trade_pct>=0?'+':'')+m.avg_trade_pct.toFixed(2)+'%',m.avg_trade_pct>=0?'g':'r')}
+        ${tile('Best',(m.best_pct>=0?'+':'')+m.best_pct.toFixed(1)+'%','g')}
+        ${tile('Worst',m.worst_pct.toFixed(1)+'%','r')}
+        ${tile('Max DD',m.max_drawdown_pct.toFixed(1)+'%','r')}
+      </div>
+      <div style="margin-top:14px">${btEquityPctSVG(m.equity)}</div>
+      <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} daily bars · ${trades.length} trades · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}.</div>`;
+  }catch(e){out.innerHTML='<div class="bt-empty" style="padding:16px">Data feed busy — try again in a moment.</div>';}
+  finally{if(btn){btn.disabled=false;btn.textContent='▶ Run backtest';}}
+}
+function btSimulate(candles){
+  const c=candles.map(b=>b.c),n=c.length;
+  const sma=(a,p,i)=>{if(i<p-1)return null;let s=0;for(let j=i-p+1;j<=i;j++)s+=a[j];return s/p;};
+  const trades=[];let pos=null;
+  for(let i=50;i<n;i++){
+    const s50=sma(c,50,i),s10=sma(c,10,i);if(s50==null||s10==null)continue;
+    if(!pos){
+      const uptrend=c[i]>s50, lo3=Math.min(candles[i].l,candles[i-1].l,candles[i-2].l), pulled=(lo3<=s10||c[i]<=s10), turnUp=c[i]>c[i-1];
+      if(uptrend&&pulled&&turnUp)pos={entry:c[i],entryT:candles[i].t,stop:c[i]*0.92};
+    } else {
+      let exit=null,reason=null;
+      if(candles[i].l<=pos.stop){exit=pos.stop;reason='hard_stop';}
+      else if(c[i]<s50){exit=c[i];reason='trend_break';}
+      if(exit!=null){trades.push({day:_btDayStr(pos.entryT),entry_ts:pos.entryT,entry_fill_price:+pos.entry.toFixed(2),exit_fill_price:+exit.toFixed(2),exit_ts:_btDayStr(candles[i].t),exit_reason:reason,pnl:null,pnlPct:(exit-pos.entry)/pos.entry*100,hold_minutes:(candles[i].t-pos.entryT)/60});pos=null;}
+    }
+  }
+  if(pos){const last=c[n-1];trades.push({day:_btDayStr(pos.entryT),entry_ts:pos.entryT,entry_fill_price:+pos.entry.toFixed(2),exit_fill_price:+last.toFixed(2),exit_ts:_btDayStr(candles[n-1].t),exit_reason:'open (marked)',pnl:null,pnlPct:(last-pos.entry)/pos.entry*100,hold_minutes:(candles[n-1].t-pos.entryT)/60});}
+  const rs=trades.map(t=>t.pnlPct),wins=rs.filter(r=>r>0),losses=rs.filter(r=>r<=0);
+  const gW=wins.reduce((a,b)=>a+b,0),gL=Math.abs(losses.reduce((a,b)=>a+b,0));
+  let eq=1,curve=[1];trades.forEach(t=>{eq*=(1+t.pnlPct/100);curve.push(eq);});
+  let peak=curve[0],dd=0;curve.forEach(v=>{if(v>peak)peak=v;const d=(v-peak)/peak*100;if(d<dd)dd=d;});
+  return {trades,metrics:{n_trades:trades.length,win_rate_pct:trades.length?wins.length/trades.length*100:0,profit_factor:gL?gW/gL:(gW>0?Infinity:0),total_return_pct:(eq-1)*100,avg_trade_pct:rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:0,best_pct:rs.length?Math.max(...rs):0,worst_pct:rs.length?Math.min(...rs):0,max_drawdown_pct:dd,equity:curve}};
+}
+function btEquityPctSVG(curve){
+  const c=curve||[];if(c.length<2)return '';
+  const W=900,H=200,padL=48,padR=12,padT=12,padB=14;
+  const min=Math.min(...c),max=Math.max(...c),rng=Math.max(1e-6,max-min);
+  const x=i=>padL+i/(c.length-1)*(W-padL-padR), y=v=>padT+(1-(v-min)/rng)*(H-padT-padB);
+  let line='',area='';c.forEach((v,i)=>{const xx=x(i).toFixed(1),yy=y(v).toFixed(1);line+=(i?'L':'M')+xx+' '+yy+' ';area+=(i?'L':'M')+xx+' '+yy+' ';});
+  area+=`L${x(c.length-1).toFixed(1)} ${(H-padB).toFixed(1)} L${x(0).toFixed(1)} ${(H-padB).toFixed(1)} Z`;
+  let grid='';for(let g=0;g<=2;g++){const v=min+rng*g/2,yy=y(v);grid+=`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.05)"/><text x="6" y="${(yy+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="var(--mono)">${v.toFixed(2)}x</text>`;}
+  const up=c[c.length-1]>=c[0];
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block"><defs><linearGradient id="bteqp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,197,94,.26)"/><stop offset="1" stop-color="rgba(34,197,94,0)"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#bteqp)"/><path d="${line}" fill="none" stroke="${up?'var(--gr)':'var(--rd)'}" stroke-width="2"/></svg>`;
+}
+function btTradeInfoHTML(t){
   const e=t.entry_fill_price,x=t.exit_fill_price,win=t.pnl>=0,mv=(x-e)/e*100,holdD=Math.round((t.hold_minutes||0)/1440);
-  return `${btTradeChartSVG(t)}
-    <div style="font-size:11px;color:var(--ink3);margin:8px 0 12px">The line connects the real entry and exit fills — the position was held ${holdD} days through the trend (intrabar path not shown).</div>
-    <div class="bt-trade-info">
-      <div class="bt-ti"><span>Entry</span><b>${t.day} · $${e.toLocaleString()}</b></div>
-      <div class="bt-ti"><span>Exit</span><b>${(t.exit_ts||'').slice(0,10)} · $${x.toLocaleString()}</b></div>
-      <div class="bt-ti"><span>Exit reason</span><b style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</b></div>
-      <div class="bt-ti"><span>Held</span><b>${holdD} days</b></div>
-      <div class="bt-ti"><span>Price move</span><b class="${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</b></div>
-      <div class="bt-ti"><span>P&L · 1 contract</span><b class="${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</b></div>
-    </div>`;
+  const pnl=(t.pnl!=null)?(win?'+':'')+_bt$(t.pnl):((mv>=0?'+':'')+mv.toFixed(1)+'%');
+  return `<div class="bt-trade-info">
+    <div class="bt-ti"><span>Entry</span><b>${t.day} · $${e.toLocaleString()}</b></div>
+    <div class="bt-ti"><span>Exit</span><b>${(t.exit_ts||'').slice(0,10)} · $${x.toLocaleString()}</b></div>
+    <div class="bt-ti"><span>Exit reason</span><b style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</b></div>
+    <div class="bt-ti"><span>Held</span><b>${holdD} days</b></div>
+    <div class="bt-ti"><span>Price move</span><b class="${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</b></div>
+    <div class="bt-ti"><span>${t.pnl!=null?'P&L · 1 contract':'Return'}</span><b class="${win?'g':'r'}">${pnl}</b></div>
+  </div>`;
+}
+function btTradeBlock(t,i){
+  return `<div id="btCanvasBox" class="bt-canvas-box"><div class="loading-label" style="padding:38px 0;text-align:center">Loading real historical candles for this trade…</div></div>${btTradeInfoHTML(t)}`;
+}
+function _btTs(d){return Math.floor(new Date((d||'').slice(0,10)+'T00:00:00Z').getTime()/1000);}
+function _btDayStr(ts){return new Date(ts*1000).toISOString().slice(0,10);}
+// Fetch real daily OHLC for an arbitrary historical window through the proxy.
+async function btFetchOHLC(sym,from,to){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&period1=${from}&period2=${to}`;
+  const data=await tryFetchRetry(url,1);
+  const res=data&&data.chart&&data.chart.result&&data.chart.result[0];if(!res)return null;
+  const q=res.indicators.quote[0],t=res.timestamp||[];
+  return (q.close||[]).map((c,i)=>({t:t[i],o:(q.open&&q.open[i]!=null)?q.open[i]:c,h:(q.high&&q.high[i]!=null)?q.high[i]:c,l:(q.low&&q.low[i]!=null)?q.low[i]:c,c})).filter(p=>p.c!=null&&p.t!=null);
+}
+// Load the candles around a trade and draw it with entry / stop / take-profit lines.
+async function btLoadTrade(i){
+  const t=_btTradesArr[i];if(!t)return;const box=document.getElementById('btCanvasBox');if(!box)return;
+  const sym=(_btCache&&_btCache.config&&_btCache.config.symbol)||'ES=F';
+  const entryT=t.entry_ts?_btTs(t.entry_ts):_btTs(t.day), exitT=_btTs(t.exit_ts);
+  try{
+    window.__userFetch=Date.now();
+    const candles=await btFetchOHLC(sym,entryT-24*86400,exitT+14*86400);
+    window.__userFetch=0;
+    if(!candles||candles.length<3){box.innerHTML='<div class="bt-empty" style="padding:16px">Couldn\'t load candles for this window — the data feed may be busy. Try another trade.</div>';return;}
+    const win=(t.pnl!=null?t.pnl>=0:t.exit_fill_price>=t.entry_fill_price);
+    box.innerHTML=btCandleTradeSVG(candles,{entry:t.entry_fill_price,stop:t.entry_fill_price*0.92,exit:t.exit_fill_price,entryT,exitT,win})
+      +`<div style="font-size:11px;color:var(--ink3);margin-top:8px;line-height:1.6">Real <b>${sym}</b> daily candles around the trade. <span style="color:var(--ink)">━ Entry</span> · <span style="color:var(--rt)">┈ Stop (−8% hard stop)</span> · <span style="color:var(--gt)">━ Take-profit = the trend-break exit</span>. This system has no fixed target — the "take-profit" is wherever the 50-day trend broke.</div>`;
+  }catch(e){window.__userFetch=0;box.innerHTML='<div class="bt-empty" style="padding:16px">Couldn\'t load candles (data feed busy).</div>';}
+}
+// Candlesticks + horizontal Entry / Stop / Take-profit lines + entry/exit verticals.
+function btCandleTradeSVG(candles,L){
+  const N=candles.length;if(N<2)return '<div class="bt-empty" style="padding:14px">No candles.</div>';
+  const W=900,H=330,padL=8,padR=92,padT=16,padB=24;
+  let min=Math.min(L.stop,L.entry,L.exit),max=Math.max(L.entry,L.exit);
+  candles.forEach(c=>{if(c.l<min)min=c.l;if(c.h>max)max=c.h;});
+  const rng=Math.max(1e-6,max-min),plotW=W-padL-padR,plotH=H-padT-padB;
+  const x=i=>padL+(N<=1?plotW/2:i/(N-1)*plotW), y=v=>padT+(1-(v-min)/rng)*plotH;
+  const cw=Math.max(1.4,Math.min(8,plotW/N*0.62));
+  let cands='';candles.forEach((b,i)=>{const up=b.c>=b.o,col=up?'var(--gr)':'var(--rd)',cx=x(i);const yo=y(b.o),yc=y(b.c),top=Math.min(yo,yc),bh=Math.max(1,Math.abs(yc-yo));cands+=`<line x1="${cx.toFixed(1)}" y1="${y(b.h).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${y(b.l).toFixed(1)}" stroke="${col}" stroke-width="1"/><rect x="${(cx-cw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${cw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}"/>`;});
+  const idxAt=ts=>{let bi=0,bd=1e18;candles.forEach((b,i)=>{const d=Math.abs(b.t-ts);if(d<bd){bd=d;bi=i;}});return bi;};
+  const ei=idxAt(L.entryT),xi=idxAt(L.exitT);
+  const lvl=(v,col,label,dash)=>`<line x1="${padL}" y1="${y(v).toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${col}" stroke-width="1.3" ${dash?`stroke-dasharray="${dash}"`:''} opacity=".9"/><text x="${(W-padR+5).toFixed(1)}" y="${(y(v)+3.5).toFixed(1)}" fill="${col}" font-size="11" font-weight="700" font-family="var(--mono)">${label}</text><text x="${(W-padR+5).toFixed(1)}" y="${(y(v)+16).toFixed(1)}" fill="${col}" font-size="10" font-family="var(--mono)" opacity=".8">$${Math.round(v).toLocaleString()}</text>`;
+  const vmark=(i,col,lbl)=>`<line x1="${x(i).toFixed(1)}" y1="${padT}" x2="${x(i).toFixed(1)}" y2="${(H-padB).toFixed(1)}" stroke="${col}" stroke-width="1" stroke-dasharray="2 4" opacity=".65"/><text x="${x(i).toFixed(1)}" y="${(H-padB+15).toFixed(1)}" fill="${col}" font-size="10" font-weight="800" text-anchor="middle">${lbl}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${cands}
+    ${lvl(L.exit,L.win?'var(--gt)':'var(--rt)','Take-profit')}
+    ${lvl(L.entry,'var(--ink)','Entry')}
+    ${lvl(L.stop,'var(--rt)','Stop −8%','5 4')}
+    ${vmark(ei,'var(--ink2)','ENTRY')}${vmark(xi,L.win?'var(--gt)':'var(--rt)','EXIT')}
+  </svg>`;
 }
 function btTradeChartSVG(t){
   const e=t.entry_fill_price,x=t.exit_fill_price,win=t.pnl>=0;

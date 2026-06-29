@@ -10,6 +10,15 @@
 - [x] **Inline position size** in the Futures plan + persisted account settings (`tlpro_acct`) synced with the Risk Calc.
 - [x] **Market-state + timestamp** on the signal card; **swapped 🟢 emoji** for a `.live-pip` dot.
 
+## Done (session 40 — candlestick trade replay + in-browser backtester)
+- [x] **Candlestick trade viz** — fetch real OHLC around any backtest trade (proxy period1/period2) + Entry/Stop/Take-profit lines; click-to-replay.
+- [x] **In-browser backtest runner** — run the rule live on real data (ES/NQ/YM/RTY/CL/GC/SPY/QQQ, 5y/10y/max) → stats + equity + verdict.
+
+## Next (backtester follow-ups)
+- [ ] **Candlestick viz on live-runner trades too** (candles already fetched in `_btLiveCandles` — wire a featured trade + log for `btSimulate` output).
+- [ ] **Fold costs into the in-browser sim** (slippage + commission) so its numbers are comparable to the Python engine, not just gross.
+- [ ] **Cache historical OHLC** per (symbol, window) to avoid refetching when replaying trades.
+
 ## Done (session 39 — Backtester tab + backtest emphasis)
 - [x] **Backtester tab** — real stats grid, equity curve, a real trade example (click-to-replay), full 59-trade log, from `results.json`.
 - [x] **Strategy Performance card** on the Futures tab (backtest return/win/PF/trades/expectancy) + link to the Backtester.
