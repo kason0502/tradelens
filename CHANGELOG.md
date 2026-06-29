@@ -3,6 +3,10 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 36) — fix Charts symbols + cooler backdrop
+- **Fixed Charts / Split "available only on TradingView" error:** real CME futures symbols (`CME_MINI:ES1!`, etc.) need a paid data entitlement, so the free widget refused them. Switched `TV_FUTURES` + `MATRIX_MARKETS.tv` + Split defaults to free-widget-friendly symbols for the underlying market (`FOREXCOM:SPXUSD`, `FOREXCOM:NSXUSD`, `FOREXCOM:DJI`, `AMEX:IWM`, `TVC:USOIL`, `TVC:GOLD`, `TVC:SILVER`, `TVC:US10Y`, `FX:EURUSD`, `BITSTAMP:BTCUSD`). Bumped the Split localStorage key (`tlpro_split_v1`→`v2`) so stale saved symbols are dropped. Search still lets you type any custom symbol.
+- **Cooler backdrop:** added a soft **cursor-following light**, a **neon glow** on the market wave ribbons (shadowBlur), and replaced the little "trade print" dots with **drifting candlesticks** floating upward. Plus a subtle **hover-lift** on cards. All reduced-motion-safe.
+
 ## 2026-06-29 (session 35) — backdrop refresh: market wave ribbons replace the perspective grid
 - **Replaced the "matrix" perspective floor-grid** in the `#fxCanvas` living-market backdrop with **flowing, layered market wave ribbons** — three translucent price-style curves that gently scroll and parallax (mood-tinted green↔red, soft gradient fills). More organic and on-theme than the grid.
 - **Made the whole backdrop more present** (without crowding the data): brighter aurora blobs (α .05–.17), stronger data-constellation links/dots, canvas opacity .85→.96, and a slightly more visible animated logo watermark (opacity .05→.07, larger glow). Reduced-motion still fully respected.

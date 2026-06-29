@@ -203,7 +203,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 /* ── CARDS ── */
 .card{background:var(--glass);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border:1px solid var(--b1);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .22s,box-shadow .25s,transform .2s;position:relative;box-shadow:var(--shadow)}
 .card:last-child{margin-bottom:0}
-.card:hover{border-color:rgba(var(--ac-rgb),.26);box-shadow:var(--shadow),0 0 0 1px rgba(var(--ac-rgb),.12),0 0 42px rgba(var(--ac-rgb),.07)}
+.card:hover{border-color:rgba(var(--ac-rgb),.26);box-shadow:var(--shadow),0 0 0 1px rgba(var(--ac-rgb),.12),0 0 42px rgba(var(--ac-rgb),.07);transform:translateY(-2px)}
+@media(prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
 .card-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--fa);margin-bottom:15px;display:flex;align-items:center;gap:7px}
 .pdot{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:blink 2s ease-in-out infinite;flex-shrink:0}
 
@@ -4983,13 +4984,16 @@ function paintSessions(){
 
 // ── MARKET MATRIX — a live command-center grid across every tracked future ──
 // (tv = the TradingView continuous-front-month symbol, for the Charts drill-in)
+// tv = a symbol the FREE TradingView widget can actually render (real CME futures
+// like ES1! require a paid data entitlement → "available only on TradingView").
+// We chart the underlying index/commodity, which tracks the same market.
 const MATRIX_MARKETS=[
-  {sym:'ES=F',label:'ES',name:'S&P 500',tv:'CME_MINI:ES1!'},
-  {sym:'NQ=F',label:'NQ',name:'Nasdaq 100',tv:'CME_MINI:NQ1!'},
-  {sym:'YM=F',label:'YM',name:'Dow Jones',tv:'CBOT_MINI:YM1!'},
-  {sym:'RTY=F',label:'RTY',name:'Russell 2000',tv:'CME_MINI:RTY1!'},
-  {sym:'CL=F',label:'CL',name:'Crude Oil',tv:'NYMEX:CL1!'},
-  {sym:'GC=F',label:'GC',name:'Gold',tv:'COMEX:GC1!'},
+  {sym:'ES=F',label:'ES',name:'S&P 500',tv:'FOREXCOM:SPXUSD'},
+  {sym:'NQ=F',label:'NQ',name:'Nasdaq 100',tv:'FOREXCOM:NSXUSD'},
+  {sym:'YM=F',label:'YM',name:'Dow Jones',tv:'FOREXCOM:DJI'},
+  {sym:'RTY=F',label:'RTY',name:'Russell 2000',tv:'AMEX:IWM'},
+  {sym:'CL=F',label:'CL',name:'Crude Oil',tv:'TVC:USOIL'},
+  {sym:'GC=F',label:'GC',name:'Gold',tv:'TVC:GOLD'},
 ];
 let _mxCache={};
 async function renderMatrix(force){
@@ -5045,19 +5049,21 @@ function futSparkSVG(closes){
 }
 
 // ── CHARTS — TradingView lookup for any futures index / symbol ──
+// Free-widget-friendly symbols (the underlying index/commodity each future tracks).
+// Real CME futures (ES1! etc.) need paid data and show "available only on TradingView".
 const TV_FUTURES=[
-  {s:'CME_MINI:ES1!',l:'ES · S&P 500'},
-  {s:'CME_MINI:NQ1!',l:'NQ · Nasdaq 100'},
-  {s:'CBOT_MINI:YM1!',l:'YM · Dow'},
-  {s:'CME_MINI:RTY1!',l:'RTY · Russell 2000'},
-  {s:'NYMEX:CL1!',l:'CL · Crude Oil'},
-  {s:'COMEX:GC1!',l:'GC · Gold'},
-  {s:'COMEX:SI1!',l:'SI · Silver'},
-  {s:'CBOT:ZB1!',l:'ZB · 30Y T-Bond'},
-  {s:'CME:6E1!',l:'6E · Euro FX'},
-  {s:'CME:BTC1!',l:'BTC · Bitcoin'},
+  {s:'FOREXCOM:SPXUSD',l:'S&P 500 (ES)'},
+  {s:'FOREXCOM:NSXUSD',l:'Nasdaq 100 (NQ)'},
+  {s:'FOREXCOM:DJI',l:'Dow Jones (YM)'},
+  {s:'AMEX:IWM',l:'Russell 2000 (RTY)'},
+  {s:'TVC:USOIL',l:'Crude Oil (CL)'},
+  {s:'TVC:GOLD',l:'Gold (GC)'},
+  {s:'TVC:SILVER',l:'Silver (SI)'},
+  {s:'TVC:US10Y',l:'US 10Y Yield'},
+  {s:'FX:EURUSD',l:'EUR / USD'},
+  {s:'BITSTAMP:BTCUSD',l:'Bitcoin'},
 ];
-let _chartSym='CME_MINI:ES1!';
+let _chartSym='FOREXCOM:SPXUSD';
 function renderCharts(){
   const el=document.getElementById('chartsBody');if(!el)return;
   if(!el.dataset.built){
@@ -5080,16 +5086,16 @@ function chartLookup(){const i=document.getElementById('chSearch');const v=(i&&i
 const SPLIT_MODS=[['chart','Chart'],['signal','Live signal'],['grid','Market grid'],['sessions','Session clock'],['notes','Notepad']];
 let _splitN=2, _splitLoaded=false, _splitTimer=null, _splitNotes=['','','',''];
 let _splitPanes=[
-  {mod:'chart',sym:'CME_MINI:ES1!',sig:'ES=F'},
-  {mod:'chart',sym:'CME_MINI:NQ1!',sig:'NQ=F'},
-  {mod:'signal',sym:'CBOT_MINI:YM1!',sig:'YM=F'},
-  {mod:'sessions',sym:'COMEX:GC1!',sig:'GC=F'},
+  {mod:'chart',sym:'FOREXCOM:SPXUSD',sig:'ES=F'},
+  {mod:'chart',sym:'FOREXCOM:NSXUSD',sig:'NQ=F'},
+  {mod:'signal',sym:'TVC:GOLD',sig:'YM=F'},
+  {mod:'sessions',sym:'TVC:USOIL',sig:'GC=F'},
 ];
 function loadSplit(){
   if(_splitLoaded)return;_splitLoaded=true;
-  try{const s=JSON.parse(localStorage.getItem('tlpro_split_v1'));if(s&&Array.isArray(s.panes)&&s.panes.length===4){_splitN=s.n||2;_splitPanes=s.panes;_splitNotes=s.notes||_splitNotes;}}catch(e){}
+  try{const s=JSON.parse(localStorage.getItem('tlpro_split_v2'));if(s&&Array.isArray(s.panes)&&s.panes.length===4){_splitN=s.n||2;_splitPanes=s.panes;_splitNotes=s.notes||_splitNotes;}}catch(e){}
 }
-function saveSplit(){try{localStorage.setItem('tlpro_split_v1',JSON.stringify({n:_splitN,panes:_splitPanes,notes:_splitNotes}));}catch(e){}}
+function saveSplit(){try{localStorage.setItem('tlpro_split_v2',JSON.stringify({n:_splitN,panes:_splitPanes,notes:_splitNotes}));}catch(e){}}
 function setSplitLayout(n){_splitN=n;saveSplit();renderSplit();}
 function renderSplit(){
   loadSplit();
@@ -7076,7 +7082,7 @@ if(lxLanding){
   const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
   const cv=document.getElementById('fxCanvas'); if(!cv)return;
   const ctx=cv.getContext('2d'); let W=0,H=0,dpr=1;
-  let parts=[],blobs=[],prints=[],mx=0,my=0,tmx=0,tmy=0,waveT=0,t0=performance.now(),raf=0;
+  let parts=[],blobs=[],cands=[],mx=0,my=0,tmx=0,tmy=0,waveT=0,t0=performance.now(),raf=0;
   // flowing "market" wave ribbons (replace the old perspective grid) — base is a
   // fraction of viewport height, amp/wl in px, sp = scroll speed, par = parallax.
   const waves=[
@@ -7116,6 +7122,11 @@ if(lxLanding){
       g.addColorStop(0,`rgba(${AC},${b.a})`); g.addColorStop(1,`rgba(${AC},0)`);
       ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     }
+    // 1b — soft light that trails the cursor
+    const lx=(mx+.5)*W, ly=(my+.5)*H, lr=Math.max(W,H)*.26;
+    const lg=ctx.createRadialGradient(lx,ly,0,lx,ly,lr);
+    lg.addColorStop(0,`rgba(${ACL},.06)`); lg.addColorStop(1,`rgba(${ACL},0)`);
+    ctx.fillStyle=lg; ctx.fillRect(0,0,W,H);
     // 2 — flowing market wave ribbons (layered translucent "price" curves)
     waveT+=dt;
     for(const wv of waves){
@@ -7128,7 +7139,8 @@ if(lxLanding){
       ctx.fillStyle=g;ctx.fill();
       ctx.beginPath();ctx.moveTo(0,yAt(0));
       for(let x=12;x<=W;x+=12)ctx.lineTo(x,yAt(x));
-      ctx.strokeStyle=`rgba(${ACL},${wv.a*1.5})`;ctx.lineWidth=wv.th;ctx.stroke();
+      ctx.save();ctx.shadowColor=`rgba(${ACL},.6)`;ctx.shadowBlur=14;
+      ctx.strokeStyle=`rgba(${ACL},${wv.a*1.7})`;ctx.lineWidth=wv.th;ctx.stroke();ctx.restore();
     }
     // 3 — drifting data constellation (parallax)
     for(const p of parts){p.x+=p.vx*dt*.5+mx*.16*p.d;p.y+=p.vy*dt*.5+my*.16*p.d;if(p.x<0)p.x+=W;if(p.x>W)p.x-=W;if(p.y<0)p.y+=H;if(p.y>H)p.y-=H;}
@@ -7138,12 +7150,13 @@ if(lxLanding){
         if(d2<15000){ctx.strokeStyle=`rgba(${ACL},${(1-d2/15000)*.2})`;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
       ctx.fillStyle=`rgba(${DOT},${.3+a.d*.32})`;ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,7);ctx.fill();
     }
-    // 4 — occasional "trade prints"
-    if(Math.random()<.022&&prints.length<9)prints.push({x:Math.random()*W,y:H*.18+Math.random()*H*.5,life:0,up:Math.random()<.5});
-    for(let i=prints.length-1;i>=0;i--){const pr=prints[i];pr.life+=dt;const k=pr.life/1500;if(k>=1){prints.splice(i,1);continue;}
-      const al=Math.sin(k*Math.PI)*.55,col=pr.up?'38,194,129':'240,68,90',yy=pr.y-k*18;
-      ctx.fillStyle=`rgba(${col},${al})`;ctx.beginPath();ctx.arc(pr.x,yy,2,0,7);ctx.fill();
-      ctx.font='9px ui-monospace,monospace';ctx.fillStyle=`rgba(${col},${al*.85})`;ctx.fillText(pr.up?'▲':'▼',pr.x+5,yy+3);
+    // 4 — drifting candlesticks (subtle "market texture" floating upward)
+    if(Math.random()<.016&&cands.length<11)cands.push({x:Math.random()*W,y:H*.2+Math.random()*H*.6,life:0,ttl:4200+Math.random()*3000,up:Math.random()<.5,bh:9+Math.random()*18,wh:5+Math.random()*9,w:4+Math.random()*3,vy:-(.004+Math.random()*.006)});
+    for(let i=cands.length-1;i>=0;i--){const c=cands[i];c.life+=dt;c.y+=c.vy*dt;const k=c.life/c.ttl;if(k>=1){cands.splice(i,1);continue;}
+      const al=Math.sin(k*Math.PI)*.5,col=c.up?'38,194,129':'240,68,90';
+      ctx.strokeStyle=`rgba(${col},${al})`;ctx.fillStyle=`rgba(${col},${al})`;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(c.x,c.y-c.bh/2-c.wh);ctx.lineTo(c.x,c.y+c.bh/2+c.wh);ctx.stroke();
+      ctx.fillRect(c.x-c.w/2,c.y-c.bh/2,c.w,c.bh);
     }
   }
   function frame(t){
