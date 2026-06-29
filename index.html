@@ -1029,6 +1029,57 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .pb-rule .pr-b{font-size:14px;font-weight:800;margin-bottom:3px}
 .pb-rule .pr-d{font-size:13px;color:var(--ink2);line-height:1.6}
 @media(max-width:560px){.calc-form{grid-template-columns:1fr}}
+.pb-phases{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.pb-phase{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);border:1px solid var(--line);border-radius:20px;padding:5px 11px}
+.pb-phase .pp-n{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#06140d;flex-shrink:0}
+/* Market Matrix */
+.mx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px}
+.mx-card{border:1px solid var(--line);border-left-width:4px;border-radius:14px;padding:14px 16px;background:var(--s1);cursor:pointer;transition:transform .14s,border-color .14s}
+.mx-card:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
+.mx-card:focus-visible{outline:2px solid rgba(var(--ac-rgb),.7);outline-offset:2px}
+.mx-card.ok,.mx-card.ok2{border-left-color:var(--gt)}
+.mx-card.wait{border-left-color:var(--at)}
+.mx-card.no{border-left-color:var(--rt)}
+.mx-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:9px}
+.mx-sym{font-size:18px;font-weight:900;letter-spacing:-.02em}
+.mx-name{font-size:11px;color:var(--mu)}
+.mx-sig{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:20px;border:1px solid var(--line);color:var(--ink3);white-space:nowrap}
+.mx-sig.ok,.mx-sig.ok2{color:var(--gt);border-color:rgba(34,197,94,.5)}
+.mx-sig.wait{color:var(--at);border-color:rgba(255,201,77,.5)}
+.mx-sig.no{color:var(--rt);border-color:rgba(240,68,90,.5)}
+.mx-px{font-family:var(--mono);font-size:16px;font-weight:800}
+.mx-spark{margin:8px 0 10px}
+.mx-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px}
+.mx-stats>div{display:flex;flex-direction:column;gap:2px}
+.mx-stats span{color:var(--mu)}
+.mx-stats b{font-family:var(--mono);font-size:12.5px}
+.mx-stats b.g{color:var(--gt)}.mx-stats b.r{color:var(--rt)}
+/* Charts (TradingView lookup) */
+.ch-bar{display:flex;gap:10px;margin-bottom:12px}
+.ch-search{flex:1;background:var(--s2);border:1px solid var(--line);border-radius:10px;padding:11px 14px;color:var(--tx);font-family:var(--mono);font-size:14px;outline:none}
+.ch-search:focus{border-color:rgba(var(--ac-rgb),.7)}
+.ch-chips{display:flex;gap:8px;flex-wrap:wrap}
+.ch-chip{border:1px solid var(--line);background:rgba(255,255,255,.015);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .14s}
+.ch-chip:hover{border-color:rgba(var(--ac-rgb),.5);color:var(--tx)}
+.ch-chip.on{border-color:rgba(var(--ac-rgb),.8);background:rgba(var(--ac-rgb),.12);color:var(--act)}
+/* Split View */
+.split-layouts{display:flex;gap:6px}
+.sl-btn{border:1px solid var(--line);background:rgba(255,255,255,.015);border-radius:9px;padding:7px 12px;font-size:13px;color:var(--ink2);cursor:pointer;letter-spacing:1px}
+.sl-btn:hover{border-color:rgba(var(--ac-rgb),.5)}
+.sl-btn.on{border-color:rgba(var(--ac-rgb),.8);background:rgba(var(--ac-rgb),.12);color:var(--act)}
+.split-grid{display:grid;gap:12px}
+.split-grid.n1{grid-template-columns:1fr}
+.split-grid.n2,.split-grid.n4{grid-template-columns:1fr 1fr}
+.sp-pane{border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;background:var(--s1);height:560px}
+.split-grid.n2 .sp-pane{height:520px}
+.split-grid.n4 .sp-pane{height:400px}
+.sp-head{display:flex;gap:8px;padding:9px 10px;border-bottom:1px solid var(--line);background:var(--s2)}
+.sp-sel{background:var(--s3);border:1px solid var(--line);border-radius:8px;color:var(--tx);font-size:12.5px;padding:6px 9px;font-family:inherit;outline:none;cursor:pointer}
+.sp-sel:focus{border-color:rgba(var(--ac-rgb),.7)}
+.sp-sym{flex:1;min-width:0}
+.sp-body{flex:1;min-height:0;position:relative;overflow:auto}
+.sp-sigwrap{padding:14px}
+@media(max-width:760px){.split-grid.n2,.split-grid.n4{grid-template-columns:1fr}}
 /* 0DTE Lab */
 .opt-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .opt-fresh{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
@@ -1687,6 +1738,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="snav-glide" id="snavGlide"></div>
     <div class="appnav-grp">Terminal</div>
     <button class="snav active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES·NQ</span></button>
+    <button class="snav" data-tab="matrix" onclick="mainTab('matrix',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Matrix</span><span class="pill">live</span></button>
+    <div class="appnav-grp">Charts</div>
+    <button class="snav" data-tab="charts" onclick="mainTab('charts',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg><span class="lbl">Charts</span></button>
+    <button class="snav" data-tab="split" onclick="mainTab('split',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></svg><span class="lbl">Split View</span></button>
     <div class="appnav-grp">Toolkit</div>
     <button class="snav" data-tab="playbook" onclick="mainTab('playbook',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg><span class="lbl">Playbook</span></button>
     <button class="snav" data-tab="calc" onclick="mainTab('calc',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15v2"/></svg><span class="lbl">Risk Calc</span></button>
@@ -1736,6 +1791,45 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <button class="dp-fu" onclick="renderFutures(true)" id="futRefresh">↻ Refresh</button>
       </div>
       <div id="futBody"><div class="card"><div class="loading-label">Loading ES futures…</div></div></div>
+    </div>
+
+    <!-- MARKET MATRIX — live command center across every tracked future -->
+    <div class="tab-pane" id="tab-matrix">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Market Matrix</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Every tracked future at a glance — live price, day move, trend health, and the system's read on each.</div>
+        </div>
+        <button class="dp-fu" onclick="renderMatrix(true)" id="mxRefresh">↻ Refresh</button>
+      </div>
+      <div id="matrixBody"><div class="card"><div class="loading-label">Loading markets…</div></div></div>
+    </div>
+
+    <!-- CHARTS — TradingView lookup for any futures index / symbol -->
+    <div class="tab-pane" id="tab-charts">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Charts</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Professional TradingView charts for any futures index — drawing tools, indicators, and live data.</div>
+        </div>
+      </div>
+      <div id="chartsBody"></div>
+    </div>
+
+    <!-- SPLIT VIEW — side-by-side workspace, each pane independently configured -->
+    <div class="tab-pane" id="tab-split">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Split View</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Watch several markets at once — pick a layout, then set each pane to a chart or a live signal.</div>
+        </div>
+        <div class="split-layouts">
+          <button class="sl-btn" data-n="1" onclick="setSplitLayout(1)">▢</button>
+          <button class="sl-btn" data-n="2" onclick="setSplitLayout(2)">▢▢</button>
+          <button class="sl-btn" data-n="4" onclick="setSplitLayout(4)">▦</button>
+        </div>
+      </div>
+      <div id="splitGrid" class="split-grid"></div>
     </div>
 
     <!-- PLAYBOOK — the validated system's rules + a live pre-trade checklist -->
@@ -1871,6 +1965,9 @@ function mainTab(name,btn){
   if(btn&&btn.classList)btn.classList.add('active');
   const sb=document.querySelector('.snav[data-tab="'+name+'"]'); if(sb)sb.classList.add('active');
   if(name==='futures')renderFutures();
+  if(name==='matrix')renderMatrix();
+  if(name==='charts')renderCharts();
+  if(name==='split')renderSplit();
   if(name==='playbook')renderPlaybookTab();
   if(name==='calc')renderCalc();
   if(name==='sessions')renderSessions();
@@ -4697,6 +4794,17 @@ async function renderPlaybookTab(){
     checklist=`<div class="card"><div class="bt-empty" style="padding:16px">Couldn't load live ES right now — the rules below still apply.</div></div>`;
   }
   el.innerHTML=checklist
+    +`<div class="card"><div class="card-title">How the setup works</div>${playbookDiagramSVG()}
+      <div class="pb-phases">
+        <span class="pb-phase"><span class="pp-n" style="background:var(--gt)">1</span>Uptrend — price above the 50-day</span>
+        <span class="pb-phase"><span class="pp-n" style="background:var(--at)">2</span>Pullback — dips to the 10-day (buy zone)</span>
+        <span class="pb-phase"><span class="pp-n" style="background:var(--gr)">3</span>Entry — first green day off the dip</span>
+        <span class="pb-phase"><span class="pp-n" style="background:var(--act)">4</span>Ride — let the trend run, no fixed target</span>
+        <span class="pb-phase"><span class="pp-n" style="background:var(--rd)">5</span>Exit — daily close back below the 50-day</span>
+      </div>
+      <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:10px;font-family:var(--mono)"><span><span style="color:var(--ink)">━</span> price</span><span><span style="color:var(--at)">━</span> 10-day avg</span><span><span style="color:var(--act)">━</span> 50-day avg</span></div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:7px">Illustrative schematic of the rules — not live price.</div>
+    </div>`
     +`<div class="card"><div class="card-title">The rules</div>${PB_RULES.map((r,i)=>`<div class="pb-rule"><div class="pb-num">${i+1}</div><div><div class="pr-b">${r.t}</div><div class="pr-d">${r.d}</div></div></div>`).join('')}</div>`
     +`<div class="card"><div class="card-title">Why it's only these rules</div><div class="analysis-text">Every other variation we tried — shorts, breakouts, tighter stops, fixed targets — failed at least one of the out-of-sample, generalization, or robustness tests in the backtester. What survived was deliberately simple: buy pullbacks in uptrends, let winners run, cut on a trend break. Simplicity is the point — fewer knobs means less curve-fitting and a better chance the edge holds live. Paper-trade it first.</div></div>`;
 }
@@ -4807,6 +4915,189 @@ function paintSessions(){
     <div class="card"><div class="card-title">How to use this</div><div class="analysis-text">CME equity-index futures (ES, NQ) trade nearly 24 hours on Globex with a short daily maintenance halt, so you can almost always get a fill. But spreads tighten and the real moves happen when the major financial centers are open — especially the <b>London–New York overlap</b>. This system is a <b>daily</b> swing system, so session timing won't change a signal; use the clock to decide <i>when</i> to place an order, not <i>whether</i> to take it. Windows are the conventional 08:00–17:00 local sessions (daylight-saving handled automatically).</div></div>`;
 }
 
+// ── MARKET MATRIX — a live command-center grid across every tracked future ──
+// (tv = the TradingView continuous-front-month symbol, for the Charts drill-in)
+const MATRIX_MARKETS=[
+  {sym:'ES=F',label:'ES',name:'S&P 500',tv:'CME_MINI:ES1!'},
+  {sym:'NQ=F',label:'NQ',name:'Nasdaq 100',tv:'CME_MINI:NQ1!'},
+  {sym:'YM=F',label:'YM',name:'Dow Jones',tv:'CBOT_MINI:YM1!'},
+  {sym:'RTY=F',label:'RTY',name:'Russell 2000',tv:'CME_MINI:RTY1!'},
+  {sym:'CL=F',label:'CL',name:'Crude Oil',tv:'NYMEX:CL1!'},
+  {sym:'GC=F',label:'GC',name:'Gold',tv:'COMEX:GC1!'},
+];
+let _mxCache={};
+async function renderMatrix(force){
+  const el=document.getElementById('matrixBody');if(!el)return;
+  const btn=document.getElementById('mxRefresh');if(btn&&force){btn.disabled=true;btn.style.opacity='.5';}
+  if(force)_mxCache={};
+  if(!Object.keys(_mxCache).length){
+    el.innerHTML=`<div class="card"><div class="loading-label">Loading markets…</div></div>`;
+    window.__userFetch=Date.now();
+    await Promise.all(MATRIX_MARKETS.map(async m=>{try{_mxCache[m.sym]=await fetchQuote(m.sym);}catch(e){_mxCache[m.sym]=null;}}));
+    window.__userFetch=0;
+  }
+  paintMatrix();
+  if(btn){btn.disabled=false;btn.style.opacity='';}
+}
+function paintMatrix(){
+  const el=document.getElementById('matrixBody');if(!el)return;
+  const rows=MATRIX_MARKETS.map(m=>{const q=_mxCache[m.sym];return {m,q,s:q?futSignal(q):null};});
+  const ok=rows.filter(r=>r.s).length, ups=rows.filter(r=>r.s&&r.s.uptrend).length, buys=rows.filter(r=>r.s&&r.s.buySetup).length;
+  const breadth=`<div class="bt-scoreboard" style="margin-bottom:14px">
+    <div class="bt-score"><div class="bt-score-val ${ups?'g':''}">${ups}/${ok||0}</div><div class="bt-score-lbl">In uptrend</div></div>
+    <div class="bt-score"><div class="bt-score-val ${buys?'g':''}">${buys}</div><div class="bt-score-lbl">Buy setups now</div></div>
+    <div class="bt-score"><div class="bt-score-val">${ok}/${MATRIX_MARKETS.length}</div><div class="bt-score-lbl">Markets live</div></div>
+  </div>`;
+  const cards=rows.map(r=>{
+    if(!r.s)return `<div class="mx-card"><div class="mx-top"><div class="mx-sym">${r.m.label}</div></div><div class="bt-empty" style="padding:10px;font-size:12px">No data — Refresh.</div></div>`;
+    const s=r.s,q=r.q,up=q.change>=0;
+    const vs50=(s.price-s.sma50)/s.sma50*100, vs10=(s.price-s.sma10)/s.sma10*100;
+    const mret=s.closes.length>21?(s.price/s.closes[s.closes.length-22]-1)*100:0;
+    const px=s.price.toLocaleString(undefined,{maximumFractionDigits:2});
+    return `<div class="mx-card ${s.cls}" role="button" tabindex="0" onclick="matrixOpen('${r.m.sym}')" onkeydown="if(event.key==='Enter')matrixOpen('${r.m.sym}')">
+      <div class="mx-top"><div><div class="mx-sym">${r.m.label}</div><div class="mx-name">${r.m.name}</div></div><div class="mx-sig ${s.cls}">${s.short}</div></div>
+      <div class="mx-px">$${px} <span class="chg-badge ${up?'up':'down'}">${up?'+':''}${q.pct.toFixed(2)}%</span></div>
+      <div class="mx-spark">${futSparkSVG(s.closes)}</div>
+      <div class="mx-stats">
+        <div><span>vs 50-day</span><b class="${vs50>=0?'g':'r'}">${vs50>=0?'+':''}${vs50.toFixed(1)}%</b></div>
+        <div><span>vs 10-day</span><b class="${vs10>=0?'g':'r'}">${vs10>=0?'+':''}${vs10.toFixed(1)}%</b></div>
+        <div><span>1-month</span><b class="${mret>=0?'g':'r'}">${mret>=0?'+':''}${mret.toFixed(1)}%</b></div>
+      </div></div>`;
+  }).join('');
+  el.innerHTML=breadth+`<div class="mx-grid">${cards}</div>`
+    +`<div style="font-size:11px;color:var(--ink3);margin-top:12px">Click any market to open it on a full TradingView chart. Signal = the same validated trend-pullback read used on the Futures tab.</div>`;
+}
+function matrixOpen(sym){const m=MATRIX_MARKETS.find(x=>x.sym===sym);if(m)_chartSym=m.tv;mainTab('charts',document.querySelector('.snav[data-tab="charts"]'));}
+// Tiny trend sparkline (last ~60 closes); green if higher than the window start.
+function futSparkSVG(closes){
+  const c=(closes||[]).slice(-60);if(c.length<2)return '';
+  const W=240,H=44,min=Math.min(...c),max=Math.max(...c),rng=Math.max(1e-6,max-min);
+  const x=i=>i/(c.length-1)*W, y=v=>H-2-((v-min)/rng)*(H-4);
+  let d='';c.forEach((v,i)=>d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ');
+  const up=c[c.length-1]>=c[0];
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:44px"><path d="${d}" fill="none" stroke="${up?'var(--gr)':'var(--rd)'}" stroke-width="1.6"/></svg>`;
+}
+
+// ── CHARTS — TradingView lookup for any futures index / symbol ──
+const TV_FUTURES=[
+  {s:'CME_MINI:ES1!',l:'ES · S&P 500'},
+  {s:'CME_MINI:NQ1!',l:'NQ · Nasdaq 100'},
+  {s:'CBOT_MINI:YM1!',l:'YM · Dow'},
+  {s:'CME_MINI:RTY1!',l:'RTY · Russell 2000'},
+  {s:'NYMEX:CL1!',l:'CL · Crude Oil'},
+  {s:'COMEX:GC1!',l:'GC · Gold'},
+  {s:'COMEX:SI1!',l:'SI · Silver'},
+  {s:'CBOT:ZB1!',l:'ZB · 30Y T-Bond'},
+  {s:'CME:6E1!',l:'6E · Euro FX'},
+  {s:'CME:BTC1!',l:'BTC · Bitcoin'},
+];
+let _chartSym='CME_MINI:ES1!';
+function renderCharts(){
+  const el=document.getElementById('chartsBody');if(!el)return;
+  if(!el.dataset.built){
+    el.innerHTML=`
+      <div class="card" style="margin-bottom:14px">
+        <div class="ch-bar"><input id="chSearch" class="ch-search" placeholder="Search any symbol — e.g. ES1!, CL1!, BTCUSD, AAPL…" onkeydown="if(event.key==='Enter')chartLookup()"><button class="dp-fu" onclick="chartLookup()">Load</button></div>
+        <div class="ch-chips">${TV_FUTURES.map(f=>`<button class="ch-chip" data-s="${f.s}" onclick="chartPick('${f.s}')">${f.l}</button>`).join('')}</div>
+      </div>
+      <div class="card" style="padding:8px"><div id="chartsTV" style="height:620px"></div></div>`;
+    el.dataset.built='1';
+  }
+  chartPick(_chartSym);
+}
+function chartPick(sym){_chartSym=sym;document.querySelectorAll('.ch-chip').forEach(c=>c.classList.toggle('on',c.dataset.s===sym));mountTVInto('chartsTV',sym,0,{allowChange:true,sideToolbar:true,details:true,dateRanges:true});}
+function chartLookup(){const i=document.getElementById('chSearch');const v=(i&&i.value||'').trim();if(v)chartPick(v.toUpperCase());}
+
+// ── SPLIT VIEW — side-by-side workspace; each pane = a chart or a live signal ──
+let _splitN=2;
+let _splitPanes=[
+  {mod:'chart',sym:'CME_MINI:ES1!',sig:'ES=F'},
+  {mod:'chart',sym:'CME_MINI:NQ1!',sig:'NQ=F'},
+  {mod:'signal',sym:'CBOT_MINI:YM1!',sig:'YM=F'},
+  {mod:'chart',sym:'COMEX:GC1!',sig:'GC=F'},
+];
+function setSplitLayout(n){_splitN=n;renderSplit();}
+function renderSplit(){
+  const grid=document.getElementById('splitGrid');if(!grid)return;
+  grid.className='split-grid n'+_splitN;
+  document.querySelectorAll('.sl-btn').forEach(b=>b.classList.toggle('on',+b.dataset.n===_splitN));
+  grid.innerHTML=Array.from({length:_splitN},(_,i)=>splitPaneShell(i)).join('');
+  for(let i=0;i<_splitN;i++)splitRenderPane(i);
+}
+function splitPaneShell(i){
+  const p=_splitPanes[i];
+  const symOpts=p.mod==='chart'
+    ? TV_FUTURES.map(f=>`<option value="${f.s}"${f.s===p.sym?' selected':''}>${f.l}</option>`).join('')
+    : MATRIX_MARKETS.map(m=>`<option value="${m.sym}"${m.sym===p.sig?' selected':''}>${m.label} · ${m.name}</option>`).join('');
+  return `<div class="sp-pane">
+    <div class="sp-head">
+      <select class="sp-sel" onchange="splitSetMod(${i},this.value)"><option value="chart"${p.mod==='chart'?' selected':''}>Chart</option><option value="signal"${p.mod==='signal'?' selected':''}>Live signal</option></select>
+      <select class="sp-sel sp-sym" onchange="splitSetSym(${i},this.value)">${symOpts}</select>
+    </div>
+    <div class="sp-body" id="sp-body-${i}"></div>
+  </div>`;
+}
+function splitSetMod(i,mod){_splitPanes[i].mod=mod;renderSplit();}
+function splitSetSym(i,val){const p=_splitPanes[i];if(p.mod==='chart')p.sym=val;else p.sig=val;splitRenderPane(i);}
+async function splitRenderPane(i){
+  const p=_splitPanes[i], body=document.getElementById('sp-body-'+i);if(!body)return;
+  if(p.mod==='chart'){mountTVInto('sp-body-'+i,p.sym,0,{allowChange:true});return;}
+  body.innerHTML=`<div class="loading-label" style="padding:16px">Loading ${p.sig}…</div>`;
+  let q=_futCache[p.sig]||_mxCache[p.sig];
+  if(!q){try{window.__userFetch=Date.now();q=await fetchQuote(p.sig);_mxCache[p.sig]=q;window.__userFetch=0;}catch(e){}}
+  const s=q?futSignal(q):null;
+  if(!s){body.innerHTML=`<div class="bt-empty" style="padding:16px">Couldn't load ${p.sig} right now.</div>`;return;}
+  const up=q.change>=0, money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
+  const mk=MATRIX_MARKETS.find(m=>m.sym===p.sig)||{label:p.sig,name:''};
+  body.innerHTML=`<div class="sp-sigwrap">
+    <div class="fut-sig ${s.cls}" style="margin:0">
+      <div class="fs-px"><div class="fs-price">$${money(s.price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
+      <div class="fs-head" style="font-size:17px">${mk.label} · ${s.head}</div>
+      <div class="fs-sub">${s.sub}</div>
+      <div class="fs-pills">
+        <span class="fs-pill ${s.uptrend?'on':'off'}">${s.uptrend?'✓':'✕'} Uptrend</span>
+        <span class="fs-pill ${s.pulledBack?'on':'off'}">${s.pulledBack?'✓':'•'} Pulled back</span>
+        <span class="fs-pill ${s.turnUp?'on':'off'}">${s.turnUp?'✓':'•'} Turning up</span>
+      </div>
+    </div>
+    <div style="margin-top:10px">${s.ohlc?futCandleSVG(s.ohlc,s.s10,s.s50):futSparkSVG(s.closes)}</div>
+  </div>`;
+}
+
+// ── PLAYBOOK setup diagram — an illustrative schematic of the rules (not live price) ──
+function playbookDiagramSVG(){
+  const v=[];
+  for(let i=0;i<20;i++)v.push(100+i*1.7+Math.sin(i/2)*1.1);        // 1 uptrend
+  for(let i=0;i<10;i++)v.push(v[v.length-1]-1.7+(i>6?0.7:0));      // 2 pullback to the fast MA
+  for(let i=0;i<18;i++)v.push(v[v.length-1]+1.95+Math.sin(i/2)*0.9); // 4 ride
+  for(let i=0;i<16;i++)v.push(v[v.length-1]-2.05+Math.sin(i/3)*0.7); // 5 breakdown
+  const mavg=(a,n,i)=>{let s=0,c=0;for(let j=Math.max(0,i-n+1);j<=i;j++){s+=a[j];c++;}return s/c;};
+  const s10=v.map((_,i)=>mavg(v,6,i)), s50=v.map((_,i)=>mavg(v,22,i));
+  const N=v.length,W=920,H=360,padL=16,padR=16,padT=34,padB=46;
+  const all=v.concat(s10,s50),min=Math.min(...all),max=Math.max(...all),rng=max-min;
+  const x=i=>padL+i/(N-1)*(W-padL-padR), y=val=>padT+(1-(val-min)/rng)*(H-padT-padB);
+  const path=a=>{let d='';a.forEach((val,i)=>d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(val).toFixed(1)+' ');return d;};
+  let ei=20;for(let i=20;i<30;i++)if(v[i]<v[ei])ei=i;            // entry = pullback low
+  let peak=30;for(let i=30;i<48;i++)if(v[i]>v[peak])peak=i;      // ride peak
+  let xi=N-1;for(let i=peak;i<N;i++){if(v[i]<s50[i]){xi=i;break;}}  // exit = close below slow MA
+  const zx1=x(18),zx2=x(30);
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <rect x="${zx1.toFixed(1)}" y="${padT}" width="${(zx2-zx1).toFixed(1)}" height="${(H-padT-padB).toFixed(1)}" fill="rgba(34,197,94,.08)"/>
+    <text x="${((zx1+zx2)/2).toFixed(1)}" y="${(padT-10).toFixed(1)}" fill="var(--gt)" font-size="11" font-weight="800" text-anchor="middle">BUY ZONE</text>
+    <path d="${path(s50)}" fill="none" stroke="rgba(var(--ac-rgb),.9)" stroke-width="2.4"/>
+    <path d="${path(s10)}" fill="none" stroke="var(--at)" stroke-width="1.8"/>
+    <path d="${path(v)}" fill="none" stroke="var(--ink)" stroke-width="2.2" stroke-linejoin="round"/>
+    <line x1="${x(ei).toFixed(1)}" y1="${padT}" x2="${x(ei).toFixed(1)}" y2="${(H-padB).toFixed(1)}" stroke="var(--gr)" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>
+    <polygon points="${x(ei).toFixed(1)},${(y(v[ei])+15).toFixed(1)} ${(x(ei)-6).toFixed(1)},${(y(v[ei])+27).toFixed(1)} ${(x(ei)+6).toFixed(1)},${(y(v[ei])+27).toFixed(1)}" fill="var(--gr)"/>
+    <text x="${x(ei).toFixed(1)}" y="${(y(v[ei])+41).toFixed(1)}" fill="var(--gt)" font-size="11.5" font-weight="800" text-anchor="middle">ENTRY</text>
+    <line x1="${x(xi).toFixed(1)}" y1="${padT}" x2="${x(xi).toFixed(1)}" y2="${(H-padB).toFixed(1)}" stroke="var(--rd)" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>
+    <text x="${x(xi).toFixed(1)}" y="${(y(v[xi])-10).toFixed(1)}" fill="var(--rt)" font-size="14" font-weight="900" text-anchor="middle">✕</text>
+    <text x="${x(xi).toFixed(1)}" y="${(y(v[xi])-26).toFixed(1)}" fill="var(--rt)" font-size="11.5" font-weight="800" text-anchor="middle">EXIT</text>
+    <circle cx="${x(ei).toFixed(1)}" cy="${y(v[ei]).toFixed(1)}" r="4" fill="var(--gr)"/>
+    <circle cx="${x(xi).toFixed(1)}" cy="${y(v[xi]).toFixed(1)}" r="4" fill="var(--rd)"/>
+  </svg>`;
+}
+
 // Real candlesticks (OHLC) with the 10/50-day averages overlaid. Replaces the
 // old price line — green = close≥open, red = close<open (semantic up/down only).
 function futCandleSVG(ohlc,s10,s50){
@@ -4867,22 +5158,24 @@ function tvFallback(id,ticker,msg){
 }
 // Mount TradingView with retries — the free widget often fails silently under load
 // (esp. during trading hours), so we re-mount if no iframe appears.
-function mountTVInto(id,ticker,tries){
+function mountTVInto(id,ticker,tries,opts){
   const el=dashEl(id);if(!el)return;
-  tries=tries||0;
+  tries=tries||0; opts=opts||{};
   if(typeof TradingView==='undefined'||!TradingView.widget){
-    if(tries<10){setTimeout(()=>mountTVInto(id,ticker,tries+1),600);return;}
+    if(tries<10){setTimeout(()=>mountTVInto(id,ticker,tries+1,opts),600);return;}
     el.innerHTML=tvFallback(id,ticker,'TradingView is taking a while to load');return;
   }
   el.innerHTML='';
   try{
-    new TradingView.widget({autosize:true,symbol:ticker,interval:'D',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',toolbar_bg:'#0c0c0e',enable_publishing:false,allow_symbol_change:false,hide_side_toolbar:true,hide_legend:false,withdateranges:false,details:false,container_id:id});
+    new TradingView.widget({autosize:true,symbol:ticker,interval:opts.interval||'D',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',toolbar_bg:'#0c0c0e',enable_publishing:false,
+      allow_symbol_change:!!opts.allowChange,hide_side_toolbar:!opts.sideToolbar,hide_legend:false,withdateranges:!!opts.dateRanges,details:!!opts.details,
+      studies:opts.studies||[],container_id:id});
     // verify it actually rendered; retry a few times, then offer a manual reload
     setTimeout(()=>{
-      if(!el.querySelector('iframe')){ if(tries<4){mountTVInto(id,ticker,tries+1);} else {el.innerHTML=tvFallback(id,ticker,'Chart didn\'t load');} }
+      if(!el.querySelector('iframe')){ if(tries<4){mountTVInto(id,ticker,tries+1,opts);} else {el.innerHTML=tvFallback(id,ticker,'Chart didn\'t load');} }
     },5000);
   }catch(e){
-    if(tries<4){setTimeout(()=>mountTVInto(id,ticker,tries+1),800);} else {el.innerHTML=tvFallback(id,ticker,'Chart unavailable');}
+    if(tries<4){setTimeout(()=>mountTVInto(id,ticker,tries+1,opts),800);} else {el.innerHTML=tvFallback(id,ticker,'Chart unavailable');}
   }
 }
 // The free widget can silently drop its live data socket and appear "paused".

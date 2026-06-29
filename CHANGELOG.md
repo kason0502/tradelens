@@ -3,6 +3,14 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 33) — Playbook setup diagram + Matrix / Charts / Split View tabs
+- **Playbook now visualizes the strategy:** new `playbookDiagramSVG()` draws an annotated schematic of the trend-pullback setup — rising 10/50-day averages, a shaded **buy zone**, a green **ENTRY** marker at the pullback turn-up, and a red **EXIT ✕** where price closes back below the 50-day — plus a 5-phase legend (uptrend → pullback → entry → ride → exit). Clearly labelled "illustrative, not live price".
+- **Market Matrix tab** (`renderMatrix`/`paintMatrix`, `MATRIX_MARKETS`) — a live command-center grid across ES/NQ/YM/RTY/CL/GC: per-card price, day %, a trend sparkline (`futSparkSVG`), vs-10/50-day and 1-month stats, and the validated signal chip; a breadth header (in-uptrend / buy-setups / markets-live). Click a card → opens it on the Charts tab.
+- **Charts tab** (`renderCharts`/`chartPick`/`chartLookup`, `TV_FUTURES`) — full TradingView charts with **symbol search** + quick chips for the major futures (ES/NQ/YM/RTY/CL/GC/SI/ZB/6E/BTC); drawing tools + side toolbar + date ranges enabled.
+- **Split View tab** (`renderSplit`/`splitRenderPane`, `setSplitLayout`) — a side-by-side workspace with **1 / 2 / 4-pane** layouts; each pane independently switches between a **live TradingView chart** (any symbol) or a **live signal card** (any tracked market) — e.g. ES chart next to NQ chart, or a chart next to its signal.
+- **`mountTVInto` generalized** with an `opts` arg (`allowChange`/`sideToolbar`/`details`/`dateRanges`/`interval`/`studies`), threaded through its retries; existing callers unchanged (defaults preserve old behavior).
+- Nav regrouped: **Terminal** (Futures · Matrix) · **Charts** (Charts · Split View) · **Toolkit** (Playbook · Risk Calc · Sessions) · **Assistant** (AI Chat · Feedback).
+
 ## 2026-06-29 (session 32) — candlestick chart + 3 new futures tools (Playbook · Risk Calc · Sessions)
 - **Price chart is now candlesticks** (was a line): new `futCandleSVG(ohlc,s10,s50)` draws real OHLC daily candles (green close≥open / red close<open) with the 10- & 50-day averages overlaid, price-axis gridlines, and a dashed last-price line. Uses `q.h1y` OHLC bars; falls back to the old `futChartSVG` line if no OHLC. Legend + card title updated.
 - **New "Toolkit" nav group** with three genuinely useful, honest tools (no fake data):

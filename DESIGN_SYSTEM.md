@@ -1,7 +1,9 @@
 # TradeLens Pro — Design System
 
 > Living doc. Update when tokens, components, or visual conventions change.
-> Last updated: 2026-06-29 (session 32)
+> Last updated: 2026-06-29 (session 33)
+
+**Matrix / Charts / Split components (session 33):** `.mx-grid`/`.mx-card` (auto-fill market cards, accent left-border keyed to signal class ok/wait/no, hover-lift, `futSparkSVG` trend line, `.mx-stats` 3-up) → click opens Charts. `.ch-bar`/`.ch-search`/`.ch-chip` (TradingView lookup: search input + selectable symbol chips, `.on` = active). `.split-grid.n1|n2|n4` + `.sp-pane`/`.sp-head`/`.sp-sel`/`.sp-body` (side-by-side panes, fixed heights per layout, `<select>`s use `--s3` fill; collapses to 1 col <760px). `.split-layouts`/`.sl-btn` layout toggle. `.pb-phases`/`.pb-phase` (numbered phase legend under the playbook diagram). All from existing tokens; sparkline/diagram use semantic `--gr`/`--rd` for up/down, accent only for the slow MA / chrome.
 
 **Toolkit tabs (session 32):** new components, all built from existing tokens — `.calc-form`/`.calc-field` (labelled inputs + select, `--s2` fill, accent focus ring) → `.calc-out`/`.co` result tiles; `.spec-tbl` (right-aligned numeric contract-spec table); `.sess-row` (session clock row, `.on` = open → green dot + tinted border); `.pb-check` (live checklist, `.yes`/`.no` → green/red icon chip) + `.pb-rule`/`.pb-num` (numbered rule list). Candlesticks use the semantic `--gr`/`--rd` (up/down only) — not the accent.
 

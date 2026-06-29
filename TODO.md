@@ -1,7 +1,19 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-29 (session 32)
+> Last updated: 2026-06-29 (session 33)
+
+## Done (session 33 — playbook diagram + Matrix/Charts/Split View)
+- [x] **Playbook setup diagram** (`playbookDiagramSVG`) — annotated schematic: uptrend → pullback (buy zone) → entry → ride → exit, with a phase legend.
+- [x] **Market Matrix** tab — live grid (ES/NQ/YM/RTY/CL/GC) w/ sparkline + signal + breadth header; cards open the Charts tab.
+- [x] **Charts** tab — TradingView symbol lookup (search + futures chips), drawing tools enabled.
+- [x] **Split View** tab — 1/2/4-pane workspace; each pane = a live chart or a live signal card.
+
+## Next (new tabs follow-ups)
+- [ ] **Persist Split View / Charts state** to localStorage (layout, per-pane symbols, last chart symbol) so it survives reload.
+- [ ] **Matrix auto-refresh** on an interval while the tab is open (bgIdle-gated), like the other pollers.
+- [ ] **Add CL/GC to the validated edge** in the backtester so the Matrix signal carries the same proven OOS profit factors (currently only ES/NQ/SPY/QQQ are validated).
+- [ ] **Split panes: more module types** (Risk Calc, Sessions) — needs the fixed-ID renderers parameterized to a target element.
 
 ## Done (session 32 — candles + futures toolkit)
 - [x] **Candlestick price chart** (`futCandleSVG`) replaces the line — real OHLC + 10/50-day MAs + price axis.
