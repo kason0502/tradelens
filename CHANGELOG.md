@@ -3,6 +3,14 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 42) — critic round 3 quick wins (trust fixes)
+- **Killed the contradictory profit factor:** the Futures edge scoreboard hard-coded ES PF 1.59 while the Backtester showed 1.99 from the same `results.json`. Now the ES tile (`#futPfReal`) is overwritten live from `results.json` in `futLoadEdge`, and the constant fallback is 1.99 — no more contradiction.
+- **Cleaned `results.json` config:** dropped the stale options/ORB scaffolding (`orb_breakout_calls`, `entry_time`, spread/credit fields, all-zero time-of-day) — `strategy` now reads `futures_trend_pullback` with the real params; added `account.instrument` "MES" + `point_value: 5`.
+- **Stated the contract multiplier:** Backtester now labels P&L/equity/about as **MES micro ($5/point)** (read from config), so +114% on a $10k account isn't misread as ES ($50/pt) sizing.
+- **Win-rate tile contextualized:** 32.2% now renders amber with "low by design — wins are bigger" instead of a bare gray number.
+- **Forming vs confirmed BUY banner:** when the session is live (today's daily bar not closed) the banner is amber "BUY SETUP forming — not final until the close"; only a closed bar shows the confident green "confirmed". Stops intraday whipsaw.
+- Trade-replay stop line now uses the engine's real hard-stop % (−10%, from config) with a dynamic label.
+
 ## 2026-06-29 (session 41) — fix trade-example math + Futures right rail (sentiment gauge)
 - **Fixed the "doesn't add up" candlestick trade example:** the engine sizes ES at ~$5/point (micro, on a $10k account), so a +178-point move = +$889, not the ~$8,900 a $50/pt reading implies. The trade card now shows **Points moved** + the implied **$/point** next to P&L so the math reconciles, and the **−8% stop no longer drags the chart scale** (it's excluded from the y-range and clamped to the edge, labelled "off-chart" when far below) so the candles render full-height.
 - **Futures dashboard → main + right rail** (toward the reference mockup): the signal/chart/plan/metrics sit in the main column; a new rail holds the **AI Market Sentiment gauge** (`futSentimentGauge` — a semicircle gauge + Bullish/Neutral/Bearish split derived from real multi-market breadth, no fabricated %) and the **Strategy Performance** card. Instrument cards + buy banner stay full-width on top.

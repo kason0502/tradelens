@@ -10,6 +10,20 @@
 - [x] **Inline position size** in the Futures plan + persisted account settings (`tlpro_acct`) synced with the Risk Calc.
 - [x] **Market-state + timestamp** on the signal card; **swapped 🟢 emoji** for a `.live-pip` dot.
 
+## Done (session 42 — critic round 3 quick wins)
+- [x] **Profit-factor contradiction fixed** — ES tile derives from results.json live (`futPfReal`); constant fallback = 1.99.
+- [x] **results.json config cleaned** — futures_trend_pullback + MES point_value 5; dropped dead options/ORB fields.
+- [x] **Contract multiplier stated** (MES $5/pt) across the Backtester.
+- [x] **Win-rate tile contextualized** ("low by design").
+- [x] **Forming vs confirmed BUY banner** (amber while the bar's open, green on the close).
+
+## Next (the wedge — needs a backend)
+- [ ] **Server-side alerts (email/push)** — Vercel cron + `futSignal` on closed bars → notify on a fresh BUY SETUP. Subscriber list in Vercel KV (reuse the `api/learn.js` pattern). The one feature that justifies a subscription.
+- [ ] **Live forward track record** — log signal flips server-side since launch; show a live curve next to the backtest.
+- [ ] **Per-symbol real backtests** so each market's PF/n/drawdown is real (removes the remaining hard-coded NQ/SPY/QQQ constants).
+- [ ] **Close-aware `buySetup` boolean** (currently the label/banner handle forming, but the boolean still evaluates intraday).
+- [ ] **Dedupe the sentiment gauge** (ES≈SPY, NQ≈QQQ → really 2 signals) or pull the Matrix's 6 distinct markets.
+
 ## Done (session 41 — trade-math fix + Futures right rail)
 - [x] **Fixed trade example math** — show points + implied $/pt so P&L reconciles; stop excluded from chart scaling (no more squished candles).
 - [x] **Futures main + right rail** with the AI Market Sentiment gauge (real breadth) + Strategy Performance, toward the mockup.

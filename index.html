@@ -999,6 +999,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fut-chip.no .fc-s{color:var(--rt)}
 .fut-alert{display:flex;align-items:center;gap:9px;border:1px solid rgba(34,197,94,.5);background:rgba(34,197,94,.1);color:var(--gt);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700}
 .live-pip{width:9px;height:9px;border-radius:50%;background:var(--gr);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulseDot 1.8s ease-out infinite;flex-shrink:0}
+.fut-alert.forming{border-color:rgba(255,201,77,.5);background:rgba(255,201,77,.1);color:var(--at)}
+.fut-alert.forming .live-pip{background:var(--at)}
 @media(prefers-reduced-motion:reduce){.live-pip{animation:none}}
 .fut-sig .fs-meta{font-size:11px;color:var(--ink3);margin-top:8px;display:flex;align-items:center;gap:6px;font-family:var(--mono)}
 .ms-dot{width:7px;height:7px;border-radius:50%;background:var(--fa);flex-shrink:0}
@@ -1027,7 +1029,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bt-statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .bt-stat{background:var(--s1);padding:14px 16px}
 .bt-stat-v{font-size:23px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em;line-height:1.1}
-.bt-stat-v.g{color:var(--gt)}.bt-stat-v.r{color:var(--rt)}
+.bt-stat-v.g{color:var(--gt)}.bt-stat-v.r{color:var(--rt)}.bt-stat-v.at{color:var(--at)}
 .bt-stat-l{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:5px}
 .bt-stat-s{font-size:10.5px;color:var(--ink3);margin-top:2px}
 .bt-trade-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
@@ -4783,7 +4785,9 @@ const FUT_MARKETS=[
   {sym:'SPY',label:'SPY',name:'S&P 500 ETF'},
   {sym:'QQQ',label:'QQQ',name:'Nasdaq 100 ETF'},
 ];
-const FUT_PF={'ES=F':1.59,'NQ=F':2.73,'SPY':1.41,'QQQ':1.32};   // validated out-of-sample profit factors
+// ES=F is overwritten live from results.json (see futLoadEdge) so it never
+// contradicts the Backtester tab; the rest are prior OOS runs.
+const FUT_PF={'ES=F':1.99,'NQ=F':2.73,'SPY':1.41,'QQQ':1.32};
 let _futSel='ES=F', _futCache={}, _futNotified={};
 function _smaAt(a,n,i){if(i<n-1)return null;let s=0;for(let j=i-n+1;j<=i;j++)s+=a[j];return s/n;}
 function _smaSeries(a,n){return a.map((_,i)=>_smaAt(a,n,i));}
@@ -4885,7 +4889,10 @@ function paintFutures(){
     return `<button class="fut-chip ${s?s.cls:''} ${on?'sel':''}" onclick="selectFutMarket('${m.sym}')">
       <div class="fc-l">${m.label}</div><div class="fc-s">${s?s.short:'—'}</div>
       <div class="fc-p">${s?'$'+s.price.toLocaleString(undefined,{maximumFractionDigits:0}):''}</div></button>`;}).join('')+`</div>`;
-  const alertBanner=buys.length?`<div class="fut-alert"><span class="live-pip"></span> <b>BUY SETUP:</b> ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up. <span style="font-weight:600;opacity:.85">Confirms on today's daily close.</span></div>`:'';
+  const buysForming=buys.some(b=>marketState(b.sym).open);   // session live → today's bar not closed yet
+  const alertBanner=buys.length?(buysForming
+    ?`<div class="fut-alert forming"><span class="live-pip"></span> <b>BUY SETUP forming:</b> ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up. <span style="font-weight:600;opacity:.85">Not final until today's daily close.</span></div>`
+    :`<div class="fut-alert"><span class="live-pip"></span> <b>BUY SETUP confirmed</b> (on the close): ${buys.map(b=>b.label).join(', ')} — uptrend + pullback + turning up.</div>`):'';
   const mkt=FUT_MARKETS.find(m=>m.sym===_futSel), s=sigs[_futSel], q=_futCache[_futSel];
   if(!s){el.innerHTML=scan+alertBanner+`<div class="card"><div class="bt-empty" style="padding:16px">Couldn't load ${mkt.label} — hit Refresh.</div></div>`;return;}
   const vs50=(s.price-s.sma50)/s.sma50*100, vs10=(s.price-s.sma10)/s.sma10*100;
@@ -4920,7 +4927,7 @@ function paintFutures(){
     </div>`:'';
   const edge=`<div class="card"><div class="card-title">Backtested edge — validated, honest</div>
     <div class="bt-scoreboard">
-      ${FUT_MARKETS.map(m=>`<div class="bt-score"><div class="bt-score-val ${FUT_PF[m.sym]>=1?'g':'r'}">${FUT_PF[m.sym]}</div><div class="bt-score-lbl">${m.label} profit factor (OOS)${m.sym===_futSel?' ·now':''}</div></div>`).join('')}
+      ${FUT_MARKETS.map(m=>`<div class="bt-score"><div class="bt-score-val ${FUT_PF[m.sym]>=1?'g':'r'}"${m.sym==='ES=F'?' id="futPfReal"':''}>${FUT_PF[m.sym]}</div><div class="bt-score-lbl">${m.label} profit factor (OOS)${m.sym===_futSel?' ·now':''}</div></div>`).join('')}
     </div>
     <div style="font-size:11px;color:var(--ink3);margin-top:7px">Out-of-sample profit factors from the <b>/backtester</b> runs (2021–2026, never tuned on). Trade count &amp; exact period for the latest run are below — a PF without a sample size means little.</div>
     <div id="futLatestRun" style="font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:6px">Latest engine run: (run the backtester to populate)…</div>
@@ -4962,6 +4969,8 @@ async function futLoadEdge(){
     if(!r.ok){el.textContent='';return;}
     const d=await r.json(), m=d.metrics||{}, c=d.config||{};
     if(!m.n_trades){el.textContent='';return;}
+    // keep the scoreboard's ES tile in lockstep with the real engine PF (no contradiction)
+    if((c.symbol==='ES=F')&&m.profit_factor!=null){const pf=document.getElementById('futPfReal');if(pf){pf.textContent=m.profit_factor;pf.className='bt-score-val '+(m.profit_factor>=1?'g':'r');}}
     el.innerHTML=`Latest engine run — ${c.symbol||''} ${(c.start_date||'').slice(0,7)}→${(c.end_date||'').slice(0,7)}: `
       +`<b>${m.n_trades}</b> trades · PF <b class="${m.profit_factor>=1?'g':'r'}">${m.profit_factor}</b> · `
       +`<b class="${m.total_pnl>=0?'g':'r'}">${m.total_pnl>=0?'+':''}$${Math.round(m.total_pnl).toLocaleString()}</b>`
@@ -4985,13 +4994,14 @@ async function renderBacktester(force){
   const m=d.metrics,c=d.config||{},trades=(d.trades||[]).slice();
   _btTradesArr=trades;
   const per=`${(c.start_date||'').slice(0,4)}–${(c.end_date||'').slice(0,4)}`;
+  const acctC=c.account||{}, instr=acctC.instrument||'1 contract', ptv=acctC.point_value;
   let bi=0;trades.forEach((t,i)=>{if(t.pnl>trades[bi].pnl)bi=i;});
   const stat=(lbl,val,cls,sub)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div>${sub?`<div class="bt-stat-s">${sub}</div>`:''}</div>`;
   const grid=`<div class="bt-statgrid">
     ${stat('Total return',(m.total_return_pct>=0?'+':'')+m.total_return_pct.toFixed(1)+'%',m.total_return_pct>=0?'g':'r','on $'+(m.starting_capital||0).toLocaleString())}
-    ${stat('Net P&L',_bt$(m.total_pnl),m.total_pnl>=0?'g':'r','per contract')}
+    ${stat('Net P&L',_bt$(m.total_pnl),m.total_pnl>=0?'g':'r',`per ${instr}${ptv?' ($'+ptv+'/pt)':''}`)}
     ${stat('Profit factor',m.profit_factor,m.profit_factor>=1?'g':'r','gross win ÷ loss')}
-    ${stat('Win rate',m.win_rate_pct.toFixed(1)+'%','',m.n_trades+' trades')}
+    ${stat('Win rate',m.win_rate_pct.toFixed(1)+'%','at','low by design — wins are bigger')}
     ${stat('Expectancy',_bt$(m.avg_trade),m.avg_trade>=0?'g':'r','avg / trade')}
     ${stat('Sharpe',m.sharpe,m.sharpe>=1?'g':'')}
     ${stat('Max drawdown',m.max_drawdown_pct.toFixed(1)+'%','r','peak-to-trough')}
@@ -5015,7 +5025,7 @@ async function renderBacktester(force){
     </div>
     <div class="card"><div class="card-title">Python engine results — ${c.symbol||'ES=F'} · ${per} <span class="pill">net of costs</span></div>${grid}</div>
     <div class="card"><div class="card-title">Equity curve — grew $${(m.starting_capital||0).toLocaleString()} → $${Math.round((m.starting_capital||0)+m.total_pnl).toLocaleString()}</div>${btEquitySVG(m.equity_curve,m.starting_capital)}
-      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Dashed line = starting capital. One contract, compounding off, after pessimistic fills + slippage + commission.</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Dashed line = starting capital. Modeled as <b>${instr}${ptv?' ($'+ptv+'/point)':''}</b>, 1 contract, compounding off, after pessimistic fills + slippage + commission.</div>
     </div>
     <div class="card"><div class="card-title">Real trade example <span class="pill">click any trade below to replay it</span></div>
       <div id="btTradeWrap">${btTradeBlock(trades[bi],bi)}</div>
@@ -5024,7 +5034,7 @@ async function renderBacktester(force){
       <div class="bt-log-wrap"><table class="bt-log" id="btLog"><thead><tr><th>#</th><th>Entry</th><th>Exit</th><th>Dir</th><th class="num">Entry</th><th class="num">Exit</th><th class="num">P&L</th><th class="num">Move</th><th class="num">Held</th><th>Exit reason</th></tr></thead><tbody>${logRows}</tbody></table></div>
     </div>
     <div class="card"><div class="card-title">About this run</div>
-      <div style="font-size:13px;color:var(--ink2);line-height:1.7">Symbol <b>${c.symbol||'ES=F'}</b> · Period <b>${per}</b> · Strategy <b>daily trend-pullback</b> — buy pullbacks to the 10-day average while above the 50-day, exit on a daily close below the 50-day. Tested with pessimistic fills + slippage + commission.</div>
+      <div style="font-size:13px;color:var(--ink2);line-height:1.7">Symbol <b>${c.symbol||'ES=F'}</b> · Period <b>${per}</b> · Sized as <b>${instr}${ptv?' ($'+ptv+'/point)':''}</b> on a $${(m.starting_capital||0).toLocaleString()} account · Strategy <b>daily trend-pullback</b> — buy pullbacks to the 10-day average while above the 50-day, exit on a daily close below the 50-day. Tested with pessimistic fills + slippage + commission.</div>
       <div class="dp-struct off" style="margin-top:10px">Honest caveats: the <b>${m.win_rate_pct.toFixed(0)}% win rate</b> is low by design — this edge profits from a few big winners (avg win <b>${_bt$(m.avg_win)}</b> vs avg loss <b>${_bt$(m.avg_loss)}</b>), not hit rate. Drawdowns reached <b>${m.max_drawdown_pct.toFixed(0)}%</b>. A passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
       ${d.synthetic?'<div class="fut-alert" style="margin-top:10px;color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)">Sample data — run the engine for real numbers.</div>':''}
     </div>`;
@@ -5128,6 +5138,7 @@ async function btFetchOHLC(sym,from,to){
 async function btLoadTrade(i){
   const t=_btTradesArr[i];if(!t)return;const box=document.getElementById('btCanvasBox');if(!box)return;
   const sym=(_btCache&&_btCache.config&&_btCache.config.symbol)||'ES=F';
+  const stopPct=((_btCache&&_btCache.config&&_btCache.config.strategy&&_btCache.config.strategy.hard_stop_pct)||10);
   const entryT=t.entry_ts?_btTs(t.entry_ts):_btTs(t.day), exitT=_btTs(t.exit_ts);
   try{
     window.__userFetch=Date.now();
@@ -5135,8 +5146,8 @@ async function btLoadTrade(i){
     window.__userFetch=0;
     if(!candles||candles.length<3){box.innerHTML='<div class="bt-empty" style="padding:16px">Couldn\'t load candles for this window — the data feed may be busy. Try another trade.</div>';return;}
     const win=(t.pnl!=null?t.pnl>=0:t.exit_fill_price>=t.entry_fill_price);
-    box.innerHTML=btCandleTradeSVG(candles,{entry:t.entry_fill_price,stop:t.entry_fill_price*0.92,exit:t.exit_fill_price,entryT,exitT,win})
-      +`<div style="font-size:11px;color:var(--ink3);margin-top:8px;line-height:1.6">Real <b>${sym}</b> daily candles around the trade. <span style="color:var(--ink)">━ Entry</span> · <span style="color:var(--rt)">┈ Stop (−8% hard stop)</span> · <span style="color:var(--gt)">━ Take-profit = the trend-break exit</span>. This system has no fixed target — the "take-profit" is wherever the 50-day trend broke.</div>`;
+    box.innerHTML=btCandleTradeSVG(candles,{entry:t.entry_fill_price,stop:t.entry_fill_price*(1-stopPct/100),exit:t.exit_fill_price,entryT,exitT,win,stopPct})
+      +`<div style="font-size:11px;color:var(--ink3);margin-top:8px;line-height:1.6">Real <b>${sym}</b> daily candles around the trade. <span style="color:var(--ink)">━ Entry</span> · <span style="color:var(--rt)">┈ Stop (−${stopPct}% hard stop)</span> · <span style="color:var(--gt)">━ Take-profit = the trend-break exit</span>. This system has no fixed target — the "take-profit" is wherever the 50-day trend broke.</div>`;
   }catch(e){window.__userFetch=0;box.innerHTML='<div class="bt-empty" style="padding:16px">Couldn\'t load candles (data feed busy).</div>';}
 }
 // Candlesticks + horizontal Entry / Stop / Take-profit lines + entry/exit verticals.
@@ -5160,7 +5171,7 @@ function btCandleTradeSVG(candles,L){
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${cands}
     ${lvl(L.exit,L.win?'var(--gt)':'var(--rt)','Take-profit','$'+Math.round(L.exit).toLocaleString())}
     ${lvl(L.entry,'var(--ink)','Entry','$'+Math.round(L.entry).toLocaleString())}
-    ${lvl(L.stop,'var(--rt)','Stop −8%',(stopOff?'↓ $':'$')+Math.round(L.stop).toLocaleString()+(stopOff?' (off-chart)':''),'5 4')}
+    ${lvl(L.stop,'var(--rt)','Stop −'+(L.stopPct||8)+'%',(stopOff?'↓ $':'$')+Math.round(L.stop).toLocaleString()+(stopOff?' (off-chart)':''),'5 4')}
     ${vmark(ei,'var(--ink2)','ENTRY')}${vmark(xi,L.win?'var(--gt)':'var(--rt)','EXIT')}
   </svg>`;
 }
