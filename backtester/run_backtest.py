@@ -25,7 +25,7 @@ def load_config(path: str) -> dict:
 
 def run_real(cfg: dict):
     provider = providers.get_provider(cfg)
-    is_futures = cfg["strategy"].get("type") == "futures_orb"
+    is_futures = cfg["strategy"].get("type") in ("futures_orb", "futures_swing")
     # Only require greeks when the strategy actually selects by delta. Polygon has
     # no historical greeks, so it runs with contract_selection='nearest_atm'.
     uses_delta = cfg["strategy"].get("contract_selection", "target_delta") == "target_delta"
@@ -172,6 +172,7 @@ def main():
     ap.add_argument("--start", help="override start date, e.g. 2024-05-15")
     ap.add_argument("--end", help="override end date (omit = same as --start, i.e. one day)")
     ap.add_argument("--symbol", help="override symbol, e.g. SPY")
+    ap.add_argument("--set", action="append", default=[], help="override any cfg key, e.g. --set strategy.pullback_trend_sma=40")
     ap.add_argument("--check", action="store_true", help="probe what your Polygon key can access, then exit")
     ap.add_argument("--probe-theta", action="store_true", help="dump raw ThetaData v3 response shape, then exit")
     ap.add_argument("--publish", action="store_true", help="after the run, commit+push results.json so the PUBLIC (Vercel) site updates")
@@ -192,6 +193,21 @@ def main():
         cfg["end_date"] = args.end
     if args.symbol:
         cfg["symbol"] = args.symbol
+    for kv in (args.set or []):                  # e.g. --set strategy.pullback_trend_sma=40
+        k, v = kv.split("=", 1)
+        try:
+            v = int(v)
+        except ValueError:
+            try:
+                v = float(v)
+            except ValueError:
+                if v.lower() in ("true", "false"):
+                    v = (v.lower() == "true")
+        d = cfg
+        parts = k.split(".")
+        for p in parts[:-1]:
+            d = d.setdefault(p, {})
+        d[parts[-1]] = v
     if args.demo:
         print("[run] DEMO MODE — synthetic data. Numbers are NOT real performance.")
         trades, mt, fr, synth = run_demo(cfg)
