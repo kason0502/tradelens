@@ -3,6 +3,12 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-27 (session 31) — purely futures: stock tabs removed + dead options code pruned
+- **Nav slimmed to futures-only:** removed the stock-era tabs (Stocks/High Volume/Screener/News/Strategy/Pro Traders/Backtest/Performance/Journal/AI Lab/Alerts). Nav is now **Futures · AI Chat · Feedback**.
+- **Hid the stock movers ticker** (`.appbar` display:none); the left news sidebar was already CSS-hidden.
+- **Pruned dead options JS** — removed `renderOptLab`/`paintOptLab`/`optLabToggleAuto`/`optEquitySVG` (the 0DTE Lab viewer, now unreferenced after session 30). Verified no leftover refs, no console errors, AI Chat still switches.
+- The stock tab *panes* remain in the DOM but are unreachable (no nav) — harmless; can be deleted for a smaller file later.
+
 ## 2026-06-27 (session 30) — futures terminal: multi-market scan, alerts, live edge; options tab removed
 - **Removed the options-focused 0DTE Lab tab** (nav + pane + hook) — STRATA is futures-first now.
 - **Market scan strip = selector + at-a-glance alert:** the Futures tab fetches **ES · NQ · SPY · QQQ** in parallel and shows a chip per market with its live signal (BUY SETUP / Watch / Uptrend / Downtrend + price); click to drill in. `FUT_MARKETS`, `futSignal(q)` (extracted), `selectFutMarket`.

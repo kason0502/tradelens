@@ -12,10 +12,15 @@
 - [x] **Edge card wired to `backtester/results.json`** (latest run line).
 - [x] **Removed options-focused 0DTE Lab tab**; logo retheme → "Futures Terminal".
 
+## Done (session 31 — purely futures)
+- [x] **Removed all stock/options tabs from the nav** (Futures · AI Chat · Feedback only); hid the stock movers ticker.
+- [x] **Pruned dead options JS** (renderOptLab/paintOptLab/optEquitySVG/optLabToggleAuto).
+
 ## Next (futures terminal)
-- [ ] **Prune dead options code** — `renderOptLab`/`paintOptLab`/`optEquitySVG` are now unreferenced (the tab is gone); safe to delete. Also the stock-era tabs (Movers/Screener/Pro Traders/Strategy) remain — decide keep vs remove.
+- [ ] **Delete the unreachable stock tab panes** from the HTML (and their now-dead render fns: renderMovers/renderScreener/renderStrategy/renderTraders/renderPerformance/renderJournal/AI-Lab) for a smaller file. They're hidden now but still in the DOM.
 - [ ] **Commodities/metals** (CL, GC) once validated in the backtester.
 - [ ] **Auto-refresh the scan** on an interval while the Futures tab is open.
+- [ ] **Prune now-unused CSS** (`.opt-*`) and stock-era styles.
 
 ## Done (session 23 — 0DTE options backtester + STRATA 0DTE Lab)
 - [x] Standalone honesty-first Python 0DTE backtester in `/backtester` (pessimistic fills, no look-ahead, next-bar exec, fragility report, swappable modules, tests, SPY ORB strategy).

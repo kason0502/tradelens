@@ -1649,21 +1649,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="snav-hover" id="snavHover"></div>
     <div class="snav-glide" id="snavGlide"></div>
     <div class="appnav-grp">Terminal</div>
-    <button class="snav active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES</span></button>
-    <button class="snav" data-tab="dashboard" onclick="mainTab('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span class="lbl">Stocks</span></button>
-    <button class="snav" data-tab="movers" onclick="mainTab('movers',this)"><svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M4 20V11"/><path d="M10 20V4"/><path d="M16 20v-6"/><path d="M22 20V8"/></svg><span class="lbl">High Volume</span><span class="pill">LIVE</span></button>
-    <button class="snav" data-tab="screener" onclick="mainTab('screener',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg><span class="lbl">Screener</span></button>
-    <button class="snav" data-tab="news" onclick="mainTab('news',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 8h2a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2"/><path d="M7 8h7M7 12h7M7 16h4"/></svg><span class="lbl">News</span></button>
-    <div class="appnav-grp">Research</div>
-    <button class="snav" data-tab="strategy" onclick="mainTab('strategy',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8.5 14.5l2 2 4-4"/></svg><span class="lbl">Strategy</span><span class="pill">DAILY</span></button>
-    <button class="snav" data-tab="traders" onclick="mainTab('traders',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M20.5 20a5 5 0 0 0-4-4.9"/></svg><span class="lbl">Pro Traders</span></button>
-    <button class="snav" data-tab="backtest" onclick="mainTab('backtest',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 2.6 6.3"/><path d="M3 20v-5h5"/><path d="M12 8v4l3 2"/></svg><span class="lbl">Backtest</span></button>
-    <button class="snav" data-tab="performance" onclick="mainTab('performance',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7 15l4-4 3 2 5-6"/></svg><span class="lbl">Performance</span></button>
-    <button class="snav" data-tab="journal" onclick="mainTab('journal',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4a2 2 0 0 1 2-2h10l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 7h6M8 11h8M8 15h5"/></svg><span class="lbl">Journal</span><span class="pill" id="jrnPill" style="display:none"></span></button>
-    <button class="snav" data-tab="ailab" onclick="mainTab('ailab',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.5L4.8 17a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 8.5V3"/></svg><span class="lbl">AI Lab</span></button>
+    <button class="snav active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES·NQ</span></button>
     <div class="appnav-grp">Assistant</div>
     <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
-    <button class="snav" data-tab="alerts" onclick="mainTab('alerts',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="lbl">Alerts</span></button>
     <button class="snav" data-tab="feedback" onclick="mainTab('feedback',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7 0l-.8.8-.8-.8a5 5 0 1 0-7 7l7.8 7.8 7.8-7.8a5 5 0 0 0 0-7z"/></svg><span class="lbl">Feedback</span></button>
   </div>
   <div class="appnav-foot">
@@ -1674,8 +1662,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 </aside>
 
 <div class="page-wrap">
-  <!-- MOVERS BANNER -->
-  <div class="appbar">
+  <!-- MOVERS BANNER (stock-era; hidden in the futures terminal) -->
+  <div class="appbar" style="display:none">
     <span class="appbar-lead"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M17 7h4v4"/></svg> Big movers</span>
     <div class="appbar-tape"><div class="appbar-track" id="appBarTrack"></div></div>
   </div>
@@ -3688,117 +3676,6 @@ function paintAutoStatus(){
     : `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ink3);margin-right:7px;vertical-align:middle"></span>Auto-learning paused — the AI only learns when you run tests manually.`;
 }
 
-// ── 0DTE LAB: render the Python backtester's results.json in STRATA's UI ──
-let _optlabData=null;
-async function renderOptLab(){
-  const el=document.getElementById('optlabBody');if(!el)return;
-  el.innerHTML=`<div class="card"><div class="loading-label">Loading backtest results…</div></div>`;
-  // Always re-fetch (cache-busted) so a fresh engine run shows up on tab open / Refresh.
-  let data=null;
-  const bust='?t='+Date.now();
-  for(const url of ['backtester/results.json','backtester/results.sample.json']){
-    try{const r=await fetch(url+bust,{cache:'no-store'});if(r.ok){data=await r.json();break;}}catch(e){}
-  }
-  if(!data){
-    el.innerHTML=`<div class="card"><div class="card-title">No results yet</div>
-      <div class="bt-empty" style="padding:16px;line-height:1.7">Run the engine to populate this tab:
-      <br><code style="color:var(--act)">cd backtester &amp;&amp; pip install -r requirements.txt &amp;&amp; python run_backtest.py --demo</code>
-      <br>That writes <code>backtester/results.json</code>, which this view renders. See <code>backtester/README.md</code>.</div></div>`;
-    return;
-  }
-  _optlabData=data; paintOptLab(data);
-}
-function paintOptLab(d){
-  const el=document.getElementById('optlabBody');if(!el)return;
-  const m=d.metrics||{}, fr=d.fragility||{}, cfg=d.config||{};
-  const money=v=>(v<0?'−$':'$')+Math.abs(v).toLocaleString(undefined,{maximumFractionDigits:0});
-  const gcls=v=>v>=0?'g':'r';
-  if(!m.n_trades){el.innerHTML=`<div class="card"><div class="card-title">No trades</div><div class="bt-empty" style="padding:16px">${m.note||'The engine produced no trades for this period.'}</div></div>`;return;}
-  const synthBanner=d.synthetic?`<div class="card" style="border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.08);margin-bottom:14px"><div style="font-weight:900;color:var(--rt)">⚠ SAMPLE DATA — NOT REAL PERFORMANCE</div><div style="font-size:12px;color:var(--ink2);margin-top:4px">These numbers come from synthetic/demo data to show the UI. Wire a real options feed (see <code>backtester/README.md</code>) and re-run for real results.</div></div>`:'';
-  // headline scoreboard
-  const score=`<div class="bt-scoreboard">
-    <div class="bt-score"><div class="bt-score-val ${gcls(m.total_pnl)}">${m.total_pnl>=0?'+':''}${money(m.total_pnl)}</div><div class="bt-score-lbl">Total P&L (${m.total_return_pct}%)</div></div>
-    <div class="bt-score"><div class="bt-score-val">${m.win_rate_pct}%</div><div class="bt-score-lbl">Win rate</div></div>
-    <div class="bt-score"><div class="bt-score-val ${m.profit_factor>=1?'g':'r'}">${m.profit_factor==null?'∞':m.profit_factor}</div><div class="bt-score-lbl">Profit factor</div></div>
-    <div class="bt-score"><div class="bt-score-val">${m.sharpe}</div><div class="bt-score-lbl">Sharpe (annual)</div></div>
-    <div class="bt-score"><div class="bt-score-val r">${m.max_drawdown_pct}%</div><div class="bt-score-lbl">Max drawdown</div></div>
-    <div class="bt-score"><div class="bt-score-val">${m.n_trades}</div><div class="bt-score-lbl">Trades · ${m.avg_hold_minutes}m avg</div></div>
-  </div>`;
-  // fragility (the loud bit)
-  const flip=fr.flips_to_loss;
-  const fragCls=flip?'r':(fr.degrade_pct_at_plus50_slippage!=null&&fr.degrade_pct_at_plus50_slippage<=-50?'at':'g');
-  const fragScen=(fr.scenarios||[]).map(s=>`<div class="perf-row"><div class="perf-row-name">${s.label}</div><div class="perf-bar"><div class="perf-bar-fill" style="width:${Math.max(4,Math.min(100,50+(s.total_pnl/(Math.abs(fr.base_total_pnl)||1))*50))}%;background:${s.total_pnl>=0?'var(--gr)':'var(--rd)'}"></div></div><div class="perf-row-stat ${s.total_pnl>=0?'g':'r'}">${s.total_pnl>=0?'+':''}${money(s.total_pnl)}${s.n_trades!=null?` · ${s.n_trades}t`:''}</div></div>`).join('');
-  const frag=`<div class="card" style="${flip?'border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.06)':''}">
-    <div class="card-title">Fragility report — is the edge real or a fill-model artifact?</div>
-    <div style="font-size:13.5px;font-weight:800;color:var(--${fragCls==='r'?'rt':fragCls==='at'?'at':'gt'});line-height:1.6;margin-bottom:10px">${fr.verdict||'n/a'}</div>
-    ${fragScen}
-    <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.6">Each row re-runs the whole backtest with harsher costs. ${fr.degrade_pct_at_plus50_slippage!=null?`A 50% wider slippage assumption changes total P&L by <b class="${fr.degrade_pct_at_plus50_slippage>=0?'g':'r'}">${fr.degrade_pct_at_plus50_slippage}%</b>.`:''} If a tiny change in fills flips it red, don't trust the base number.</div>
-  </div>`;
-  // equity curve (SVG, STRATA style)
-  const eq=m.equity_curve||[];
-  const equityCard=eq.length?`<div class="card"><div class="card-title">Equity curve <span class="tag">${cfg.symbol||''} · start $${(m.starting_capital||0).toLocaleString()}</span></div>${optEquitySVG(eq,m.starting_capital)}</div>`:'';
-  // time of day
-  const tod=m.by_time_of_day||{};
-  const todLabels={open:'Open 9:30–10:30',midday:'Midday 10:30–14:00',power_hour:'Power hour 14:00–15:30',last_30:'Last 30 15:30–16:00'};
-  const todRows=Object.keys(todLabels).map(k=>{const c=tod[k]||{n:0};return `<div class="perf-row"><div class="perf-row-name">${todLabels[k]}</div><div class="perf-bar"><div class="perf-bar-fill" style="width:${c.n?Math.max(4,Math.min(100,50+(c.pnl/(Math.abs(m.total_pnl)||1))*50)):50}%;background:${(c.pnl||0)>=0?'var(--gr)':'var(--rd)'}"></div></div><div class="perf-row-stat">${c.n?`${c.n}t · ${c.win_rate_pct}% · <span class="${c.pnl>=0?'g':'r'}">${c.pnl>=0?'+':''}${money(c.pnl)}</span>`:'—'}</div></div>`;}).join('');
-  const todCard=`<div class="card"><div class="card-title">By time of day</div>${todRows}</div>`;
-  // costs + assumptions
-  const f=cfg.fills||{};
-  const costsCard=`<div class="card"><div class="card-title">Cost & fill assumptions (pessimistic)</div>
-    <div style="font-size:12.5px;color:var(--ink2);line-height:1.9">
-      Buy at <b>${f.buy_at||'ask'}</b> · sell at <b>${f.sell_at||'bid'}</b> · extra slippage <b>${f.extra_slippage_cents}¢</b>/contract each side · commission <b>$${f.commission_per_contract}</b>/leg · skip if spread &gt; <b>$${f.spread_threshold_dollars}</b> (${f.wide_spread_policy}).<br>
-      Total spread cost paid: <b class="r">${money(m.total_spread_cost)}</b> · total commission: <b class="r">${money(m.total_commission)}</b> · avg win <b class="g">${money(m.avg_win)}</b> · avg loss <b class="r">${money(m.avg_loss)}</b> · worst trade <b class="r">${money(m.worst_trade)}</b>.
-    </div></div>`;
-  // trade log
-  const rows=(d.trades||[]).map(t=>{
-    const tcol=t.pnl>=0?'g':'r';
-    const et=(t.entry_ts||'').slice(0,16).replace('T',' '), xt=(t.exit_ts||'').slice(11,16);
-    return `<tr>
-      <td>${et}→${xt}</td><td>${t.tod}</td><td>${t.type} ${t.strike}</td>
-      <td title="bid ${t.entry_ref_bid} / ask ${t.entry_ref_ask}">${t.entry_fill_price}</td>
-      <td title="bid ${t.exit_ref_bid} / ask ${t.exit_ref_ask}">${t.exit_fill_price}</td>
-      <td>${t.exit_reason}</td>
-      <td class="r">${money(t.spread_cost_paid)}</td>
-      <td class="${tcol}" style="font-weight:800">${t.pnl>=0?'+':''}${money(t.pnl)}</td>
-    </tr>`;
-  }).join('');
-  const logCard=`<div class="card"><div class="card-title">Trade log <span class="tag">${(d.trades||[]).length} trades · fills show spread cost paid</span></div>
-    <div style="overflow-x:auto"><table class="rg-table opt-log"><tr><th>Entry→Exit</th><th>Session</th><th>Contract</th><th>Buy fill</th><th>Sell fill</th><th>Exit</th><th>Spread cost</th><th>P&L</th></tr>${rows}</table></div></div>`;
-  const gen=d.generated_at?String(d.generated_at).replace('T',' ').slice(0,16):'';
-  const autoOn=!!window._optLabTimer;
-  const topBar=`<div class="opt-top">
-    <div class="opt-fresh">Last run: <b>${gen||'—'}</b>${d.synthetic?' <span style="color:var(--rt)">(synthetic)</span>':''} · ${cfg.symbol||''} ${(cfg.start_date||'')}→${(cfg.end_date||'')}</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <label class="opt-auto"><input type="checkbox" ${autoOn?'checked':''} onchange="optLabToggleAuto(this.checked)"> auto-refresh</label>
-      <button class="dp-fu" onclick="renderOptLab()">↻ Refresh</button>
-    </div>
-  </div>`;
-  el.innerHTML=topBar+synthBanner+score+frag+equityCard+`<div class="opt-2col">${todCard}${costsCard}</div>`+logCard;
-}
-// Auto-refresh: re-pull results.json every 10s while the 0DTE Lab tab is open.
-window._optLabTimer=window._optLabTimer||null;
-function optLabToggleAuto(on){
-  if(window._optLabTimer){clearInterval(window._optLabTimer);window._optLabTimer=null;}
-  if(on){window._optLabTimer=setInterval(()=>{
-    const t=document.getElementById('tab-optlab');
-    if(t&&t.classList.contains('active'))renderOptLab(); else {clearInterval(window._optLabTimer);window._optLabTimer=null;}
-  },10000);}
-}
-function optEquitySVG(eq,cap){
-  const W=900,H=200,pad=34;const min=Math.min(cap||eq[0],...eq),max=Math.max(cap||eq[0],...eq);const rng=Math.max(1,max-min);
-  const x=i=>pad+ (eq.length<2?0:i/(eq.length-1)*(W-pad-8));
-  const y=v=>H-22-((v-min)/rng)*(H-44);
-  const pts=eq.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-  const base=cap!=null?`<line x1="${pad}" y1="${y(cap).toFixed(1)}" x2="${W-8}" y2="${y(cap).toFixed(1)}" stroke="var(--ink3)" stroke-dasharray="4 4" stroke-width="1"/>`:'';
-  const last=eq[eq.length-1], up=last>=(cap||eq[0]);
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" preserveAspectRatio="none">
-    ${base}
-    <polyline points="${pts}" fill="none" stroke="${up?'var(--gt)':'var(--rt)'}" stroke-width="2" stroke-linejoin="round"/>
-    <text x="${pad}" y="14" fill="var(--ink3)" font-size="11" font-family="var(--mono)">${money_(max)}</text>
-    <text x="${pad}" y="${H-6}" fill="var(--ink3)" font-size="11" font-family="var(--mono)">${money_(min)}</text>
-  </svg>`;
-  function money_(v){return (v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString();}
-}
 function setAILabBucket(b){window.aiLabBucket=b;renderAILearnStats();}
 function renderAILearnStats(){
   const el=document.getElementById('aiLearnStats');if(!el)return;
