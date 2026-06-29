@@ -3,6 +3,10 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 35) — backdrop refresh: market wave ribbons replace the perspective grid
+- **Replaced the "matrix" perspective floor-grid** in the `#fxCanvas` living-market backdrop with **flowing, layered market wave ribbons** — three translucent price-style curves that gently scroll and parallax (mood-tinted green↔red, soft gradient fills). More organic and on-theme than the grid.
+- **Made the whole backdrop more present** (without crowding the data): brighter aurora blobs (α .05–.17), stronger data-constellation links/dots, canvas opacity .85→.96, and a slightly more visible animated logo watermark (opacity .05→.07, larger glow). Reduced-motion still fully respected.
+
 ## 2026-06-29 (session 34) — Split View expansion + Learn academy + Relative Strength + animated logo backdrop
 - **Animated brand watermark** behind the app: a faint, accent-tinted `logo.png` that slowly floats/breathes (`.bg-logo`, `bgLogoFloat`/`bgGlow`), flips red with bearish mood (uses `--ac-rgb`), and respects reduced-motion. Plus a subtle tab-switch entrance animation (`tabIn`).
 - **Split View — expanded** from chart/signal to **five module types** per pane: Chart · Live signal · **Market grid** · **Session clock** · **Notepad**; added a **3-pane** layout (now 1/2/3/4); **state persists** to localStorage (`tlpro_split_v1`: layout + per-pane config + notes); live panes (clock/grid) tick on a 1s timer that stops when you leave the tab (`splitTimerSync`/`stopSplitTimer`). Session math extracted to shared `_sessionData()`.
