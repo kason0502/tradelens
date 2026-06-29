@@ -1,7 +1,18 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-27 (session 29)
+> Last updated: 2026-06-29 (session 32)
+
+## Done (session 32 — candles + futures toolkit)
+- [x] **Candlestick price chart** (`futCandleSVG`) replaces the line — real OHLC + 10/50-day MAs + price axis.
+- [x] **Playbook tab** — the system's rules + a live ES pre-trade checklist (`renderPlaybookTab`).
+- [x] **Risk Calculator tab** — position sizing from real CME contract specs (`renderCalc`/`FUT_SPECS`); pre-fills from live ES.
+- [x] **Session Clock tab** — live global sessions, DST-correct, London–NY overlap highlight (`renderSessions`/`_tzNow`).
+
+## Next (futures toolkit follow-ups)
+- [ ] **Auto-refresh the futures scan** on an interval while the tab is open (still manual via ↻ Refresh).
+- [ ] **Calculator: contract auto-detect** — when a contract is picked, default entry/stop from that market's live quote (only ES is pre-filled today).
+- [ ] **Add CL/GC to the scan strip** once validated in the backtester (specs already in the calculator).
 
 ## Done (session 29 — STRATA refocused on futures)
 - [x] **Futures terminal is the new default tab** — live validated trend-pullback signal on ES (signal card + daily chart w/ 10/50-day MAs + plain trade plan + validated-edge card). Stocks dashboard moved to a "Stocks" tab. Shell kept.

@@ -992,6 +992,43 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fut-chip.wait .fc-s{color:var(--at)}
 .fut-chip.no .fc-s{color:var(--rt)}
 .fut-alert{border:1px solid rgba(34,197,94,.5);background:rgba(34,197,94,.1);color:var(--gt);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700}
+/* Toolkit: Playbook · Risk Calculator · Sessions */
+.calc-form{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
+.calc-field label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;font-weight:700}
+.calc-field input,.calc-field select{width:100%;background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--tx);font-family:var(--mono);font-size:14px;outline:none}
+.calc-field input:focus,.calc-field select:focus{border-color:rgba(var(--ac-rgb),.7)}
+.calc-out{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:16px}
+.calc-out .co{background:var(--s2);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+.calc-out .co-l{font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.calc-out .co-v{font-size:22px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em;margin-top:3px}
+.calc-out .co-v.r{color:var(--rt)}
+.spec-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.spec-tbl th,.spec-tbl td{text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
+.spec-tbl th{color:var(--mu);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.spec-tbl td:first-child,.spec-tbl th:first-child{text-align:left}
+.spec-tbl td:first-child{font-weight:800;font-family:var(--mono)}
+.sess-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.sess-row.on{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.06)}
+.sess-dot{width:11px;height:11px;border-radius:50%;background:var(--fa);flex-shrink:0}
+.sess-row.on .sess-dot{background:var(--gr);box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+.sess-name{font-size:16px;font-weight:800;min-width:84px}
+.sess-time{font-family:var(--mono);font-size:15px;color:var(--ink2)}
+.sess-stat{margin-left:auto;text-align:right}
+.sess-stat .ss-s{font-size:13px;font-weight:800}
+.sess-row.on .ss-s{color:var(--gt)}
+.sess-stat .ss-n{font-size:11px;color:var(--mu);font-family:var(--mono)}
+.pb-check{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:9px}
+.pb-check .pc-ic{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0;font-size:13px}
+.pb-check.yes .pc-ic{background:rgba(34,197,94,.16);color:var(--gt)}
+.pb-check.no .pc-ic{background:rgba(240,68,90,.16);color:var(--rt)}
+.pb-check .pc-t{font-size:13px;color:var(--ink2);line-height:1.5}
+.pb-check .pc-t b{display:block;font-size:14px;margin-bottom:1px;color:var(--tx)}
+.pb-rule{display:flex;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+.pb-rule:last-child{border-bottom:none}
+.pb-num{width:26px;height:26px;border-radius:8px;background:rgba(var(--ac-rgb),.14);color:var(--act);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;font-family:var(--mono)}
+.pb-rule .pr-b{font-size:14px;font-weight:800;margin-bottom:3px}
+.pb-rule .pr-d{font-size:13px;color:var(--ink2);line-height:1.6}
+@media(max-width:560px){.calc-form{grid-template-columns:1fr}}
 /* 0DTE Lab */
 .opt-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .opt-fresh{font-size:11.5px;color:var(--ink3);font-family:var(--mono)}
@@ -1650,6 +1687,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="snav-glide" id="snavGlide"></div>
     <div class="appnav-grp">Terminal</div>
     <button class="snav active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES·NQ</span></button>
+    <div class="appnav-grp">Toolkit</div>
+    <button class="snav" data-tab="playbook" onclick="mainTab('playbook',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg><span class="lbl">Playbook</span></button>
+    <button class="snav" data-tab="calc" onclick="mainTab('calc',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15v2"/></svg><span class="lbl">Risk Calc</span></button>
+    <button class="snav" data-tab="sessions" onclick="mainTab('sessions',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Sessions</span></button>
     <div class="appnav-grp">Assistant</div>
     <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
     <button class="snav" data-tab="feedback" onclick="mainTab('feedback',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7 0l-.8.8-.8-.8a5 5 0 1 0-7 7l7.8 7.8 7.8-7.8a5 5 0 0 0 0-7z"/></svg><span class="lbl">Feedback</span></button>
@@ -1695,6 +1736,39 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <button class="dp-fu" onclick="renderFutures(true)" id="futRefresh">↻ Refresh</button>
       </div>
       <div id="futBody"><div class="card"><div class="loading-label">Loading ES futures…</div></div></div>
+    </div>
+
+    <!-- PLAYBOOK — the validated system's rules + a live pre-trade checklist -->
+    <div class="tab-pane" id="tab-playbook">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">The Playbook</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">The exact rules of the trend-pullback system, and a live checklist that grades today's ES against them.</div>
+        </div>
+      </div>
+      <div id="playbookBody"></div>
+    </div>
+
+    <!-- RISK CALCULATOR — futures position sizing from real contract specs -->
+    <div class="tab-pane" id="tab-calc">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Risk &amp; Position Calculator</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Size every trade off a fixed % of your account. Built on exchange contract specs — no guesswork.</div>
+        </div>
+      </div>
+      <div id="calcBody"></div>
+    </div>
+
+    <!-- SESSIONS — live global trading-session clock -->
+    <div class="tab-pane" id="tab-sessions">
+      <div class="fut-head-row">
+        <div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">Session Clock</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Where the trading day is right now — futures run nearly 24h, but liquidity peaks when these sessions overlap.</div>
+        </div>
+      </div>
+      <div id="sessionsBody"></div>
     </div>
 
     <!-- AI CHAT -->
@@ -1797,7 +1871,11 @@ function mainTab(name,btn){
   if(btn&&btn.classList)btn.classList.add('active');
   const sb=document.querySelector('.snav[data-tab="'+name+'"]'); if(sb)sb.classList.add('active');
   if(name==='futures')renderFutures();
+  if(name==='playbook')renderPlaybookTab();
+  if(name==='calc')renderCalc();
+  if(name==='sessions')renderSessions();
   if(name==='feedback')renderFeedbackTab();
+  if(name!=='sessions')stopSessionClock();
   if(sb)snavGlideTo(sb);
   const pw=document.querySelector('.page-wrap'); if(pw)pw.scrollTop=0;
 }
@@ -4557,8 +4635,8 @@ function paintFutures(){
         <span class="fs-pill ${s.turnUp?'on':'off'}">${s.turnUp?'✓':'•'} Turning up</span>
       </div>
     </div>
-    <div class="card"><div class="card-title">${mkt.label} daily — price, 10-day &amp; 50-day averages</div>${futChartSVG(s.closes,s.s10,s.s50)}
-      <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--ink)">━</span> price</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
+    <div class="card"><div class="card-title">${mkt.label} daily candles — with 10-day &amp; 50-day averages</div>${s.ohlc?futCandleSVG(s.ohlc,s.s10,s.s50):futChartSVG(s.closes,s.s10,s.s50)}
+      <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--gr)">▮</span><span style="color:var(--rd)">▮</span> up / down day</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
     </div>
     ${plan}
     <div class="bt-scoreboard">
@@ -4583,6 +4661,185 @@ async function futLoadEdge(){
       +`<b class="${m.total_pnl>=0?'g':'r'}">${m.total_pnl>=0?'+':''}$${Math.round(m.total_pnl).toLocaleString()}</b>`
       +(d.synthetic?' <span style="color:var(--rt)">(sample)</span>':'');
   }catch(e){el.textContent='';}
+}
+// Make sure a live ES quote exists (Playbook/Calc may open before the Futures tab fetched).
+async function _ensureES(){
+  if(!_futCache['ES=F']){try{window.__userFetch=Date.now();_futCache['ES=F']=await fetchQuote('ES=F');window.__userFetch=0;}catch(e){}}
+  return _futCache['ES=F'];
+}
+
+// ── PLAYBOOK — the validated system's rules + a live pre-trade checklist ──
+const PB_RULES=[
+  {t:'Trade only longs, only in uptrends',d:'A position is opened only when price is above its 50-day average. No shorts — the edge is long-only, so expect flat or down years in bear markets.'},
+  {t:'Wait for a pullback to the 10-day average',d:"Don't chase strength. The entry comes when price dips back to its 10-day average inside the larger uptrend — buying value, not breakouts."},
+  {t:'Enter when it turns back up',d:'After the pullback, take the trade on the first day that closes above the prior day — confirmation the dip is being bought.'},
+  {t:'Exit on a trend break',d:'Close the trade when a daily bar closes below the 50-day average. A −8% hard stop is the safety net for a fast crash.'},
+  {t:'No fixed profit target — ride the trend',d:'Winners are left to run as long as the trend holds. Most trades are small; a few large winners carry the whole year (~5–6 trades annually).'},
+  {t:'Risk a fixed fraction every trade',d:'Size each entry so the trend-break exit costs the same small % of the account each time. The Risk Calculator turns that % into a contract count.'},
+];
+async function renderPlaybookTab(){
+  const el=document.getElementById('playbookBody');if(!el)return;
+  el.innerHTML=`<div class="card"><div class="loading-label">Reading live ES…</div></div>`;
+  const q=await _ensureES(), s=q?futSignal(q):null;
+  let checklist;
+  if(s){
+    const items=[
+      {ok:s.uptrend,b:'Uptrend confirmed',y:'Price is above the 50-day average — the trend filter is on.',n:'Price is below the 50-day average — the system stands aside.'},
+      {ok:s.pulledBack,b:'Pulled back to value',y:'Price has dipped to the 10-day average — a buyable pullback.',n:'No pullback yet — price is still extended above the 10-day average.'},
+      {ok:s.turnUp,b:'Turning back up',y:'Today is closing above yesterday — momentum is resuming.',n:'Not turning up yet — wait for a green day.'},
+    ];
+    const score=items.filter(i=>i.ok).length;
+    const verdict=s.buySetup?'All 3 conditions met — this is the entry the backtest traded.':s.uptrend?`Setup forming — ${score}/3 conditions met. Wait for the rest before entering.`:'No trade — the trend filter is off. Stand aside.';
+    checklist=`<div class="card"><div class="card-title">Live checklist — ES today <span class="pill">${s.short}</span></div>
+      ${items.map(i=>`<div class="pb-check ${i.ok?'yes':'no'}"><div class="pc-ic">${i.ok?'✓':'✕'}</div><div class="pc-t"><b>${i.b}</b>${i.ok?i.y:i.n}</div></div>`).join('')}
+      <div class="dp-rr" style="margin-top:8px">${verdict}</div></div>`;
+  } else {
+    checklist=`<div class="card"><div class="bt-empty" style="padding:16px">Couldn't load live ES right now — the rules below still apply.</div></div>`;
+  }
+  el.innerHTML=checklist
+    +`<div class="card"><div class="card-title">The rules</div>${PB_RULES.map((r,i)=>`<div class="pb-rule"><div class="pb-num">${i+1}</div><div><div class="pr-b">${r.t}</div><div class="pr-d">${r.d}</div></div></div>`).join('')}</div>`
+    +`<div class="card"><div class="card-title">Why it's only these rules</div><div class="analysis-text">Every other variation we tried — shorts, breakouts, tighter stops, fixed targets — failed at least one of the out-of-sample, generalization, or robustness tests in the backtester. What survived was deliberately simple: buy pullbacks in uptrends, let winners run, cut on a trend break. Simplicity is the point — fewer knobs means less curve-fitting and a better chance the edge holds live. Paper-trade it first.</div></div>`;
+}
+
+// ── RISK CALCULATOR — position sizing from real exchange contract specs ──
+// tick = min price increment · tickVal = $ per tick (exchange-fixed). $/point = tickVal/tick.
+const FUT_SPECS=[
+  {sym:'ES',name:'E-mini S&P 500',tick:0.25,tickVal:12.50},
+  {sym:'MES',name:'Micro E-mini S&P 500',tick:0.25,tickVal:1.25},
+  {sym:'NQ',name:'E-mini Nasdaq 100',tick:0.25,tickVal:5.00},
+  {sym:'MNQ',name:'Micro E-mini Nasdaq 100',tick:0.25,tickVal:0.50},
+  {sym:'YM',name:'E-mini Dow',tick:1.0,tickVal:5.00},
+  {sym:'MYM',name:'Micro E-mini Dow',tick:1.0,tickVal:0.50},
+  {sym:'RTY',name:'E-mini Russell 2000',tick:0.10,tickVal:5.00},
+  {sym:'M2K',name:'Micro E-mini Russell 2000',tick:0.10,tickVal:0.50},
+  {sym:'CL',name:'Crude Oil',tick:0.01,tickVal:10.00},
+  {sym:'MCL',name:'Micro Crude Oil',tick:0.01,tickVal:1.00},
+  {sym:'GC',name:'Gold',tick:0.10,tickVal:10.00},
+  {sym:'MGC',name:'Micro Gold',tick:0.10,tickVal:1.00},
+];
+function renderCalc(){
+  const el=document.getElementById('calcBody');if(!el)return;
+  const es=_futCache['ES=F'], s=es?futSignal(es):null;
+  const entry=s?+s.price.toFixed(2):5000, stop=s?+s.sma50.toFixed(2):4800;
+  el.innerHTML=`
+    <div class="card"><div class="card-title">Position size</div>
+      <div class="calc-form">
+        <div class="calc-field"><label>Account size ($)</label><input id="cAcct" type="number" value="25000" oninput="calcCompute()"></div>
+        <div class="calc-field"><label>Risk per trade (%)</label><input id="cRisk" type="number" value="1" step="0.1" oninput="calcCompute()"></div>
+        <div class="calc-field"><label>Contract</label><select id="cSym" onchange="calcCompute()">${FUT_SPECS.map(f=>`<option value="${f.sym}"${f.sym==='ES'?' selected':''}>${f.sym} — ${f.name}</option>`).join('')}</select></div>
+        <div class="calc-field"><label>Entry price</label><input id="cEntry" type="number" value="${entry}" step="0.25" oninput="calcCompute()"></div>
+        <div class="calc-field"><label>Stop price</label><input id="cStop" type="number" value="${stop}" step="0.25" oninput="calcCompute()"></div>
+        <div class="calc-field"><label>&nbsp;</label><div style="font-size:11px;color:var(--mu);line-height:1.5;padding-top:6px">${s?'Pre-filled with live ES price and its 50-day trend-break exit. Edit freely.':'Enter your own entry and stop.'}</div></div>
+      </div>
+      <div class="calc-out" id="calcOut"></div>
+      <div class="dp-struct off" style="margin-top:14px">Contract specs are exchange-fixed. Broker margin requirements vary and aren't shown — confirm yours before sizing up.</div>
+    </div>
+    <div class="card"><div class="card-title">CME contract specs</div>
+      <table class="spec-tbl"><thead><tr><th>Contract</th><th>Tick</th><th>$ / tick</th><th>$ / point</th></tr></thead>
+      <tbody>${FUT_SPECS.map(f=>`<tr><td>${f.sym}</td><td>${f.tick}</td><td>$${f.tickVal.toFixed(2)}</td><td>$${(f.tickVal/f.tick).toLocaleString(undefined,{maximumFractionDigits:0})}</td></tr>`).join('')}</tbody></table>
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px">M-prefixed contracts (MES/MNQ/MYM/M2K/MCL/MGC) are the micros — 1/10th the size, far easier to size on a small account.</div>
+    </div>`;
+  calcCompute();
+}
+function calcCompute(){
+  const g=id=>document.getElementById(id), out=g('calcOut');if(!out)return;
+  const acct=+g('cAcct').value||0, risk=+g('cRisk').value||0, entry=+g('cEntry').value||0, stop=+g('cStop').value||0;
+  const spec=FUT_SPECS.find(f=>f.sym===g('cSym').value)||FUT_SPECS[0];
+  const ptVal=spec.tickVal/spec.tick, riskDollar=acct*risk/100, ptsRisk=Math.abs(entry-stop);
+  const perContract=ptsRisk*ptVal, contracts=perContract>0?Math.floor(riskDollar/perContract):0, actualRisk=contracts*perContract;
+  const n0=v=>'$'+v.toLocaleString(undefined,{maximumFractionDigits:0});
+  out.innerHTML=`
+    <div class="co"><div class="co-l">Risk budget</div><div class="co-v">${n0(riskDollar)}</div></div>
+    <div class="co"><div class="co-l">Risk / contract</div><div class="co-v">${n0(perContract)}</div></div>
+    <div class="co"><div class="co-l">Contracts</div><div class="co-v ${contracts>0?'':'r'}">${contracts}</div></div>
+    <div class="co"><div class="co-l">Actual risk</div><div class="co-v">${n0(actualRisk)}</div></div>
+    <div class="co"><div class="co-l">Points at risk</div><div class="co-v">${ptsRisk.toLocaleString(undefined,{maximumFractionDigits:2})}</div></div>
+    <div class="co"><div class="co-l">$ per point</div><div class="co-v">${n0(ptVal)}</div></div>`;
+  if(contracts===0&&perContract>0){
+    out.innerHTML+=`<div class="co" style="grid-column:1/-1;border-color:rgba(240,68,90,.4)"><div class="co-l r">Position too large for the budget</div><div style="font-size:12px;color:var(--ink2);margin-top:4px;font-family:inherit">One ${spec.sym} risks ${n0(perContract)} at this stop — more than your ${n0(riskDollar)} budget. Tighten the stop, raise the account/risk, or trade a micro (MES, MNQ, MGC…).</div></div>`;
+  }
+}
+
+// ── SESSION CLOCK — live global trading sessions (DST-correct via Intl) ──
+const SESSIONS=[
+  {name:'Sydney',tz:'Australia/Sydney',o:8,c:17},
+  {name:'Tokyo',tz:'Asia/Tokyo',o:9,c:18},
+  {name:'London',tz:'Europe/London',o:8,c:17},
+  {name:'New York',tz:'America/New_York',o:8,c:17},
+];
+let _sessTimer=null;
+function _tzNow(tz){
+  const p={};new Intl.DateTimeFormat('en-GB',{timeZone:tz,weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date()).forEach(o=>{p[o.type]=o.value;});
+  const h=(+p.hour)%24;
+  return {h,m:+p.minute,wd:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(p.weekday),hhmm:String(h).padStart(2,'0')+':'+p.minute};
+}
+function _fmtDur(mins){const h=Math.floor(mins/60),m=mins%60;return (h?h+'h ':'')+m+'m';}
+function renderSessions(){const el=document.getElementById('sessionsBody');if(!el)return;paintSessions();if(_sessTimer)clearInterval(_sessTimer);_sessTimer=setInterval(paintSessions,1000);}
+function stopSessionClock(){if(_sessTimer){clearInterval(_sessTimer);_sessTimer=null;}}
+function paintSessions(){
+  const el=document.getElementById('sessionsBody');if(!el){stopSessionClock();return;}
+  const now=new Date();
+  const localStr=now.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const utc=new Intl.DateTimeFormat('en-GB',{timeZone:'UTC',hour:'2-digit',minute:'2-digit',hour12:false}).format(now);
+  let openCount=0;
+  const rows=SESSIONS.map(se=>{
+    const t=_tzNow(se.tz), wkday=t.wd>=1&&t.wd<=5, oM=se.o*60, cM=se.c*60, nowM=t.h*60+t.m;
+    const isOpen=wkday&&nowM>=oM&&nowM<cM;if(isOpen)openCount++;
+    let stat,note;
+    if(isOpen){stat='Open';note='closes in '+_fmtDur(cM-nowM);}
+    else if(!wkday){stat='Weekend';note='opens Monday '+String(se.o).padStart(2,'0')+':00';}
+    else if(nowM<oM){stat='Closed';note='opens in '+_fmtDur(oM-nowM);}
+    else{stat='Closed';note='opens in '+_fmtDur(1440-nowM+oM);}
+    return `<div class="sess-row ${isOpen?'on':''}"><div class="sess-dot"></div><div class="sess-name">${se.name}</div><div class="sess-time">${t.hhmm}</div><div class="sess-stat"><div class="ss-s">${stat}</div><div class="ss-n">${note}</div></div></div>`;
+  }).join('');
+  const lon=_tzNow('Europe/London'), ny=_tzNow('America/New_York');
+  const lonM=lon.h*60+lon.m, nyM=ny.h*60+ny.m;
+  const overlap=(lon.wd>=1&&lon.wd<=5&&lonM>=480&&lonM<1020)&&(ny.wd>=1&&ny.wd<=5&&nyM>=480&&nyM<1020);
+  el.innerHTML=`
+    <div class="bt-scoreboard" style="margin-bottom:14px">
+      <div class="bt-score"><div class="bt-score-val">${localStr}</div><div class="bt-score-lbl">Your local time</div></div>
+      <div class="bt-score"><div class="bt-score-val">${utc}</div><div class="bt-score-lbl">UTC</div></div>
+      <div class="bt-score"><div class="bt-score-val ${openCount?'g':''}">${openCount}/4</div><div class="bt-score-lbl">Sessions open</div></div>
+    </div>
+    <div class="card"><div class="card-title">Global sessions</div>${rows}
+      ${overlap?`<div class="fut-alert" style="margin:10px 0 0">🟢 <b>London–New York overlap</b> — the highest-liquidity, highest-volatility window of the day.</div>`:''}
+    </div>
+    <div class="card"><div class="card-title">How to use this</div><div class="analysis-text">CME equity-index futures (ES, NQ) trade nearly 24 hours on Globex with a short daily maintenance halt, so you can almost always get a fill. But spreads tighten and the real moves happen when the major financial centers are open — especially the <b>London–New York overlap</b>. This system is a <b>daily</b> swing system, so session timing won't change a signal; use the clock to decide <i>when</i> to place an order, not <i>whether</i> to take it. Windows are the conventional 08:00–17:00 local sessions (daylight-saving handled automatically).</div></div>`;
+}
+
+// Real candlesticks (OHLC) with the 10/50-day averages overlaid. Replaces the
+// old price line — green = close≥open, red = close<open (semantic up/down only).
+function futCandleSVG(ohlc,s10,s50){
+  const N=Math.min(120,ohlc.length);
+  const bars=ohlc.slice(-N), a10=s10.slice(-N), a50=s50.slice(-N);
+  const W=920,H=320,padL=46,padR=12,padT=16,padB=22;
+  let min=Infinity,max=-Infinity;
+  bars.forEach(b=>{if(b.l<min)min=b.l;if(b.h>max)max=b.h;});
+  a10.concat(a50).forEach(v=>{if(v!=null){if(v<min)min=v;if(v>max)max=v;}});
+  const rng=Math.max(1e-6,max-min), plotW=W-padL-padR, plotH=H-padT-padB;
+  const x=i=>padL+(N<=1?plotW/2:i/(N-1)*plotW);
+  const y=v=>padT+(1-(v-min)/rng)*plotH;
+  const cw=Math.max(1.6,Math.min(8,plotW/N*0.62));
+  // gridlines + price axis (4 rows)
+  let grid='';
+  for(let g=0;g<=3;g++){const v=min+rng*g/3, yy=y(v);
+    grid+=`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.05)" stroke-width="1"/>`
+      +`<text x="6" y="${(yy+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10.5" font-family="var(--mono)">$${Math.round(v).toLocaleString()}</text>`;}
+  let cands='';
+  bars.forEach((b,i)=>{const up=b.c>=b.o, col=up?'var(--gr)':'var(--rd)', cx=x(i);
+    const yo=y(b.o),yc=y(b.c),yh=y(b.h),yl=y(b.l);
+    const top=Math.min(yo,yc), bh=Math.max(1,Math.abs(yc-yo));
+    cands+=`<line x1="${cx.toFixed(1)}" y1="${yh.toFixed(1)}" x2="${cx.toFixed(1)}" y2="${yl.toFixed(1)}" stroke="${col}" stroke-width="1"/>`
+      +`<rect x="${(cx-cw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${cw.toFixed(1)}" height="${bh.toFixed(1)}" rx="${cw>3?1:0}" fill="${col}"/>`;});
+  const line=(arr,col,w)=>{let d='',started=false;arr.forEach((v,i)=>{if(v==null)return;d+=(started?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';started=true;});return `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"/>`;};
+  const last=bars[bars.length-1];
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">
+    ${grid}${cands}
+    ${line(a50,'rgba(var(--ac-rgb),.95)',2)}
+    ${line(a10,'var(--at)',1.5)}
+    <line x1="${padL}" y1="${y(last.c).toFixed(1)}" x2="${W-padR}" y2="${y(last.c).toFixed(1)}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>
+    <circle cx="${x(N-1).toFixed(1)}" cy="${y(last.c).toFixed(1)}" r="3" fill="var(--ink)"/>
+  </svg>`;
 }
 function futChartSVG(closes,s10,s50){
   const N=Math.min(140,closes.length);

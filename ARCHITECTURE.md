@@ -1,7 +1,9 @@
 # TradeLens Pro — Architecture
 
 > Living doc. Update when structure, key functions, or data flow change.
-> Last updated: 2026-06-27 (session 29)
+> Last updated: 2026-06-29 (session 32)
+
+**Candles + futures toolkit (session 32).** The futures price chart is now **candlesticks** — `futCandleSVG(ohlc,s10,s50)` (drawn from `q.h1y` OHLC; green close≥open / red close<open) overlays the 10/50-day MA lines + a price-axis grid + a dashed last-price line; falls back to the old line `futChartSVG` only when no OHLC. Three tab panes were added under a new **Toolkit** nav group: `#tab-playbook` (`renderPlaybookTab` — system rules + a live ES checklist via `futSignal`), `#tab-calc` (`renderCalc`/`calcCompute` over `FUT_SPECS` — contract specs + position-size calc, pre-filled from live ES via `_ensureES`), `#tab-sessions` (`renderSessions`/`paintSessions`/`_tzNow` — DST-correct global session clock, 1s `setInterval` cleared by `stopSessionClock` on tab-leave). `mainTab` routes all three (`renderPlaybookTab`/`renderCalc`/`renderSessions`) and calls `stopSessionClock()` when leaving Sessions. NOTE: a dead stock-era `renderPlaybook` (targets the now-absent `#playbook`) still exists — the new one is `renderPlaybookTab` to avoid the collision.
 
 **Purely-futures app (session 31).** Only three tab panes remain in the markup: `#tab-futures` (default), `#tab-ai` (AI Chat), `#tab-feedback`. All stock/options panes + nav buttons were deleted; `mainTab` only routes `futures`/`feedback`; init no longer calls `cpInit`/`renderNews`/`renderTraders`; `loadTicker` is a no-op; the `.appbar` movers ticker is `display:none`. Stock-only render functions (`renderDash`, `renderMovers`, the AI self-learning engine, backtest engine, etc.) remain as **dead, unreferenced JS** (kept to avoid breaking shared helpers like `fetchQuote`/`analyze`/`smaN`/`atr` the futures code reuses).
 

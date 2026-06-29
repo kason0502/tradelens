@@ -3,6 +3,14 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 32) — candlestick chart + 3 new futures tools (Playbook · Risk Calc · Sessions)
+- **Price chart is now candlesticks** (was a line): new `futCandleSVG(ohlc,s10,s50)` draws real OHLC daily candles (green close≥open / red close<open) with the 10- & 50-day averages overlaid, price-axis gridlines, and a dashed last-price line. Uses `q.h1y` OHLC bars; falls back to the old `futChartSVG` line if no OHLC. Legend + card title updated.
+- **New "Toolkit" nav group** with three genuinely useful, honest tools (no fake data):
+  - **Playbook** (`renderPlaybookTab`) — the validated trend-pullback system's six rules, plus a **live pre-trade checklist** that grades today's ES against the three entry conditions (uptrend / pulled back / turning up) with a verdict.
+  - **Risk Calculator** (`renderCalc`/`calcCompute`, `FUT_SPECS`) — futures position sizing from exchange-fixed contract specs (ES/MES/NQ/MNQ/YM/MYM/RTY/M2K/CL/MCL/GC/MGC): account × risk% + entry/stop → risk budget, $/contract, **# of contracts**, actual risk, $/point. Pre-fills entry/stop from the live ES signal; warns when one contract exceeds the budget.
+  - **Session Clock** (`renderSessions`/`paintSessions`, `_tzNow`) — live global sessions (Sydney/Tokyo/London/New York), open/closed + countdown, DST-correct via `Intl`, highlights the London–NY overlap. Live-ticks every second while open; `stopSessionClock` clears the timer when leaving the tab.
+- Renamed the new playbook fn to `renderPlaybookTab` to avoid colliding with a dead stock-era `renderPlaybook`.
+
 ## 2026-06-27 (session 31) — purely futures: stock tabs removed + dead options code pruned
 - **Nav slimmed to futures-only:** removed the stock-era tabs (Stocks/High Volume/Screener/News/Strategy/Pro Traders/Backtest/Performance/Journal/AI Lab/Alerts). Nav is now **Futures · AI Chat · Feedback**.
 - **Hid the stock movers ticker** (`.appbar` display:none); the left news sidebar was already CSS-hidden.

@@ -1,7 +1,9 @@
 # TradeLens Pro — Design System
 
 > Living doc. Update when tokens, components, or visual conventions change.
-> Last updated: 2026-06-26 (session 7)
+> Last updated: 2026-06-29 (session 32)
+
+**Toolkit tabs (session 32):** new components, all built from existing tokens — `.calc-form`/`.calc-field` (labelled inputs + select, `--s2` fill, accent focus ring) → `.calc-out`/`.co` result tiles; `.spec-tbl` (right-aligned numeric contract-spec table); `.sess-row` (session clock row, `.on` = open → green dot + tinted border); `.pb-check` (live checklist, `.yes`/`.no` → green/red icon chip) + `.pb-rule`/`.pb-num` (numbered rule list). Candlesticks use the semantic `--gr`/`--rd` (up/down only) — not the accent.
 
 Aesthetic: **premium dark terminal** — near-black, data-first, professional, with depth. Dark-gray surfaces, white type, an **emerald-green accent**, and a crafted animated background (`#fxCanvas`) + a floating glass nav. (As of session 8 the look moved from "flat minimal" toward "premium/designed" with deliberate glow/depth where the user asked for it — see the background + nav notes below.)
 
