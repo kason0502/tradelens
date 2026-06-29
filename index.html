@@ -1697,219 +1697,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div id="futBody"><div class="card"><div class="loading-label">Loading ES futures…</div></div></div>
     </div>
 
-    <div class="tab-pane" id="tab-dashboard">
-      <!-- INDEX STRIP — live market context -->
-      <div class="idx-strip" id="idxStrip"></div>
-      <!-- COMMAND BAR — drives every panel below -->
-      <div class="dash-cmd">
-        <div class="dash-cmd-main">
-          <svg class="dash-cmd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input id="cpInput" type="text" maxlength="6" spellcheck="false" placeholder="Enter a ticker — e.g. AAPL, NVDA, TSLA, SPY" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')" onkeydown="if(event.key==='Enter')cpSend()"/>
-          <select class="dash-hz" id="cpHorizon" onchange="cpSetHorizon(this.value)" aria-label="Horizon">
-            <option value="0dte" selected>Intraday · 1-min</option><option value="1w">1 Week</option><option value="1m">1 Month</option><option value="3m">3 Month</option><option value="6m">6 Month</option><option value="1y">1 Year</option>
-          </select>
-          <button class="dash-go" onclick="cpSend()">Analyze</button>
-        </div>
-        <div class="dash-chips">
-          <button class="dash-chip" onclick="cpChip('AAPL')">AAPL</button>
-          <button class="dash-chip" onclick="cpChip('NVDA')">NVDA</button>
-          <button class="dash-chip" onclick="cpChip('TSLA')">TSLA</button>
-          <button class="dash-chip" onclick="cpChip('SPY')">SPY</button>
-          <button class="dash-chip" onclick="cpChip('COIN')">COIN</button>
-          <button class="dash-chip" onclick="cpChip('AMD')">AMD</button>
-        </div>
-      </div>
-
-      <!-- HEADER STRIP -->
-      <div class="dash-head" id="dashHead"></div>
-
-      <!-- PANEL GRID -->
-      <div class="dash-grid">
-        <div class="dash-col">
-          <section class="dash-panel chart">
-            <div class="dash-tv" id="dashTV"></div>
-          </section>
-          <section class="dash-panel" id="dashPredictPanel" style="display:none"><div id="dashPredict"></div></section>
-          <section class="dash-panel">
-            <div class="dp-h">Key metrics</div>
-            <div class="dash-metrics" id="dashMetrics"></div>
-          </section>
-          <section class="dash-panel" id="dashGreeks"></section>
-          <section class="dash-panel">
-            <div class="dp-h">Why — live signals</div>
-            <div id="dashWhy"></div>
-          </section>
-        </div>
-        <div class="dash-col">
-          <section class="dash-panel" id="dashWatch"></section>
-          <section class="dash-panel" id="dashPlan"></section>
-          <section class="dash-panel" id="dashConv"></section>
-          <section class="dash-panel dash-note" id="dashNote"></section>
-        </div>
-      </div>
-    </div>
-
-    <!-- HIGH VOLUME / MOVERS -->
-    <div class="tab-pane" id="tab-movers">
-      <div class="mv-head">
-        <div>
-          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">High volume &amp; big movers</div>
-          <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-top:6px;max-width:680px">The day's most active names and largest moves, pulled from live market data. Click any card to analyze its structure on the dashboard.</div>
-        </div>
-        <button class="mv-tgl" onclick="renderMovers(true)" style="flex-shrink:0"><span>↻ Refresh</span></button>
-      </div>
-      <div id="moversStats" class="scan-stats"></div>
-      <div class="mv-toolbar" id="mvToolbar">
-        <button class="mv-tgl active" data-sort="vol" onclick="moversSort('vol',this)">Most active</button>
-        <button class="mv-tgl" data-sort="gain" onclick="moversSort('gain',this)">Top gainers</button>
-        <button class="mv-tgl" data-sort="lose" onclick="moversSort('lose',this)">Top losers</button>
-        <button class="mv-tgl" data-sort="vola" onclick="moversSort('vola',this)">Most volatile</button>
-      </div>
-      <div id="moversBody"><div class="mv-empty">Loading live market movers…</div></div>
-    </div>
-
-    <!-- NEWS -->
-    <div class="tab-pane" id="tab-news">
-      <div style="margin-bottom:8px;font-size:26px;font-weight:800;letter-spacing:-.03em">Market News</div>
-      <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:8px;max-width:640px">Macro and single-name headlines with a plain-English read on what each could mean for price. Click a ticker to analyze it on the dashboard.</div>
-      <div style="font-size:12px;color:var(--ink3);margin-bottom:18px">Illustrative sample feed — a live newswire can be wired in with a data provider key.</div>
-      <div id="newsSummary" class="scan-stats"></div>
-      <div id="newsLegend" style="font-size:12px;color:var(--ink3);line-height:1.7;margin:4px 0 22px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--s1)">
-        <b style="color:var(--ink2)">How to read this:</b> each card carries a <span class="ntag ntag-bull">Bullish</span> / <span class="ntag ntag-bear">Bearish</span> / <span class="ntag ntag-neut">Neutral</span> tag = the likely <i>direction of pressure</i> on the named tickers, plus a one-line "what it could mean for price." Headlines aren't trade signals on their own — confirm the structure on the dashboard before acting.
-      </div>
-      <div class="news-grid" id="newsTabFeed"></div>
-    </div>
-
-    <!-- STRATEGY IDEAS (day-by-day) -->
-    <div class="tab-pane" id="tab-strategy">
-      <div style="margin-bottom:18px">
-        <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">Strategy ideas</div>
-        <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-top:6px;max-width:720px">A day-by-day playbook: what each trading day tends to favor, the scheduled events that move markets this week, and <b>live candidates</b> scanned from real data to match today's setup. Educational — not financial advice.</div>
-      </div>
-      <div id="stratToday"></div>
-      <div id="stratEvents"></div>
-      <div id="stratWeek"></div>
-      <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--s1)"><b style="color:var(--ink2)">How to read this:</b> these are <i>tendencies</i>, not guarantees — markets don't follow a calendar perfectly. Use each day's theme to bias which setups you hunt, confirm the structure on the dashboard, and always size with a stop. Scheduled macro events (FOMC, CPI) shift dates each month — check an economic calendar for exact times.</div>
-    </div>
-
-    <!-- PRO TRADERS -->
-    <div class="tab-pane" id="tab-traders">
-      <div style="margin-bottom:20px">
-        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">Pro Trader Calls</div>
-        <div style="font-size:13px;color:var(--mu);line-height:1.6">What high-reputation traders and analysts are saying about the market right now. For educational purposes only.</div>
-      </div>
-      <div class="trader-filter-row" id="traderFilterRow">
-        <button class="tfl-btn active" data-f="all" onclick="filterTraders(this)">All Stocks</button>
-        <button class="tfl-btn" data-f="AAPL" onclick="filterTraders(this)">AAPL</button>
-        <button class="tfl-btn" data-f="NVDA" onclick="filterTraders(this)">NVDA</button>
-        <button class="tfl-btn" data-f="TSLA" onclick="filterTraders(this)">TSLA</button>
-        <button class="tfl-btn" data-f="SPY" onclick="filterTraders(this)">SPY</button>
-        <button class="tfl-btn" data-f="META" onclick="filterTraders(this)">META</button>
-        <button class="tfl-btn" data-f="AMZN" onclick="filterTraders(this)">AMZN</button>
-        <button class="tfl-btn" data-f="bull" onclick="filterTraders(this)">🟢 Bullish Only</button>
-        <button class="tfl-btn" data-f="bear" onclick="filterTraders(this)">🔴 Bearish Only</button>
-      </div>
-      <div id="traderCards"></div>
-    </div>
-
-    <!-- BACKTEST -->
-    <div class="tab-pane" id="tab-backtest">
-      <div style="margin-bottom:18px">
-        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">Backtesting Engine</div>
-        <div style="font-size:13px;color:var(--mu);line-height:1.6">Pull up a historical chart, study the setup, then predict <b style="color:var(--gt)">Long</b> or <b style="color:var(--rt)">Short</b>. We reveal what actually happened next and score your call. Practice reading charts with zero risk.</div>
-      </div>
-
-      <!-- Session scoreboard -->
-      <div id="btScore"></div>
-
-      <!-- Setup controls -->
-      <div class="card">
-        <div class="card-title"><span class="pdot"></span>Set Up a Backtest</div>
-        <div class="bt-setup">
-          <div class="bt-field">
-            <div class="bt-lbl">Ticker</div>
-            <input class="fi" id="btTicker" placeholder="AAPL" value="AAPL" style="margin:0;max-width:120px;font-family:var(--mono);font-weight:700;text-transform:uppercase"/>
-          </div>
-          <div class="bt-field">
-            <div class="bt-lbl">Timeframe</div>
-            <select class="fi" id="btTF" style="margin:0;max-width:150px">
-              <option value="1m">1-min (scalp)</option>
-              <option value="5m">5-min (intraday)</option>
-              <option value="10m">10-min (intraday)</option>
-              <option value="1d" selected>Daily (swing)</option>
-            </select>
-          </div>
-          <div class="bt-field">
-            <div class="bt-lbl">Hold (bars ahead)</div>
-            <select class="fi" id="btHold" style="margin:0;max-width:150px">
-              <option value="5">5 bars</option>
-              <option value="10" selected>10 bars</option>
-              <option value="20">20 bars</option>
-              <option value="40">40 bars</option>
-            </select>
-          </div>
-          <button class="go-btn" id="btStart" style="align-self:flex-end">Deal Setup →</button>
-          <button class="nbtn" id="btRandom" type="button" style="align-self:flex-end">Surprise me</button>
-        </div>
-        <div class="bt-hint">You'll be assigned a <b>strategy to apply</b> and shown price history up to a hidden decision point. Make your call, then see how the strategy would've played out.</div>
-      </div>
-
-      <!-- The backtest play area -->
-      <div id="btArena"><div class="bt-empty">Set a ticker and hit <b>Deal Setup</b> to begin a practice trade.</div></div>
-
-      <!-- Strategy examples / playbook -->
-      <div class="card">
-        <div class="card-title">📘 Strategy Playbook — worked examples</div>
-        <div style="font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.6">Study these classic setups before you predict. Each shows the entry logic, the tell, and how to manage the trade.</div>
-        <div class="playbook" id="playbook"></div>
-      </div>
-    </div>
-
-    <!-- MY PERFORMANCE -->
-    <div class="tab-pane" id="tab-performance">
-      <div style="margin-bottom:18px">
-        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">My Performance</div>
-        <div style="font-size:13px;color:var(--mu);line-height:1.6">Your backtest track record — broken down by strategy, direction, and timeframe — so you can see what you're good at and where you leak. Let the AI coach review it and tell you exactly what to work on.</div>
-      </div>
-      <div id="perfBody"></div>
-    </div>
-
-    <!-- TRADE JOURNAL (self-grading) -->
-    <div class="tab-pane" id="tab-journal">
-      <div style="margin-bottom:18px">
-        <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">Trade journal</div>
-        <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-top:6px;max-width:720px">Setups you've chosen to <b>track</b> from the dashboard. STRATA watches live price and grades each one for you — <span style="color:var(--gt)">entry hit</span>, <span style="color:var(--rt)">stopped</span> or <span style="color:var(--gt)">target reached</span> — building a real, honest track record from actual market movement. Not financial advice.</div>
-      </div>
-      <div id="journalBody"></div>
-    </div>
-
-    <!-- AI LAB -->
-    <div class="tab-pane" id="tab-ailab">
-      <div style="margin-bottom:18px">
-        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">AI Lab — Self-Learning Engine</div>
-        <div style="font-size:13px;color:var(--mu);line-height:1.6">The AI picks strategies, <b>back-tests its own picks</b> on real data, logs each win and loss, and adjusts how much it trusts each strategy. It learns <b>each timeframe separately</b> — Intraday on real 1-/5-min bars, Swing &amp; Position on daily history — so shorter <i>and</i> longer setups both improve. That learned edge shapes the <b>strategy pick, entry, stop and targets</b> on the dashboard for whichever horizon you choose. Train it more to sharpen its edge.</div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="pdot"></span>Train the AI</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
-          <button class="ai-btn" id="aiTrain12" onclick="aiSelfBacktest(12)">▶ Run 12 self-tests</button>
-          <button class="ai-btn" id="aiTrain30" onclick="aiSelfBacktest(30)">▶▶ Run 30 (deeper)</button>
-          <button class="walk-ctrl" id="aiAutoBtn" onclick="toggleAutoLearn()">⏸ Pause auto-learn</button>
-          <button class="walk-ctrl" onclick="resetAIMemory()">↻ Reset memory</button>
-        </div>
-        <div id="aiAutoStatus" style="font-size:12px;color:var(--mu);margin-bottom:12px;min-height:16px"></div>
-        <div class="ai-learn-barwrap"><div class="ai-learn-bar" id="aiLearnBar"></div></div>
-        <div id="aiLearnStatus" style="font-size:12px;color:var(--mu);margin-top:8px;min-height:16px"></div>
-        <div style="font-size:11px;color:var(--fa);margin-top:6px">The manual runs train the <b>timeframe you select below</b>; background auto-learn rotates through all three. Each test reads a random real chart, picks the fitting strategy, then <b>walks the trade forward bar-by-bar on real data</b> to see whether the target or the stop hit first — and updates that timeframe's edge. Needs a connection; a few seconds per test.</div>
-      </div>
-      <div id="aiLearnStats"></div>
-      <div class="card">
-        <div class="card-title"><span class="pdot"></span>Live learning console</div>
-        <div style="font-size:12px;color:var(--ink3);line-height:1.6;margin-bottom:12px">Every self-test streams here: the setup it picked, the planned <b>entry / stop / target</b>, whether the <span style="color:var(--gt)">target</span> or <span style="color:var(--rt)">stop</span> hit first on real forward data, the result in <b>R</b> (multiples of risk), and how that <b>nudged the strategy's confidence</b> — which feeds straight into your dashboard reads and trade levels.</div>
-        <div id="aiConsole"></div>
-      </div>
-    </div>
-
     <!-- AI CHAT -->
     <div class="tab-pane" id="tab-ai">
       <div style="margin-bottom:16px">
@@ -1955,43 +1742,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <button class="chat-send" onclick="sendChat()">Send</button>
         </div>
       </div>
-    </div>
-
-    <!-- SCREENER -->
-    <div class="tab-pane" id="tab-screener">
-      <div class="mv-head">
-        <div>
-          <div style="font-size:26px;font-weight:800;letter-spacing:-.03em">Market screener</div>
-          <div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-top:6px;max-width:680px">A live structure scan across the most liquid names — RSI, trend, distance-to-high and a verdict on each, computed from real data. Click any row to open it on the dashboard.</div>
-        </div>
-        <button class="mv-tgl" onclick="renderScreener(true)" style="flex-shrink:0">↻ Refresh</button>
-      </div>
-      <div id="scanStats" class="scan-stats"></div>
-      <div class="mv-toolbar" id="scanToolbar">
-        <button class="mv-tgl active" data-scan="bullish" onclick="runScanLive('bullish',this)">Bullish momentum</button>
-        <button class="mv-tgl" data-scan="breakout" onclick="runScanLive('breakout',this)">Breakout watch</button>
-        <button class="mv-tgl" data-scan="oversold" onclick="runScanLive('oversold',this)">Oversold bounce</button>
-        <button class="mv-tgl" data-scan="bearish" onclick="runScanLive('bearish',this)">Bearish pressure</button>
-        <button class="mv-tgl" data-scan="trend" onclick="runScanLive('trend',this)">Trend leaders</button>
-        <button class="mv-tgl" data-scan="all" onclick="runScanLive('all',this)">All names</button>
-      </div>
-      <div id="scanResults"><div class="mv-empty">Loading live screener…</div></div>
-    </div>
-
-    <!-- ALERTS -->
-    <div class="tab-pane" id="tab-alerts">
-      <div style="margin-bottom:16px"><div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">Price Alerts</div><div style="font-size:13px;color:var(--mu)">Monitor key price levels for any ticker — set one at your trade plan's <b>entry</b>, <b>stop</b>, or <b>target</b> so you never miss the trigger.</div></div>
-      <div class="card">
-        <div class="card-title">Add New Alert</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="fi" id="alTk2" placeholder="Symbol" style="max-width:92px;margin:0"/>
-          <input class="fi" id="alPr2" type="number" placeholder="Target price $" style="flex:1;margin:0"/>
-          <select class="fi" id="alDir2" style="max-width:90px;margin:0"><option value="above">Above</option><option value="below">Below</option></select>
-          <button class="go-btn" style="padding:9px 15px;font-size:13px" onclick="addAlert2()">+ Add</button>
-        </div>
-        <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">How to use this:</b> pick <b>Above</b> to be notified when price rises through your level (breakouts, targets) or <b>Below</b> for breakdowns and stops. A typical plan needs two alerts — one at your <span style="color:var(--gt)">target</span> to take profit and one at your <span style="color:var(--rt)">stop</span> to cut the loss.</div>
-      </div>
-      <div class="card"><div class="card-title">Active Alerts <span id="alertCount" style="font-family:var(--mono);font-weight:700;color:var(--ink3);font-size:12px"></span></div><div id="alertList2"><div style="text-align:center;padding:22px;color:var(--fa);font-size:13px">No alerts yet. Add one above.</div></div></div>
     </div>
 
     <!-- FEEDBACK -->
@@ -2046,18 +1796,8 @@ function mainTab(name,btn){
   const pane=document.getElementById('tab-'+name); if(pane)pane.classList.add('active');
   if(btn&&btn.classList)btn.classList.add('active');
   const sb=document.querySelector('.snav[data-tab="'+name+'"]'); if(sb)sb.classList.add('active');
-  if(name==='screener')renderScreener();
-  if(name==='news')renderNewsTab();
-  if(name==='feedback')renderFeedbackTab();
-  if(name==='strategy')renderStrategy();
-  if(name==='traders')renderTraders(currentTraderFilter);
-  if(name==='backtest')initBacktestTab();
-  if(name==='performance')renderPerformance();
-  if(name==='journal')renderJournal();
-  if(name==='ailab')renderAILearnStats();
   if(name==='futures')renderFutures();
-  if(name==='dashboard'&&!window._dashInited){window._dashInited=true;cpInit();}
-  if(name==='movers')renderMovers();
+  if(name==='feedback')renderFeedbackTab();
   if(sb)snavGlideTo(sb);
   const pw=document.querySelector('.page-wrap'); if(pw)pw.scrollTop=0;
 }
@@ -4690,11 +4430,7 @@ async function load(ticker){
   }
   document.getElementById('main').innerHTML=`<div class="error-state"><strong>Could not load ${ticker}</strong><br><br>${lastErr?.message||'Data feed unavailable.'}<br><br>Public market-data proxies can be intermittent. Give it a moment and retry.<br><br><button class="retry-btn" onclick="loadTicker('${ticker}')">↻ Retry</button></div>`;
 }
-function loadTicker(t){
-  // route any "open this ticker" request to the dashboard
-  mainTab('dashboard',document.querySelector('.ntab'));
-  renderDash(t);
-}
+function loadTicker(t){ /* stocks removed — futures-only terminal */ }
 
 // ══════════════════════════════════════════════════════════════════════
 // ── DASHBOARD — panel terminal, driven by the ask bar ────────────────
@@ -6405,8 +6141,6 @@ function renderMoWl(){const el=document.getElementById('moWl');if(!el)return;el.
 window.addEventListener('resize',()=>{if(lastCanvasData){const{q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;setTimeout(()=>drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral),80);}if(btState&&document.getElementById('btCanvas')){setTimeout(()=>drawBacktestChart(btState.done,btState._overlay),80);}});
 
 // ── INIT ──────────────────────────────────────────────────────────────
-renderNews();
-renderTraders('all');
 updateAIBadge();
 probeProxy();
 renderFutures();     // Futures is the default tab now

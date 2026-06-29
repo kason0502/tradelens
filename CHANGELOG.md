@@ -7,7 +7,7 @@
 - **Nav slimmed to futures-only:** removed the stock-era tabs (Stocks/High Volume/Screener/News/Strategy/Pro Traders/Backtest/Performance/Journal/AI Lab/Alerts). Nav is now **Futures · AI Chat · Feedback**.
 - **Hid the stock movers ticker** (`.appbar` display:none); the left news sidebar was already CSS-hidden.
 - **Pruned dead options JS** — removed `renderOptLab`/`paintOptLab`/`optLabToggleAuto`/`optEquitySVG` (the 0DTE Lab viewer, now unreferenced after session 30). Verified no leftover refs, no console errors, AI Chat still switches.
-- The stock tab *panes* remain in the DOM but are unreachable (no nav) — harmless; can be deleted for a smaller file later.
+- **Deleted the stock tab panes from the DOM** (dashboard/movers/news/strategy/traders/backtest/performance/journal/ailab/screener/alerts) — only futures/AI-Chat/feedback markup remains. Removed the dead `mainTab` hooks + init calls (`renderNews`/`renderTraders`) and no-op'd `loadTicker`. Verified: futures + AI Chat + Feedback all work, no console errors. (The stock-only *render functions* still exist in JS — harmless dead code, deeper prune deferred to avoid touching shared helpers.)
 
 ## 2026-06-27 (session 30) — futures terminal: multi-market scan, alerts, live edge; options tab removed
 - **Removed the options-focused 0DTE Lab tab** (nav + pane + hook) — STRATA is futures-first now.
