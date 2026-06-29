@@ -2,7 +2,7 @@
   "_comment": "All knobs for one backtest run. Pessimistic by design — see README.",
 
   "symbol": "ES=F",
-  "start_date": "2024-01-01",
+  "start_date": "2015-01-01",
   "end_date": "2026-12-31",
   "timezone": "America/New_York",
 
@@ -10,8 +10,8 @@
     "provider": "yahoo",
     "_provider_options": ["yahoo", "polygon", "thetadata", "local"],
     "yahoo": {
-      "interval": "5m",
-      "range": "60d",
+      "interval": "1d",
+      "range": "10y",
       "_note": "FREE futures/stock price bars. 5m -> ~60 days history; 1m -> ~7 days; 1d -> years. So intraday futures backtests only cover the recent weeks Yahoo serves. Symbols: ES=F, NQ=F, MES=F, MNQ=F."
     },
     "polygon": {
@@ -33,16 +33,16 @@
 
   "strategy": {
     "name": "orb_breakout_calls",
-    "type": "futures_orb",
-    "_type_options": ["long_call", "put_credit_spread", "futures_orb"],
+    "type": "futures_swing",
+    "_type_options": ["long_call", "put_credit_spread", "futures_orb", "futures_swing"],
 
     "signal": "pullback",
     "_signal_options": ["orb", "pullback", "meanrev"],
-    "pullback_trend_sma": 30,
+    "pullback_trend_sma": 50,
     "pullback_sma": 10,
     "meanrev_sma": 20,
     "meanrev_k": 2.0,
-    "stop_pct": 0.5,
+    "stop_pct": 8,
     "_type_note": "long_call = the ORB buy-calls strategy (loses after costs). put_credit_spread = SELL a defined-risk put spread (collect premium, theta works for you).",
 
     "entry_time": "10:00",
@@ -70,8 +70,8 @@
     "allowed_sessions": ["open", "midday", "power_hour", "last_30"],
     "_allowed_sessions_note": "Restrict entries by time of day. e.g. [\"open\"] = only 09:30-10:30. All four = no restriction.",
 
-    "take_profit_pct": 0.5,
-    "_take_profit_note": "Percent of price. For options ~15-40; for FUTURES this is a % move of the index, so keep it small (e.g. 0.3-0.8 = a 0.3-0.8% move).",
+    "take_profit_pct": null,
+    "_take_profit_note": "null = let winners run (swing exits on trend_break/stop). For options ~15-40; intraday futures 0.3-0.8; daily swing maybe 8-15 if used.",
     "stop_rule": "pct",
     "_stop_rule_options": ["pct", "close_back_below_level", "none"],
     "eod_exit_minute": "15:55",
@@ -79,7 +79,7 @@
   },
 
   "futures": {
-    "point_value": 50,
+    "point_value": 5,
     "tick_size": 0.25,
     "slippage_ticks": 1,
     "commission_per_contract": 2.5,

@@ -440,9 +440,17 @@ class YahooProvider(BaseProvider):
             "ts": pd.to_datetime(res["timestamp"], unit="s", utc=True).tz_convert(self.tz),
             "open": q.get("open"), "high": q.get("high"), "low": q.get("low"), "close": q.get("close"),
         }).dropna()
-        # regular cash session only (so the opening-range concept is meaningful)
-        df = df[(df["ts"].dt.time >= dt.time(9, 30)) & (df["ts"].dt.time <= dt.time(16, 0))]
+        # intraday only: keep the regular cash session (so opening-range is meaningful).
+        if self.interval.endswith("m"):
+            df = df[(df["ts"].dt.time >= dt.time(9, 30)) & (df["ts"].dt.time <= dt.time(16, 0))]
         return df.sort_values("ts").reset_index(drop=True)
+
+    def all_bars(self) -> pd.DataFrame:
+        """Whole series within [start_date,end_date] — for the daily/swing runner."""
+        start = pd.Timestamp(self.cfg["start_date"]).date()
+        end = pd.Timestamp(self.cfg["end_date"]).date()
+        d = self._df[(self._df["ts"].dt.date >= start) & (self._df["ts"].dt.date <= end)]
+        return d.reset_index(drop=True)
 
     def trading_days(self) -> list[dt.date]:
         start = pd.Timestamp(self.cfg["start_date"]).date()

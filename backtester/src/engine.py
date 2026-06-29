@@ -353,9 +353,68 @@ def _close_futures(pos, bar, exit_px, pv, slip, comm, contracts, reason):
     }
 
 
+# ════════════════════ FUTURES SWING (daily bars, hold across days) ════════════════════
+def run_swing(bars: pd.DataFrame, cfg: dict) -> list[dict]:
+    """Daily/swing: one bar per day, positions held across days. Uses the same
+    signal functions (pullback/meanrev/orb-ish) on the rolling DAILY window.
+    Exit on take-profit, % stop, or trend break (close below the long MA)."""
+    s = cfg["strategy"]; fu = cfg.get("futures", {})
+    bars = bars.sort_values("ts").reset_index(drop=True)
+    if len(bars) < 60:
+        return []
+    pv = fu.get("point_value", 50.0); tick = fu.get("tick_size", 0.25)
+    slip = fu.get("slippage_ticks", 1) * tick; comm = fu.get("commission_per_contract", 2.5)
+    contracts = cfg["account"]["contracts_per_trade"]
+    tp = s.get("take_profit_pct"); stop_pct = s.get("stop_pct")
+    trend_n = int(s.get("pullback_trend_sma", 50))
+
+    trades = []; position = None; pending_entry = False; pending_exit = None
+    n = len(bars)
+    for i in range(n):
+        bar = bars.iloc[i]; is_last = (i == n - 1)
+
+        if pending_exit and position is not None:
+            trades.append(_close_futures(position, bar, float(bar["open"]) - slip, pv, slip, comm, contracts, pending_exit))
+            position = None; pending_exit = None
+        if pending_entry and position is None and not is_last:
+            px = float(bar["open"]) + slip
+            position = {"day": bar["ts"].date(), "tod": "swing", "entry_ts": bar["ts"],
+                        "entry": px, "entry_ref": float(bar["open"])}
+            pending_entry = False
+        elif pending_entry:
+            pending_entry = False
+        if is_last and position is not None:
+            trades.append(_close_futures(position, bar, float(bar["close"]) - slip, pv, slip, comm, contracts, "end_of_data"))
+            position = None; continue
+
+        win = bars.iloc[: i + 1]
+        if position is not None:
+            cur = float(bar["close"]); reason = None
+            if tp and cur >= position["entry"] * (1 + tp / 100.0):
+                reason = "take_profit"
+            elif stop_pct and cur <= position["entry"] * (1 - stop_pct / 100.0):
+                reason = "stop_pct"
+            elif len(win) >= trend_n and cur < win["close"].tail(trend_n).mean():
+                reason = "trend_break"
+            if reason:
+                pending_exit = reason
+        elif not pending_entry:
+            if strat.detect_signal(win, None, s) == "long":
+                pending_entry = True
+    return trades
+
+
 def run(provider, cfg: dict, quiet: bool = False) -> list[dict]:
     all_trades: list[dict] = []
     stype = cfg["strategy"].get("type")
+    if stype == "futures_swing":                       # daily series, single pass (not per-day)
+        if not quiet:
+            print("[engine] daily/swing mode — loading full series…", flush=True)
+        bars = provider.all_bars()
+        if not quiet:
+            print(f"[engine] {len(bars)} daily bars "
+                  f"({cfg.get('start_date')}..{cfg.get('end_date')})", flush=True)
+        return run_swing(bars, cfg)
     is_futures = (stype == "futures_orb")
     runner = run_day_futures if is_futures else (run_day_spread if stype == "put_credit_spread" else run_day)
     days = provider.trading_days()
