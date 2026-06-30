@@ -1,4 +1,23 @@
-# STRATA Trader — standalone desktop tool
+# STRATA desktop tools
+
+Two standalone programs (PowerShell, **no installs** — no Node/Python). Both run
+the validated daily trend-pullback strategy on real Yahoo data.
+
+## 1. STRATA Live — charting app (`strata-live.ps1`, double-click `run-live.bat`)
+A windowed app that **reacts to the live chart**: draws candlesticks + the 10/50
+averages, drops **`bull.png` on BUY signals** and **`bear.png` on downtrend/exit
+signals**, and shows the current **entry / exit / hard-stop + position size**. It
+auto-refreshes every 60s.
+
+- **Timeframe dropdown:** *Daily* (~weeks hold) or *Hourly* (~couple-days hold).
+- **Backtest button:** re-tests the edge on the selected timeframe and gives a verdict
+  (EDGE HOLDS / MARGINAL / NO EDGE). Finding so far: the edge **holds on Daily**
+  (PF ~1.4) but **does NOT hold on Hourly** for ES (PF ~0.8) — so a couple-day-hold
+  version of this exact rule isn't profitable; try other markets/timeframes and re-test.
+- Headless check (no window): `powershell -ExecutionPolicy Bypass -File strata-live.ps1 -NoUI -Interval 1h`
+
+## 2. STRATA Trader — console backtester
+# (original) standalone desktop tool
 
 A single PowerShell program that runs the validated **daily trend-pullback** futures
 strategy on real market data — **no website, no installs** (no Node, no Python).

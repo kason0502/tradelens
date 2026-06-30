@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 44) — STRATA Live: desktop charting app with bull/bear signal markers
+- **New `trader/strata-live.ps1` (+ `run-live.bat`)** — a PowerShell **WinForms** desktop app (no installs) that reacts to the live chart: custom-draws candlesticks + 10/50 averages, overlays **`bull.png` on BUY signals** and **`bear.png` on downtrend/exit signals**, shows the current **entry/exit/hard-stop + position size**, and auto-refreshes every 60s. Symbol + **timeframe dropdown (Daily ~weeks hold / Hourly ~couple-days hold)** + a **Backtest** button that re-tests the selected timeframe and prints a verdict.
+- **Answered the lower-timeframe question:** the same rule on **hourly** bars (~3-day holds) **does NOT hold the edge** on ES (PF 0.79, −5.8%) while **Daily holds** (PF 1.42, +13.6%) — the app flags "NO EDGE — re-backtest a different timeframe." Engine verified headless (`-NoUI`); the WinForms chart is built on that same verified engine.
+- Shared, parameterized strategy/backtest (`Analyze`/`Backtest-Text`/`Signal-Info`, per-timeframe SMA + range config). Pure-ASCII source (PS 5.1 reads .ps1 as ANSI).
+
 ## 2026-06-29 (session 43) — standalone desktop trader (PowerShell, no installs)
 - **New `/trader` tool** — a single PowerShell program (`trader/strata-trader.ps1` + `run.bat`) that runs the trend-pullback strategy **off the website, with no Node/Python**. It fetches real Yahoo daily candles server-side (no CORS), **prints every backtest trade as it finds them** (green wins / red losses, colorized), shows full stats (trades, win rate, profit factor, total return, net $ on a micro, max DD, verdict), then prints the **current live setup with concrete enter / exit / hard-stop levels** and a position size. Flags: `-Symbol -Years -Account -RiskPct -All` (scan every market) `-Watch` (re-check on a timer). Tested live (ES 5y → PF 1.42, +13.6%, current BUY SETUP; `-All` scans ES/NQ/YM/RTY/CL/GC). Same edge/rules as the app. Educational — does NOT place orders. Added `trader` + `backtester` to `.vercelignore`.
 
