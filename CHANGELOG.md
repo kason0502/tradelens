@@ -3,6 +3,15 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 47) — STRATA Live: "insane" upgrade (terminal mode)
+- **Living backdrop:** animated particle/constellation field + aurora glow behind the whole app (its own canvas).
+- **Streaming ticker tape** across the top (real multi-market last price + day %), seamless marquee.
+- **Watchlist rail** (left): every market with a live signal chip (BUY/WATCH/UP/DOWN) + mini sparkline + day %; click to load. Shares one universe fetch with the ticker.
+- **Replay mode:** scrubber + ▶/⏸ play + ←/→ step + Live button to scrub through history and watch the bull/bear signals fire bar-by-bar (before each move).
+- **⚡ Edge Finder:** backtests a grid of SMA settings (trend 30–200 × pull 5/10/20) on the loaded data instantly, ranks by profit factor, and **click-to-apply** a config to the chart — the real "backtest again" loop.
+- **Neon/glow rendering** (glowing MAs, pulsing signal marker + ring, pulsing last-price dot), **OHLC tooltip** on hover, **equity-curve sparkline** + **count-up** stat animations, **BUY-signal toast**, a **boot splash**, and hotkeys (←/→ step, space play, +/− zoom).
+- Verified: server serves the 32KB app (chart/Edge Finder/replay present) and `/api/yf` returns live data. Strategy logic unchanged (parameterized for Edge Finder). Educational; no orders.
+
 ## 2026-06-29 (session 46) — STRATA Live as a local WEB APP (much nicer than WinForms)
 - **New `trader/app/index.html` + `serve-app.ps1` + `STRATA-Live.bat`** — the live trader rebuilt as a local single-page web app (Canvas), launched in an app-mode browser window by a one-click `.bat`. A tiny PowerShell server (port 8799) serves the app **and proxies Yahoo server-side** (reliable data, no CORS). Verified end-to-end: page served, `/api/yf` returns live data, bull/bear PNGs serve.
 - Same engine ported to JS (SMA / trend-pullback / backtest / signal). Features: live candlesticks + 10/50 MAs, **bull.png on BUY / bear.png on SELL-exit** (bulls only in uptrends, bears only at trend-break — never the wrong one), **pulsing latest marker + glow ring**, last-price pulse, **hover crosshair w/ price**, **scroll + ▢ zoom**, **click a marker → targets popup** (entry/target/stop/result, or live for the open position), live entry/exit/size panel, per-timeframe backtest stats + verdict (Daily ~weeks / Hourly ~days), 60s auto-refresh, smooth CSS/Canvas animation.

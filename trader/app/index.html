@@ -5,272 +5,320 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>STRATA Live</title>
 <style>
-  :root{ --bg:#0a0a0c; --s1:#111114; --s2:#16171b; --line:rgba(255,255,255,.08); --ink:#e8eaed; --mut:#8a8f98;
-    --green:#26c281; --red:#f0445a; --amber:#ffc94d; --ac:#22c55e; --ac2:#34d399; }
+  :root{ --bg:#08080b; --s1:rgba(20,21,26,.72); --s2:rgba(26,28,34,.78); --line:rgba(255,255,255,.09);
+    --ink:#e8eaed; --mut:#8a8f98; --green:#26e58f; --red:#ff4d6a; --amber:#ffc94d; --ac:#22c55e; --ac2:#34d399; }
   *{box-sizing:border-box} html,body{margin:0;height:100%}
   body{background:var(--bg);color:var(--ink);font:13px/1.5 "Segoe UI",system-ui,sans-serif;overflow:hidden}
-  .wrap{display:flex;flex-direction:column;height:100vh}
-  .top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(180deg,#141417,#0e0e11);border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:.5px;margin-right:6px}
-  .brand img{width:26px;height:26px;border-radius:6px}
-  .brand small{font-weight:600;color:var(--mut);letter-spacing:.16em;font-size:9.5px;text-transform:uppercase}
+  #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh}
+  .top{display:flex;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(180deg,rgba(20,20,24,.92),rgba(12,12,15,.86));backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:.5px}
+  .brand img{width:28px;height:28px;border-radius:7px;box-shadow:0 0 14px rgba(34,197,94,.5)}
+  .brand small{font-weight:700;color:var(--ac2);letter-spacing:.18em;font-size:9px;text-transform:uppercase}
   select,button{background:var(--s2);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 11px;font:inherit;cursor:pointer;transition:all .15s}
-  select:hover,button:hover{border-color:rgba(34,197,94,.55)}
-  button.pri{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.4);color:#aef0c8}
+  select:hover,button:hover{border-color:rgba(34,197,94,.6);transform:translateY(-1px)}
+  button.pri{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.45);color:#aef0c8}
+  button.pri:hover{box-shadow:0 0 18px rgba(34,197,94,.35)}
   .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
-  .seg button{border:0;border-radius:0;background:transparent}
-  .seg button.on{background:rgba(34,197,94,.18);color:#aef0c8}
+  .seg button{border:0;border-radius:0;background:transparent;transform:none}
+  .seg button.on{background:rgba(34,197,94,.2);color:#aef0c8}
   .spacer{flex:1}
   .status{font-size:11.5px;color:var(--mut);font-family:ui-monospace,Consolas,monospace}
-  .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 0 0 rgba(38,194,129,.6);animation:pulse 1.8s infinite}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(38,194,129,.5)}70%{box-shadow:0 0 0 7px rgba(38,194,129,0)}100%{box-shadow:0 0 0 0 rgba(38,194,129,0)}}
+  .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 0 0 rgba(38,229,143,.6);animation:pulse 1.8s infinite;vertical-align:middle}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(38,229,143,.5)}70%{box-shadow:0 0 0 8px rgba(38,229,143,0)}100%{box-shadow:0 0 0 0 rgba(38,229,143,0)}}
+  /* ticker tape */
+  .tape{height:30px;overflow:hidden;border-bottom:1px solid var(--line);background:rgba(8,8,11,.6);position:relative}
+  .tape-track{display:inline-flex;gap:34px;white-space:nowrap;position:absolute;will-change:transform;padding-top:6px}
+  .tk{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  .tk b{font-weight:800} .tk .u{color:var(--green)} .tk .d{color:var(--red)} .tk .s{color:var(--mut);margin-right:6px}
   .main{flex:1;display:flex;min-height:0}
+  /* watchlist */
+  .watch{width:172px;border-right:1px solid var(--line);background:var(--s1);overflow:auto;padding:8px}
+  .wh{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:800;padding:4px 6px}
+  .wrow{display:block;width:100%;text-align:left;border:1px solid transparent;border-radius:10px;padding:7px 8px;margin-bottom:5px;background:transparent;cursor:pointer}
+  .wrow:hover{background:rgba(255,255,255,.04)} .wrow.on{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.1)}
+  .wrow .r1{display:flex;justify-content:space-between;align-items:center}
+  .wrow .sym{font-weight:800;font-size:13px} .wrow .px{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--mut)}
+  .chip{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:20px;border:1px solid var(--line);color:var(--mut)}
+  .chip.buy{color:var(--green);border-color:rgba(38,229,143,.5)} .chip.wait{color:var(--amber);border-color:rgba(255,201,77,.5)} .chip.no{color:var(--red);border-color:rgba(255,77,106,.5)} .chip.up{color:var(--ac2);border-color:rgba(52,211,153,.4)}
+  .spark{display:block;width:100%;height:22px;margin-top:5px}
   .chartwrap{flex:1;position:relative;min-width:0}
   #chart{display:block;width:100%;height:100%}
-  .rail{width:320px;border-left:1px solid var(--line);background:var(--s1);overflow:auto;padding:14px}
-  .card{background:var(--s2);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:13px;animation:rise .4s ease both}
-  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  .card h3{margin:0 0 9px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:800}
-  .sigbig{font-size:19px;font-weight:900;letter-spacing:-.02em}
+  /* replay bar */
+  .replay{position:absolute;left:10px;right:10px;bottom:10px;display:flex;align-items:center;gap:10px;background:rgba(14,14,18,.78);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:7px 12px}
+  .replay input[type=range]{flex:1;accent-color:var(--ac)} .replay .t{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--mut);min-width:74px}
+  .iconbtn{padding:5px 10px;border-radius:8px}
+  /* rail */
+  .rail{width:330px;border-left:1px solid var(--line);background:var(--s1);overflow:auto;padding:13px}
+  .card{background:var(--s2);border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:12px;animation:rise .45s cubic-bezier(.22,1,.36,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .card h3{margin:0 0 9px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:800;display:flex;justify-content:space-between}
+  .sigbig{font-size:20px;font-weight:900;letter-spacing:-.02em;text-shadow:0 0 18px currentColor}
   .sigbig.buy{color:var(--green)} .sigbig.wait{color:var(--amber)} .sigbig.no{color:var(--red)} .sigbig.up{color:var(--ac2)}
   .lv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Consolas,monospace}
   .lv:last-child{border-bottom:0} .lv span{color:var(--mut)} .lv b{font-weight:700}
   .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .stat{background:var(--s2);padding:9px 11px} .stat .v{font-size:18px;font-weight:900;font-family:ui-monospace,Consolas,monospace}
-  .stat .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .stat{background:rgba(26,28,34,.9);padding:9px 11px} .stat .v{font-size:18px;font-weight:900;font-family:ui-monospace,Consolas,monospace}
+  .stat .l{font-size:9.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
   .g{color:var(--green)} .r{color:var(--red)} .a{color:var(--amber)}
-  .verdict{margin-top:10px;padding:9px 11px;border-radius:9px;font-weight:800;text-align:center;font-size:13px}
-  .verdict.hold{background:rgba(38,194,129,.13);color:var(--green);border:1px solid rgba(38,194,129,.4)}
+  .verdict{margin-top:10px;padding:9px;border-radius:9px;font-weight:800;text-align:center;font-size:13px}
+  .verdict.hold{background:rgba(38,229,143,.13);color:var(--green);border:1px solid rgba(38,229,143,.4)}
   .verdict.marg{background:rgba(255,201,77,.12);color:var(--amber);border:1px solid rgba(255,201,77,.4)}
-  .verdict.no{background:rgba(240,68,90,.12);color:var(--red);border:1px solid rgba(240,68,90,.4)}
-  .note{font-size:11px;color:var(--mut);line-height:1.6;margin-top:8px}
-  #pop{position:absolute;display:none;background:#1b1c20;border:1px solid rgba(34,197,94,.4);border-radius:11px;padding:11px 13px;font-family:ui-monospace,Consolas,monospace;font-size:12px;box-shadow:0 16px 40px rgba(0,0,0,.6);pointer-events:none;z-index:5;min-width:200px;animation:rise .18s ease both}
-  #pop h4{margin:0 0 7px;font-size:12px;letter-spacing:.04em}
-  #pop .row{display:flex;justify-content:space-between;gap:18px;padding:2px 0} #pop .row span{color:var(--mut)}
-  .disc{font-size:10px;color:#5a5e66;padding:8px 14px;border-top:1px solid var(--line);background:#0c0c0e}
+  .verdict.no{background:rgba(255,77,106,.12);color:var(--red);border:1px solid rgba(255,77,106,.4)}
+  .note{font-size:11px;color:var(--mut);line-height:1.55;margin-top:8px}
+  .ef-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Consolas,monospace;font-size:12px;cursor:pointer}
+  .ef-row:hover{background:rgba(34,197,94,.06)} .ef-row .cfg{color:var(--ink)} .ef-row .pf{font-weight:800}
+  .ef-row.cur{background:rgba(34,197,94,.1)}
+  #pop{position:absolute;display:none;background:rgba(24,26,32,.97);border:1px solid rgba(34,197,94,.45);border-radius:11px;padding:11px 13px;font-family:ui-monospace,Consolas,monospace;font-size:12px;box-shadow:0 18px 44px rgba(0,0,0,.65);pointer-events:none;z-index:6;min-width:200px;animation:rise .16s ease both}
+  #pop h4{margin:0 0 7px;font-size:12px} #pop .row{display:flex;justify-content:space-between;gap:18px;padding:2px 0} #pop .row span{color:var(--mut)}
+  /* signal toast */
+  #toast{position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:rgba(20,22,28,.95);border:1px solid rgba(38,229,143,.6);border-radius:14px;padding:12px 20px;font-weight:800;font-size:15px;z-index:8;box-shadow:0 0 40px rgba(38,229,143,.4);transition:all .4s cubic-bezier(.22,1,.36,1);pointer-events:none}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .disc{font-size:10px;color:#5a5e66;padding:7px 14px;border-top:1px solid var(--line);background:rgba(10,10,13,.8)}
+  /* boot splash */
+  #boot{position:fixed;inset:0;z-index:50;background:#08080b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s}
+  #boot.gone{opacity:0;pointer-events:none}
+  #boot img{width:74px;height:74px;border-radius:16px;box-shadow:0 0 50px rgba(34,197,94,.6);animation:bootpulse 1.2s ease-in-out infinite}
+  @keyframes bootpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  #boot .bt{font-weight:900;letter-spacing:.4em;font-size:22px} #boot .bs{color:var(--mut);font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 </style>
 </head>
 <body>
+<canvas id="bg"></canvas>
+<div id="boot"><img src="/bull.png" alt=""/><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div>
 <div class="wrap">
   <div class="top">
     <div class="brand"><img id="brandImg" src="/bull.png" alt=""/>STRATA <small>Live</small></div>
-    <select id="sym">
-      <option value="ES=F">ES · S&P 500</option><option value="NQ=F">NQ · Nasdaq 100</option>
-      <option value="YM=F">YM · Dow</option><option value="RTY=F">RTY · Russell</option>
-      <option value="CL=F">CL · Crude</option><option value="GC=F">GC · Gold</option>
-      <option value="SPY">SPY</option><option value="QQQ">QQQ</option>
-    </select>
-    <div class="seg" id="tfSeg">
-      <button data-tf="1d" class="on">Daily · weeks</button>
-      <button data-tf="1h">Hourly · days</button>
-    </div>
+    <select id="sym"></select>
+    <div class="seg" id="tfSeg"><button data-tf="1d" class="on">Daily · weeks</button><button data-tf="1h">Hourly · days</button></div>
     <button id="zoomIn">+</button><button id="zoomOut">−</button>
-    <button id="refresh" class="pri">↻ Refresh</button>
+    <button id="edge">⚡ Edge Finder</button>
+    <button id="refresh" class="pri">↻ Live</button>
     <div class="spacer"></div>
     <div class="status" id="status"><span class="live"></span>loading…</div>
   </div>
+  <div class="tape"><div class="tape-track" id="tape"></div></div>
   <div class="main">
+    <div class="watch" id="watch"><div class="wh">Markets</div><div id="watchList" class="note">scanning…</div></div>
     <div class="chartwrap">
       <canvas id="chart"></canvas>
       <div id="pop"></div>
-    </div>
-    <div class="rail">
-      <div class="card" id="sigCard"><h3>Live setup</h3><div id="sigBody" class="note">Loading…</div></div>
-      <div class="card" id="btCard"><h3>Backtest · this timeframe</h3><div id="btBody" class="note">Loading…</div></div>
-      <div class="card"><h3>How to read it</h3>
-        <div class="note"><img src="/bull.png" style="width:14px;vertical-align:-3px"/> bull = BUY (only in uptrends) ·
-        <img src="/bear.png" style="width:14px;vertical-align:-3px"/> bear = SELL/exit (trend break).<br>
-        Click a marker for its targets · scroll or +/− to zoom · hover for price.</div>
+      <div id="toast"></div>
+      <div class="replay">
+        <button class="iconbtn" id="play">▶</button>
+        <input type="range" id="scrub" min="0" max="100" value="100"/>
+        <span class="t" id="scrubT">LIVE</span>
+        <button class="iconbtn" id="liveBtn">⤓ Live</button>
       </div>
     </div>
+    <div class="rail">
+      <div class="card" id="sigCard"><h3>Live setup <span id="cfgTag" class="note" style="margin:0"></span></h3><div id="sigBody" class="note">Loading…</div></div>
+      <div class="card" id="btCard"><h3>Backtest · this timeframe</h3><div id="btBody" class="note">Loading…</div></div>
+      <div class="card" id="efCard" style="display:none"><h3>⚡ Edge Finder <span id="efClose" style="cursor:pointer;pointer-events:auto">✕</span></h3><div id="efBody" class="note">—</div></div>
+      <div class="card"><h3>Legend</h3><div class="note"><img src="/bull.png" style="width:14px;vertical-align:-3px"/> bull = BUY (uptrends only) · <img src="/bear.png" style="width:14px;vertical-align:-3px"/> bear = SELL/exit.<br>Click a marker → targets · scroll/+− zoom · hover for price · drag the scrubber to replay history · Edge Finder backtests many settings at once. Hotkeys: ←/→ step, space play, +/− zoom.</div></div>
+    </div>
   </div>
-  <div class="disc">Educational only — not financial advice. Shows levels; does not place orders. Backtest is gross of costs (cross-check of the /backtester engine).</div>
+  <div class="disc">Educational only — not financial advice. Shows levels; does not place orders. Backtest gross of costs (cross-check of the /backtester engine).</div>
 </div>
 <script>
 const PV={'ES=F':5,'NQ=F':2,'YM=F':0.5,'RTY=F':5,'CL=F':100,'GC=F':10,'SPY':1,'QQQ':1};
-const NAMES={'ES=F':'S&P 500 (MES)','NQ=F':'Nasdaq 100 (MNQ)','YM=F':'Dow (MYM)','RTY=F':'Russell 2000 (M2K)','CL=F':'Crude Oil (MCL)','GC=F':'Gold (MGC)','SPY':'S&P 500 ETF','QQQ':'Nasdaq 100 ETF'};
-const TF={'1d':{range:'5y',hold:'~weeks'},'1h':{range:'180d',hold:'~days'}};
+const NAMES={'ES=F':'S&P 500 (MES)','NQ=F':'Nasdaq 100 (MNQ)','YM=F':'Dow (MYM)','RTY=F':'Russell 2000 (M2K)','CL=F':'Crude (MCL)','GC=F':'Gold (MGC)','SPY':'S&P 500 ETF','QQQ':'Nasdaq 100 ETF'};
+const UNIVERSE=['ES=F','NQ=F','YM=F','RTY=F','CL=F','GC=F'];
+const TF={'1d':{range:'5y'},'1h':{range:'180d'}};
 const ACCOUNT=25000, RISKPCT=1;
 let SYM='ES=F', INTV='1d', DATA=null, VIEW=140, phase=0;
-let mouseX=-1, mouseY=-1, markers=[], bull=new Image(), bear=new Image();
-bull.src='/bull.png'; bear.src='/bear.png';
-
+let MTREND=50, MPULL=10;            // current strategy config (Edge Finder can change)
+let REPLAY=null, PLAYING=false;     // replay cutoff index (null=live)
+let mouseX=-1, mouseY=-1, markers=[], lastBuyShown='';
+const bull=new Image(), bear=new Image(); bull.src='/bull.png'; bear.src='/bear.png';
 const $=s=>document.querySelector(s);
 const cv=$('#chart'), ctx=cv.getContext('2d');
+
+// ── populate symbol dropdown ──
+$('#sym').innerHTML=Object.keys(NAMES).map(k=>`<option value="${k}">${k.replace('=F','')} · ${NAMES[k]}</option>`).join('');
 
 // ── data ──
 async function fetchSeries(sym,intv){
   const y=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${intv}&range=${TF[intv].range}`;
   const r=await fetch('/api/yf?url='+encodeURIComponent(y),{cache:'no-store'});
-  if(!r.ok) throw new Error('data feed '+r.status);
+  if(!r.ok) throw new Error('feed '+r.status);
   const d=await r.json(); const res=d.chart&&d.chart.result&&d.chart.result[0]; if(!res) throw new Error('no data');
   const t=res.timestamp||[], q=res.indicators.quote[0], bars=[];
-  for(let i=0;i<t.length;i++){ const c=q.close[i]; if(c==null)continue;
-    bars.push({t:t[i]*1000,o:q.open[i]??c,h:q.high[i]??c,l:q.low[i]??c,c}); }
+  for(let i=0;i<t.length;i++){ const c=q.close[i]; if(c==null)continue; bars.push({t:t[i]*1000,o:q.open[i]??c,h:q.high[i]??c,l:q.low[i]??c,c}); }
   return bars;
 }
-function sma(a,n){ const o=new Array(a.length).fill(null); let s=0;
-  for(let i=0;i<a.length;i++){ s+=a[i]; if(i>=n)s-=a[i-n]; if(i>=n-1)o[i]=s/n; } return o; }
-
-// ── strategy: bull on BUY (uptrend only), bear on SELL/exit (trend break) ──
-function analyze(bars){
-  const c=bars.map(b=>b.c), n=c.length, s50=sma(c,50), s10=sma(c,10);
+function sma(a,n){ const o=new Array(a.length).fill(null); let s=0; for(let i=0;i<a.length;i++){ s+=a[i]; if(i>=n)s-=a[i-n]; if(i>=n-1)o[i]=s/n; } return o; }
+function analyze(bars,trendN,pullN){
+  trendN=trendN||50; pullN=pullN||10;
+  const c=bars.map(b=>b.c), n=c.length, s50=sma(c,trendN), s10=sma(c,pullN);
   const sig=new Array(n).fill(''); const trades=[]; let pos=null;
-  for(let i=0;i<n;i++){
-    if(s50[i]==null||s10[i]==null||i<2)continue;
+  for(let i=0;i<n;i++){ if(s50[i]==null||s10[i]==null||i<2)continue;
     const price=c[i], up=price>s50[i];
-    if(!pos){
-      const lo3=Math.min(bars[i].l,bars[i-1].l,bars[i-2].l);
-      const pulled=(lo3<=s10[i])||(price<=s10[i]); const turn=price>c[i-1];
-      if(up&&pulled&&turn){ sig[i]='buy'; pos={i,entry:price,stop:price*0.9}; }
-    } else {
-      let exit=null,reason=null;
-      if(bars[i].l<=pos.stop){exit=pos.stop;reason='hard stop -10%';}
-      else if(price<s50[i]){exit=price;reason='trend break';}
-      if(exit!=null){ trades.push({i0:pos.i,i1:i,entry:pos.entry,exit,stop:pos.stop,pct:(exit-pos.entry)/pos.entry*100,reason,bars:i-pos.i}); sig[i]='sell'; pos=null; }
-    }
-  }
-  return {bars,c,s50,s10,sig,trades,openPos:pos};
+    if(!pos){ const lo3=Math.min(bars[i].l,bars[i-1].l,bars[i-2].l); const pulled=(lo3<=s10[i])||(price<=s10[i]); const turn=price>c[i-1];
+      if(up&&pulled&&turn){ sig[i]='buy'; pos={i,entry:price,stop:price*0.9}; } }
+    else { let exit=null,reason=null; if(bars[i].l<=pos.stop){exit=pos.stop;reason='hard stop -10%';} else if(price<s50[i]){exit=price;reason='trend break';}
+      if(exit!=null){ trades.push({i0:pos.i,i1:i,entry:pos.entry,exit,stop:pos.stop,pct:(exit-pos.entry)/pos.entry*100,reason,bars:i-pos.i}); sig[i]='sell'; pos=null; } } }
+  return {bars,c,s50,s10,sig,trades,openPos:pos,trendN,pullN};
 }
-function metrics(a){
-  const rs=a.trades.map(t=>t.pct); if(!rs.length)return null;
-  const w=rs.filter(x=>x>0), l=rs.filter(x=>x<=0);
-  const gW=w.reduce((p,x)=>p+x,0), gL=Math.abs(l.reduce((p,x)=>p+x,0));
-  const pf=gL>0?gW/gL:Infinity; let eq=1,peak=1,dd=0;
-  rs.forEach(x=>{eq*=(1+x/100); if(eq>peak)peak=eq; const d=(eq-peak)/peak*100; if(d<dd)dd=d;});
-  const avgBars=a.trades.reduce((p,t)=>p+t.bars,0)/a.trades.length;
-  return {n:rs.length,win:w.length/rs.length*100,pf,ret:(eq-1)*100,dd,avgBars};
-}
+function metrics(a){ const rs=a.trades.map(t=>t.pct); if(!rs.length)return null;
+  const w=rs.filter(x=>x>0), l=rs.filter(x=>x<=0); const gW=w.reduce((p,x)=>p+x,0), gL=Math.abs(l.reduce((p,x)=>p+x,0));
+  const pf=gL>0?gW/gL:Infinity; let eq=1,peak=1,dd=0,curve=[1];
+  rs.forEach(x=>{eq*=(1+x/100); curve.push(eq); if(eq>peak)peak=eq; const d=(eq-peak)/peak*100; if(d<dd)dd=d;});
+  return {n:rs.length,win:w.length/rs.length*100,pf,ret:(eq-1)*100,dd,avgBars:a.trades.reduce((p,t)=>p+t.bars,0)/a.trades.length,curve}; }
 
-// ── render rail ──
-function holdLabel(intv,avgBars){ if(intv==='1h'){const h=Math.round(avgBars);return `~${h} hrs (~${(h/6.5).toFixed(1)} days)`;} return `~${Math.round(avgBars)} days`; }
+// ── count-up tween ──
+function countUp(el,to,dec,suf,pre){ const from=0,dur=600,t0=performance.now();
+  (function step(t){ const k=Math.min(1,(t-t0)/dur); const v=from+(to-from)*(1-Math.pow(1-k,3));
+    el.textContent=(pre||'')+(dec?v.toFixed(dec):Math.round(v))+(suf||''); if(k<1)requestAnimationFrame(step); })(t0); }
+
+// ── rail ──
+function holdLabel(intv,avgBars){ if(intv==='1h'){const h=Math.round(avgBars);return `~${h}h (~${(h/6.5).toFixed(1)}d)`;} return `~${Math.round(avgBars)}d`; }
 function renderRail(a){
-  const c=a.c, n=c.length, i=n-1, price=c[i], s50=a.s50[i], s10=a.s10[i];
-  const up=price>s50; let cls,word;
-  const sg=a.sig[i];
-  if(!up){cls='no';word='NO TRADE — downtrend';}
-  else if(sg==='buy'){cls='buy';word='★ BUY SIGNAL';}
-  else if(price<=s10){cls='wait';word='WATCH — pulled back';}
-  else {cls='up';word='UPTREND — no entry yet';}
-  const hard=price*0.9, exitLvl=Math.max(s50,hard), dist=price-exitLvl;
-  const ct=dist>0?Math.floor(ACCOUNT*RISKPCT/100/(dist*PV[SYM])):0;
-  let body=`<div class="sigbig ${cls}">${word}</div><div class="note" style="margin:4px 0 10px">${NAMES[SYM]}</div>`;
-  if(up){ body+=`
-    <div class="lv"><span>Enter</span><b>${price.toFixed(2)}</b></div>
-    <div class="lv"><span>Exit (trend)</span><b>${s50.toFixed(2)}</b></div>
-    <div class="lv"><span>Hard stop</span><b>${hard.toFixed(2)}</b></div>
-    <div class="lv"><span>Target</span><b>ride the trend</b></div>
-    <div class="lv"><span>Size</span><b>${ct} micro</b></div>`; }
-  $('#sigBody').innerHTML=body;
+  const c=a.c,n=c.length,i=n-1,price=c[i],s50=a.s50[i],s10=a.s10[i],up=price>s50,sg=a.sig[i];
+  let cls,word; if(!up){cls='no';word='NO TRADE — downtrend';} else if(sg==='buy'){cls='buy';word='★ BUY SIGNAL';} else if(price<=s10){cls='wait';word='WATCH — pulled back';} else {cls='up';word='UPTREND — no entry';}
+  const hard=price*0.9,exitLvl=Math.max(s50,hard),dist=price-exitLvl,ct=dist>0?Math.floor(ACCOUNT*RISKPCT/100/(dist*PV[SYM])):0;
+  $('#cfgTag').textContent=`${a.trendN}/${a.pullN}`;
+  let b=`<div class="sigbig ${cls}">${word}</div><div class="note" style="margin:3px 0 10px">${NAMES[SYM]}</div>`;
+  if(up){ b+=`<div class="lv"><span>Enter</span><b>${price.toFixed(2)}</b></div><div class="lv"><span>Exit (trend)</span><b>${s50.toFixed(2)}</b></div><div class="lv"><span>Hard stop</span><b>${hard.toFixed(2)}</b></div><div class="lv"><span>Target</span><b>ride the trend</b></div><div class="lv"><span>Size</span><b>${ct} micro</b></div>`; }
+  $('#sigBody').innerHTML=b;
   const m=metrics(a);
-  if(!m){ $('#btBody').innerHTML='<div class="note">No trades on this timeframe.</div>'; return; }
-  const v=(m.pf>=1.3&&m.ret>0)?['hold','EDGE HOLDS']:(m.pf>=1?['marg','MARGINAL — try another TF']:['no','NO EDGE — re-backtest']);
+  if(!m){ $('#btBody').innerHTML='<div class="note">No trades on this config.</div>'; return; }
+  const v=(m.pf>=1.3&&m.ret>0)?['hold','EDGE HOLDS']:(m.pf>=1?['marg','MARGINAL']:['no','NO EDGE']);
   $('#btBody').innerHTML=`<div class="stats">
-    <div class="stat"><div class="v ${m.ret>=0?'g':'r'}">${m.ret>=0?'+':''}${m.ret.toFixed(0)}%</div><div class="l">Return</div></div>
-    <div class="stat"><div class="v">${m.win.toFixed(0)}%</div><div class="l">Win rate</div></div>
-    <div class="stat"><div class="v ${m.pf>=1?'g':'r'}">${isFinite(m.pf)?m.pf.toFixed(2):'∞'}</div><div class="l">Profit factor</div></div>
-    <div class="stat"><div class="v">${m.n}</div><div class="l">Trades</div></div>
-    <div class="stat"><div class="v r">${m.dd.toFixed(0)}%</div><div class="l">Max DD</div></div>
-    <div class="stat"><div class="v">${holdLabel(INTV,m.avgBars)}</div><div class="l">Avg hold</div></div>
-  </div><div class="verdict ${v[0]}">${v[1]}</div>
-  <div class="note">Win rate is low by design — a few big winners carry it. Gross of costs.</div>`;
+    <div class="stat"><div class="v ${m.ret>=0?'g':'r'}" id="m1"></div><div class="l">Return</div></div>
+    <div class="stat"><div class="v" id="m2"></div><div class="l">Win rate</div></div>
+    <div class="stat"><div class="v ${m.pf>=1?'g':'r'}" id="m3"></div><div class="l">Profit factor</div></div>
+    <div class="stat"><div class="v" id="m4"></div><div class="l">Trades</div></div>
+    <div class="stat"><div class="v r" id="m5"></div><div class="l">Max DD</div></div>
+    <div class="stat"><div class="v" style="font-size:13px">${holdLabel(INTV,m.avgBars)}</div><div class="l">Avg hold</div></div>
+  </div><div style="margin-top:10px">${equitySVG(m.curve)}</div><div class="verdict ${v[0]}">${v[1]}</div>
+  <div class="note">Win rate is low by design — a few big winners carry it.</div>`;
+  countUp($('#m1'),m.ret,0,'%',m.ret>=0?'+':''); countUp($('#m2'),m.win,0,'%'); countUp($('#m3'),isFinite(m.pf)?m.pf:0,2); countUp($('#m4'),m.n,0); countUp($('#m5'),m.dd,0,'%');
 }
+function equitySVG(curve){ if(!curve||curve.length<2)return ''; const W=290,H=54,mn=Math.min(...curve),mx=Math.max(...curve),rg=Math.max(1e-6,mx-mn);
+  const X=i=>i/(curve.length-1)*W, Y=v=>H-2-((v-mn)/rg)*(H-4); let d='',ar='';
+  curve.forEach((v,i)=>{const x=X(i).toFixed(1),y=Y(v).toFixed(1);d+=(i?'L':'M')+x+' '+y+' ';ar+=(i?'L':'M')+x+' '+y+' ';});
+  ar+=`L${W} ${H} L0 ${H} Z`; const up=curve[curve.length-1]>=1;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:54px"><defs><linearGradient id="eg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(38,229,143,.35)"/><stop offset="1" stop-color="rgba(38,229,143,0)"/></linearGradient></defs><path d="${ar}" fill="url(#eg)"/><path d="${d}" fill="none" stroke="${up?'#26e58f':'#ff4d6a'}" stroke-width="1.6"/></svg>`; }
 
-// ── canvas chart ──
-function resize(){ const r=cv.parentElement.getBoundingClientRect(); const dpr=Math.min(2,devicePixelRatio||1);
+// ── chart ──
+function resize(){ const r=cv.parentElement.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);
   cv.width=r.width*dpr; cv.height=r.height*dpr; cv.style.width=r.width+'px'; cv.style.height=r.height+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); }
 function draw(){
-  const a=DATA; const W=cv.clientWidth,H=cv.clientHeight; ctx.clearRect(0,0,W,H);
-  if(!a){ return; }
-  const padL=8,padR=66,padT=12,padB=22; const n=a.c.length, N=Math.min(VIEW,n), start=n-N;
-  let min=1e18,max=-1e18;
-  for(let k=start;k<n;k++){ const b=a.bars[k]; if(b.l<min)min=b.l; if(b.h>max)max=b.h; if(a.s50[k]!=null){min=Math.min(min,a.s50[k]);max=Math.max(max,a.s50[k]);} }
-  if(min>=max)return; const pd=(max-min)*0.05; min-=pd; max+=pd;
-  const rng=max-min, plotW=W-padL-padR, plotH=H-padT-padB;
-  const X=k=>padL+(k-start)/Math.max(1,N-1)*plotW, Y=v=>padT+(1-(v-min)/rng)*plotH;
-  const cw=Math.max(2,Math.min(11,plotW/N*0.62));
-  // grid
+  const a=DATA,W=cv.clientWidth,H=cv.clientHeight; ctx.clearRect(0,0,W,H); if(!a)return;
+  const padL=8,padR=66,padT=12,padB=46; const full=a.c.length; const nEff=(REPLAY!=null)?Math.max(60,Math.min(full,REPLAY)):full;
+  const N=Math.min(VIEW,nEff), start=nEff-N;
+  let min=1e18,max=-1e18; for(let k=start;k<nEff;k++){const b=a.bars[k];if(b.l<min)min=b.l;if(b.h>max)max=b.h;if(a.s50[k]!=null){min=Math.min(min,a.s50[k]);max=Math.max(max,a.s50[k]);}}
+  if(min>=max)return; const pd=(max-min)*0.05; min-=pd; max+=pd; const rng=max-min,plotW=W-padL-padR,plotH=H-padT-padB;
+  const X=k=>padL+(k-start)/Math.max(1,N-1)*plotW, Y=v=>padT+(1-(v-min)/rng)*plotH, cw=Math.max(2,Math.min(11,plotW/N*0.62));
   ctx.font='10px ui-monospace,Consolas,monospace'; ctx.textBaseline='middle';
-  for(let gi=0;gi<=4;gi++){ const v=min+rng*gi/4,y=Y(v); ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();
-    ctx.fillStyle='#7a7e86'; ctx.fillText(v.toFixed(0),W-padR+4,y); }
-  // MAs
-  const ma=(arr,col,w)=>{ ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();let st=false;
-    for(let k=start;k<n;k++){ if(arr[k]==null)continue; const x=X(k),y=Y(arr[k]); if(!st){ctx.moveTo(x,y);st=true;}else ctx.lineTo(x,y);} ctx.stroke(); };
+  for(let gi=0;gi<=4;gi++){const v=min+rng*gi/4,y=Y(v); ctx.strokeStyle='rgba(255,255,255,.045)';ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke(); ctx.fillStyle='#7a7e86';ctx.fillText(v.toFixed(0),W-padR+4,y);}
+  // glowing MAs
+  const ma=(arr,col,w)=>{ctx.save();ctx.shadowColor=col;ctx.shadowBlur=8;ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();let st=false;for(let k=start;k<nEff;k++){if(arr[k]==null)continue;const x=X(k),y=Y(arr[k]);if(!st){ctx.moveTo(x,y);st=true;}else ctx.lineTo(x,y);}ctx.stroke();ctx.restore();};
   ma(a.s50,'#22c55e',2); ma(a.s10,'#ffc94d',1.5);
-  // candles
-  for(let k=start;k<n;k++){ const b=a.bars[k],upb=b.c>=b.o,col=upb?'#26c281':'#f0445a';
-    const x=X(k); ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(x,Y(b.h));ctx.lineTo(x,Y(b.l));ctx.stroke();
-    const yo=Y(b.o),yc=Y(b.c),top=Math.min(yo,yc),bh=Math.max(1,Math.abs(yc-yo)); ctx.fillRect(x-cw/2,top,cw,bh); }
-  // markers (bull=buy, bear=sell), latest pulses
-  markers=[]; let lastSig=-1; for(let k=n-1;k>=start;k--){ if(a.sig[k]){lastSig=k;break;} }
-  const pulse=1+0.16*Math.sin(phase), mk=42;
-  for(let k=start;k<n;k++){ const sg=a.sig[k]; if(!sg)continue; const b=a.bars[k],x=X(k);
-    let sz=mk; if(k===lastSig)sz*=pulse; let cy,img,rc;
-    if(sg==='buy'){cy=Y(b.l)+8+sz/2;img=bull;rc='#26c281';} else {cy=Y(b.h)-8-sz/2;img=bear;rc='#f0445a';}
-    if(k===lastSig){ctx.strokeStyle=rc;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,cy,sz/2+4,0,7);ctx.stroke();}
-    if(img.complete&&img.naturalWidth) ctx.drawImage(img,x-sz/2,cy-sz/2,sz,sz);
-    markers.push({x,cy,r:Math.max(16,sz/2),bar:k}); }
-  // last price line + pulsing dot
-  const lp=Y(a.c[n-1]),lx=X(n-1);
-  ctx.strokeStyle='rgba(232,234,237,.6)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(padL,lp);ctx.lineTo(W-padR,lp);ctx.stroke();ctx.setLineDash([]);
-  const dr=4+1.6*Math.abs(Math.sin(phase)); ctx.fillStyle='#e8eaed';ctx.beginPath();ctx.arc(lx,lp,dr,0,7);ctx.fill();
-  // crosshair
+  for(let k=start;k<nEff;k++){const b=a.bars[k],upb=b.c>=b.o,col=upb?'#26e58f':'#ff4d6a',x=X(k);
+    ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(x,Y(b.h));ctx.lineTo(x,Y(b.l));ctx.stroke();
+    const yo=Y(b.o),yc=Y(b.c),top=Math.min(yo,yc),bh=Math.max(1,Math.abs(yc-yo)); ctx.fillRect(x-cw/2,top,cw,bh);}
+  // markers
+  markers=[]; let lastSig=-1; for(let k=nEff-1;k>=start;k--){if(a.sig[k]){lastSig=k;break;}} const pulse=1+0.16*Math.sin(phase),mk=42;
+  for(let k=start;k<nEff;k++){const sg=a.sig[k];if(!sg)continue;const b=a.bars[k],x=X(k);let sz=mk;if(k===lastSig)sz*=pulse;let cy,img,rc;
+    if(sg==='buy'){cy=Y(b.l)+8+sz/2;img=bull;rc='#26e58f';}else{cy=Y(b.h)-8-sz/2;img=bear;rc='#ff4d6a';}
+    if(k===lastSig){ctx.save();ctx.shadowColor=rc;ctx.shadowBlur=18;ctx.strokeStyle=rc;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,cy,sz/2+4,0,7);ctx.stroke();ctx.restore();}
+    if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-sz/2,cy-sz/2,sz,sz); markers.push({x,cy,r:Math.max(16,sz/2),bar:k});}
+  // last price + pulse
+  const lp=Y(a.c[nEff-1]),lx=X(nEff-1); ctx.strokeStyle='rgba(232,234,237,.5)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(padL,lp);ctx.lineTo(W-padR,lp);ctx.stroke();ctx.setLineDash([]);
+  ctx.save();ctx.shadowColor='#e8eaed';ctx.shadowBlur=10;ctx.fillStyle='#e8eaed';const dr=4+1.6*Math.abs(Math.sin(phase));ctx.beginPath();ctx.arc(lx,lp,dr,0,7);ctx.fill();ctx.restore();
+  // crosshair + OHLC
   if(mouseX>=padL&&mouseX<=W-padR&&mouseY>=padT&&mouseY<=H-padB){
-    ctx.strokeStyle='rgba(150,156,168,.45)';ctx.setLineDash([2,3]);
-    ctx.beginPath();ctx.moveTo(mouseX,padT);ctx.lineTo(mouseX,H-padB);ctx.moveTo(padL,mouseY);ctx.lineTo(W-padR,mouseY);ctx.stroke();ctx.setLineDash([]);
-    const pv=min+(1-(mouseY-padT)/plotH)*rng; ctx.fillStyle='rgba(44,45,52,.95)';ctx.fillRect(W-padR,mouseY-8,padR,16);
-    ctx.fillStyle='#e8eaed';ctx.fillText(pv.toFixed(2),W-padR+4,mouseY); }
+    ctx.strokeStyle='rgba(150,156,168,.45)';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(mouseX,padT);ctx.lineTo(mouseX,H-padB);ctx.moveTo(padL,mouseY);ctx.lineTo(W-padR,mouseY);ctx.stroke();ctx.setLineDash([]);
+    const pv=min+(1-(mouseY-padT)/plotH)*rng; ctx.fillStyle='rgba(44,45,52,.95)';ctx.fillRect(W-padR,mouseY-8,padR,16);ctx.fillStyle='#e8eaed';ctx.fillText(pv.toFixed(2),W-padR+4,mouseY);
+    const ki=Math.round(start+(mouseX-padL)/plotW*(N-1)); if(ki>=0&&ki<nEff){const b=a.bars[ki]; ctx.fillStyle='rgba(20,21,26,.92)';ctx.fillRect(padL+4,padT+4,182,46);
+      ctx.fillStyle='#8a8f98';ctx.fillText(new Date(b.t).toLocaleDateString(),padL+12,padT+14);
+      ctx.fillStyle='#e8eaed';ctx.fillText(`O ${b.o.toFixed(1)}  H ${b.h.toFixed(1)}`,padL+12,padT+28);ctx.fillText(`L ${b.l.toFixed(1)}  C ${b.c.toFixed(1)}`,padL+12,padT+40);}}
 }
-function anim(){ phase+=0.14; if(phase>6.283)phase-=6.283; draw(); requestAnimationFrame(anim); }
+function anim(){ phase+=0.13; if(phase>6.283)phase-=6.283; if(PLAYING&&REPLAY!=null){ REPLAY+=Math.max(1,Math.round(VIEW/120)); if(REPLAY>=DATA.c.length){REPLAY=null;PLAYING=false;$('#play').textContent='▶';syncScrub();} else updateScrubUI(); } draw(); requestAnimationFrame(anim); }
 
 // ── targets popup ──
-function targetText(bar){
-  const a=DATA, t=a.trades.find(x=>x.i0===bar||x.i1===bar);
-  if(t){ const word=t.pct>=0?'WIN':'LOSS', col=t.pct>=0?'g':'r';
-    return `<h4 class="${col}">${word} ${t.pct>=0?'+':''}${t.pct.toFixed(1)}%</h4>
-      <div class="row"><span>Entry</span><b>${t.entry.toFixed(2)}</b></div>
-      <div class="row"><span>Target</span><b>${t.exit.toFixed(2)}</b></div>
-      <div class="row"><span>Reason</span><b>${t.reason}</b></div>
-      <div class="row"><span>Stop</span><b>${t.stop.toFixed(2)}</b></div>
-      <div class="row"><span>Held</span><b>${t.bars} bars</b></div>`; }
-  const op=a.openPos;
-  if(op&&op.i===bar){ const i=a.c.length-1;
-    return `<h4 class="g">OPEN BUY</h4>
-      <div class="row"><span>Entry</span><b>${op.entry.toFixed(2)}</b></div>
-      <div class="row"><span>Target</span><b>trend break</b></div>
-      <div class="row"><span>50-avg now</span><b>${a.s50[i].toFixed(2)}</b></div>
-      <div class="row"><span>Stop</span><b>${op.stop.toFixed(2)}</b></div>`; }
-  return '<h4>Signal</h4>';
+function targetText(bar){ const a=DATA,t=a.trades.find(x=>x.i0===bar||x.i1===bar);
+  if(t){const word=t.pct>=0?'WIN':'LOSS',col=t.pct>=0?'g':'r'; return `<h4 class="${col}">${word} ${t.pct>=0?'+':''}${t.pct.toFixed(1)}%</h4><div class="row"><span>Entry</span><b>${t.entry.toFixed(2)}</b></div><div class="row"><span>Target</span><b>${t.exit.toFixed(2)}</b></div><div class="row"><span>Reason</span><b>${t.reason}</b></div><div class="row"><span>Stop</span><b>${t.stop.toFixed(2)}</b></div><div class="row"><span>Held</span><b>${t.bars} bars</b></div>`;}
+  const op=a.openPos; if(op&&op.i===bar){const i=a.c.length-1;return `<h4 class="g">OPEN BUY</h4><div class="row"><span>Entry</span><b>${op.entry.toFixed(2)}</b></div><div class="row"><span>Target</span><b>trend break</b></div><div class="row"><span>50-avg</span><b>${a.s50[i].toFixed(2)}</b></div><div class="row"><span>Stop</span><b>${op.stop.toFixed(2)}</b></div>`;}
+  return '<h4>Signal</h4>'; }
+
+// ── replay UI ──
+function updateScrubUI(){ const n=DATA.c.length, cut=(REPLAY!=null)?REPLAY:n; $('#scrub').value=Math.round(cut/n*100); $('#scrubT').textContent=(REPLAY!=null)?new Date(DATA.bars[Math.min(cut,n)-1].t).toLocaleDateString():'LIVE'; }
+function syncScrub(){ $('#scrub').value=100; $('#scrubT').textContent='LIVE'; }
+
+// ── toast on a fresh live BUY ──
+function maybeToast(a){ const i=a.c.length-1; if(a.sig[i]==='buy'){ const key=SYM+a.bars[i].t; if(key!==lastBuyShown){ lastBuyShown=key; const t=$('#toast'); t.textContent='★ BUY SIGNAL — '+SYM.replace('=F',''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4200); } } }
+
+// ── watchlist + ticker (shared universe fetch) ──
+let UNI={};
+async function scanUniverse(){
+  for(const s of UNIVERSE){ try{ const bars=await fetchSeries(s,'1d'); UNI[s]={bars,a:analyze(bars,50,10)}; renderWatch(); renderTape(); }catch(e){} }
+}
+function sigClass(a){ const i=a.c.length-1,p=a.c[i],up=p>a.s50[i]; if(!up)return['no','DOWN']; if(a.sig[i]==='buy')return['buy','BUY']; if(p<=a.s10[i])return['wait','WATCH']; return['up','UP']; }
+function renderWatch(){ $('#watchList').innerHTML=UNIVERSE.map(s=>{ const u=UNI[s]; if(!u)return `<div class="wrow"><div class="r1"><span class="sym">${s.replace('=F','')}</span><span class="px">…</span></div></div>`;
+  const a=u.a,i=a.c.length-1,px=a.c[i],prev=a.c[i-1]||px,chg=(px-prev)/prev*100,[cl,lbl]=sigClass(a);
+  return `<button class="wrow ${s===SYM?'on':''}" data-sym="${s}"><div class="r1"><span class="sym">${s.replace('=F','')}</span><span class="chip ${cl}">${lbl}</span></div><div class="r1"><span class="px">${px.toFixed(px>1000?0:2)}</span><span class="px ${chg>=0?'g':'r'}">${chg>=0?'+':''}${chg.toFixed(1)}%</span></div>${miniSpark(a.c.slice(-44),chg>=0)}</button>`; }).join('');
+  $('#watchList').querySelectorAll('.wrow[data-sym]').forEach(el=>el.onclick=()=>{ SYM=el.dataset.sym; $('#sym').value=SYM; load(); }); }
+function miniSpark(c,up){ if(c.length<2)return''; const W=150,H=22,mn=Math.min(...c),mx=Math.max(...c),rg=Math.max(1e-6,mx-mn); let d=''; c.forEach((v,i)=>{d+=(i?'L':'M')+(i/(c.length-1)*W).toFixed(1)+' '+(H-1-((v-mn)/rg)*(H-2)).toFixed(1)+' ';}); return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${up?'#26e58f':'#ff4d6a'}" stroke-width="1.4"/></svg>`; }
+function renderTape(){ const cells=UNIVERSE.filter(s=>UNI[s]).map(s=>{const a=UNI[s].a,i=a.c.length-1,px=a.c[i],prev=a.c[i-1]||px,chg=(px-prev)/prev*100; return `<span class="tk"><span class="s">${s.replace('=F','')}</span><b>${px.toFixed(px>1000?0:2)}</b> <span class="${chg>=0?'u':'d'}">${chg>=0?'▲':'▼'}${Math.abs(chg).toFixed(2)}%</span></span>`;}).join('');
+  $('#tape').innerHTML=cells+cells; }   // doubled for seamless loop
+// animate tape
+let tapeX=0; (function tapeAnim(){ const tr=$('#tape'); if(tr&&tr.scrollWidth){ tapeX-=0.5; const half=tr.scrollWidth/2; if(-tapeX>=half)tapeX+=half; tr.style.transform=`translateX(${tapeX}px)`; } requestAnimationFrame(tapeAnim); })();
+
+// ── Edge Finder: backtest a grid of settings on the loaded data ──
+function runEdgeFinder(){
+  if(!DATA)return; const bars=DATA.bars; const trends=[30,50,80,100,150,200], pulls=[5,10,20]; const out=[];
+  for(const t of trends)for(const p of pulls){ if(p>=t)continue; const a=analyze(bars,t,p); const m=metrics(a); if(m&&m.n>=8) out.push({t,p,m}); }
+  out.sort((x,y)=>(y.m.pf===Infinity?9:y.m.pf)-(x.m.pf===Infinity?9:x.m.pf));
+  $('#efCard').style.display='block';
+  $('#efBody').innerHTML=`<div class="note" style="margin:0 0 8px">Tested ${out.length} settings on ${SYM.replace('=F','')} ${INTV}. Click one to apply it to the chart.</div>`+
+    out.slice(0,7).map(o=>{const v=(o.m.pf>=1.3&&o.m.ret>0)?'g':(o.m.pf>=1?'a':'r'); return `<div class="ef-row ${o.t===MTREND&&o.p===MPULL?'cur':''}" data-t="${o.t}" data-p="${o.p}"><span class="cfg">${o.t}/${o.p}</span><span class="note" style="margin:0">PF <b class="${v}">${isFinite(o.m.pf)?o.m.pf.toFixed(2):'∞'}</b> · ${o.m.ret>=0?'+':''}${o.m.ret.toFixed(0)}% · ${o.m.n}t</span><span class="pf ${v}">${o.m.win.toFixed(0)}%</span></div>`;}).join('')+
+    `<div class="note" style="margin-top:8px">Best-by-profit-factor first. This is the "backtest again" loop — find a setting whose edge holds, then trade that.</div>`;
+  $('#efBody').querySelectorAll('.ef-row').forEach(el=>el.onclick=()=>{ MTREND=+el.dataset.t; MPULL=+el.dataset.p; DATA=analyze(DATA.bars,MTREND,MPULL); renderRail(DATA); runEdgeFinder(); });
 }
 
 // ── load + events ──
 async function load(){
   $('#status').innerHTML='<span class="live"></span>fetching '+SYM+'…';
-  try{
-    const bars=await fetchSeries(SYM,INTV); DATA=analyze(bars); renderRail(DATA);
+  try{ const bars=await fetchSeries(SYM,INTV); DATA=analyze(bars,MTREND,MPULL); REPLAY=null; PLAYING=false; $('#play').textContent='▶'; syncScrub();
+    renderRail(DATA); maybeToast(DATA); renderWatch();
     $('#status').innerHTML=`<span class="live"></span>${SYM} · ${INTV==='1h'?'Hourly':'Daily'} · ${bars.length} bars · ${new Date().toLocaleTimeString()}`;
-    draw();
-  }catch(e){ $('#status').innerHTML='data busy — click Refresh'; $('#sigBody').innerHTML='<div class="note">Couldn\'t load ('+e.message+'). The server window must be open.</div>'; }
+  }catch(e){ $('#status').innerHTML='data busy — click Live'; $('#sigBody').innerHTML='<div class="note">Couldn\'t load ('+e.message+'). Keep the server window open.</div>'; }
 }
-$('#sym').onchange=e=>{SYM=e.target.value; document.querySelector('.brand img'); load();};
-$('#tfSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return;
-  [...e.currentTarget.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); INTV=b.dataset.tf; load(); });
-$('#refresh').onclick=load;
-$('#zoomIn').onclick=()=>{VIEW=Math.max(40,VIEW-20);};
-$('#zoomOut').onclick=()=>{VIEW=Math.min(420,VIEW+20);};
-cv.addEventListener('wheel',e=>{e.preventDefault(); VIEW=Math.max(40,Math.min(420,VIEW+(e.deltaY>0?15:-15)));},{passive:false});
+$('#sym').onchange=e=>{SYM=e.target.value;load();};
+$('#tfSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;[...e.currentTarget.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');INTV=b.dataset.tf;load();});
+$('#refresh').onclick=load; $('#liveBtn').onclick=()=>{REPLAY=null;PLAYING=false;$('#play').textContent='▶';syncScrub();};
+$('#edge').onclick=runEdgeFinder; $('#efClose').onclick=()=>$('#efCard').style.display='none';
+$('#zoomIn').onclick=()=>VIEW=Math.max(40,VIEW-20); $('#zoomOut').onclick=()=>VIEW=Math.min(420,VIEW+20);
+$('#play').onclick=()=>{ if(!DATA)return; if(REPLAY==null)REPLAY=Math.max(60,DATA.c.length-VIEW); PLAYING=!PLAYING; $('#play').textContent=PLAYING?'⏸':'▶'; };
+$('#scrub').oninput=e=>{ if(!DATA)return; const n=DATA.c.length,cut=Math.round(+e.target.value/100*n); REPLAY=(cut>=n)?null:Math.max(60,cut); PLAYING=false;$('#play').textContent='▶'; $('#scrubT').textContent=(REPLAY!=null)?new Date(DATA.bars[REPLAY-1].t).toLocaleDateString():'LIVE'; };
+cv.addEventListener('wheel',e=>{e.preventDefault();VIEW=Math.max(40,Math.min(420,VIEW+(e.deltaY>0?15:-15)));},{passive:false});
 cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mouseX=e.clientX-r.left;mouseY=e.clientY-r.top;});
 cv.addEventListener('mouseleave',()=>{mouseX=mouseY=-1;});
-cv.addEventListener('click',e=>{ const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
-  const hit=markers.find(m=>{const dx=mx-m.x,dy=my-m.cy;return dx*dx+dy*dy<=m.r*m.r;});
-  const pop=$('#pop');
-  if(hit){ pop.innerHTML=targetText(hit.bar); pop.style.display='block';
-    pop.style.left=Math.min(mx+14,cv.clientWidth-220)+'px'; pop.style.top=Math.min(my+14,cv.clientHeight-150)+'px'; }
-  else pop.style.display='none'; });
-window.addEventListener('resize',()=>{resize();});
-resize(); anim(); load();
-setInterval(load,60000);  // auto-refresh
+cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,hit=markers.find(m=>{const dx=mx-m.x,dy=my-m.cy;return dx*dx+dy*dy<=m.r*m.r;}),pop=$('#pop');
+  if(hit){pop.innerHTML=targetText(hit.bar);pop.style.display='block';pop.style.left=Math.min(mx+14,cv.clientWidth-220)+'px';pop.style.top=Math.min(my+14,cv.clientHeight-150)+'px';}else pop.style.display='none';});
+window.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'&&DATA){REPLAY=Math.min(DATA.c.length,(REPLAY||DATA.c.length-VIEW)+1);updateScrubUI();} else if(e.key==='ArrowLeft'&&DATA){REPLAY=Math.max(60,(REPLAY||DATA.c.length)-1);updateScrubUI();} else if(e.key===' '){e.preventDefault();$('#play').click();} else if(e.key==='+'||e.key==='='){VIEW=Math.max(40,VIEW-20);} else if(e.key==='-'){VIEW=Math.min(420,VIEW+20);} });
+window.addEventListener('resize',resize);
+
+// ── backdrop: drifting particles + faint grid ──
+const bg=$('#bg'),bx=bg.getContext('2d'); let parts=[];
+function bgResize(){bg.width=innerWidth;bg.height=innerHeight; parts=[]; const n=Math.round(innerWidth*innerHeight/26000); for(let i=0;i<n;i++)parts.push({x:Math.random()*bg.width,y:Math.random()*bg.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.6+.4});}
+bgResize(); addEventListener('resize',bgResize);
+(function bgAnim(){ bx.clearRect(0,0,bg.width,bg.height);
+  const g=bx.createRadialGradient(bg.width*.5,bg.height*.1,0,bg.width*.5,bg.height*.1,bg.width*.6); g.addColorStop(0,'rgba(34,197,94,.06)');g.addColorStop(1,'rgba(34,197,94,0)'); bx.fillStyle=g;bx.fillRect(0,0,bg.width,bg.height);
+  for(const p of parts){p.x+=p.vx;p.y+=p.vy; if(p.x<0)p.x+=bg.width;if(p.x>bg.width)p.x-=bg.width;if(p.y<0)p.y+=bg.height;if(p.y>bg.height)p.y-=bg.height;}
+  for(let i=0;i<parts.length;i++){const a=parts[i]; for(let j=i+1;j<parts.length;j++){const b=parts[j],dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy; if(d2<11000){bx.strokeStyle='rgba(34,197,94,'+(.12*(1-d2/11000))+')';bx.beginPath();bx.moveTo(a.x,a.y);bx.lineTo(b.x,b.y);bx.stroke();}} bx.fillStyle='rgba(120,200,160,.5)';bx.beginPath();bx.arc(a.x,a.y,a.r,0,7);bx.fill();}
+  requestAnimationFrame(bgAnim); })();
+
+// ── boot ──
+const bootMsgs=['booting live engine…','connecting market feed…','loading strategy…','ready.'];let bm=0;
+const bootInt=setInterval(()=>{bm++;if(bm<bootMsgs.length)$('#bootMsg').textContent=bootMsgs[bm];},420);
+resize(); anim();
+(async()=>{ await load(); scanUniverse(); setTimeout(()=>{clearInterval(bootInt);$('#boot').classList.add('gone');},1400); })();
+setInterval(()=>{ if(REPLAY==null)load(); },60000);
 </script>
 </body>
 </html>
