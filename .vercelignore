@@ -1,3 +1,5 @@
 .claude
 .gitignore
 *.md
+trader
+backtester

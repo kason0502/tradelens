@@ -3,6 +3,9 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 43) — standalone desktop trader (PowerShell, no installs)
+- **New `/trader` tool** — a single PowerShell program (`trader/strata-trader.ps1` + `run.bat`) that runs the trend-pullback strategy **off the website, with no Node/Python**. It fetches real Yahoo daily candles server-side (no CORS), **prints every backtest trade as it finds them** (green wins / red losses, colorized), shows full stats (trades, win rate, profit factor, total return, net $ on a micro, max DD, verdict), then prints the **current live setup with concrete enter / exit / hard-stop levels** and a position size. Flags: `-Symbol -Years -Account -RiskPct -All` (scan every market) `-Watch` (re-check on a timer). Tested live (ES 5y → PF 1.42, +13.6%, current BUY SETUP; `-All` scans ES/NQ/YM/RTY/CL/GC). Same edge/rules as the app. Educational — does NOT place orders. Added `trader` + `backtester` to `.vercelignore`.
+
 ## 2026-06-29 (session 42) — critic round 3 quick wins (trust fixes)
 - **Killed the contradictory profit factor:** the Futures edge scoreboard hard-coded ES PF 1.59 while the Backtester showed 1.99 from the same `results.json`. Now the ES tile (`#futPfReal`) is overwritten live from `results.json` in `futLoadEdge`, and the constant fallback is 1.99 — no more contradiction.
 - **Cleaned `results.json` config:** dropped the stale options/ORB scaffolding (`orb_breakout_calls`, `entry_time`, spread/credit fields, all-zero time-of-day) — `strategy` now reads `futures_trend_pullback` with the real params; added `account.instrument` "MES" + `point_value: 5`.
