@@ -10,7 +10,13 @@
   *{box-sizing:border-box} html,body{margin:0;height:100%}
   body{background:var(--bg);color:var(--ink);font:13px/1.5 "Segoe UI",system-ui,sans-serif;overflow:hidden}
   #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
-  #bgLogo{position:fixed;top:50%;left:50%;width:min(48vw,560px);transform:translate(-50%,-50%);opacity:.05;z-index:0;pointer-events:none;filter:drop-shadow(0 0 46px rgba(34,197,94,.22))}
+  #bgLogo{position:fixed;top:50%;left:50%;width:min(48vw,560px);aspect-ratio:509/788;transform:translate(-50%,-50%);z-index:0;pointer-events:none}
+  #bgLogo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.05;filter:drop-shadow(0 0 46px rgba(34,197,94,.22))}
+  /* the bull's eyes flare a slight green glow once every ~10s (tweak left/right/top
+     % if the dots don't sit exactly on the eyes) */
+  #bgLogo .bgEye{position:absolute;top:34.5%;width:6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(150,255,200,.95),rgba(34,197,94,.4) 45%,transparent 72%);opacity:0;mix-blend-mode:screen;filter:blur(1.5px);animation:bgEyeGlow 10s ease-in-out infinite}
+  #bgLogo .bgEye.l{left:35%} #bgLogo .bgEye.r{right:35%}
+  @keyframes bgEyeGlow{0%,86%{opacity:0}91%{opacity:.9}97%{opacity:.25}100%{opacity:0}}
   .wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh}
   .top{display:flex;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(180deg,rgba(20,20,24,.92),rgba(12,12,15,.86));backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:.5px}
@@ -84,6 +90,16 @@
   .po3-seg.on.man{background:var(--ac2);border-color:var(--ac2)}
   .po3-seg.on.dis{background:var(--green);border-color:var(--green)}
   .po3-seg.on.man.dn,.po3-seg.on.dis.dn{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 16px rgba(255,77,106,.3)}
+  /* edge bias stack */
+  .bias-net{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .bn-lean{font-weight:900;font-size:14px} .bn-lean.g{color:var(--green)} .bn-lean.r{color:var(--red)} .bn-lean.a{color:var(--amber)}
+  .bias-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;margin-bottom:11px;background:rgba(255,255,255,.06)}
+  .bias-bar .bb{height:100%} .bias-bar .bb.g{background:var(--green)} .bias-bar .bb.a{background:var(--amber)} .bias-bar .bb.r{background:var(--red)}
+  .bias-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .bias-row:last-child{border-bottom:0}
+  .bias-name{font-weight:700;font-size:12px} .bias-why{font-size:10.5px;color:var(--mut);line-height:1.4;margin-top:1px}
+  .bias-chip{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:20px;border:1px solid var(--line);flex:none}
+  .bias-chip.bull{color:var(--green);border-color:rgba(38,229,143,.5)} .bias-chip.bear{color:var(--red);border-color:rgba(255,77,106,.5)} .bias-chip.neu{color:var(--mut)}
   /* boot splash */
   #boot{position:fixed;inset:0;z-index:50;background:#000;transition:opacity 1.1s ease}
   #boot.gone{opacity:0;pointer-events:none}
@@ -109,7 +125,7 @@
 </head>
 <body>
 <canvas id="bg"></canvas>
-<img id="bgLogo" src="/logo.png" alt=""/>
+<div id="bgLogo"><img src="/logo.png" alt=""/><span class="bgEye l"></span><span class="bgEye r"></span></div>
 <div id="boot"><img id="bootLogo" src="/logo.png" alt=""/><div class="boot-cap"><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div></div>
 <div class="wrap">
   <div class="top">
@@ -139,6 +155,7 @@
     <div class="rail">
       <div class="card" id="sigCard"><h3>Live setup <span id="cfgTag" class="note" style="margin:0"></span></h3><div id="sigBody" class="note">Loading…</div></div>
       <div class="card" id="po3Card"><h3>Market cycle · PO3 <span id="po3Tag" class="note" style="margin:0"></span></h3><div id="po3Body" class="note">Loading…</div></div>
+      <div class="card" id="biasCard"><h3>Edge bias stack <span id="biasTag" class="note" style="margin:0"></span></h3><div id="biasBody" class="note">Loading…</div></div>
       <div class="card" id="btCard"><h3>Backtest · this timeframe</h3><div id="btBody" class="note">Loading…</div></div>
       <div class="card" id="efCard" style="display:none"><h3>⚡ Edge Finder <span id="efClose" style="cursor:pointer;pointer-events:auto">✕</span></h3><div id="efBody" class="note">—</div></div>
       <div class="card"><h3>Legend</h3><div class="note"><img src="/bull-ind.png" style="width:16px;vertical-align:-4px"/> bull = <b>demand</b> (institutional buying) · <img src="/bear-ind.png" style="width:16px;vertical-align:-4px"/> bear = <b>supply</b> (selling). <b>Bigger marker = higher conviction</b> (swing size + volume + trend). A pulsing marker on the right edge = price <b>approaching a zone</b>, anticipating the reaction. Click a marker for its level/conviction. 1m/5m/1H/1D timeframes · scroll/+− zoom · replay scrubber · Edge Finder. <span style="color:#6a6e76">Zones are estimates from structure, not guarantees.</span></div></div>
@@ -163,6 +180,9 @@ const cv=$('#chart'), ctx=cv.getContext('2d');
 // portrait (~0.66:1); drawing them in a square box stretched them wide. Fit the
 // height to sz and scale the width to the true ratio.
 function drawMarker(img,x,cy,sz){ if(!img.complete||!img.naturalWidth)return; const w=sz*(img.naturalWidth/img.naturalHeight); ctx.drawImage(img,x-w/2,cy-sz/2,w,sz); }
+// Occasional SUBTLE bounce: each marker hops ~5px briefly every ~9s, staggered by
+// its index so they don't all move at once. Returns a vertical offset (px).
+function markerBounce(seed){ const t=performance.now()/1000, P=9, ph=((t+seed*2.3)%P); return ph>0.75?0:-Math.sin(ph/0.75*Math.PI)*5; }
 
 // ── populate symbol dropdown ──
 $('#sym').innerHTML=Object.keys(NAMES).map(k=>`<option value="${k}">${k.replace('=F','')} · ${NAMES[k]}</option>`).join('');
@@ -266,6 +286,41 @@ function renderPO3(bars){
     <div class="note" style="margin:9px 0 0"><b style="color:var(--ink)">Plan:</b> ${t.plan}</div>`;
 }
 
+// ── Edge bias stack: several INDEPENDENT, real-data biases that tilt the odds.
+// Each returns +1 bull / -1 bear / 0 neutral with a one-line reason. Confluence
+// (several agreeing) is the edge — no single factor is a signal on its own. ──
+function biasStack(a){
+  const c=a.c,n=c.length,price=c[n-1],out=[];
+  const add=(name,dir,why)=>out.push({name,dir,why});
+  const s50=a.s50[n-1], s10=a.s10[n-1], s200=sma(c,200)[n-1];
+  const ret=k=>n>k?(price/c[n-1-k]-1)*100:null;
+  let rsi=null; if(n>15){let g=0,l=0;for(let i=n-14;i<n;i++){const d=c[i]-c[i-1];if(d>=0)g+=d;else l-=d;}const rs=l===0?100:g/l;rsi=100-100/(1+rs);}
+  if(s50!=null)add('Primary trend',price>s50?1:-1,price>s50?'Above the 50-bar average':'Below the 50-bar average');
+  if(s200!=null)add('Long-term trend',price>s200?1:-1,price>s200?'Above the 200-bar — secular up':'Below the 200-bar — secular down');
+  if(s10!=null&&s50!=null)add('MA alignment',s10>s50?1:-1,s10>s50?'10-bar stacked above the 50-bar':'10-bar below the 50-bar');
+  if(rsi!=null)add('Momentum (RSI)',rsi>=55?1:(rsi<=45?-1:0),`RSI ${rsi.toFixed(0)} — ${rsi>=55?'buyers in control':rsi<=45?'sellers pressing':'balanced'}`);
+  const m1=ret(21),m3=ret(63);
+  if(m1!=null&&m3!=null){const acc=m1>=m3/3;add('Trend acceleration',(m1>=0&&acc)?1:(m1<0?-1:0),`recent ${m1>=0?'+':''}${m1.toFixed(1)}% — ${acc?'accelerating':'fading'}`);}
+  let at=null; try{at=atr(a.bars,14);}catch(e){}
+  if(at&&s10!=null){const ext=(price-s10)/at;add('Extension',ext>2.2?-1:(ext<-2.2?1:0),ext>2.2?`${ext.toFixed(1)}×ATR above the mean — snap-back risk`:(ext<-2.2?`${Math.abs(ext).toFixed(1)}×ATR below the mean — bounce odds rise`:'Near the mean — room to extend'));}
+  if(a.bars.length>40){const aRec=atr(a.bars,14),aOld=atr(a.bars.slice(0,a.bars.length-12),14);if(aOld){const vUp=aRec>aOld*1.07;add('Volatility regime',vUp?(price>s50?1:-1):0,vUp?'Range expanding — fuel for the trend':'Range contracting — coiling, lower conviction');}}
+  const p3=po3Analyze(a.bars); if(p3){const d=(p3.phase==='man'||p3.phase==='dis')?(p3.dir==='up'?1:-1):0;add('PO3 cycle zone',d,`${p3.phase==='acc'?'Accumulation':p3.phase==='man'?'Manipulation':'Distribution'} · ${p3.dir==='up'?'bull':p3.phase==='acc'?'neutral':'bear'}`);}
+  return out;
+}
+function renderBias(a){
+  const el=$('#biasBody'),tag=$('#biasTag'); if(!el)return;
+  const arr=biasStack(a); if(!arr.length){el.innerHTML='<div class="note">Not enough data for a bias read.</div>';return;}
+  const bull=arr.filter(b=>b.dir>0).length,bear=arr.filter(b=>b.dir<0).length,total=arr.length,neu=total-bull-bear;
+  const net=bull-bear,lean=net>0?'LONG':net<0?'SHORT':'BALANCED',lc=net>0?'g':net<0?'r':'a';
+  if(tag)tag.textContent=`${Math.max(bull,bear)}/${total}`;
+  const rows=arr.map(b=>{const cl=b.dir>0?'bull':b.dir<0?'bear':'neu',tg=b.dir>0?'Bull':b.dir<0?'Bear':'Neutral';
+    return `<div class="bias-row"><div><div class="bias-name">${b.name}</div><div class="bias-why">${b.why}</div></div><div class="bias-chip ${cl}">${tg}</div></div>`;}).join('');
+  el.innerHTML=`<div class="bias-net"><span class="bn-lean ${lc}">Net: ${lean}</span><span class="note" style="margin:0">${bull}▲ ${neu}● ${bear}▼</span></div>
+    <div class="bias-bar"><span class="bb g" style="width:${(bull/total*100).toFixed(0)}%"></span><span class="bb a" style="width:${(neu/total*100).toFixed(0)}%"></span><span class="bb r" style="width:${(bear/total*100).toFixed(0)}%"></span></div>
+    <div class="bias-list">${rows}</div>
+    <div class="note" style="margin-top:8px">Confluence is the edge — several agreeing beats any one factor. All live from real price structure.</div>`;
+}
+
 // ── count-up tween ──
 function countUp(el,to,dec,suf,pre){ const from=0,dur=600,t0=performance.now();
   (function step(t){ const k=Math.min(1,(t-t0)/dur); const v=from+(to-from)*(1-Math.pow(1-k,3));
@@ -282,6 +337,7 @@ function renderRail(a,animate){
   if(up){ b+=`<div class="lv"><span>Enter</span><b>${price.toFixed(2)}</b></div><div class="lv"><span>Exit (trend)</span><b>${s50.toFixed(2)}</b></div><div class="lv"><span>Hard stop</span><b>${hard.toFixed(2)}</b></div><div class="lv"><span>Target</span><b>ride the trend</b></div><div class="lv"><span>Size</span><b>${ct} micro</b></div>`; }
   $('#sigBody').innerHTML=b;
   renderPO3(a.bars);
+  renderBias(a);
   const m=metrics(a);
   if(!m){ $('#btBody').innerHTML='<div class="note">No trades on this config.</div>'; return; }
   const v=(m.pf>=1.3&&m.ret>0)?['hold','EDGE HOLDS']:(m.pf>=1?['marg','MARGINAL']:['no','NO EDGE']);
@@ -321,13 +377,16 @@ function draw(){
   for(let k=start;k<nEff;k++){const b=a.bars[k],upb=b.c>=b.o,col=upb?'#26e58f':'#ff4d6a',x=X(k);
     ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(x,Y(b.h));ctx.lineTo(x,Y(b.l));ctx.stroke();
     const yo=Y(b.o),yc=Y(b.c),top=Math.min(yo,yc),bh=Math.max(1,Math.abs(yc-yo)); ctx.fillRect(x-cw/2,top,cw,bh);}
-  // ── institutional zones: bull at DEMAND, bear at SUPPLY, sized by conviction ──
+  // ── institutional zones: bull at DEMAND, bear at SUPPLY, SIZED + faded by IMPACT
+  //    (conviction = swing size + volume + trend confluence). Bigger, more opaque,
+  //    higher = stronger indicator. Each hops subtly on its own cadence. ──
   markers=[];
   const zs=(a.zones||[]).filter(z=>z.i>=start&&z.i<nEff&&z.conv>=0.4).sort((p,q)=>q.conv-p.conv).slice(0,16);
-  for(const z of zs){ const b=a.bars[z.i],x=X(z.i),sz=22+z.conv*48; let cy,img;
+  for(const z of zs){ const b=a.bars[z.i],x=X(z.i),sz=18+z.conv*64; let cy,img;
     if(z.type==='demand'){cy=Y(b.l)+6+sz/2;img=bull;} else {cy=Y(b.h)-6-sz/2;img=bear;}
-    ctx.globalAlpha=0.55+0.45*z.conv; drawMarker(img,x,cy,sz); ctx.globalAlpha=1;
-    markers.push({x,cy,r:Math.max(15,sz/2),zone:z}); }
+    const by=markerBounce(z.i);
+    ctx.globalAlpha=0.5+0.5*z.conv; drawMarker(img,x,cy+by,sz); ctx.globalAlpha=1;
+    markers.push({x,cy,r:Math.max(14,sz/2),zone:z}); }
   // nearest active support (demand below price) / resistance (supply above)
   const cur=a.c[nEff-1], at=a.atr||cur*0.01; let dem=null,sup=null;
   for(const z of (a.zones||[])){ if(z.i>=nEff)continue;

@@ -1007,6 +1007,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .po3-plan{font-size:12.5px;line-height:1.6;color:var(--ink2);padding:10px 12px;border-radius:9px;background:rgba(var(--ac-rgb),.07);border:1px solid rgba(var(--ac-rgb),.22)}
 .po3-plan b{color:var(--act)}
 @media(max-width:560px){.po3-badge{width:44px;height:44px}.po3-seg{font-size:8.5px;padding:6px 2px}}
+/* edge bias stack */
+.bias-net{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.bn-lean{font-weight:900;font-size:16px;letter-spacing:-.01em} .bn-lean.g{color:var(--gt)} .bn-lean.r{color:var(--rt)}
+.bn-split{font-size:12px;font-family:var(--mono);color:var(--mu)}
+.bias-bar{display:flex;height:7px;border-radius:5px;overflow:hidden;margin-bottom:14px;background:rgba(255,255,255,.06)}
+.bias-bar .bb{height:100%} .bias-bar .bb.g{background:var(--gr)} .bias-bar .bb.a{background:var(--am)} .bias-bar .bb.r{background:var(--rd)}
+.bias-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--line)}
+.bias-row:last-child{border-bottom:0}
+.bias-name{font-weight:800;font-size:13px} .bias-why{font-size:11.5px;color:var(--mu);line-height:1.45;margin-top:2px}
+.bias-chip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:4px 11px;border-radius:99px;border:1px solid var(--line);flex:none}
+.bias-chip.bull{color:var(--gt);border-color:rgba(38,229,143,.4);background:rgba(38,229,143,.08)}
+.bias-chip.bear{color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)}
+.bias-chip.neu{color:var(--mu)}
 .fut-scan{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .fut-chip{border:1px solid var(--line);border-radius:14px;padding:15px 16px;text-align:left;cursor:pointer;background:rgba(255,255,255,.015);transition:transform .14s,border-color .14s,background .14s}
 .fut-chip:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
@@ -1423,15 +1436,21 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 /* Faint, slightly-animated brand watermark behind the app (accent-tinted, flips with mood) */
 .bg-logo{position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .bg-logo::before{content:'';position:absolute;width:min(74vw,860px);height:min(74vw,860px);border-radius:50%;background:radial-gradient(circle,rgba(var(--ac-rgb),.1),transparent 64%);filter:blur(22px);animation:bgGlow 16s ease-in-out infinite}
-.bg-logo img{width:min(48vw,540px);opacity:.07;animation:bgLogoFloat 18s ease-in-out infinite;will-change:transform,opacity;filter:drop-shadow(0 0 34px rgba(var(--ac-rgb),.22))}
-@keyframes bgLogoFloat{0%,100%{transform:translateY(0) scale(1) rotate(0);opacity:.07}50%{transform:translateY(-18px) scale(1.05) rotate(1.4deg);opacity:.11}}
+.bg-logo .bgl-inner{position:relative;width:min(48vw,540px);aspect-ratio:509/788;animation:bgLogoFloatT 18s ease-in-out infinite;will-change:transform}
+.bg-logo .bgl-inner img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.08;filter:drop-shadow(0 0 34px rgba(var(--ac-rgb),.22))}
+/* the bull's eyes flare a slight accent glow once every ~10s (nudge left/right/top
+   % below if the dots don't sit exactly on the eyes) */
+.bg-logo .bgEye{position:absolute;top:34.5%;width:6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(var(--ac-rgb),.95),rgba(var(--ac-rgb),.4) 45%,transparent 72%);opacity:0;mix-blend-mode:screen;filter:blur(1.5px);animation:bgEyeGlow 10s ease-in-out infinite}
+.bg-logo .bgEye.l{left:35%} .bg-logo .bgEye.r{right:35%}
+@keyframes bgLogoFloatT{0%,100%{transform:translateY(0) scale(1) rotate(0)}50%{transform:translateY(-18px) scale(1.05) rotate(1.4deg)}}
+@keyframes bgEyeGlow{0%,86%{opacity:0}91%{opacity:.9}97%{opacity:.25}100%{opacity:0}}
 @keyframes bgGlow{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-@media(prefers-reduced-motion:reduce){.bg-logo img,.bg-logo::before{animation:none}}
+@media(prefers-reduced-motion:reduce){.bg-logo .bgl-inner,.bg-logo .bgEye,.bg-logo::before{animation:none}}
 </style>
 </head>
 <body>
 <canvas id="fxCanvas" aria-hidden="true"></canvas>
-<div class="bg-logo" aria-hidden="true"><img src="logo.png" alt=""/></div>
+<div class="bg-logo" aria-hidden="true"><div class="bgl-inner"><img src="logo.png" alt=""/><span class="bgEye l"></span><span class="bgEye r"></span></div></div>
 <div class="particles" id="particles"></div>
 
 <!-- ═══════════════════ LANDING ═══════════════════ -->
@@ -4981,6 +5000,39 @@ function po3CardHTML(p,mkt){
     <div class="dp-struct off" style="margin-top:10px">PO3 (Power of Three) reads price in three repeating zones. The live phase is estimated from real structure — range compression, liquidity sweeps, expansion — not a prediction or guarantee.</div>
   </div>`;
 }
+// ── Edge bias stack: several INDEPENDENT, real-data biases that tilt the odds.
+// Each is +1 bull / -1 bear / 0 neutral with a reason. Confluence is the edge. ──
+function biasStack(s){
+  const closes=s.closes,ohlc=s.ohlc,price=s.price,n=closes.length,out=[];
+  const add=(name,dir,why)=>out.push({name,dir,why});
+  const s50=s.sma50,s10=s.sma10,s200=smaN(closes,200);
+  const ret=k=>n>k?(price/closes[n-1-k]-1)*100:null;
+  let rsi=null; if(n>15){let g=0,l=0;for(let i=n-14;i<n;i++){const d=closes[i]-closes[i-1];if(d>=0)g+=d;else l-=d;}const rs=l===0?100:g/l;rsi=100-100/(1+rs);}
+  if(s50!=null)add('Primary trend',price>s50?1:-1,price>s50?'Price holds above the 50-day average':'Price is below the 50-day average');
+  if(s200!=null)add('Long-term trend',price>s200?1:-1,price>s200?'Above the 200-day — secular uptrend':'Below the 200-day — secular downtrend');
+  if(s10!=null&&s50!=null)add('MA alignment',s10>s50?1:-1,s10>s50?'10-day stacked above the 50-day':'10-day below the 50-day');
+  if(rsi!=null)add('Momentum (RSI)',rsi>=55?1:(rsi<=45?-1:0),`RSI ${rsi.toFixed(0)} — ${rsi>=55?'strong, buyers in control':rsi<=45?'weak, sellers pressing':'balanced'}`);
+  const m1=ret(21),m3=ret(63);
+  if(m1!=null&&m3!=null){const acc=m1>=m3/3;add('Trend acceleration',(m1>=0&&acc)?1:(m1<0?-1:0),`1-mo ${m1>=0?'+':''}${m1.toFixed(1)}% — ${acc?'accelerating':'fading'}`);}
+  let at=null; try{if(ohlc)at=atr(ohlc,14);}catch(e){}
+  if(at&&s10!=null){const ext=(price-s10)/at;add('Extension',ext>2.2?-1:(ext<-2.2?1:0),ext>2.2?`Stretched ${ext.toFixed(1)}×ATR above the mean — snap-back risk`:(ext<-2.2?`${Math.abs(ext).toFixed(1)}×ATR below the mean — bounce odds rise`:'Near the mean — room to extend'));}
+  if(ohlc&&ohlc.length>40){const aRec=atr(ohlc,14),aOld=atr(ohlc.slice(0,ohlc.length-12),14);if(aOld){const vUp=aRec>aOld*1.07;add('Volatility regime',vUp?(price>s50?1:-1):0,vUp?'Range expanding — fuel for the prevailing trend':'Range contracting — coiling, lower conviction');}}
+  if(ohlc){const p3=po3Analyze(ohlc);if(p3){const d=(p3.phase==='man'||p3.phase==='dis')?(p3.dir==='up'?1:-1):0;add('PO3 cycle zone',d,`${p3.phase==='acc'?'Accumulation':p3.phase==='man'?'Manipulation':'Distribution'} — ${p3.dir==='up'?'bullish':p3.phase==='acc'?'neutral':'bearish'}`);}}
+  return out;
+}
+function biasStackHTML(s){
+  const arr=biasStack(s); if(!arr.length)return '';
+  const bull=arr.filter(b=>b.dir>0).length,bear=arr.filter(b=>b.dir<0).length,total=arr.length,neu=total-bull-bear;
+  const net=bull-bear,lean=net>0?'LEAN LONG':net<0?'LEAN SHORT':'BALANCED',lc=net>0?'g':net<0?'r':'';
+  const rows=arr.map(b=>{const cl=b.dir>0?'bull':b.dir<0?'bear':'neu',tg=b.dir>0?'Bull':b.dir<0?'Bear':'Neutral';
+    return `<div class="bias-row"><div class="bias-info"><div class="bias-name">${b.name}</div><div class="bias-why">${b.why}</div></div><div class="bias-chip ${cl}">${tg}</div></div>`;}).join('');
+  return `<div class="card"><div class="card-title">Edge bias stack — what’s tilting the odds <span class="pill">${total} factors</span></div>
+    <div class="bias-net"><div class="bn-lean ${lc}"${lc===''?' style="color:var(--at)"':''}>${lean}</div><div class="bn-split"><span class="g">${bull} bull</span> · <span style="color:var(--at)">${neu} neutral</span> · <span class="r">${bear} bear</span></div></div>
+    <div class="bias-bar"><span class="bb g" style="width:${(bull/total*100).toFixed(0)}%"></span><span class="bb a" style="width:${(neu/total*100).toFixed(0)}%"></span><span class="bb r" style="width:${(bear/total*100).toFixed(0)}%"></span></div>
+    <div class="bias-list">${rows}</div>
+    <div class="dp-struct off" style="margin-top:10px">Each bias is computed live from real price structure — trend, momentum, distance-from-mean, volatility, and the PO3 cycle. <b>Confluence</b> (several agreeing) is the edge; one factor alone isn’t a signal. Educational, not advice.</div>
+  </div>`;
+}
 function paintFutures(){
   const el=document.getElementById('futBody');if(!el)return;
   const money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
@@ -5062,6 +5114,7 @@ function paintFutures(){
       <div class="bt-score"><div class="bt-score-val">${atrPct.toFixed(1)}%</div><div class="bt-score-lbl">Daily range (ATR)</div></div>
     </div>
     ${po3card}
+    ${biasStackHTML(s)}
     ${edge}
     </div><div class="fut-rail">${futSentimentGauge(sigs)}<div id="futStratPerf"></div></div></div>`;
   futLoadEdge();
