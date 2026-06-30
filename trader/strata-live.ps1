@@ -231,8 +231,8 @@ $chart.Dock="Fill"; $chart.BackColor=$BG
 $form.Controls.Add($chart)
 $chart.BringToFront()
 
-# enable double-buffering on the chart panel (reduce flicker)
-$chart.GetType().GetProperty("DoubleBuffered","Instance,NonPublic").SetValue($chart,$true,$null)
+# enable double-buffering on the chart panel (reduce flicker) - non-essential, ignore if it fails
+try { $bf=[System.Reflection.BindingFlags]'Instance,NonPublic'; [System.Windows.Forms.Control].GetProperty('DoubleBuffered',$bf).SetValue($chart,$true,$null) } catch {}
 
 $chart.Add_Paint({
   param($s,$e)
