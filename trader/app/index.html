@@ -10,6 +10,7 @@
   *{box-sizing:border-box} html,body{margin:0;height:100%}
   body{background:var(--bg);color:var(--ink);font:13px/1.5 "Segoe UI",system-ui,sans-serif;overflow:hidden}
   #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #bgLogo{position:fixed;top:50%;left:50%;width:min(48vw,560px);transform:translate(-50%,-50%);opacity:.05;z-index:0;pointer-events:none;filter:drop-shadow(0 0 46px rgba(34,197,94,.22))}
   .wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh}
   .top{display:flex;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(180deg,rgba(20,20,24,.92),rgba(12,12,15,.86));backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:.5px}
@@ -86,6 +87,7 @@
 </head>
 <body>
 <canvas id="bg"></canvas>
+<img id="bgLogo" src="/logo.png" alt=""/>
 <div id="boot"><img src="/bull.png" alt=""/><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div>
 <div class="wrap">
   <div class="top">
@@ -174,7 +176,7 @@ function countUp(el,to,dec,suf,pre){ const from=0,dur=600,t0=performance.now();
 
 // ── rail ──
 function holdLabel(intv,avgBars){ if(intv==='1h'){const h=Math.round(avgBars);return `~${h}h (~${(h/6.5).toFixed(1)}d)`;} return `~${Math.round(avgBars)}d`; }
-function renderRail(a){
+function renderRail(a,animate){
   const c=a.c,n=c.length,i=n-1,price=c[i],s50=a.s50[i],s10=a.s10[i],up=price>s50,sg=a.sig[i];
   let cls,word; if(!up){cls='no';word='NO TRADE — downtrend';} else if(sg==='buy'){cls='buy';word='★ BUY SIGNAL';} else if(price<=s10){cls='wait';word='WATCH — pulled back';} else {cls='up';word='UPTREND — no entry';}
   const hard=price*0.9,exitLvl=Math.max(s50,hard),dist=price-exitLvl,ct=dist>0?Math.floor(ACCOUNT*RISKPCT/100/(dist*PV[SYM])):0;
@@ -194,7 +196,8 @@ function renderRail(a){
     <div class="stat"><div class="v" style="font-size:13px">${holdLabel(INTV,m.avgBars)}</div><div class="l">Avg hold</div></div>
   </div><div style="margin-top:10px">${equitySVG(m.curve)}</div><div class="verdict ${v[0]}">${v[1]}</div>
   <div class="note">Win rate is low by design — a few big winners carry it.</div>`;
-  countUp($('#m1'),m.ret,0,'%',m.ret>=0?'+':''); countUp($('#m2'),m.win,0,'%'); countUp($('#m3'),isFinite(m.pf)?m.pf:0,2); countUp($('#m4'),m.n,0); countUp($('#m5'),m.dd,0,'%');
+  const sv=(id,to,dec,suf,pre)=>{const el=$(id);if(!el)return; if(animate===false){el.textContent=(pre||'')+(dec?to.toFixed(dec):Math.round(to))+(suf||'');} else countUp(el,to,dec,suf,pre);};
+  sv('#m1',m.ret,0,'%',m.ret>=0?'+':''); sv('#m2',m.win,0,'%'); sv('#m3',isFinite(m.pf)?m.pf:0,2); sv('#m4',m.n,0); sv('#m5',m.dd,0,'%');
 }
 function equitySVG(curve){ if(!curve||curve.length<2)return ''; const W=290,H=54,mn=Math.min(...curve),mx=Math.max(...curve),rg=Math.max(1e-6,mx-mn);
   const X=i=>i/(curve.length-1)*W, Y=v=>H-2-((v-mn)/rg)*(H-4); let d='',ar='';
@@ -215,20 +218,20 @@ function draw(){
   ctx.font='10px ui-monospace,Consolas,monospace'; ctx.textBaseline='middle';
   for(let gi=0;gi<=4;gi++){const v=min+rng*gi/4,y=Y(v); ctx.strokeStyle='rgba(255,255,255,.045)';ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke(); ctx.fillStyle='#7a7e86';ctx.fillText(v.toFixed(0),W-padR+4,y);}
   // glowing MAs
-  const ma=(arr,col,w)=>{ctx.save();ctx.shadowColor=col;ctx.shadowBlur=8;ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();let st=false;for(let k=start;k<nEff;k++){if(arr[k]==null)continue;const x=X(k),y=Y(arr[k]);if(!st){ctx.moveTo(x,y);st=true;}else ctx.lineTo(x,y);}ctx.stroke();ctx.restore();};
+  const ma=(arr,col,w)=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();let st=false;for(let k=start;k<nEff;k++){if(arr[k]==null)continue;const x=X(k),y=Y(arr[k]);if(!st){ctx.moveTo(x,y);st=true;}else ctx.lineTo(x,y);}ctx.stroke();};
   ma(a.s50,'#22c55e',2); ma(a.s10,'#ffc94d',1.5);
   for(let k=start;k<nEff;k++){const b=a.bars[k],upb=b.c>=b.o,col=upb?'#26e58f':'#ff4d6a',x=X(k);
     ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1; ctx.beginPath();ctx.moveTo(x,Y(b.h));ctx.lineTo(x,Y(b.l));ctx.stroke();
     const yo=Y(b.o),yc=Y(b.c),top=Math.min(yo,yc),bh=Math.max(1,Math.abs(yc-yo)); ctx.fillRect(x-cw/2,top,cw,bh);}
   // markers
-  markers=[]; let lastSig=-1; for(let k=nEff-1;k>=start;k--){if(a.sig[k]){lastSig=k;break;}} const pulse=1+0.16*Math.sin(phase),mk=42;
+  markers=[]; let lastSig=-1; for(let k=nEff-1;k>=start;k--){if(a.sig[k]){lastSig=k;break;}} const pulse=1+0.05*Math.sin(phase),mk=42;
   for(let k=start;k<nEff;k++){const sg=a.sig[k];if(!sg)continue;const b=a.bars[k],x=X(k);let sz=mk;if(k===lastSig)sz*=pulse;let cy,img,rc;
     if(sg==='buy'){cy=Y(b.l)+8+sz/2;img=bull;rc='#26e58f';}else{cy=Y(b.h)-8-sz/2;img=bear;rc='#ff4d6a';}
-    if(k===lastSig){ctx.save();ctx.shadowColor=rc;ctx.shadowBlur=18;ctx.strokeStyle=rc;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,cy,sz/2+4,0,7);ctx.stroke();ctx.restore();}
+    if(k===lastSig){ctx.save();ctx.strokeStyle=rc;ctx.globalAlpha=0.85;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,cy,sz/2+4,0,7);ctx.stroke();ctx.restore();}
     if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-sz/2,cy-sz/2,sz,sz); markers.push({x,cy,r:Math.max(16,sz/2),bar:k});}
-  // last price + pulse
+  // last price + gentle dot
   const lp=Y(a.c[nEff-1]),lx=X(nEff-1); ctx.strokeStyle='rgba(232,234,237,.5)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(padL,lp);ctx.lineTo(W-padR,lp);ctx.stroke();ctx.setLineDash([]);
-  ctx.save();ctx.shadowColor='#e8eaed';ctx.shadowBlur=10;ctx.fillStyle='#e8eaed';const dr=4+1.6*Math.abs(Math.sin(phase));ctx.beginPath();ctx.arc(lx,lp,dr,0,7);ctx.fill();ctx.restore();
+  ctx.fillStyle='#e8eaed';const dr=4.5+0.6*Math.abs(Math.sin(phase));ctx.beginPath();ctx.arc(lx,lp,dr,0,7);ctx.fill();
   // crosshair + OHLC
   if(mouseX>=padL&&mouseX<=W-padR&&mouseY>=padT&&mouseY<=H-padB){
     ctx.strokeStyle='rgba(150,156,168,.45)';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(mouseX,padT);ctx.lineTo(mouseX,H-padB);ctx.moveTo(padL,mouseY);ctx.lineTo(W-padR,mouseY);ctx.stroke();ctx.setLineDash([]);
@@ -237,7 +240,7 @@ function draw(){
       ctx.fillStyle='#8a8f98';ctx.fillText(new Date(b.t).toLocaleDateString(),padL+12,padT+14);
       ctx.fillStyle='#e8eaed';ctx.fillText(`O ${b.o.toFixed(1)}  H ${b.h.toFixed(1)}`,padL+12,padT+28);ctx.fillText(`L ${b.l.toFixed(1)}  C ${b.c.toFixed(1)}`,padL+12,padT+40);}}
 }
-function anim(){ phase+=0.13; if(phase>6.283)phase-=6.283; if(PLAYING&&REPLAY!=null){ REPLAY+=Math.max(1,Math.round(VIEW/120)); if(REPLAY>=DATA.c.length){REPLAY=null;PLAYING=false;$('#play').textContent='▶';syncScrub();} else updateScrubUI(); } draw(); requestAnimationFrame(anim); }
+function anim(){ phase+=0.045; if(phase>6.283)phase-=6.283; if(PLAYING&&REPLAY!=null){ REPLAY+=Math.max(1,Math.round(VIEW/120)); if(REPLAY>=DATA.c.length){REPLAY=null;PLAYING=false;$('#play').textContent='▶';syncScrub();} else updateScrubUI(); } draw(); requestAnimationFrame(anim); }
 
 // ── targets popup ──
 function targetText(bar){ const a=DATA,t=a.trades.find(x=>x.i0===bar||x.i1===bar);
@@ -281,10 +284,10 @@ function runEdgeFinder(){
 }
 
 // ── load + events ──
-async function load(){
+async function load(animate){ animate=animate!==false;
   $('#status').innerHTML='<span class="live"></span>fetching '+SYM+'…';
   try{ const bars=await fetchSeries(SYM,INTV); DATA=analyze(bars,MTREND,MPULL); REPLAY=null; PLAYING=false; $('#play').textContent='▶'; syncScrub();
-    renderRail(DATA); maybeToast(DATA); renderWatch();
+    renderRail(DATA,animate); maybeToast(DATA); renderWatch();
     $('#status').innerHTML=`<span class="live"></span>${SYM} · ${INTV==='1h'?'Hourly':'Daily'} · ${bars.length} bars · ${new Date().toLocaleTimeString()}`;
   }catch(e){ $('#status').innerHTML='data busy — click Live'; $('#sigBody').innerHTML='<div class="note">Couldn\'t load ('+e.message+'). Keep the server window open.</div>'; }
 }
@@ -318,7 +321,7 @@ const bootMsgs=['booting live engine…','connecting market feed…','loading st
 const bootInt=setInterval(()=>{bm++;if(bm<bootMsgs.length)$('#bootMsg').textContent=bootMsgs[bm];},420);
 resize(); anim();
 (async()=>{ await load(); scanUniverse(); setTimeout(()=>{clearInterval(bootInt);$('#boot').classList.add('gone');},1400); })();
-setInterval(()=>{ if(REPLAY==null)load(); },60000);
+setInterval(()=>{ if(REPLAY==null)load(false); },60000);
 </script>
 </body>
 </html>
