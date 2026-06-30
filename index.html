@@ -609,6 +609,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lx-nav-links a:hover{color:var(--ink)}
 @media(max-width:860px){.lx-nav-links .nl{display:none}}
 .lx-hero{position:relative;padding:64px 0 90px}
+.lx-mascots{display:flex;gap:16px;align-items:flex-end;margin-bottom:20px}
+.lx-mascots .mz{height:104px;width:auto;object-fit:contain}
+.lx-mascots .bull{filter:drop-shadow(0 0 20px rgba(34,197,94,.5))}
+.lx-mascots .bear{height:90px;opacity:.92;filter:drop-shadow(0 0 20px rgba(240,68,90,.45))}
+@media(max-width:980px){.lx-mascots .mz{height:80px}.lx-mascots .bear{height:70px}}
 .lx-hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:40px;align-items:center}
 @media(max-width:980px){.lx-hero-grid{grid-template-columns:1fr;gap:54px}}
 .lx-status{display:inline-flex;align-items:center;gap:10px;padding:7px 15px;border-radius:100px;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:30px}
@@ -1437,6 +1442,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <section class="lx-hero" id="lxTop">
     <div class="lx">
       <div class="lx-hero-head lx-reveal in">
+        <div class="lx-mascots"><img src="bull.png" class="mz bull" alt="bull"/><img src="bear.png" class="mz bear" alt="bear"/></div>
         <div class="lx-status"><span class="pulse"></span> <b>Live</b>&nbsp;·&nbsp;real-time market data</div>
         <h1 class="lx-h1">Trade on <span class="glo">structure</span>,<br>not on noise.</h1>
         <p class="lx-lead">STRATA turns live market data into structure-based plans — entry, stop, and targets from real swing levels and volatility, with a self-learning strategy engine behind every read.</p>

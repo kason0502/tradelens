@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-30 (session 51) — static images into both surfaces (animation dropped)
+- **STRATA Live app:** chart signal markers now use the new high-res **`bull indicator.png` / `bear indicator.png`** (served at `/trader/...`) instead of the smaller root PNGs. Static, no animation.
+- **Main site (index.html):** added the **bull + bear PNGs to the landing hero** (`.lx-mascots`, green/red glow, responsive) using the deployed root `bull.png`/`bear.png`. Logo already uses `logo.png` in nav/footer.
+- Animated-asset effort parked (the SVG approaches looked amateur; AI image-to-video prompt pack remains in `trader/AI-VIDEO-PROMPTS.md` for when real clips are wanted).
+
 ## 2026-06-30 (session 50) — original RIGGED vector assets (replaces the raster-wrap)
 - Scrapped the embedded-PNG `.anim.svg` wraps (looked pasted-on) for **original hand-built vector** emblems with **real moving parts**, pure SVG (self-contained, scale-free, work as img/inline/object/CSS):
   - `bull.rig.svg` — geometric bull head; idle breathing → periodic trigger (head dips/charges, dual nostril steam blasts, eye flare, green pulse).
