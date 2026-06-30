@@ -10,6 +10,8 @@
   - **Site** (`index.html`): `po3Analyze`/`po3Text`/`po3DiagramSVG`/`po3CardHTML`; a new **Market cycle — PO3 zone** card injected into the Futures tab (after the signal card) with a directional bull/bear badge, a 3-segment phase strip (live phase lit), an illustrative range→sweep→expansion SVG schematic, a plain-language description, the cycle range + equilibrium, and a phase-specific trade plan.
   - **App** (`trader/app/index.html`): mirrored `po3Analyze`/`po3Text`/`renderPO3` into a new **Market cycle · PO3** rail card (phase strip + badge + description + range + plan), wired into `renderRail`.
 - **Tooling:** `serve.ps1` now honors a `PORT` env var (defaults to 8777) and `launch.json` sets `autoPort:true`, so a second session can preview on a free port without fighting over 8777. App still uses relative `/api/yf`, so the proxy works on any port.
+- **App marker distortion fixed** — the badges are portrait (~0.66:1) but were drawn into a square box (stretched wide). New `drawMarker()` fits height to the marker size and scales width to the true aspect; used for both zone markers and the anticipation marker. Verified live: 16 markers render clean.
+- **Cinematic boot intro (STRATA Live app)** — opens on a black screen with the big `logo.png` bull, which **flashes a green outline twice** then recedes as the main UI **fades up** into the live layout (`#bootLogo` `bootBull` keyframes + `.wrap.revealed`; fixed 2.65s timeline decoupled from data load; reduced-motion-safe).
 
 ## 2026-06-30 (session 51) — static images into both surfaces (animation dropped)
 - **STRATA Live app:** chart signal markers now use the new high-res **`bull indicator.png` / `bear indicator.png`** (served at `/trader/...`) instead of the smaller root PNGs. Static, no animation.

@@ -85,18 +85,33 @@
   .po3-seg.on.dis{background:var(--green);border-color:var(--green)}
   .po3-seg.on.man.dn,.po3-seg.on.dis.dn{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 16px rgba(255,77,106,.3)}
   /* boot splash */
-  #boot{position:fixed;inset:0;z-index:50;background:#08080b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s}
+  #boot{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 42%,#0a0a12 0%,#050507 68%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .9s ease}
   #boot.gone{opacity:0;pointer-events:none}
-  #boot img{width:74px;height:74px;border-radius:16px;box-shadow:0 0 50px rgba(34,197,94,.6);animation:bootpulse 1.2s ease-in-out infinite}
-  @keyframes bootpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-  #boot .bt{font-weight:900;letter-spacing:.4em;font-size:22px} #boot .bs{color:var(--mut);font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  #bootLogo{width:min(44vw,400px);max-height:60vh;object-fit:contain;will-change:transform,filter,opacity;animation:bootBull 2.9s cubic-bezier(.4,0,.2,1) forwards}
+  /* bull appears on black → flashes a green outline twice → recedes as the UI fades up */
+  @keyframes bootBull{
+    0%{opacity:0;transform:scale(.82);filter:brightness(.35) drop-shadow(0 0 0 rgba(34,197,94,0))}
+    15%{opacity:1;transform:scale(1);filter:brightness(1) drop-shadow(0 0 0 rgba(34,197,94,0))}
+    27%{filter:brightness(1.25) drop-shadow(0 0 30px rgba(34,197,94,.95)) drop-shadow(0 0 9px rgba(52,211,153,.9))}
+    37%{filter:brightness(1) drop-shadow(0 0 4px rgba(34,197,94,.14))}
+    49%{filter:brightness(1.32) drop-shadow(0 0 36px rgba(34,197,94,1)) drop-shadow(0 0 12px rgba(52,211,153,1))}
+    61%{filter:brightness(1) drop-shadow(0 0 4px rgba(34,197,94,.1))}
+    100%{opacity:0;transform:scale(1.07);filter:brightness(.85) drop-shadow(0 0 22px rgba(34,197,94,.3))}
+  }
+  #boot .bt{font-weight:900;letter-spacing:.42em;font-size:22px;animation:bootFade 2.9s ease forwards}
+  #boot .bs{color:var(--mut);font-family:ui-monospace,Consolas,monospace;font-size:12px;animation:bootFade 2.9s ease forwards}
+  @keyframes bootFade{0%,18%{opacity:0}34%{opacity:1}78%,100%{opacity:0}}
+  /* the main UI starts hidden and fades up from black as the bull recedes */
+  .wrap{opacity:0}
+  .wrap.revealed{opacity:1;transition:opacity 1.3s ease}
+  @media(prefers-reduced-motion:reduce){#bootLogo{animation:none;opacity:1}#boot .bt,#boot .bs{animation:none;opacity:1}.wrap{opacity:1}}
   ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 <img id="bgLogo" src="/logo.png" alt=""/>
-<div id="boot"><img src="/bull.png" alt=""/><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div>
+<div id="boot"><img id="bootLogo" src="/logo.png" alt=""/><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div>
 <div class="wrap">
   <div class="top">
     <div class="brand"><img id="brandImg" src="/bull.png" alt=""/>STRATA <small>Live</small></div>
@@ -145,6 +160,10 @@ let mouseX=-1, mouseY=-1, markers=[], lastBuyShown='';
 const bull=new Image(), bear=new Image(); bull.src='/bull-ind.png'; bear.src='/bear-ind.png';
 const $=s=>document.querySelector(s);
 const cv=$('#chart'), ctx=cv.getContext('2d');
+// Draw a marker image preserving its aspect ratio. The bull/bear badges are
+// portrait (~0.66:1); drawing them in a square box stretched them wide. Fit the
+// height to sz and scale the width to the true ratio.
+function drawMarker(img,x,cy,sz){ if(!img.complete||!img.naturalWidth)return; const w=sz*(img.naturalWidth/img.naturalHeight); ctx.drawImage(img,x-w/2,cy-sz/2,w,sz); }
 
 // ── populate symbol dropdown ──
 $('#sym').innerHTML=Object.keys(NAMES).map(k=>`<option value="${k}">${k.replace('=F','')} · ${NAMES[k]}</option>`).join('');
@@ -308,7 +327,7 @@ function draw(){
   const zs=(a.zones||[]).filter(z=>z.i>=start&&z.i<nEff&&z.conv>=0.4).sort((p,q)=>q.conv-p.conv).slice(0,16);
   for(const z of zs){ const b=a.bars[z.i],x=X(z.i),sz=22+z.conv*48; let cy,img;
     if(z.type==='demand'){cy=Y(b.l)+6+sz/2;img=bull;} else {cy=Y(b.h)-6-sz/2;img=bear;}
-    ctx.globalAlpha=0.55+0.45*z.conv; if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-sz/2,cy-sz/2,sz,sz); ctx.globalAlpha=1;
+    ctx.globalAlpha=0.55+0.45*z.conv; drawMarker(img,x,cy,sz); ctx.globalAlpha=1;
     markers.push({x,cy,r:Math.max(15,sz/2),zone:z}); }
   // nearest active support (demand below price) / resistance (supply above)
   const cur=a.c[nEff-1], at=a.atr||cur*0.01; let dem=null,sup=null;
@@ -321,7 +340,7 @@ function draw(){
   // anticipation: price approaching a zone -> a pulsing marker BEFORE the move
   const ante=(z,img2)=>{ const sz=30+z.conv*46+6*Math.sin(phase), x=W-padR-28, cy=Y(z.price);
     ctx.save();ctx.globalAlpha=.92;ctx.strokeStyle=z.type==='demand'?'#26e58f':'#ff4d6a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,cy,sz/2+5,0,7);ctx.stroke();
-    if(img2.complete&&img2.naturalWidth)ctx.drawImage(img2,x-sz/2,cy-sz/2,sz,sz);ctx.restore(); markers.push({x,cy,r:sz/2,zone:z}); };
+    drawMarker(img2,x,cy,sz);ctx.restore(); markers.push({x,cy,r:sz/2,zone:z}); };
   const upTrend=a.s50[nEff-1]!=null&&cur>a.s50[nEff-1];
   if(dem&&upTrend&&(cur-dem.price)<at*1.2) ante(dem,bull);
   else if(sup&&!upTrend&&(sup.price-cur)<at*1.2) ante(sup,bear);
@@ -416,9 +435,12 @@ bgResize(); addEventListener('resize',bgResize);
 
 // ── boot ──
 const bootMsgs=['booting live engine…','connecting market feed…','loading strategy…','ready.'];let bm=0;
-const bootInt=setInterval(()=>{bm++;if(bm<bootMsgs.length)$('#bootMsg').textContent=bootMsgs[bm];},420);
+const bootInt=setInterval(()=>{bm++;if(bm<bootMsgs.length)$('#bootMsg').textContent=bootMsgs[bm];},560);
 resize(); anim();
-(async()=>{ await load(); scanUniverse(); setTimeout(()=>{clearInterval(bootInt);$('#boot').classList.add('gone');},1400); })();
+// data loads in the background; the cinematic intro runs on its own fixed timeline
+(async()=>{ try{await load();}catch(e){} scanUniverse(); })();
+setTimeout(()=>{const w=document.querySelector('.wrap');if(w)w.classList.add('revealed');},1500);
+setTimeout(()=>{clearInterval(bootInt);const b=$('#boot');if(b){b.classList.add('gone');setTimeout(()=>{b.style.display='none';},950);}},2650);
 setInterval(()=>{ if(REPLAY==null)load(false); },60000);
 </script>
 </body>
