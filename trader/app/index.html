@@ -76,6 +76,14 @@
   #toast{position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:rgba(20,22,28,.95);border:1px solid rgba(38,229,143,.6);border-radius:14px;padding:12px 20px;font-weight:800;font-size:15px;z-index:8;box-shadow:0 0 40px rgba(38,229,143,.4);transition:all .4s cubic-bezier(.22,1,.36,1);pointer-events:none}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .disc{font-size:10px;color:#5a5e66;padding:7px 14px;border-top:1px solid var(--line);background:rgba(10,10,13,.8)}
+  /* PO3 market-cycle phase strip */
+  .po3-strip{display:flex;gap:5px;margin:2px 0 11px}
+  .po3-seg{flex:1;text-align:center;padding:6px 3px;border-radius:8px;border:1px solid var(--line);font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);background:rgba(255,255,255,.02);transition:all .3s}
+  .po3-seg.on{color:#08080b;box-shadow:0 0 16px rgba(34,197,94,.3)}
+  .po3-seg.on.acc{background:var(--amber);border-color:var(--amber);color:#08080b;box-shadow:0 0 16px rgba(255,201,77,.3)}
+  .po3-seg.on.man{background:var(--ac2);border-color:var(--ac2)}
+  .po3-seg.on.dis{background:var(--green);border-color:var(--green)}
+  .po3-seg.on.man.dn,.po3-seg.on.dis.dn{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 16px rgba(255,77,106,.3)}
   /* boot splash */
   #boot{position:fixed;inset:0;z-index:50;background:#08080b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s}
   #boot.gone{opacity:0;pointer-events:none}
@@ -116,9 +124,10 @@
     </div>
     <div class="rail">
       <div class="card" id="sigCard"><h3>Live setup <span id="cfgTag" class="note" style="margin:0"></span></h3><div id="sigBody" class="note">Loading…</div></div>
+      <div class="card" id="po3Card"><h3>Market cycle · PO3 <span id="po3Tag" class="note" style="margin:0"></span></h3><div id="po3Body" class="note">Loading…</div></div>
       <div class="card" id="btCard"><h3>Backtest · this timeframe</h3><div id="btBody" class="note">Loading…</div></div>
       <div class="card" id="efCard" style="display:none"><h3>⚡ Edge Finder <span id="efClose" style="cursor:pointer;pointer-events:auto">✕</span></h3><div id="efBody" class="note">—</div></div>
-      <div class="card"><h3>Legend</h3><div class="note"><img src="/bull.png" style="width:14px;vertical-align:-3px"/> bull = <b>demand</b> (institutional buying) · <img src="/bear.png" style="width:14px;vertical-align:-3px"/> bear = <b>supply</b> (selling). <b>Bigger marker = higher conviction</b> (swing size + volume + trend). A pulsing marker on the right edge = price <b>approaching a zone</b>, anticipating the reaction. Click a marker for its level/conviction. 1m/5m/1H/1D timeframes · scroll/+− zoom · replay scrubber · Edge Finder. <span style="color:#6a6e76">Zones are estimates from structure, not guarantees.</span></div></div>
+      <div class="card"><h3>Legend</h3><div class="note"><img src="/bull-ind.png" style="width:16px;vertical-align:-4px"/> bull = <b>demand</b> (institutional buying) · <img src="/bear-ind.png" style="width:16px;vertical-align:-4px"/> bear = <b>supply</b> (selling). <b>Bigger marker = higher conviction</b> (swing size + volume + trend). A pulsing marker on the right edge = price <b>approaching a zone</b>, anticipating the reaction. Click a marker for its level/conviction. 1m/5m/1H/1D timeframes · scroll/+− zoom · replay scrubber · Edge Finder. <span style="color:#6a6e76">Zones are estimates from structure, not guarantees.</span></div></div>
     </div>
   </div>
   <div class="disc">Educational only — not financial advice. Shows levels; does not place orders. Backtest gross of costs (cross-check of the /backtester engine).</div>
@@ -133,7 +142,7 @@ let SYM='ES=F', INTV='1d', DATA=null, VIEW=140, phase=0;
 let MTREND=50, MPULL=10;            // current strategy config (Edge Finder can change)
 let REPLAY=null, PLAYING=false;     // replay cutoff index (null=live)
 let mouseX=-1, mouseY=-1, markers=[], lastBuyShown='';
-const bull=new Image(), bear=new Image(); bull.src='/trader/bull%20indicator.png'; bear.src='/trader/bear%20indicator.png';
+const bull=new Image(), bear=new Image(); bull.src='/bull-ind.png'; bear.src='/bear-ind.png';
 const $=s=>document.querySelector(s);
 const cv=$('#chart'), ctx=cv.getContext('2d');
 
@@ -196,6 +205,49 @@ function detectZones(bars,s50){
 // analyze + attach zones/atr; recomputed whenever data or strategy config changes.
 function prep(bars){ const a=analyze(bars,MTREND,MPULL); a.zones=detectZones(bars,a.s50); a.atr=atr(bars,14); return a; }
 
+// ── PO3 / market-cycle phase: Accumulation → Manipulation → Distribution ──
+// The market cycles through three zones: a coiling range (accumulation), a
+// liquidity sweep that traps the crowd (manipulation), then the real expansion
+// (distribution / markup-markdown). Derived from REAL price structure only —
+// range compression, a sweep of the range extreme, and expansion past it.
+// It's an estimate from structure, not a guarantee.
+function po3Analyze(bars){
+  if(!bars||bars.length<35)return null;
+  const b=bars.slice(-60),n=b.length,c=b.map(x=>x.c),price=c[n-1],at=atr(b,14);
+  const recN=5, base=b.slice(Math.max(0,n-26),n-recN);
+  let hi=-1e18,lo=1e18; base.forEach(x=>{if(x.h>hi)hi=x.h;if(x.l<lo)lo=x.l;});
+  const mid=(hi+lo)/2, range=hi-lo, s20=sma(c,20), trendUp=s20[n-1]!=null?price>s20[n-1]:price>mid;
+  const rec=b.slice(n-recN); let rHi=-1e18,rLo=1e18; rec.forEach(x=>{if(x.h>rHi)rHi=x.h;if(x.l<rLo)rLo=x.l;});
+  const compr=range/(at||1), disp=(price-c[n-recN-1])/(at||1);
+  const sweptLow=rLo<lo-at*0.1 && price>lo && price<hi+at*0.2;   // grabbed sell-side liquidity, back inside
+  const sweptHigh=rHi>hi+at*0.1 && price<hi && price>lo-at*0.2;  // grabbed buy-side liquidity, back inside
+  const expandUp=price>hi+at*0.3, expandDn=price<lo-at*0.3;
+  let phase,dir;
+  if(sweptLow||sweptHigh){phase='man';dir=sweptLow?'up':'dn';}
+  else if(expandUp||expandDn){phase='dis';dir=expandUp?'up':'dn';}
+  else if(compr<=6.5){phase='acc';dir=trendUp?'up':'dn';}
+  else {phase='dis';dir=disp>=0?'up':'dn';}
+  return {phase,dir,hi,lo,mid,range,price,at,compr,disp,trendUp};
+}
+function po3Text(p){ const up=p.dir==='up';
+  if(p.phase==='acc')return {head:'Accumulation',desc:`Price is coiling between <b>${p.lo.toFixed(2)}</b> and <b>${p.hi.toFixed(2)}</b>. Volatility is compressed — smart money is quietly building a position while it looks like "nothing is happening." The calm before the expansion.`,plan:'Don\'t chase inside the range. Mark the range high/low and wait for a sweep of one side + a reversal back in — that\'s the high-odds entry into the next leg.'};
+  if(p.phase==='man')return {head:up?'Manipulation · bullish':'Manipulation · bearish',desc:up?`Price just <b>swept the lows</b> near ${p.lo.toFixed(2)} and snapped back inside the range — a stop-hunt / "Judas swing" taking liquidity from late sellers before the real move up.`:`Price just <b>swept the highs</b> near ${p.hi.toFixed(2)} and rejected back inside — a stop-hunt taking liquidity from late buyers before the real move down.`,plan:up?'Highest-quality long of the cycle: enter on the reclaim, stop below the sweep low, target the opposite side of the range and beyond.':'Highest-quality short of the cycle: enter on the rejection, stop above the sweep high, target the opposite side and beyond. (This long-only system stands aside on shorts.)'};
+  return {head:up?'Distribution · markup':'Distribution · markdown',desc:up?`Price has broken out of accumulation and is <b>expanding higher</b> — the real directional move (markup). Where trend-followers get paid.`:`Price has broken down from its range and is <b>expanding lower</b> — the real directional move (markdown).`,plan:up?'Trade with the trend (buy pullbacks to the 10/50 avg), but you\'re later in the cycle — manage risk as it extends; a new range forms when momentum stalls.':'Trend is down — this long-only system stands aside. Wait for the next accumulation range to form before hunting longs.'};
+}
+function renderPO3(bars){
+  const el=$('#po3Body'),tag=$('#po3Tag'); if(!el)return;
+  const p=po3Analyze(bars);
+  if(!p){el.innerHTML='<div class="note">Not enough data for a cycle read.</div>';if(tag)tag.textContent='';return;}
+  const t=po3Text(p),up=p.dir==='up',dn=up?'':'dn';
+  const seg=(k,lab)=>`<div class="po3-seg ${p.phase===k?'on '+k+' '+dn:''}">${lab}</div>`;
+  if(tag)tag.innerHTML=`<img src="${up?'/bull-ind.png':'/bear-ind.png'}" style="width:17px;vertical-align:-4px"/>`;
+  el.innerHTML=`<div class="po3-strip">${seg('acc','Accum')}${seg('man','Manip')}${seg('dis','Distrib')}</div>
+    <div style="font-weight:800;font-size:14px;margin:0 0 5px;color:${up?'var(--green)':'var(--red)'}">${t.head}</div>
+    <div class="note" style="margin:0 0 9px">${t.desc}</div>
+    <div class="lv"><span>Cycle range</span><b>${p.lo.toFixed(2)} – ${p.hi.toFixed(2)}</b></div>
+    <div class="note" style="margin:9px 0 0"><b style="color:var(--ink)">Plan:</b> ${t.plan}</div>`;
+}
+
 // ── count-up tween ──
 function countUp(el,to,dec,suf,pre){ const from=0,dur=600,t0=performance.now();
   (function step(t){ const k=Math.min(1,(t-t0)/dur); const v=from+(to-from)*(1-Math.pow(1-k,3));
@@ -211,6 +263,7 @@ function renderRail(a,animate){
   let b=`<div class="sigbig ${cls}">${word}</div><div class="note" style="margin:3px 0 10px">${NAMES[SYM]}</div>`;
   if(up){ b+=`<div class="lv"><span>Enter</span><b>${price.toFixed(2)}</b></div><div class="lv"><span>Exit (trend)</span><b>${s50.toFixed(2)}</b></div><div class="lv"><span>Hard stop</span><b>${hard.toFixed(2)}</b></div><div class="lv"><span>Target</span><b>ride the trend</b></div><div class="lv"><span>Size</span><b>${ct} micro</b></div>`; }
   $('#sigBody').innerHTML=b;
+  renderPO3(a.bars);
   const m=metrics(a);
   if(!m){ $('#btBody').innerHTML='<div class="note">No trades on this config.</div>'; return; }
   const v=(m.pf>=1.3&&m.ret>0)?['hold','EDGE HOLDS']:(m.pf>=1?['marg','MARGINAL']:['no','NO EDGE']);

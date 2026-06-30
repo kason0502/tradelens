@@ -988,6 +988,25 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fut-sig.ok2{border-left-color:var(--gt)} .fut-sig.ok2 .fs-head{color:var(--gt)}
 .fut-sig.wait{border-left-color:var(--at)} .fut-sig.wait .fs-head{color:var(--at)}
 .fut-sig.no{border-left-color:var(--rt)} .fut-sig.no .fs-head{color:var(--rt)}
+/* PO3 market-cycle zone card */
+.po3-card .po3-top{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.po3-badge{width:54px;height:54px;flex:none;filter:drop-shadow(0 0 14px rgba(var(--ac-rgb),.45))}
+.po3-head{font-size:19px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
+.po3-strip{display:flex;gap:6px}
+.po3-seg{flex:1;text-align:center;padding:7px 4px;border-radius:9px;border:1px solid var(--line);font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--fa);background:rgba(255,255,255,.02);transition:all .3s}
+.po3-seg.on{color:#05130c}
+.po3-seg.on.acc{background:var(--at);border-color:var(--at);color:#1a1200;box-shadow:0 0 18px rgba(255,201,77,.3)}
+.po3-seg.on.man{background:var(--gr);border-color:var(--gr);box-shadow:0 0 18px rgba(38,194,129,.35)}
+.po3-seg.on.dis{background:var(--gr);border-color:var(--gr);box-shadow:0 0 18px rgba(38,194,129,.35)}
+.po3-seg.on.man.dn,.po3-seg.on.dis.dn{background:var(--rd);border-color:var(--rd);color:#fff;box-shadow:0 0 18px rgba(240,68,90,.35)}
+.po3-diagram{background:rgba(255,255,255,.018);border:1px solid var(--line);border-radius:11px;padding:12px 14px 6px;margin-bottom:12px}
+.po3-desc{font-size:13px;color:var(--ink2);line-height:1.65;margin-bottom:12px}
+.po3-levels{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.po3-lv{flex:1;min-width:140px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--rsm);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono)}
+.po3-lv span{font-size:11px;color:var(--fa)} .po3-lv b{font-size:13px;font-weight:800}
+.po3-plan{font-size:12.5px;line-height:1.6;color:var(--ink2);padding:10px 12px;border-radius:9px;background:rgba(var(--ac-rgb),.07);border:1px solid rgba(var(--ac-rgb),.22)}
+.po3-plan b{color:var(--act)}
+@media(max-width:560px){.po3-badge{width:44px;height:44px}.po3-seg{font-size:8.5px;padding:6px 2px}}
 .fut-scan{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .fut-chip{border:1px solid var(--line);border-radius:14px;padding:15px 16px;text-align:left;cursor:pointer;background:rgba(255,255,255,.015);transition:transform .14s,border-color .14s,background .14s}
 .fut-chip:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
@@ -4884,6 +4903,74 @@ function futSentimentGauge(sigs){
     <div style="font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.5">Share of tracked markets in an uptrend vs pulled-back vs down — live breadth, not a guess.</div>
   </div>`;
 }
+// ── PO3 / market-cycle zone: Accumulation → Manipulation → Distribution ──
+// The market repeats three zones: a coiling range (accumulation), a liquidity
+// sweep that traps the crowd (manipulation), then the real expansion
+// (distribution / markup-markdown). Read from REAL daily structure only —
+// range compression, a sweep of the range extreme, and expansion past it.
+// Estimated from price structure; an edge framework, not a guarantee.
+function po3Analyze(ohlc){
+  if(!ohlc||ohlc.length<35)return null;
+  const b=ohlc.slice(-60),n=b.length,c=b.map(x=>x.c),price=c[n-1];
+  let at;try{at=atr(b,14);}catch(e){at=price*0.01;} if(!at||!isFinite(at))at=price*0.01;
+  const recN=5, base=b.slice(Math.max(0,n-26),n-recN);
+  let hi=-1e18,lo=1e18; base.forEach(x=>{if(x.h>hi)hi=x.h;if(x.l<lo)lo=x.l;});
+  const mid=(hi+lo)/2, range=hi-lo, s20=smaN(c,20), trendUp=(s20!=null)?price>s20:price>mid;
+  const rec=b.slice(n-recN); let rHi=-1e18,rLo=1e18; rec.forEach(x=>{if(x.h>rHi)rHi=x.h;if(x.l<rLo)rLo=x.l;});
+  const compr=range/at, disp=(price-c[n-recN-1])/at;
+  const sweptLow=rLo<lo-at*0.1 && price>lo && price<hi+at*0.2;    // grabbed sell-side liquidity, back inside
+  const sweptHigh=rHi>hi+at*0.1 && price<hi && price>lo-at*0.2;   // grabbed buy-side liquidity, back inside
+  const expandUp=price>hi+at*0.3, expandDn=price<lo-at*0.3;
+  let phase,dir;
+  if(sweptLow||sweptHigh){phase='man';dir=sweptLow?'up':'dn';}
+  else if(expandUp||expandDn){phase='dis';dir=expandUp?'up':'dn';}
+  else if(compr<=6.5){phase='acc';dir=trendUp?'up':'dn';}
+  else {phase='dis';dir=disp>=0?'up':'dn';}
+  return {phase,dir,hi,lo,mid,range,price,at,compr,disp,trendUp};
+}
+function po3Text(p){ const up=p.dir==='up';
+  if(p.phase==='acc')return {head:'Accumulation',desc:`Price is coiling between <b>$${p.lo.toFixed(2)}</b> and <b>$${p.hi.toFixed(2)}</b>. Volatility is compressed — smart money is quietly building a position while it looks like “nothing is happening.” This is the calm before the expansion.`,plan:'Don’t chase inside the range. Mark the range high/low and wait for a <b>sweep of one side + a snap back in</b> — that’s the high-odds entry into the next leg.'};
+  if(p.phase==='man')return {head:up?'Manipulation — bullish':'Manipulation — bearish',desc:up?`Price just <b>swept the lows</b> near $${p.lo.toFixed(2)} and snapped back inside the range — a stop-hunt / “Judas swing” that takes liquidity from late sellers right before the real move up.`:`Price just <b>swept the highs</b> near $${p.hi.toFixed(2)} and rejected back inside — a stop-hunt that takes liquidity from late buyers right before the real move down.`,plan:up?'The <b>highest-quality long</b> of the cycle: enter on the reclaim, stop just below the sweep low, target the opposite side of the range and beyond.':'A short signal in ICT terms — but this long-only system <b>stands aside</b>: wait for the next accumulation before hunting longs.'};
+  return {head:up?'Distribution — markup':'Distribution — markdown',desc:up?`Price has broken out of accumulation and is <b>expanding higher</b> — the real directional move (markup). This is where trend-followers get paid.`:`Price has broken down from its range and is <b>expanding lower</b> — the real directional move (markdown).`,plan:up?'Trade <b>with the trend</b> (buy pullbacks to the 10-/50-day avg), but you’re later in the cycle — manage risk as it extends; a new range forms when momentum stalls.':'Trend is down — this long-only system <b>stands aside</b>. Wait for the next accumulation range to form before looking for longs.'};
+}
+// Illustrative archetype: range → sweep → expansion, with the live phase lit.
+function po3DiagramSVG(phase,dir){
+  const up=dir==='up', acc=phase==='acc', man=phase==='man', dis=phase==='dis';
+  const C=up?'var(--gr)':'var(--rd)', A=on=>on?1:.26;
+  const box=`<rect x="14" y="40" width="104" height="44" rx="4" fill="rgba(255,201,77,.10)" stroke="var(--at)" stroke-width="1.4" opacity="${A(acc)}"/>
+    <path d="M22 70 L42 54 L60 72 L80 52 L98 70 L114 57" fill="none" stroke="var(--at)" stroke-width="1.7" opacity="${A(acc)}"/>`;
+  const manD=up?`M114 60 L140 102 L150 98 L164 60`:`M114 64 L140 22 L150 26 L164 64`;
+  const sweep=`<path d="${manD}" fill="none" stroke="${C}" stroke-width="1.9" opacity="${A(man)}"/>
+    <line x1="14" x2="172" y1="${up?84:40}" y2="${up?84:40}" stroke="${C}" stroke-dasharray="3 3" stroke-width="1" opacity="${A(man)*.75}"/>`;
+  const disD=up?`M164 60 L212 48 L252 30 L300 14`:`M164 64 L212 78 L252 98 L300 112`;
+  const arrow=up?'300,14 289,15 296,25':'300,112 289,111 296,101';
+  const exp=`<path d="${disD}" fill="none" stroke="${C}" stroke-width="2.5" opacity="${A(dis)}"/>
+    <polygon points="${arrow}" fill="${C}" opacity="${A(dis)}"/>`;
+  const lab=(x,txt,on,col)=>`<text x="${x}" y="118" text-anchor="middle" font-size="8.5" font-weight="800" letter-spacing=".3" fill="${on?(col||'var(--tx)'):'var(--fa)'}">${txt}</text>`;
+  return `<svg viewBox="0 0 314 124" style="width:100%;height:auto;display:block">${box}${sweep}${exp}
+    ${lab(64,'ACCUMULATION',acc,'var(--at)')}${lab(150,'MANIPULATION',man,C)}${lab(248,'DISTRIBUTION',dis,C)}</svg>`;
+}
+function po3CardHTML(p,mkt){
+  const t=po3Text(p), up=p.dir==='up';
+  const seg=(k,lab)=>`<div class="po3-seg ${p.phase===k?'on '+k+(up?'':' dn'):''}">${lab}</div>`;
+  return `<div class="card po3-card"><div class="card-title">Market cycle — PO3 zone <span class="pill">${mkt.label}</span></div>
+    <div class="po3-top">
+      <img class="po3-badge" src="${up?'bull-ind.png':'bear-ind.png'}" alt=""/>
+      <div style="flex:1;min-width:0">
+        <div class="po3-head" style="color:${up?'var(--gt)':'var(--rt)'}">${t.head}</div>
+        <div class="po3-strip">${seg('acc','Accumulation')}${seg('man','Manipulation')}${seg('dis','Distribution')}</div>
+      </div>
+    </div>
+    <div class="po3-diagram">${po3DiagramSVG(p.phase,p.dir)}</div>
+    <div class="po3-desc">${t.desc}</div>
+    <div class="po3-levels">
+      <div class="po3-lv"><span>Cycle range</span><b>$${p.lo.toFixed(2)} – $${p.hi.toFixed(2)}</b></div>
+      <div class="po3-lv"><span>Equilibrium (50%)</span><b>$${p.mid.toFixed(2)}</b></div>
+    </div>
+    <div class="po3-plan"><b>Trade plan:</b> ${t.plan}</div>
+    <div class="dp-struct off" style="margin-top:10px">PO3 (Power of Three) reads price in three repeating zones. The live phase is estimated from real structure — range compression, liquidity sweeps, expansion — not a prediction or guarantee.</div>
+  </div>`;
+}
 function paintFutures(){
   const el=document.getElementById('futBody');if(!el)return;
   const money=v=>v.toLocaleString(undefined,{maximumFractionDigits:2});
@@ -4940,6 +5027,7 @@ function paintFutures(){
     <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (S&amp;P &amp; Nasdaq, futures &amp; ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
     <div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
   </div>`;
+  let po3card=''; if(s.ohlc){const p3=po3Analyze(s.ohlc); if(p3)po3card=po3CardHTML(p3,mkt);}
   el.innerHTML=scan+alertBanner+`<div class="fut-layout"><div class="fut-main">
     <div class="fut-sig ${s.cls}">
       <div class="fs-px"><div class="fs-price">$${money(s.price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
@@ -4952,6 +5040,7 @@ function paintFutures(){
         <span class="fs-pill ${s.turnUp?'on':'off'}">${s.turnUp?'✓':'•'} Turning up</span>
       </div>
     </div>
+    ${po3card}
     <div class="card"><div class="card-title">${mkt.label} daily candles — with 10-day &amp; 50-day averages</div>${s.ohlc?futCandleSVG(s.ohlc,s.s10,s.s50):futChartSVG(s.closes,s.s10,s.s50)}
       <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--gr)">▮</span><span style="color:var(--rd)">▮</span> up / down day</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
     </div>

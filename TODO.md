@@ -1,7 +1,19 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-29 (session 37)
+> Last updated: 2026-06-30 (session 52)
+
+## Done (session 52 — new indicator badges + PO3 market-cycle zones)
+- [x] **New bull/bear indicator badges** wired into both surfaces — root `bull-ind.png` / `bear-ind.png` (one source of truth; root so Vercel serves them). Fixed the **broken** STRATA Live marker refs (old `/trader/bull indicator.png` files were deleted) + the Legend.
+- [x] **PO3 zone engine + card on the site** — Accumulation/Manipulation/Distribution read from real daily structure, with a phase strip, SVG schematic, directional badge, description, range/equilibrium, and a phase-specific plan (`po3Analyze`/`po3CardHTML` in the Futures tab).
+- [x] **PO3 card in the STRATA Live app** — mirrored engine in a new rail card (`renderPO3`).
+- [x] **`serve.ps1` honors `PORT`** + `launch.json` `autoPort` — multiple preview sessions no longer collide on 8777.
+
+## Next (PO3 follow-ups)
+- [ ] **Verify live in a real browser** — the preview sandbox can't load the TradingView/Chart.js CDNs, so the full Futures tab doesn't init there; the PO3 engine + card were verified directly, but eyeball the live ES read once. (Per CLAUDE.md: this page can't be auto-screenshotted.)
+- [ ] **Tune the PO3 thresholds** on real history if the phase calls feel off (sweep buffer `0.1×ATR`, expansion `0.3×ATR`, compression `≤6.5×ATR`). Consider a small backtest of "enter on manipulation reclaim" to put an honest number on the zone.
+- [ ] **Show the PO3 zone on the Market Matrix** (a per-market phase chip) so the cycle read spans all six futures, not just the selected one.
+- [ ] **Draw the live PO3 box/sweep on the actual candle chart** (not just the schematic) — range hi/lo lines + the sweep marker on `futCandleSVG` / the app canvas.
 
 ## Done (session 37 — trader-critic robot + its quick wins)
 - [x] **Built `futures-trader-critic` subagent** (`.claude/agents/`) — reusable site-review robot (flaws + monetization ideas through a trader's eyes).

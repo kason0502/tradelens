@@ -10,10 +10,11 @@
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
+$port = if ($env:PORT) { [int]$env:PORT } else { 8777 }   # honor PORT (preview autoPort); default 8777
 $listener = New-Object System.Net.HttpListener
-$listener.Prefixes.Add('http://localhost:8777/')
+$listener.Prefixes.Add("http://localhost:$port/")
 $listener.Start()
-Write-Host "Serving $root at http://localhost:8777/  (+ /api/yf live-data proxy)"
+Write-Host "Serving $root at http://localhost:$port/  (+ /api/yf live-data proxy)"
 
 while ($listener.IsListening) {
   try {

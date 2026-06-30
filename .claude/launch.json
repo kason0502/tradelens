@@ -5,7 +5,8 @@
       "name": "tradelens",
       "runtimeExecutable": "powershell",
       "runtimeArgs": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".claude/serve.ps1"],
-      "port": 8777
+      "port": 8777,
+      "autoPort": true
     }
   ]
 }

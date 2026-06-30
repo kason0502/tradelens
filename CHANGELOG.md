@@ -3,6 +3,14 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-30 (session 52) — new bull/bear indicator badges + PO3 market-cycle zones
+- **New indicator art (both surfaces):** the user's new low-poly **bull/bear head badges** are now the canonical "indicator" graphics. Copied to repo root as **`bull-ind.png` / `bear-ind.png`** (root so the Vercel-deployed site can use them — `.vercelignore` excludes `trader/`). One source of truth, served to both the site and the local STRATA Live app.
+  - **STRATA Live app** (`trader/app/index.html`): chart demand/supply markers + the Legend now point to `/bull-ind.png` / `/bear-ind.png` (the old `/trader/bull indicator.png` refs were **broken** — those files were deleted). Removed the redundant space-named copies from `trader/`.
+- **PO3 (Power of Three) market-cycle zone — NEW, on both surfaces.** A new engine reads which of three repeating zones the market is in — **Accumulation → Manipulation → Distribution** — from REAL daily structure only (range compression, a liquidity sweep of the range extreme, expansion past it). Honest: an edge framework, estimated from structure, not a prediction.
+  - **Site** (`index.html`): `po3Analyze`/`po3Text`/`po3DiagramSVG`/`po3CardHTML`; a new **Market cycle — PO3 zone** card injected into the Futures tab (after the signal card) with a directional bull/bear badge, a 3-segment phase strip (live phase lit), an illustrative range→sweep→expansion SVG schematic, a plain-language description, the cycle range + equilibrium, and a phase-specific trade plan.
+  - **App** (`trader/app/index.html`): mirrored `po3Analyze`/`po3Text`/`renderPO3` into a new **Market cycle · PO3** rail card (phase strip + badge + description + range + plan), wired into `renderRail`.
+- **Tooling:** `serve.ps1` now honors a `PORT` env var (defaults to 8777) and `launch.json` sets `autoPort:true`, so a second session can preview on a free port without fighting over 8777. App still uses relative `/api/yf`, so the proxy works on any port.
+
 ## 2026-06-30 (session 51) — static images into both surfaces (animation dropped)
 - **STRATA Live app:** chart signal markers now use the new high-res **`bull indicator.png` / `bear indicator.png`** (served at `/trader/...`) instead of the smaller root PNGs. Static, no animation.
 - **Main site (index.html):** added the **bull + bear PNGs to the landing hero** (`.lx-mascots`, green/red glow, responsive) using the deployed root `bull.png`/`bear.png`. Logo already uses `logo.png` in nav/footer.
