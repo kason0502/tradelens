@@ -64,6 +64,8 @@ while ($listener.IsListening) {
         '.jpeg' { $res.ContentType = 'image/jpeg' }
         '.webp' { $res.ContentType = 'image/webp' }
         '.svg'  { $res.ContentType = 'image/svg+xml' }
+        '.webm' { $res.ContentType = 'video/webm' }
+        '.mp4'  { $res.ContentType = 'video/mp4' }
         default { $res.ContentType = 'application/octet-stream' }
       }
       $res.OutputStream.Write($bytes, 0, $bytes.Length)
