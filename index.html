@@ -1020,6 +1020,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bias-chip.bull{color:var(--gt);border-color:rgba(38,229,143,.4);background:rgba(38,229,143,.08)}
 .bias-chip.bear{color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)}
 .bias-chip.neu{color:var(--mu)}
+.bt-del{cursor:pointer;color:var(--fa);font-weight:800;padding:0 4px}.bt-del:hover{color:var(--rt)}
+#btHistoryWrap .bt-log tbody tr{cursor:pointer}#btHistoryWrap .bt-log tbody tr:hover{background:rgba(var(--ac-rgb),.06)}
 .fut-scan{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .fut-chip{border:1px solid var(--line);border-radius:14px;padding:15px 16px;text-align:left;cursor:pointer;background:rgba(255,255,255,.015);transition:transform .14s,border-color .14s,background .14s}
 .fut-chip:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
@@ -1440,7 +1442,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bg-logo .bgl-inner img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.08;filter:drop-shadow(0 0 34px rgba(var(--ac-rgb),.22))}
 /* the bull's eyes flare a slight accent glow once every ~10s (nudge left/right/top
    % below if the dots don't sit exactly on the eyes) */
-.bg-logo .bgEye{position:absolute;top:34.5%;width:6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(var(--ac-rgb),.95),rgba(var(--ac-rgb),.4) 45%,transparent 72%);opacity:0;mix-blend-mode:screen;filter:blur(1.5px);animation:bgEyeGlow 10s ease-in-out infinite}
+.bg-logo .bgEye{position:absolute;top:41%;width:6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(var(--ac-rgb),.95),rgba(var(--ac-rgb),.4) 45%,transparent 72%);opacity:0;mix-blend-mode:screen;filter:blur(1.5px);animation:bgEyeGlow 10s ease-in-out infinite}
 .bg-logo .bgEye.l{left:35%} .bg-logo .bgEye.r{right:35%}
 @keyframes bgLogoFloatT{0%,100%{transform:translateY(0) scale(1) rotate(0)}50%{transform:translateY(-18px) scale(1.05) rotate(1.4deg)}}
 @keyframes bgEyeGlow{0%,86%{opacity:0}91%{opacity:.9}97%{opacity:.25}100%{opacity:0}}
@@ -4957,27 +4959,31 @@ function po3Text(p){ const up=p.dir==='up';
 // live phase lit and the others dimmed. Bearish flips the geometry vertically.
 function po3DiagramSVG(phase,dir){
   const up=dir==='up', acc=phase==='acc', man=phase==='man', dis=phase==='dis';
-  const bmid=70, Y=y=>up?y:(2*bmid-y), A=on=>on?1:.22;
-  const GU='var(--gr)', RD='var(--rd)', AT='var(--at)', cw=7;
+  const bmid=70, Y=y=>up?y:(2*bmid-y), A=on=>on?1:.2;
+  const GU='var(--gr)', RD='var(--rd)', AT='var(--at)', cw=4.4;
   // one candle: body between bt/bb, wick between wt/wb (pre-reflection coords)
   const cdl=(x,bt,bb,wt,wb,col,op)=>{const T=Y(Math.min(bt,bb)),B=Y(Math.max(bt,bb)),W1=Y(Math.min(wt,wb)),W2=Y(Math.max(wt,wb));
-    return `<line x1="${x}" x2="${x}" y1="${W1}" y2="${W2}" stroke="${col}" stroke-width="1.3" opacity="${op}"/><rect x="${x-cw/2}" y="${T}" width="${cw}" height="${Math.max(2,B-T)}" rx="1.2" fill="${col}" opacity="${op}"/>`;};
+    return `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${W1.toFixed(1)}" y2="${W2.toFixed(1)}" stroke="${col}" stroke-width="1" opacity="${op}"/><rect x="${(x-cw/2).toFixed(1)}" y="${T.toFixed(1)}" width="${cw}" height="${Math.max(1.6,B-T).toFixed(1)}" rx="1" fill="${col}" opacity="${op}"/>`;};
   const accOp=A(acc), manOp=A(man), disOp=A(dis);
-  // accumulation: range box + coiling candles (box is vertically symmetric)
-  const box=`<rect x="14" y="48" width="106" height="44" rx="5" fill="rgba(255,201,77,.08)" stroke="${AT}" stroke-width="1.3" opacity="${accOp}"/>`;
-  const accC=[[24,64,72,60,76,1],[38,67,75,62,80,0],[52,61,69,57,74,1],[66,68,76,64,82,0],[80,62,70,58,77,1],[94,67,75,63,81,0],[108,63,71,59,78,1]]
-    .map(d=>cdl(d[0],d[1],d[2],d[3],d[4],d[5]?GU:RD,accOp)).join('');
-  // manipulation: a spike that sweeps the range extreme (long wick past it) + a reclaim candle
+  // accumulation: a DENSE run of small coiling candles inside the box
+  const box=`<rect x="14" y="48" width="104" height="44" rx="5" fill="rgba(255,201,77,.07)" stroke="${AT}" stroke-width="1.2" opacity="${accOp}"/>`;
+  let accC=''; {const x0=22,x1=112,nC=14;
+    for(let k=0;k<nC;k++){const x=x0+(x1-x0)*k/(nC-1), cy=70+Math.sin(k*0.85)*8+Math.cos(k*1.9)*3.2, ud=Math.sin((k+1)*0.85)>=Math.sin(k*0.85);
+      accC+=cdl(x,cy-2.3,cy+2.3,cy-5,cy+5, ud?GU:RD, accOp);}}
+  // manipulation: drift into the low, a SWEEP candle (long wick past the box low), then reclaim
   const sweepCol=up?RD:GU, reclaimCol=up?GU:RD;
-  const sweep=cdl(140,72,82,66,116,sweepCol,manOp)+cdl(154,66,76,62,82,reclaimCol,manOp)
-    +`<line x1="14" x2="172" y1="${Y(92)}" y2="${Y(92)}" stroke="${sweepCol}" stroke-dasharray="3 3" stroke-width="1" opacity="${manOp*.7}"/>`;
-  // distribution: strong directional candles expanding away from the range
+  let manC=cdl(124,73,77,70,80,sweepCol,manOp)+cdl(131,77,82,74,87,sweepCol,manOp)
+    +cdl(138,80,85,77,116,sweepCol,manOp)                  // the sweep — long lower wick past the low
+    +cdl(145,69,79,65,83,reclaimCol,manOp)+cdl(152,63,72,59,76,reclaimCol,manOp)
+    +`<line x1="14" x2="170" y1="${Y(92).toFixed(1)}" y2="${Y(92).toFixed(1)}" stroke="${sweepCol}" stroke-dasharray="3 3" stroke-width="1" opacity="${(manOp*.65).toFixed(2)}"/>`;
+  // distribution: a smooth run of candles expanding away from the range
   const dCol=up?GU:RD;
-  const distC=[[178,71,62],[201,62,51],[224,51,39],[247,39,27],[270,27,17],[296,17,8]]
-    .map(d=>cdl(d[0],d[1],d[2],d[1]+3,d[2]-3,dCol,disOp)).join('');
+  let distC=''; {const x0=176,x1=305,nD=14;
+    for(let k=0;k<nD;k++){const x=x0+(x1-x0)*k/(nD-1), cy=72-(72-9)*k/(nD-1)+Math.sin(k*1.25)*2.6;
+      distC+=cdl(x,cy-3,cy+3,cy-5.5,cy+5.5,dCol,disOp);}}
   const lab=(x,txt,on,col)=>`<text x="${x}" y="142" text-anchor="middle" font-size="8.5" font-weight="800" letter-spacing=".3" fill="${on?(col||'var(--tx)'):'var(--fa)'}">${txt}</text>`;
-  return `<svg viewBox="0 0 314 150" style="width:100%;height:auto;display:block">${box}${accC}${sweep}${distC}
-    ${lab(64,'ACCUMULATION',acc,AT)}${lab(150,'MANIPULATION',man,man?(up?GU:RD):'')}${lab(248,'DISTRIBUTION',dis,dis?(up?GU:RD):'')}</svg>`;
+  return `<svg viewBox="0 0 314 150" style="width:100%;height:auto;display:block">${box}${accC}${manC}${distC}
+    ${lab(64,'ACCUMULATION',acc,AT)}${lab(146,'MANIPULATION',man,man?(up?GU:RD):'')}${lab(244,'DISTRIBUTION',dis,dis?(up?GU:RD):'')}</svg>`;
 }
 function po3CardHTML(p,mkt){
   const t=po3Text(p), up=p.dir==='up';
@@ -5180,6 +5186,7 @@ async function renderBacktester(force){
       </div>
       <div style="font-size:11px;color:var(--ink3);margin-top:8px">Runs the exact trend-pullback rule on real daily candles, live. Results are in <b>% per trade</b> and <b>gross of costs</b> — an honest cross-check of the Python engine below (which adds pessimistic fills + slippage + commission).</div>
       <div id="btLiveResults"></div>
+      <div id="btHistoryWrap"></div>
     </div>
     <div class="card"><div class="card-title">Python engine results — ${c.symbol||'ES=F'} · ${per} <span class="pill">net of costs</span></div>${grid}</div>
     <div class="card"><div class="card-title">Equity curve — grew $${(m.starting_capital||0).toLocaleString()} → $${Math.round((m.starting_capital||0)+m.total_pnl).toLocaleString()}</div>${btEquitySVG(m.equity_curve,m.starting_capital)}
@@ -5197,6 +5204,7 @@ async function renderBacktester(force){
       ${d.synthetic?'<div class="fut-alert" style="margin-top:10px;color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)">Sample data — run the engine for real numbers.</div>':''}
     </div>`;
   btLoadTrade(bi);   // draw the featured trade on real candles
+  btRenderHistory(); // show any permanently-saved in-browser runs
 }
 function btShowTrade(i){const t=_btTradesArr[i];if(!t)return;const w=document.getElementById('btTradeWrap');if(w)w.innerHTML=btTradeBlock(t,i);document.querySelectorAll('#btLog tbody tr').forEach((r,idx)=>r.classList.toggle('sel',idx===i));btLoadTrade(i);}
 // ── IN-BROWSER backtest runner — run the trend-pullback rule on real daily data ──
@@ -5228,9 +5236,42 @@ async function btRunLive(){
         ${tile('Max DD',m.max_drawdown_pct.toFixed(1)+'%','r')}
       </div>
       <div style="margin-top:14px">${btEquityPctSVG(m.equity)}</div>
-      <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} daily bars · ${trades.length} trades · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}.</div>`;
+      <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} daily bars · ${trades.length} trades · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}. <span style="color:var(--gt)">✓ saved below</span></div>`;
+    btSaveRun({sym,yrs,bars:candles.length,m});   // permanently store this run (this browser)
+    btRenderHistory();
   }catch(e){out.innerHTML='<div class="bt-empty" style="padding:16px">Data feed busy — try again in a moment.</div>';}
   finally{if(btn){btn.disabled=false;btn.textContent='▶ Run backtest';}}
+}
+// ── Saved backtests — persisted in localStorage so runs survive reloads/sessions ──
+const BT_STORE='tlpro_backtests_v1';
+function btLoadRuns(){try{return JSON.parse(localStorage.getItem(BT_STORE))||[];}catch(e){return [];}}
+function btSaveRuns(a){try{localStorage.setItem(BT_STORE,JSON.stringify(a));}catch(e){}}
+function btSaveRun(r){const m=r.m,a=btLoadRuns();
+  a.unshift({id:Date.now()+'_'+Math.random().toString(36).slice(2,6),ranAt:Date.now(),sym:r.sym,yrs:r.yrs,bars:r.bars,
+    m:{n_trades:m.n_trades,win_rate_pct:m.win_rate_pct,profit_factor:isFinite(m.profit_factor)?m.profit_factor:null,total_return_pct:m.total_return_pct,avg_trade_pct:m.avg_trade_pct,best_pct:m.best_pct,worst_pct:m.worst_pct,max_drawdown_pct:m.max_drawdown_pct,equity:m.equity}});
+  if(a.length>60)a.length=60; btSaveRuns(a);}
+function btDeleteRun(id){btSaveRuns(btLoadRuns().filter(r=>r.id!==id));btRenderHistory();}
+function btClearRuns(){if(confirm('Clear all saved backtests?')){btSaveRuns([]);btRenderHistory();}}
+function btRenderHistory(){
+  const el=document.getElementById('btHistoryWrap');if(!el)return;
+  const a=btLoadRuns();
+  if(!a.length){el.innerHTML=`<div style="font-size:11.5px;color:var(--ink3);margin-top:14px">No saved backtests yet — run one above and it’s stored here permanently (in this browser).</div>`;return;}
+  const rows=a.map(r=>{const m=r.m,pf=m.profit_factor==null?'∞':m.profit_factor.toFixed(2),ret=m.total_return_pct,d=new Date(r.ranAt);
+    return `<tr onclick="btViewSaved('${r.id}')"><td>${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}, ${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</td><td>${r.sym.replace('=F','')}</td><td>${r.yrs==='max'?'max':r.yrs+'y'}</td><td class="num ${ret>=0?'g':'r'}">${ret>=0?'+':''}${ret.toFixed(0)}%</td><td class="num ${(m.profit_factor==null||m.profit_factor>=1)?'g':'r'}">${pf}</td><td class="num">${m.win_rate_pct.toFixed(0)}%</td><td class="num">${m.n_trades}</td><td class="num r">${m.max_drawdown_pct.toFixed(0)}%</td><td><span class="bt-del" onclick="event.stopPropagation();btDeleteRun('${r.id}')" title="Delete this run">✕</span></td></tr>`;}).join('');
+  el.innerHTML=`<div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="card-title" style="margin:0">Saved backtests <span class="pill">${a.length} stored · this browser</span></div><button class="dp-fu" style="padding:5px 11px;font-size:11px" onclick="btClearRuns()">Clear all</button></div>
+    <div class="bt-log-wrap" style="margin-top:10px"><table class="bt-log"><thead><tr><th>Run at</th><th>Symbol</th><th>Window</th><th class="num">Return</th><th class="num">PF</th><th class="num">Win</th><th class="num">Trades</th><th class="num">Max DD</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:7px">Click a row to re-open its stats + equity curve. Stored locally in this browser (persists across reloads) — clearing site data removes them.</div>
+    <div id="btSavedView"></div>`;
+}
+function btViewSaved(id){
+  const r=btLoadRuns().find(x=>x.id===id);if(!r)return;const v=document.getElementById('btSavedView');if(!v)return;
+  const m=r.m,pf=m.profit_factor==null?'∞':m.profit_factor.toFixed(2);
+  const tile=(lbl,val,cls)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div></div>`;
+  v.innerHTML=`<div class="card" style="margin-top:12px"><div class="card-title">${r.sym.replace('=F','')} · ${r.yrs==='max'?'max history':r.yrs+'y'} <span class="pill">saved ${new Date(r.ranAt).toLocaleString()}</span></div>
+    <div class="bt-statgrid">${tile('Total return',(m.total_return_pct>=0?'+':'')+m.total_return_pct.toFixed(0)+'%',m.total_return_pct>=0?'g':'r')}${tile('Win rate',m.win_rate_pct.toFixed(1)+'%')}${tile('Profit factor',pf,(m.profit_factor==null||m.profit_factor>=1)?'g':'r')}${tile('Trades',m.n_trades)}${tile('Avg / trade',(m.avg_trade_pct>=0?'+':'')+m.avg_trade_pct.toFixed(2)+'%',m.avg_trade_pct>=0?'g':'r')}${tile('Max DD',m.max_drawdown_pct.toFixed(1)+'%','r')}</div>
+    <div style="margin-top:12px">${btEquityPctSVG(m.equity)}</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:8px">${r.bars} daily bars · ${r.sym.replace('=F','')} · gross of costs. Re-opened from your saved history.</div></div>`;
+  v.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function btSimulate(candles){
   const c=candles.map(b=>b.c),n=c.length;
