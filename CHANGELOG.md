@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 46) — STRATA Live as a local WEB APP (much nicer than WinForms)
+- **New `trader/app/index.html` + `serve-app.ps1` + `STRATA-Live.bat`** — the live trader rebuilt as a local single-page web app (Canvas), launched in an app-mode browser window by a one-click `.bat`. A tiny PowerShell server (port 8799) serves the app **and proxies Yahoo server-side** (reliable data, no CORS). Verified end-to-end: page served, `/api/yf` returns live data, bull/bear PNGs serve.
+- Same engine ported to JS (SMA / trend-pullback / backtest / signal). Features: live candlesticks + 10/50 MAs, **bull.png on BUY / bear.png on SELL-exit** (bulls only in uptrends, bears only at trend-break — never the wrong one), **pulsing latest marker + glow ring**, last-price pulse, **hover crosshair w/ price**, **scroll + ▢ zoom**, **click a marker → targets popup** (entry/target/stop/result, or live for the open position), live entry/exit/size panel, per-timeframe backtest stats + verdict (Daily ~weeks / Hourly ~days), 60s auto-refresh, smooth CSS/Canvas animation.
+- Chosen over the PowerShell/WinForms app because it's far nicer + interactive and I can verify the data/serve path (the WinForms GUI couldn't be tested headless). The `.ps1` console/WinForms tools remain in `/trader`.
+
 ## 2026-06-29 (session 45) — STRATA Live: interactivity, click-for-targets, animation, signal fix
 - **Signal logic corrected to match the long-only rule:** bears now appear **only at SELL/exit (trend break)**, bulls **only at BUY entries** — no bears during uptrends, no bulls during downtrends (was marking every down bar → 401 bears; now 41, one per exit). Markers sit on the signal bar (before the move they call).
 - **Bigger logos (40px)**; the most-recent signal **pulses** with a glow ring.

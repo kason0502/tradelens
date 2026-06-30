@@ -1,7 +1,25 @@
 # STRATA desktop tools
 
-Two standalone programs (PowerShell, **no installs** — no Node/Python). Both run
-the validated daily trend-pullback strategy on real Yahoo data.
+Standalone programs (PowerShell + a local web app, **no installs** — no Node/Python).
+All run the validated daily trend-pullback strategy on real Yahoo data.
+
+## ★ STRATA Live (web app) — double-click `STRATA-Live.bat`
+The polished one: opens a clean app window (Edge/Chrome `--app` mode) with a live
+candlestick chart, your **bull.png on BUY signals / bear.png on SELL-exit signals**,
+animated pulsing markers, a hover crosshair, scroll/▢ zoom, **click any marker for
+its targets**, a live entry/exit panel, and a backtest verdict per timeframe
+(Daily ~weeks / Hourly ~days). Auto-refreshes every 60s.
+
+- `STRATA-Live.bat` starts a tiny local server (`serve-app.ps1`, port 8799) that
+  serves the app **and proxies Yahoo server-side** (reliable live data, no CORS),
+  then opens `trader/app/index.html` in an app window.
+- Bears appear **only** at sell/exit and bulls **only** at buy entries — never a
+  bear in an uptrend or a bull in a downtrend (that's the long-only rule). Markers
+  sit on the signal bar, i.e. before the move.
+
+---
+
+The original console/WinForms tools (still here):
 
 ## 1. STRATA Live — charting app (`strata-live.ps1`, double-click `run-live.bat`)
 A windowed app that **reacts to the live chart**: draws candlesticks + the 10/50
