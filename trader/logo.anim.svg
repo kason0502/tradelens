@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 509 788" width="509" height="788">
+<!-- STRATA main logo — premium looping animation (~3.6s).
+     Raster art is embedded; the motion is vector FX layered around it:
+     up-arrow draw -> green pulse, breathing, eye glow, side steam, floating particles.
+     Tweak EYE_L/EYE_R (cx,cy) and steam vent x to match the art if needed. -->
+<defs>
+  <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#22e07a" stop-opacity=".55"/><stop offset="70%" stop-color="#22c55e" stop-opacity=".12"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="eyeg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#d6ffe6"/><stop offset="55%" stop-color="#3bff95" stop-opacity=".9"/><stop offset="100%" stop-color="#3bff95" stop-opacity="0"/></radialGradient>
+  <radialGradient id="steamg" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#eafff3" stop-opacity=".7"/><stop offset="100%" stop-color="#eafff3" stop-opacity="0"/></radialGradient>
+  <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  <style>
+    .halo{transform-box:fill-box;transform-origin:center;animation:halo 4.1s ease-in-out infinite}
+    @keyframes halo{0%,100%{opacity:.4;transform:scale(1)}45%{opacity:.95;transform:scale(1.06)}}
+    .fig{transform-box:fill-box;transform-origin:50% 62%;animation:breathe 3.6s ease-in-out infinite}
+    @keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.014)}}
+    .arrow{fill:none;stroke:#3dff90;stroke-width:16;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:340;stroke-dashoffset:340;filter:drop-shadow(0 0 8px #2effa0);animation:draw 3.6s ease-out infinite}
+    @keyframes draw{0%{stroke-dashoffset:340;opacity:0}8%{opacity:1}42%{stroke-dashoffset:0;opacity:1}60%{opacity:.85}72%{opacity:0}100%{stroke-dashoffset:0;opacity:0}}
+    .eye{opacity:0;transform-box:fill-box;transform-origin:center;animation:eye 3.6s ease-in-out infinite}
+    @keyframes eye{0%,100%{opacity:.25;transform:scale(.85)}48%{opacity:.95;transform:scale(1.15)}}
+    .steam{opacity:0;transform-box:fill-box;transform-origin:center bottom}
+    .sL{animation:steam 2.9s ease-out infinite} .sR{animation:steam 2.9s ease-out .5s infinite}
+    @keyframes steam{0%{opacity:0;transform:translateY(0) scale(.6)}25%{opacity:.6}100%{opacity:0;transform:translateY(-90px) scale(1.5)}}
+    .p{fill:#7dffb4;opacity:0;animation:rise 6s linear infinite}
+    @keyframes rise{0%{opacity:0;transform:translateY(0)}15%{opacity:.8}100%{opacity:0;transform:translateY(-160px)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}.eye{opacity:.6}.arrow{stroke-dashoffset:0;opacity:.6}}
+  </style>
+</defs>
+<ellipse class="halo" cx="254" cy="400" rx="210" ry="300" fill="url(#halo)"/>
+<!-- side steam (nostril vents) -->
+<g filter="url(#blur)">
+  <ellipse class="steam sL" cx="150" cy="470" rx="34" ry="26" fill="url(#steamg)"/>
+  <ellipse class="steam sR" cx="359" cy="470" rx="34" ry="26" fill="url(#steamg)"/>
+</g>
+<!-- the logo art -->
+<g class="fig"><image href="../logo.png" x="0" y="0" width="509" height="788"/></g>
+<!-- eye glow (EYE_L / EYE_R) -->
+<circle class="eye" cx="206" cy="300" r="26" fill="url(#eyeg)"/>
+<circle class="eye" cx="303" cy="300" r="26" fill="url(#eyeg)"/>
+<!-- upward arrow accent that draws then pulses -->
+<path class="arrow" d="M254 575 L254 330 M254 330 L210 384 M254 330 L298 384"/>
+<!-- floating particles -->
+<circle class="p" cx="170" cy="600" r="3"/><circle class="p" cx="330" cy="560" r="2.5" style="animation-delay:1.2s"/>
+<circle class="p" cx="240" cy="640" r="3.5" style="animation-delay:2.1s"/><circle class="p" cx="300" cy="620" r="2" style="animation-delay:3.3s"/>
+<circle class="p" cx="200" cy="580" r="2.5" style="animation-delay:4.4s"/><circle class="p" cx="280" cy="660" r="3" style="animation-delay:5s"/>
+</svg>

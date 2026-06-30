@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 823 1024" width="823" height="1024">
+<!-- BULL indicator — idle breathing + a periodic "trigger" every ~4s:
+     head dips/charges, steam blasts from both sides, glow flashes, then settles.
+     Tweak EYE (cx,cy) and VENT (cx) coords to line up with the art. -->
+<defs>
+  <radialGradient id="bhalo" cx="50%" cy="48%" r="50%"><stop offset="0%" stop-color="#27e07d" stop-opacity=".5"/><stop offset="65%" stop-color="#22c55e" stop-opacity=".12"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0"/></radialGradient>
+  <radialGradient id="beye" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e6ffef"/><stop offset="55%" stop-color="#37ff90" stop-opacity=".9"/><stop offset="100%" stop-color="#37ff90" stop-opacity="0"/></radialGradient>
+  <radialGradient id="bsteam" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#f1fff7" stop-opacity=".8"/><stop offset="100%" stop-color="#f1fff7" stop-opacity="0"/></radialGradient>
+  <filter id="bblur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="7"/></filter>
+  <style>
+    .halo{transform-box:fill-box;transform-origin:center;animation:bhalo 4s ease-in-out infinite}
+    @keyframes bhalo{0%,55%,100%{opacity:.4;transform:scale(1)}70%{opacity:1;transform:scale(1.12)}}
+    .fig{transform-box:fill-box;transform-origin:50% 26%;animation:bfig 4s cubic-bezier(.5,0,.3,1) infinite}
+    @keyframes bfig{0%{transform:translateY(0) rotate(0) scale(1)}30%{transform:translateY(-7px) scale(1.012)}58%{transform:translateY(0) scale(1)}68%{transform:translateY(20px) rotate(1.6deg) scale(1.022)}77%{transform:translateY(-6px) rotate(-.4deg) scale(1.01)}88%,100%{transform:translateY(0) rotate(0) scale(1)}}
+    .eye{transform-box:fill-box;transform-origin:center;animation:beye 4s ease-in-out infinite}
+    @keyframes beye{0%,55%,100%{opacity:.4;transform:scale(.9)}40%{opacity:.6}70%{opacity:1;transform:scale(1.25)}}
+    .blast{opacity:0;transform-box:fill-box;transform-origin:center}
+    .bL{animation:bblastL 4s ease-out infinite}.bR{animation:bblastR 4s ease-out infinite}
+    @keyframes bblastL{0%,62%{opacity:0;transform:translate(0,0) scale(.3)}71%{opacity:.9}100%,92%{opacity:0;transform:translate(-150px,18px) scale(2.1)}}
+    @keyframes bblastR{0%,62%{opacity:0;transform:translate(0,0) scale(.3)}71%{opacity:.9}100%,92%{opacity:0;transform:translate(150px,18px) scale(2.1)}}
+    .idle{opacity:0;transform-box:fill-box;transform-origin:center bottom}
+    .iL{animation:idlesteam 3.1s ease-out infinite}.iR{animation:idlesteam 3.1s ease-out .7s infinite}
+    @keyframes idlesteam{0%{opacity:0;transform:translateY(0) scale(.5)}30%{opacity:.4}100%{opacity:0;transform:translateY(-70px) scale(1.4)}}
+    .p{fill:#79ffb0;opacity:0;animation:brise 6.5s linear infinite}
+    @keyframes brise{0%{opacity:0;transform:translateY(0)}15%{opacity:.7}100%{opacity:0;transform:translateY(-200px)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}.eye{opacity:.6}}
+  </style>
+</defs>
+<ellipse class="halo" cx="411" cy="500" rx="350" ry="470" fill="url(#bhalo)"/>
+<g filter="url(#bblur)">
+  <ellipse class="idle iL" cx="300" cy="480" rx="40" ry="30" fill="url(#bsteam)"/>
+  <ellipse class="idle iR" cx="523" cy="480" rx="40" ry="30" fill="url(#bsteam)"/>
+  <ellipse class="blast bL" cx="300" cy="480" rx="60" ry="44" fill="url(#bsteam)"/>
+  <ellipse class="blast bR" cx="523" cy="480" rx="60" ry="44" fill="url(#bsteam)"/>
+</g>
+<g class="fig"><image href="bull%20indicator.png" x="0" y="0" width="823" height="1024"/></g>
+<circle class="eye" cx="340" cy="345" r="30" fill="url(#beye)"/>
+<circle class="eye" cx="483" cy="345" r="30" fill="url(#beye)"/>
+<circle class="p" cx="270" cy="780" r="3.5"/><circle class="p" cx="540" cy="740" r="3" style="animation-delay:1.4s"/>
+<circle class="p" cx="400" cy="820" r="4" style="animation-delay:2.6s"/><circle class="p" cx="500" cy="800" r="2.5" style="animation-delay:3.9s"/>
+<circle class="p" cx="320" cy="760" r="3" style="animation-delay:5.1s"/>
+</svg>

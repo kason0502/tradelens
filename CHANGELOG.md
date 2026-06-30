@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-30 (session 49) — premium animated SVG assets (logo / bull / bear)
+- **Three looping animated SVGs** in `/trader` that embed the raster art and layer vector FX on top (CSS keyframes + gradients; `prefers-reduced-motion` aware): `logo.anim.svg` (up-arrow draw → green pulse, breathing, eye glow, side steam, floating particles, ~3.6s), `bull.anim.svg` (idle breathing → periodic trigger: head dip + dual steam blasts + glow flash, ~4s), `bear.anim.svg` (breathing + glowing eyes + embers → periodic roar: head push + eye flare + red shockwave rings + mouth flash, ~4s).
+- `trader/assets.html` previews all three (double-click, or `/trader/assets.html`). SVGs reference the PNGs relatively and animate as documents/`<object>`/inline (note: as a plain `<img src>` browsers block the external raster — use `<object>` or inline; canvas markers stay raster since canvas can't animate SVG).
+- Honest limitation: raster can't be rigged, so the bull/bear bodies don't deform (no true mouth-open/head-turn); FX layers (glow/steam/embers/shockwave/breathe/push/eye-glow/arrow) carry the premium feel. Eye/mouth/vent coordinates are best-guess (commented for easy tweaking). Not yet wired into the app — pending a look at placement.
+
 ## 2026-06-30 (session 48) — STRATA Live: institutional zones, conviction sizing, anticipation, minute candles
 - **Bulls/bears now sit on institutional zones** (swing-liquidity): a swing low = **demand** (bull), swing high = **supply** (bear) — `detectZones()`. By construction the marker sits on the pivot *before* the ensuing move.
 - **Conviction sizing** — each zone scores 0–1 from swing size + volume-vs-average + trend confluence; **bigger marker = higher conviction** (24–70px), opacity scales too. Volume now parsed from the feed.
