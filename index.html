@@ -4933,22 +4933,32 @@ function po3Text(p){ const up=p.dir==='up';
   if(p.phase==='man')return {head:up?'Manipulation — bullish':'Manipulation — bearish',desc:up?`Price just <b>swept the lows</b> near $${p.lo.toFixed(2)} and snapped back inside the range — a stop-hunt / “Judas swing” that takes liquidity from late sellers right before the real move up.`:`Price just <b>swept the highs</b> near $${p.hi.toFixed(2)} and rejected back inside — a stop-hunt that takes liquidity from late buyers right before the real move down.`,plan:up?'The <b>highest-quality long</b> of the cycle: enter on the reclaim, stop just below the sweep low, target the opposite side of the range and beyond.':'A short signal in ICT terms — but this long-only system <b>stands aside</b>: wait for the next accumulation before hunting longs.'};
   return {head:up?'Distribution — markup':'Distribution — markdown',desc:up?`Price has broken out of accumulation and is <b>expanding higher</b> — the real directional move (markup). This is where trend-followers get paid.`:`Price has broken down from its range and is <b>expanding lower</b> — the real directional move (markdown).`,plan:up?'Trade <b>with the trend</b> (buy pullbacks to the 10-/50-day avg), but you’re later in the cycle — manage risk as it extends; a new range forms when momentum stalls.':'Trend is down — this long-only system <b>stands aside</b>. Wait for the next accumulation range to form before looking for longs.'};
 }
-// Illustrative archetype: range → sweep → expansion, with the live phase lit.
+// Illustrative archetype drawn with CANDLESTICKS (demo data, not live): a coiling
+// range → a liquidity-sweep candle that snaps back → an expansion run, with the
+// live phase lit and the others dimmed. Bearish flips the geometry vertically.
 function po3DiagramSVG(phase,dir){
   const up=dir==='up', acc=phase==='acc', man=phase==='man', dis=phase==='dis';
-  const C=up?'var(--gr)':'var(--rd)', A=on=>on?1:.26;
-  const box=`<rect x="14" y="40" width="104" height="44" rx="4" fill="rgba(255,201,77,.10)" stroke="var(--at)" stroke-width="1.4" opacity="${A(acc)}"/>
-    <path d="M22 70 L42 54 L60 72 L80 52 L98 70 L114 57" fill="none" stroke="var(--at)" stroke-width="1.7" opacity="${A(acc)}"/>`;
-  const manD=up?`M114 60 L140 102 L150 98 L164 60`:`M114 64 L140 22 L150 26 L164 64`;
-  const sweep=`<path d="${manD}" fill="none" stroke="${C}" stroke-width="1.9" opacity="${A(man)}"/>
-    <line x1="14" x2="172" y1="${up?84:40}" y2="${up?84:40}" stroke="${C}" stroke-dasharray="3 3" stroke-width="1" opacity="${A(man)*.75}"/>`;
-  const disD=up?`M164 60 L212 48 L252 30 L300 14`:`M164 64 L212 78 L252 98 L300 112`;
-  const arrow=up?'300,14 289,15 296,25':'300,112 289,111 296,101';
-  const exp=`<path d="${disD}" fill="none" stroke="${C}" stroke-width="2.5" opacity="${A(dis)}"/>
-    <polygon points="${arrow}" fill="${C}" opacity="${A(dis)}"/>`;
-  const lab=(x,txt,on,col)=>`<text x="${x}" y="118" text-anchor="middle" font-size="8.5" font-weight="800" letter-spacing=".3" fill="${on?(col||'var(--tx)'):'var(--fa)'}">${txt}</text>`;
-  return `<svg viewBox="0 0 314 124" style="width:100%;height:auto;display:block">${box}${sweep}${exp}
-    ${lab(64,'ACCUMULATION',acc,'var(--at)')}${lab(150,'MANIPULATION',man,C)}${lab(248,'DISTRIBUTION',dis,C)}</svg>`;
+  const bmid=70, Y=y=>up?y:(2*bmid-y), A=on=>on?1:.22;
+  const GU='var(--gr)', RD='var(--rd)', AT='var(--at)', cw=7;
+  // one candle: body between bt/bb, wick between wt/wb (pre-reflection coords)
+  const cdl=(x,bt,bb,wt,wb,col,op)=>{const T=Y(Math.min(bt,bb)),B=Y(Math.max(bt,bb)),W1=Y(Math.min(wt,wb)),W2=Y(Math.max(wt,wb));
+    return `<line x1="${x}" x2="${x}" y1="${W1}" y2="${W2}" stroke="${col}" stroke-width="1.3" opacity="${op}"/><rect x="${x-cw/2}" y="${T}" width="${cw}" height="${Math.max(2,B-T)}" rx="1.2" fill="${col}" opacity="${op}"/>`;};
+  const accOp=A(acc), manOp=A(man), disOp=A(dis);
+  // accumulation: range box + coiling candles (box is vertically symmetric)
+  const box=`<rect x="14" y="48" width="106" height="44" rx="5" fill="rgba(255,201,77,.08)" stroke="${AT}" stroke-width="1.3" opacity="${accOp}"/>`;
+  const accC=[[24,64,72,60,76,1],[38,67,75,62,80,0],[52,61,69,57,74,1],[66,68,76,64,82,0],[80,62,70,58,77,1],[94,67,75,63,81,0],[108,63,71,59,78,1]]
+    .map(d=>cdl(d[0],d[1],d[2],d[3],d[4],d[5]?GU:RD,accOp)).join('');
+  // manipulation: a spike that sweeps the range extreme (long wick past it) + a reclaim candle
+  const sweepCol=up?RD:GU, reclaimCol=up?GU:RD;
+  const sweep=cdl(140,72,82,66,116,sweepCol,manOp)+cdl(154,66,76,62,82,reclaimCol,manOp)
+    +`<line x1="14" x2="172" y1="${Y(92)}" y2="${Y(92)}" stroke="${sweepCol}" stroke-dasharray="3 3" stroke-width="1" opacity="${manOp*.7}"/>`;
+  // distribution: strong directional candles expanding away from the range
+  const dCol=up?GU:RD;
+  const distC=[[178,71,62],[201,62,51],[224,51,39],[247,39,27],[270,27,17],[296,17,8]]
+    .map(d=>cdl(d[0],d[1],d[2],d[1]+3,d[2]-3,dCol,disOp)).join('');
+  const lab=(x,txt,on,col)=>`<text x="${x}" y="142" text-anchor="middle" font-size="8.5" font-weight="800" letter-spacing=".3" fill="${on?(col||'var(--tx)'):'var(--fa)'}">${txt}</text>`;
+  return `<svg viewBox="0 0 314 150" style="width:100%;height:auto;display:block">${box}${accC}${sweep}${distC}
+    ${lab(64,'ACCUMULATION',acc,AT)}${lab(150,'MANIPULATION',man,man?(up?GU:RD):'')}${lab(248,'DISTRIBUTION',dis,dis?(up?GU:RD):'')}</svg>`;
 }
 function po3CardHTML(p,mkt){
   const t=po3Text(p), up=p.dir==='up';
@@ -5040,7 +5050,6 @@ function paintFutures(){
         <span class="fs-pill ${s.turnUp?'on':'off'}">${s.turnUp?'✓':'•'} Turning up</span>
       </div>
     </div>
-    ${po3card}
     <div class="card"><div class="card-title">${mkt.label} daily candles — with 10-day &amp; 50-day averages</div>${s.ohlc?futCandleSVG(s.ohlc,s.s10,s.s50):futChartSVG(s.closes,s.s10,s.s50)}
       <div style="display:flex;gap:16px;font-size:11px;color:var(--ink3);margin-top:8px;font-family:var(--mono)"><span><span style="color:var(--gr)">▮</span><span style="color:var(--rd)">▮</span> up / down day</span><span><span style="color:var(--at)">━</span> 10-day</span><span><span style="color:var(--act)">━</span> 50-day</span></div>
     </div>
@@ -5052,6 +5061,7 @@ function paintFutures(){
       <div class="bt-score"><div class="bt-score-val ${mret>=0?'g':'r'}">${mret>=0?'+':''}${mret.toFixed(1)}%</div><div class="bt-score-lbl">1-month return</div></div>
       <div class="bt-score"><div class="bt-score-val">${atrPct.toFixed(1)}%</div><div class="bt-score-lbl">Daily range (ATR)</div></div>
     </div>
+    ${po3card}
     ${edge}
     </div><div class="fut-rail">${futSentimentGauge(sigs)}<div id="futStratPerf"></div></div></div>`;
   futLoadEdge();

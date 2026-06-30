@@ -85,33 +85,36 @@
   .po3-seg.on.dis{background:var(--green);border-color:var(--green)}
   .po3-seg.on.man.dn,.po3-seg.on.dis.dn{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 16px rgba(255,77,106,.3)}
   /* boot splash */
-  #boot{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 42%,#0a0a12 0%,#050507 68%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .9s ease}
+  #boot{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 50%,#0a0a12 0%,#050507 70%);transition:opacity 1.1s ease}
   #boot.gone{opacity:0;pointer-events:none}
-  #bootLogo{width:min(44vw,400px);max-height:60vh;object-fit:contain;will-change:transform,filter,opacity;animation:bootBull 2.9s cubic-bezier(.4,0,.2,1) forwards}
-  /* bull appears on black → flashes a green outline twice → recedes as the UI fades up */
+  /* boot bull sits at the EXACT geometry of #bgLogo so it settles onto the
+     background watermark as the overlay fades — same center, same size. */
+  #bootLogo{position:fixed;top:50%;left:50%;width:min(48vw,560px);transform:translate(-50%,-50%);will-change:transform,filter,opacity;animation:bootBull 4.8s cubic-bezier(.45,0,.2,1) forwards}
+  /* appears on black → two SUBTLE green outline pulses → settles onto the bg bull */
   @keyframes bootBull{
-    0%{opacity:0;transform:scale(.82);filter:brightness(.35) drop-shadow(0 0 0 rgba(34,197,94,0))}
-    15%{opacity:1;transform:scale(1);filter:brightness(1) drop-shadow(0 0 0 rgba(34,197,94,0))}
-    27%{filter:brightness(1.25) drop-shadow(0 0 30px rgba(34,197,94,.95)) drop-shadow(0 0 9px rgba(52,211,153,.9))}
-    37%{filter:brightness(1) drop-shadow(0 0 4px rgba(34,197,94,.14))}
-    49%{filter:brightness(1.32) drop-shadow(0 0 36px rgba(34,197,94,1)) drop-shadow(0 0 12px rgba(52,211,153,1))}
-    61%{filter:brightness(1) drop-shadow(0 0 4px rgba(34,197,94,.1))}
-    100%{opacity:0;transform:scale(1.07);filter:brightness(.85) drop-shadow(0 0 22px rgba(34,197,94,.3))}
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.94);filter:brightness(.5) drop-shadow(0 0 0 rgba(34,197,94,0))}
+    16%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:brightness(1) drop-shadow(0 0 0 rgba(34,197,94,0))}
+    32%{filter:brightness(1.05) drop-shadow(0 0 14px rgba(34,197,94,.42)) drop-shadow(0 0 4px rgba(52,211,153,.28))}
+    43%{filter:brightness(1) drop-shadow(0 0 1px rgba(34,197,94,.08))}
+    59%{filter:brightness(1.07) drop-shadow(0 0 18px rgba(34,197,94,.48)) drop-shadow(0 0 5px rgba(52,211,153,.32))}
+    71%{filter:brightness(1) drop-shadow(0 0 1px rgba(34,197,94,.06))}
+    100%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:brightness(.95) drop-shadow(0 0 8px rgba(34,197,94,.18))}
   }
-  #boot .bt{font-weight:900;letter-spacing:.42em;font-size:22px;animation:bootFade 2.9s ease forwards}
-  #boot .bs{color:var(--mut);font-family:ui-monospace,Consolas,monospace;font-size:12px;animation:bootFade 2.9s ease forwards}
-  @keyframes bootFade{0%,18%{opacity:0}34%{opacity:1}78%,100%{opacity:0}}
+  .boot-cap{position:fixed;left:0;right:0;bottom:13vh;text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px;z-index:51}
+  #boot .bt{font-weight:900;letter-spacing:.46em;font-size:22px;animation:bootFade 4.8s ease forwards}
+  #boot .bs{color:var(--mut);font-family:ui-monospace,Consolas,monospace;font-size:12px;animation:bootFade 4.8s ease forwards}
+  @keyframes bootFade{0%,14%{opacity:0}28%{opacity:1}84%,100%{opacity:0}}
   /* the main UI starts hidden and fades up from black as the bull recedes */
   .wrap{opacity:0}
-  .wrap.revealed{opacity:1;transition:opacity 1.3s ease}
-  @media(prefers-reduced-motion:reduce){#bootLogo{animation:none;opacity:1}#boot .bt,#boot .bs{animation:none;opacity:1}.wrap{opacity:1}}
+  .wrap.revealed{opacity:1;transition:opacity 1.6s ease}
+  @media(prefers-reduced-motion:reduce){#bootLogo{animation:none;opacity:.9}#boot .bt,#boot .bs{animation:none;opacity:1}.wrap{opacity:1}}
   ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 <img id="bgLogo" src="/logo.png" alt=""/>
-<div id="boot"><img id="bootLogo" src="/logo.png" alt=""/><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div>
+<div id="boot"><img id="bootLogo" src="/logo.png" alt=""/><div class="boot-cap"><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div></div>
 <div class="wrap">
   <div class="top">
     <div class="brand"><img id="brandImg" src="/bull.png" alt=""/>STRATA <small>Live</small></div>
@@ -435,12 +438,12 @@ bgResize(); addEventListener('resize',bgResize);
 
 // ── boot ──
 const bootMsgs=['booting live engine…','connecting market feed…','loading strategy…','ready.'];let bm=0;
-const bootInt=setInterval(()=>{bm++;if(bm<bootMsgs.length)$('#bootMsg').textContent=bootMsgs[bm];},560);
+const bootInt=setInterval(()=>{bm++;if(bm<bootMsgs.length)$('#bootMsg').textContent=bootMsgs[bm];},950);
 resize(); anim();
 // data loads in the background; the cinematic intro runs on its own fixed timeline
 (async()=>{ try{await load();}catch(e){} scanUniverse(); })();
-setTimeout(()=>{const w=document.querySelector('.wrap');if(w)w.classList.add('revealed');},1500);
-setTimeout(()=>{clearInterval(bootInt);const b=$('#boot');if(b){b.classList.add('gone');setTimeout(()=>{b.style.display='none';},950);}},2650);
+setTimeout(()=>{const w=document.querySelector('.wrap');if(w)w.classList.add('revealed');},2800);
+setTimeout(()=>{clearInterval(bootInt);const b=$('#boot');if(b){b.classList.add('gone');setTimeout(()=>{b.style.display='none';},1100);}},4200);
 setInterval(()=>{ if(REPLAY==null)load(false); },60000);
 </script>
 </body>
