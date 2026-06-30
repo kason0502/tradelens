@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-30 (session 48) — STRATA Live: institutional zones, conviction sizing, anticipation, minute candles
+- **Bulls/bears now sit on institutional zones** (swing-liquidity): a swing low = **demand** (bull), swing high = **supply** (bear) — `detectZones()`. By construction the marker sits on the pivot *before* the ensuing move.
+- **Conviction sizing** — each zone scores 0–1 from swing size + volume-vs-average + trend confluence; **bigger marker = higher conviction** (24–70px), opacity scales too. Volume now parsed from the feed.
+- **Anticipation** — nearest active **support/resistance** drawn as dashed levels; when price comes within ~1.2×ATR of a demand zone (uptrend) or supply zone (downtrend), a **pulsing marker appears at the right edge before the move**.
+- **Minute candles** — added **1m / 5m** timeframes (+ 1H/1D) with correct hold labels; verified 1m/5m data flows through the proxy.
+- Click a zone → popup with level, conviction %, and the real historical reaction. Legend updated; honest "estimates from structure, not guarantees" note. Strategy backtest/Edge Finder/replay unchanged (data now routed through `prep()` = analyze + zones + ATR).
+
 ## 2026-06-29 (session 47) — STRATA Live: "insane" upgrade (terminal mode)
 - **Living backdrop:** animated particle/constellation field + aurora glow behind the whole app (its own canvas).
 - **Streaming ticker tape** across the top (real multi-market last price + day %), seamless marquee.
