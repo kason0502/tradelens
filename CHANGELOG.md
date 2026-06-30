@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-29 (session 45) — STRATA Live: interactivity, click-for-targets, animation, signal fix
+- **Signal logic corrected to match the long-only rule:** bears now appear **only at SELL/exit (trend break)**, bulls **only at BUY entries** — no bears during uptrends, no bulls during downtrends (was marking every down bar → 401 bears; now 41, one per exit). Markers sit on the signal bar (before the move they call).
+- **Bigger logos (40px)**; the most-recent signal **pulses** with a glow ring.
+- **Interactive chart:** scroll-wheel zoom + **+/− zoom buttons** (reliable regardless of focus), **hover crosshair** with a live price readout, and **click any bull/bear → a popup with that trade's targets** (entry / target / stop / result, or live targets for the open position).
+- **Animation timer** (~12 fps) pulses the live signal marker and the last-price dot.
+- 60s auto-refresh kept (status shows LIVE + timestamp). Parse-checked; engine verified headless.
+
 ## 2026-06-29 (session 44) — STRATA Live: desktop charting app with bull/bear signal markers
 - **New `trader/strata-live.ps1` (+ `run-live.bat`)** — a PowerShell **WinForms** desktop app (no installs) that reacts to the live chart: custom-draws candlesticks + 10/50 averages, overlays **`bull.png` on BUY signals** and **`bear.png` on downtrend/exit signals**, shows the current **entry/exit/hard-stop + position size**, and auto-refreshes every 60s. Symbol + **timeframe dropdown (Daily ~weeks hold / Hourly ~couple-days hold)** + a **Backtest** button that re-tests the selected timeframe and prints a verdict.
 - **Answered the lower-timeframe question:** the same rule on **hourly** bars (~3-day holds) **does NOT hold the edge** on ES (PF 0.79, −5.8%) while **Daily holds** (PF 1.42, +13.6%) — the app flags "NO EDGE — re-backtest a different timeframe." Engine verified headless (`-NoUI`); the WinForms chart is built on that same verified engine.
