@@ -3,6 +3,13 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-06-30 (session 50) — original RIGGED vector assets (replaces the raster-wrap)
+- Scrapped the embedded-PNG `.anim.svg` wraps (looked pasted-on) for **original hand-built vector** emblems with **real moving parts**, pure SVG (self-contained, scale-free, work as img/inline/object/CSS):
+  - `bull.rig.svg` — geometric bull head; idle breathing → periodic trigger (head dips/charges, dual nostril steam blasts, eye flare, green pulse).
+  - `bear.rig.svg` — bear head with a **real hinged jaw that opens** on the roar (separate group rotating from a pivot), head push, eye flare, red shockwave rings, embers, mouth glow.
+  - `logo.rig.svg` — bull mark with an **up-arrow that draws** between the horns → green pulse, breathing, eye glow, side steam, particles.
+- All ~3.6–4s loops, `prefers-reduced-motion` aware, validated XML. Preview at `trader/assets.html`. Trade-off (chosen): my clean vector style, not the exact PNG art — but now things actually animate (jaw opens, arrow draws) instead of flat glows. Not yet wired into the app pending a look.
+
 ## 2026-06-30 (session 49) — premium animated SVG assets (logo / bull / bear)
 - **Three looping animated SVGs** in `/trader` that embed the raster art and layer vector FX on top (CSS keyframes + gradients; `prefers-reduced-motion` aware): `logo.anim.svg` (up-arrow draw → green pulse, breathing, eye glow, side steam, floating particles, ~3.6s), `bull.anim.svg` (idle breathing → periodic trigger: head dip + dual steam blasts + glow flash, ~4s), `bear.anim.svg` (breathing + glowing eyes + embers → periodic roar: head push + eye flare + red shockwave rings + mouth flash, ~4s).
 - `trader/assets.html` previews all three (double-click, or `/trader/assets.html`). SVGs reference the PNGs relatively and animate as documents/`<object>`/inline (note: as a plain `<img src>` browsers block the external raster — use `<object>` or inline; canvas markers stay raster since canvas can't animate SVG).

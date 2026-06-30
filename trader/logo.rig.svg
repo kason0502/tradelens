@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<!-- STRATA LOGO — original vector bull mark. Loop ~3.6s: an up-arrow DRAWS upward
+     between the horns, then a bright green pulse; with breathing, eye glow,
+     side steam, and floating particles. -->
+<defs>
+  <linearGradient id="em" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#16a34a"/></linearGradient>
+  <radialGradient id="halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#22e07a" stop-opacity=".55"/><stop offset="70%" stop-color="#22c55e" stop-opacity=".12"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0"/></radialGradient>
+  <radialGradient id="eyeG" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#eafff3"/><stop offset="55%" stop-color="#3dff90" stop-opacity=".9"/><stop offset="100%" stop-color="#3dff90" stop-opacity="0"/></radialGradient>
+  <radialGradient id="stm" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#f1fff7" stop-opacity=".8"/><stop offset="100%" stop-color="#f1fff7" stop-opacity="0"/></radialGradient>
+  <filter id="b1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
+  <style>
+    .halo{transform-box:fill-box;transform-origin:center;animation:halo 3.6s ease-in-out infinite}
+    @keyframes halo{0%,30%,100%{opacity:.4;transform:scale(1)}55%{opacity:1;transform:scale(1.1)}}
+    .fig{transform-box:fill-box;transform-origin:50% 60%;animation:breathe 3.6s ease-in-out infinite}
+    @keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.015)}}
+    .arrow{fill:none;stroke:#3dff90;stroke-width:11;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120;filter:drop-shadow(0 0 6px #2effa0);animation:draw 3.6s ease-out infinite}
+    @keyframes draw{0%{stroke-dashoffset:120;opacity:0}8%{opacity:1}40%{stroke-dashoffset:0;opacity:1}60%{opacity:.9}74%{opacity:0}100%{stroke-dashoffset:0;opacity:0}}
+    .eye{transform-box:fill-box;transform-origin:center;animation:eye 3.6s ease-in-out infinite}
+    @keyframes eye{0%,30%,100%{opacity:.3;transform:scale(.85)}55%{opacity:.95;transform:scale(1.2)}}
+    .s{opacity:0;transform-box:fill-box;transform-origin:center bottom}
+    .sL{animation:steam 2.9s ease-out infinite}.sR{animation:steam 2.9s ease-out .6s infinite}
+    @keyframes steam{0%{opacity:0;transform:translateY(0) scale(.5)}30%{opacity:.55}100%{opacity:0;transform:translateY(-34px) scale(1.5)}}
+    .p{fill:#7dffb4;opacity:0;animation:rise 6s linear infinite}
+    @keyframes rise{0%{opacity:0;transform:translateY(0)}15%{opacity:.8}100%{opacity:0;transform:translateY(-70px)}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important}.eye{opacity:.6}.arrow{stroke-dashoffset:0;opacity:.7}}
+  </style>
+</defs>
+<ellipse class="halo" cx="120" cy="124" rx="104" ry="110" fill="url(#halo)"/>
+<g filter="url(#b1)">
+  <ellipse class="s sL" cx="108" cy="172" rx="11" ry="8" fill="url(#stm)"/><ellipse class="s sR" cx="132" cy="172" rx="11" ry="8" fill="url(#stm)"/>
+</g>
+<g class="fig">
+  <path d="M74 96 C 52 86 40 66 45 42" fill="none" stroke="url(#em)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M166 96 C 188 86 200 66 195 42" fill="none" stroke="url(#em)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M80 110 L57 101 L76 124 Z" fill="url(#em)"/><path d="M160 110 L183 101 L164 124 Z" fill="url(#em)"/>
+  <path d="M120 76 C 94 76 78 92 78 114 C 78 150 96 194 120 194 C 144 194 162 150 162 114 C 162 92 146 76 120 76 Z" fill="url(#em)"/>
+  <ellipse cx="120" cy="166" rx="30" ry="25" fill="#0c2a1b" opacity=".30"/>
+  <ellipse cx="103" cy="121" rx="9.5" ry="6" transform="rotate(20 103 121)" fill="#06160e"/>
+  <ellipse cx="137" cy="121" rx="9.5" ry="6" transform="rotate(-20 137 121)" fill="#06160e"/>
+  <ellipse cx="110" cy="168" rx="5.5" ry="8" fill="#06160e"/><ellipse cx="130" cy="168" rx="5.5" ry="8" fill="#06160e"/>
+</g>
+<!-- up-arrow that draws between the horns -->
+<path class="arrow" d="M120 70 L120 30 M120 30 L107 46 M120 30 L133 46"/>
+<!-- eye glow -->
+<circle class="eye" cx="103" cy="121" r="13" fill="url(#eyeG)"/><circle class="eye" cx="137" cy="121" r="13" fill="url(#eyeG)"/>
+<circle class="p" cx="92" cy="150" r="2.5"/><circle class="p" cx="150" cy="140" r="2" style="animation-delay:1.6s"/>
+<circle class="p" cx="120" cy="160" r="3" style="animation-delay:3s"/><circle class="p" cx="138" cy="150" r="2" style="animation-delay:4.4s"/>
+</svg>
