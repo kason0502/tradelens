@@ -45,7 +45,7 @@
   .wrow .r1{display:flex;justify-content:space-between;align-items:center}
   .wrow .sym{font-weight:800;font-size:13px} .wrow .px{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--mut)}
   .chip{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:20px;border:1px solid var(--line);color:var(--mut)}
-  .chip.buy{color:var(--green);border-color:rgba(38,229,143,.5)} .chip.wait{color:var(--amber);border-color:rgba(255,201,77,.5)} .chip.no{color:var(--red);border-color:rgba(255,77,106,.5)} .chip.up{color:var(--ac2);border-color:rgba(52,211,153,.4)}
+  .chip.buy{color:var(--green);border-color:rgba(38,229,143,.5)} .chip.wait{color:var(--amber);border-color:rgba(255,201,77,.5)} .chip.no{color:var(--red);border-color:rgba(255,77,106,.5)} .chip.sell{color:var(--red);border-color:rgba(255,77,106,.5)} .chip.up{color:var(--ac2);border-color:rgba(52,211,153,.4)}
   .spark{display:block;width:100%;height:22px;margin-top:5px}
   .chartwrap{flex:1;position:relative;min-width:0}
   #chart{display:block;width:100%;height:100%}
@@ -59,7 +59,7 @@
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   .card h3{margin:0 0 9px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:800;display:flex;justify-content:space-between}
   .sigbig{font-size:20px;font-weight:900;letter-spacing:-.02em;text-shadow:0 0 18px currentColor}
-  .sigbig.buy{color:var(--green)} .sigbig.wait{color:var(--amber)} .sigbig.no{color:var(--red)} .sigbig.up{color:var(--ac2)}
+  .sigbig.buy{color:var(--green)} .sigbig.wait{color:var(--amber)} .sigbig.no{color:var(--red)} .sigbig.sell{color:var(--red)} .sigbig.up{color:var(--ac2)}
   .lv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Consolas,monospace}
   .lv:last-child{border-bottom:0} .lv span{color:var(--mut)} .lv b{font-weight:700}
   .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -215,16 +215,25 @@ async function fetchSeries(sym,intv){
   return bars;
 }
 function sma(a,n){ const o=new Array(a.length).fill(null); let s=0; for(let i=0;i<a.length;i++){ s+=a[i]; if(i>=n)s-=a[i-n]; if(i>=n-1)o[i]=s/n; } return o; }
+// Trend-pullback in BOTH directions: long the dip in an uptrend, SHORT the rally
+// in a downtrend. Same rule mirrored — you can trade downtrends, not just sit out.
 function analyze(bars,trendN,pullN){
   trendN=trendN||50; pullN=pullN||10;
   const c=bars.map(b=>b.c), n=c.length, s50=sma(c,trendN), s10=sma(c,pullN);
   const sig=new Array(n).fill(''); const trades=[]; let pos=null;
   for(let i=0;i<n;i++){ if(s50[i]==null||s10[i]==null||i<2)continue;
-    const price=c[i], up=price>s50[i];
-    if(!pos){ const lo3=Math.min(bars[i].l,bars[i-1].l,bars[i-2].l); const pulled=(lo3<=s10[i])||(price<=s10[i]); const turn=price>c[i-1];
-      if(up&&pulled&&turn){ sig[i]='buy'; pos={i,entry:price,stop:price*0.9}; } }
-    else { let exit=null,reason=null; if(bars[i].l<=pos.stop){exit=pos.stop;reason='hard stop -10%';} else if(price<s50[i]){exit=price;reason='trend break';}
-      if(exit!=null){ trades.push({i0:pos.i,i1:i,entry:pos.entry,exit,stop:pos.stop,pct:(exit-pos.entry)/pos.entry*100,reason,bars:i-pos.i}); sig[i]='sell'; pos=null; } } }
+    const price=c[i], up=price>s50[i], dn=price<s50[i];
+    if(!pos){
+      const lo3=Math.min(bars[i].l,bars[i-1].l,bars[i-2].l), pulledL=(lo3<=s10[i])||(price<=s10[i]), turnUp=price>c[i-1];
+      const hi3=Math.max(bars[i].h,bars[i-1].h,bars[i-2].h), pulledS=(hi3>=s10[i])||(price>=s10[i]), turnDn=price<c[i-1];
+      if(up&&pulledL&&turnUp){ sig[i]='buy'; pos={i,dir:1,entry:price,stop:price*0.9}; }
+      else if(dn&&pulledS&&turnDn){ sig[i]='short'; pos={i,dir:-1,entry:price,stop:price*1.1}; }
+    } else {
+      let exit=null,reason=null;
+      if(pos.dir===1){ if(bars[i].l<=pos.stop){exit=pos.stop;reason='hard stop -10%';} else if(price<s50[i]){exit=price;reason='trend break';} }
+      else { if(bars[i].h>=pos.stop){exit=pos.stop;reason='hard stop -10%';} else if(price>s50[i]){exit=price;reason='trend break';} }
+      if(exit!=null){ const pct=pos.dir===1?(exit-pos.entry)/pos.entry*100:(pos.entry-exit)/pos.entry*100;
+        trades.push({i0:pos.i,i1:i,dir:pos.dir,entry:pos.entry,exit,stop:pos.stop,pct,reason,bars:i-pos.i}); sig[i]=pos.dir===1?'sell':'cover'; pos=null; } } }
   return {bars,c,s50,s10,sig,trades,openPos:pos,trendN,pullN};
 }
 function metrics(a){ const rs=a.trades.map(t=>t.pct); if(!rs.length)return null;
@@ -357,11 +366,20 @@ function countUp(el,to,dec,suf,pre){ const from=0,dur=600,t0=performance.now();
 function holdLabel(intv,avgBars){ if(intv==='1m')return `~${Math.round(avgBars)} min`; if(intv==='5m')return `~${Math.round(avgBars*5)} min`; if(intv==='1h')return `~${Math.round(avgBars)} hrs`; return `~${Math.round(avgBars)} days`; }
 function renderRail(a,animate){
   const c=a.c,n=c.length,i=n-1,price=c[i],s50=a.s50[i],s10=a.s10[i],up=price>s50,sg=a.sig[i];
-  let cls,word; if(!up){cls='no';word='NO TRADE — downtrend';} else if(sg==='buy'){cls='buy';word='★ BUY SIGNAL';} else if(price<=s10){cls='wait';word='WATCH — pulled back';} else {cls='up';word='UPTREND — no entry';}
-  const hard=price*0.9,exitLvl=Math.max(s50,hard),dist=price-exitLvl,ct=dist>0?Math.floor(ACCOUNT*RISKPCT/100/(dist*PV[SYM])):0;
+  let cls,word,dir=0;
+  if(up){ dir=1;
+    if(sg==='buy'){cls='buy';word='★ LONG SIGNAL';}
+    else if(price<=s10){cls='wait';word='WATCH — pullback (long)';}
+    else {cls='up';word='UPTREND — wait for the dip';}
+  } else { dir=-1;
+    if(sg==='short'){cls='sell';word='★ SHORT SIGNAL';}
+    else if(price>=s10){cls='wait';word='WATCH — rally (short)';}
+    else {cls='sell';word='DOWNTREND — wait for the bounce';}
+  }
+  const hard=dir===1?price*0.9:price*1.1, exitLvl=dir===1?Math.max(s50,hard):Math.min(s50,hard), dist=Math.abs(price-exitLvl), ct=dist>0?Math.floor(ACCOUNT*RISKPCT/100/(dist*PV[SYM])):0;
   $('#cfgTag').textContent=`${a.trendN}/${a.pullN}`;
-  let b=`<div class="sigbig ${cls}">${word}</div><div class="note" style="margin:3px 0 10px">${NAMES[SYM]}</div>`;
-  if(up){ b+=`<div class="lv"><span>Enter</span><b>${price.toFixed(2)}</b></div><div class="lv"><span>Exit (trend)</span><b>${s50.toFixed(2)}</b></div><div class="lv"><span>Hard stop</span><b>${hard.toFixed(2)}</b></div><div class="lv"><span>Target</span><b>ride the trend</b></div><div class="lv"><span>Size</span><b>${ct} micro</b></div>`; }
+  let b=`<div class="sigbig ${cls}">${word}</div><div class="note" style="margin:3px 0 10px">${NAMES[SYM]} · ${dir===1?'long the dip':'short the rally'}</div>`;
+  b+=`<div class="lv"><span>${dir===1?'Enter long':'Enter short'}</span><b>${price.toFixed(2)}</b></div><div class="lv"><span>Exit (trend)</span><b>${s50.toFixed(2)}</b></div><div class="lv"><span>Hard stop</span><b>${hard.toFixed(2)}</b></div><div class="lv"><span>Target</span><b>ride the trend</b></div><div class="lv"><span>Size</span><b>${ct} micro</b></div>`;
   $('#sigBody').innerHTML=b;
   renderPO3(a.bars);
   renderBias(a);
@@ -411,14 +429,16 @@ function draw(){
   //    EXIT (from analyze's actual trades). Size + opacity scale with the trade's
   //    magnitude, so a big symbol = a big real move. These aren't decorative
   //    zones — each is a trade the strategy actually took on this data. ──
+  //    Direction-aware: LONG entry = bull below the bar, exit = bear above; SHORT
+  //    entry = bear above the bar, exit = bull below.
   markers=[];
   for(const t of (a.trades||[])){
-    const mag=Math.min(1,Math.abs(t.pct)/8), sz=38+mag*58;
-    if(t.i0>=start&&t.i0<nEff){ const b=a.bars[t.i0],x=X(t.i0),cy=Y(b.l)+6+sz/2,by=markerBounce(t.i0);
-      ctx.globalAlpha=0.7+0.3*mag; drawMarker(bull,x,cy+by,sz); ctx.globalAlpha=1;
+    const long=t.dir!==-1, mag=Math.min(1,Math.abs(t.pct)/8), sz=38+mag*58;
+    if(t.i0>=start&&t.i0<nEff){ const b=a.bars[t.i0],x=X(t.i0),img=long?bull:bear,cy=long?Y(b.l)+6+sz/2:Y(b.h)-6-sz/2,by=markerBounce(t.i0);
+      ctx.globalAlpha=0.7+0.3*mag; drawMarker(img,x,cy+by,sz); ctx.globalAlpha=1;
       markers.push({x,cy,r:Math.max(14,sz/2),trade:t,kind:'entry'}); }
-    if(t.i1>=start&&t.i1<nEff){ const b=a.bars[t.i1],x=X(t.i1),cy=Y(b.h)-6-sz/2,by=markerBounce(t.i1);
-      ctx.globalAlpha=0.7+0.3*mag; drawMarker(bear,x,cy+by,sz); ctx.globalAlpha=1;
+    if(t.i1>=start&&t.i1<nEff){ const b=a.bars[t.i1],x=X(t.i1),img=long?bear:bull,cy=long?Y(b.h)-6-sz/2:Y(b.l)+6+sz/2,by=markerBounce(t.i1);
+      ctx.globalAlpha=0.7+0.3*mag; drawMarker(img,x,cy+by,sz); ctx.globalAlpha=1;
       markers.push({x,cy,r:Math.max(14,sz/2),trade:t,kind:'exit'}); }
   }
   // nearest active support (demand below price) / resistance (supply above)
@@ -449,8 +469,10 @@ function anim(){ phase+=0.045; if(phase>6.283)phase-=6.283;
   draw(); requestAnimationFrame(anim); }
 
 // ── validated-signal popup: the real trade this symbol marks ──
-function tradeText(t,kind){ const win=t.pct>=0, entry=kind==='entry';
-  return `<h4 class="${entry?'g':(win?'g':'r')}">${entry?'▲ BUY · strategy entry':'▼ SELL · strategy exit'}</h4>
+function tradeText(t,kind){ const win=t.pct>=0, entry=kind==='entry', long=t.dir!==-1;
+  const head=entry?(long?'▲ LONG · entry':'▼ SHORT · entry'):(long?'▼ Exit · sell':'▲ Exit · cover');
+  return `<h4 class="${long===entry?'g':'r'}">${head}</h4>
+  <div class="row"><span>Direction</span><b>${long?'Long':'Short'}</b></div>
   <div class="row"><span>Entry</span><b>${t.entry.toFixed(2)}</b></div>
   <div class="row"><span>Exit</span><b>${t.exit.toFixed(2)}</b></div>
   <div class="row"><span>Result</span><b class="${win?'g':'r'}">${win?'+':''}${t.pct.toFixed(1)}%</b></div>
@@ -469,14 +491,16 @@ function updateScrubUI(){ const n=DATA.c.length, cut=(REPLAY!=null)?REPLAY:n; $(
 function syncScrub(){ $('#scrub').value=100; $('#scrubT').textContent='LIVE'; }
 
 // ── toast on a fresh live BUY ──
-function maybeToast(a){ const i=a.c.length-1; if(a.sig[i]==='buy'){ const key=SYM+a.bars[i].t; if(key!==lastBuyShown){ lastBuyShown=key; const t=$('#toast'); t.textContent='★ BUY SIGNAL — '+SYM.replace('=F',''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4200); } } }
+function maybeToast(a){ const i=a.c.length-1,sg=a.sig[i]; if(sg==='buy'||sg==='short'){ const key=SYM+a.bars[i].t+sg; if(key!==lastBuyShown){ lastBuyShown=key; const t=$('#toast'); t.textContent=(sg==='buy'?'★ LONG SIGNAL — ':'★ SHORT SIGNAL — ')+SYM.replace('=F',''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4200); } } }
 
 // ── watchlist + ticker (shared universe fetch) ──
 let UNI={};
 async function scanUniverse(){
   for(const s of UNIVERSE){ try{ const bars=await fetchSeries(s,'1d'); UNI[s]={bars,a:analyze(bars,50,10)}; renderWatch(); renderTape(); }catch(e){} }
 }
-function sigClass(a){ const i=a.c.length-1,p=a.c[i],up=p>a.s50[i]; if(!up)return['no','DOWN']; if(a.sig[i]==='buy')return['buy','BUY']; if(p<=a.s10[i])return['wait','WATCH']; return['up','UP']; }
+function sigClass(a){ const i=a.c.length-1,p=a.c[i],up=p>a.s50[i];
+  if(up){ if(a.sig[i]==='buy')return['buy','LONG']; if(p<=a.s10[i])return['wait','WATCH']; return['up','UP']; }
+  if(a.sig[i]==='short')return['sell','SHORT']; if(p>=a.s10[i])return['wait','WATCH']; return['sell','DOWN']; }
 function renderWatch(){ $('#watchList').innerHTML=UNIVERSE.map(s=>{ const u=UNI[s]; if(!u)return `<div class="wrow"><div class="r1"><span class="sym">${s.replace('=F','')}</span><span class="px">…</span></div></div>`;
   const a=u.a,i=a.c.length-1,px=a.c[i],prev=a.c[i-1]||px,chg=(px-prev)/prev*100,[cl,lbl]=sigClass(a);
   return `<button class="wrow ${s===SYM?'on':''}" data-sym="${s}"><div class="r1"><span class="sym">${s.replace('=F','')}</span><span class="chip ${cl}">${lbl}</span></div><div class="r1"><span class="px">${px.toFixed(px>1000?0:2)}</span><span class="px ${chg>=0?'g':'r'}">${chg>=0?'+':''}${chg.toFixed(1)}%</span></div>${miniSpark(a.c.slice(-44),chg>=0)}</button>`; }).join('');
