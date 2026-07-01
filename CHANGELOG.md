@@ -3,6 +3,9 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-07-01 — new `edge-hunter` subagent (short-term strategy research)
+- **New custom agent `.claude/agents/edge-hunter.md`** — researches shorter-term (hourly-hold) futures strategies on real data and may ONLY implement ones that pass strict gates: tune/holdout split, OOS PF ≥ 1.3 with ≥ 30 trades, cross-market generalization, ±25% parameter + 2× slippage robustness, t-stat reporting, buy-and-hold benchmark. "No edge found" is an accepted verdict (the ORB precedent). Computes via `preview_eval` in the live page (reusing `btFetchOHLC`/`btSimulate`); knows Yahoo intraday data limits (hourly ~2y is the only validatable intraday interval). Writes validation evidence to `backtester/results-hourly-*.json`; never labels in-sample numbers "OOS".
+
 ## 2026-07-01 — new `strata-debugger` subagent
 - **New custom agent `.claude/agents/strata-debugger.md`** — debugs and enriches BOTH surfaces (site `index.html` + STRATA Live `trader/app/index.html`). Has Edit/Write + preview tools so it can fix and verify (console/network/eval — screenshots don't work on these pages); bound by the house rules (real data only, honesty over hype, no "OOS" labels on full-sample stats). Read-only critique stays with the existing `futures-trader-critic` agent. Agents are plain markdown files in `.claude/agents/`; there's no count limit.
 
