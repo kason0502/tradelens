@@ -15,6 +15,23 @@
 - [ ] **Show the PO3 zone on the Market Matrix** (a per-market phase chip) so the cycle read spans all six futures, not just the selected one.
 - [ ] **Draw the live PO3 box/sweep on the actual candle chart** (not just the schematic) — range hi/lo lines + the sweep marker on `futCandleSVG` / the app canvas.
 
+## Open (sessions 53–62 — carried forward)
+- [ ] **Volatility / timing heatmap** — a grid of realized volatility & average move by hour-of-day × day-of-week (from real intraday bars), showing when the biggest moves happen. New "Timing" panel/tab, Plus tier. (Requested, not built yet.)
+- [ ] **Website Futures signal → long + short** — the trader app now shorts downtrends; give `futSignal`/`paintFutures` on the main site the same treatment (it still says "No trade — downtrend").
+- [ ] **Go live on payments/storage** — create two Stripe products ($20/$50), set `STRIPE_SECRET_KEY` + `STRIPE_PRICE_PLUS` + `STRIPE_PRICE_PRO` in Vercel, enable Vercel KV, flip `PAY.testMode=false`. See `DEPLOY_PAYWALL.md`.
+- [ ] **Multi-device login + Stripe webhook** — v1 remembers the tier per browser after checkout; add `api/auth.js` + a users table and `api/stripe-webhook.js` for real account portability + renewal/cancel sync.
+- [ ] **App still has stock-era dead code** (Pro Traders sample data, movers/screener universes, backtester random-ticker) — prune to pure futures if wanted.
+
+## Done (sessions 53–62)
+- [x] New bull/bear **indicator badges** at root (`bull-ind/bear-ind.png`); fixed the app's broken marker refs.
+- [x] **PO3 cycle zone** + **12-factor edge bias stack** on both surfaces (site card + app rail).
+- [x] **Validated-signal markers** in the app (real backtest entries/exits, click for detail), bigger, direction-aware; replay **speed control**; subtle marker bounce.
+- [x] Boot intro (dim bull, steady glow, ready for a looping `/logo.mp4`); background bull **eye→edge glow** every ~10s.
+- [x] Landing **remodeled to futures-only**; removed **AI self-learning** copy; pricing = the 3 real tiers; faint bg bull.
+- [x] **3-tier membership** (Free / Plus $20 / Pro $50) with gating, test mode, Stripe + KV backend code, and the trader-app Pro gate.
+- [x] **Backtester**: Hourly short-hold timeframe, strategy explainer, signal timeline; server-side saved backtests.
+- [x] **App trades downtrends** (long + short).
+
 ## Done (session 37 — trader-critic robot + its quick wins)
 - [x] **Built `futures-trader-critic` subagent** (`.claude/agents/`) — reusable site-review robot (flaws + monetization ideas through a trader's eyes).
 - [x] **Fixed headline day-change** to use the close series in `fetchQuote` (was the proxy prev-close bug).
