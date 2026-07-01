@@ -15,6 +15,9 @@
 - **Intro polish (follow-up):** the boot bull sits at the **exact geometry of `#bgLogo`** (same center + `min(48vw,560px)` width) so it settles seamlessly onto the background watermark; the sequence is **longer (~4.8s + reveal)** to feel more official; caption moved to a fixed bottom band. **No flash** — the surround is **pitch black**, the bull is **dimmer** (`brightness .72`), and it carries a **subtle, steady green glow** (constant drop-shadow on the base filter; the fade-in never pulses it). Verified the filter is byte-identical across time (no flicker).
 - **PO3 card (site):** moved **further down** the Futures tab (now below the trade plan + metrics) and its schematic is now drawn with **candlesticks** — a coiling range, a sweep candle with a long wick past the range, then an expansion run (illustrative demo data; bearish flips it vertically). Verified live: clean geometry within the viewBox for all phases/directions.
 
+## 2026-06-30 (session 56) — swap eye-glow for a bull edge-glow
+- Dropped the two eye-glow dots on both surfaces. The **whole bull now edge-glows a little once every ~10s** (same cadence) — a green/accent drop-shadow halo on the silhouette plus a subtle opacity lift, then it fades back (`bgEdgeGlow` on the watermark `<img>`; app uses green, site uses `--ac-rgb` so it flips with the theme). Removed the `.bgEye` elements/keyframes.
+
 ## 2026-06-30 (session 55) — eye position, denser PO3 candles, saved backtests
 - **Eye-glow lowered** to `top:41%` (was 34.5%) on both surfaces so it sits on the bull's eyes.
 - **PO3 diagram is denser + smoother** — rebuilt with loop-generated candles: **33 candlesticks** (14 coiling range + 5 sweep/reclaim + 14 expansion) instead of 15, so it reads like a real chart rather than choppy blocks. Bearish still flips vertically; geometry verified within the viewBox.

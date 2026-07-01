@@ -1439,20 +1439,18 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bg-logo{position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .bg-logo::before{content:'';position:absolute;width:min(74vw,860px);height:min(74vw,860px);border-radius:50%;background:radial-gradient(circle,rgba(var(--ac-rgb),.1),transparent 64%);filter:blur(22px);animation:bgGlow 16s ease-in-out infinite}
 .bg-logo .bgl-inner{position:relative;width:min(48vw,540px);aspect-ratio:509/788;animation:bgLogoFloatT 18s ease-in-out infinite;will-change:transform}
-.bg-logo .bgl-inner img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.08;filter:drop-shadow(0 0 34px rgba(var(--ac-rgb),.22))}
-/* the bull's eyes flare a slight accent glow once every ~10s (nudge left/right/top
-   % below if the dots don't sit exactly on the eyes) */
-.bg-logo .bgEye{position:absolute;top:41%;width:6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(var(--ac-rgb),.95),rgba(var(--ac-rgb),.4) 45%,transparent 72%);opacity:0;mix-blend-mode:screen;filter:blur(1.5px);animation:bgEyeGlow 10s ease-in-out infinite}
-.bg-logo .bgEye.l{left:35%} .bg-logo .bgEye.r{right:35%}
+/* the whole bull's edge glows a little once every ~10s (accent drop-shadow halo on
+   the silhouette + a subtle opacity lift), then fades back */
+.bg-logo .bgl-inner img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.08;animation:bgEdgeGlow 10s ease-in-out infinite}
 @keyframes bgLogoFloatT{0%,100%{transform:translateY(0) scale(1) rotate(0)}50%{transform:translateY(-18px) scale(1.05) rotate(1.4deg)}}
-@keyframes bgEyeGlow{0%,86%{opacity:0}91%{opacity:.9}97%{opacity:.25}100%{opacity:0}}
+@keyframes bgEdgeGlow{0%,84%,100%{opacity:.08;filter:drop-shadow(0 0 34px rgba(var(--ac-rgb),.2))}91%{opacity:.18;filter:drop-shadow(0 0 16px rgba(var(--ac-rgb),.85)) drop-shadow(0 0 6px rgba(var(--ac-rgb),.55))}96%{opacity:.11;filter:drop-shadow(0 0 24px rgba(var(--ac-rgb),.4))}}
 @keyframes bgGlow{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-@media(prefers-reduced-motion:reduce){.bg-logo .bgl-inner,.bg-logo .bgEye,.bg-logo::before{animation:none}}
+@media(prefers-reduced-motion:reduce){.bg-logo .bgl-inner,.bg-logo .bgl-inner img,.bg-logo::before{animation:none}}
 </style>
 </head>
 <body>
 <canvas id="fxCanvas" aria-hidden="true"></canvas>
-<div class="bg-logo" aria-hidden="true"><div class="bgl-inner"><img src="logo.png" alt=""/><span class="bgEye l"></span><span class="bgEye r"></span></div></div>
+<div class="bg-logo" aria-hidden="true"><div class="bgl-inner"><img src="logo.png" alt=""/></div></div>
 <div class="particles" id="particles"></div>
 
 <!-- ═══════════════════ LANDING ═══════════════════ -->
