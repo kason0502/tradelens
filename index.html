@@ -5022,6 +5022,16 @@ function biasStack(s){
   if(at&&s10!=null){const ext=(price-s10)/at;add('Extension',ext>2.2?-1:(ext<-2.2?1:0),ext>2.2?`Stretched ${ext.toFixed(1)}×ATR above the mean — snap-back risk`:(ext<-2.2?`${Math.abs(ext).toFixed(1)}×ATR below the mean — bounce odds rise`:'Near the mean — room to extend'));}
   if(ohlc&&ohlc.length>40){const aRec=atr(ohlc,14),aOld=atr(ohlc.slice(0,ohlc.length-12),14);if(aOld){const vUp=aRec>aOld*1.07;add('Volatility regime',vUp?(price>s50?1:-1):0,vUp?'Range expanding — fuel for the prevailing trend':'Range contracting — coiling, lower conviction');}}
   if(ohlc){const p3=po3Analyze(ohlc);if(p3){const d=(p3.phase==='man'||p3.phase==='dis')?(p3.dir==='up'?1:-1):0;add('PO3 cycle zone',d,`${p3.phase==='acc'?'Accumulation':p3.phase==='man'?'Manipulation':'Distribution'} — ${p3.dir==='up'?'bullish':p3.phase==='acc'?'neutral':'bearish'}`);}}
+  // --- more predictive variables: MACD · Bollinger %B · swing structure · breakout proximity ---
+  const emaS=(arr,p)=>{const k=2/(p+1),o=[arr[0]];for(let i=1;i<arr.length;i++)o.push(arr[i]*k+o[i-1]*(1-k));return o;};
+  if(n>26){const e12=emaS(closes,12),e26=emaS(closes,26),ml=e12.map((v,i)=>v-e26[i]),sig=emaS(ml,9),hist=ml[n-1]-sig[n-1];
+    add('MACD momentum',ml[n-1]>sig[n-1]?1:-1,`MACD ${hist>=0?'above':'below'} its signal — momentum ${hist>=0?'building up':'rolling over'}`);}
+  if(n>20){const m20=smaN(closes,20);let sd=0;for(let i=n-20;i<n;i++)sd+=(closes[i]-m20)**2;sd=Math.sqrt(sd/20);const upB=m20+2*sd,loB=m20-2*sd,pB=(price-loB)/Math.max(1e-6,upB-loB);
+    add('Bollinger position',pB>0.8?1:(pB<0.2?-1:0),`%B ${(pB*100).toFixed(0)} — ${pB>0.8?'riding the upper band (strength)':pB<0.2?'pinned to the lower band (weak)':'mid-band, no stretch'}`);}
+  {const half=Math.min(40,Math.floor(n/2));if(half>5){const rHi=Math.max(...closes.slice(n-half)),pHi=Math.max(...closes.slice(n-2*half,n-half)),rLo=Math.min(...closes.slice(n-half)),pLo=Math.min(...closes.slice(n-2*half,n-half)),hh=rHi>pHi,hl=rLo>pLo;
+    add('Swing structure',(hh&&hl)?1:((!hh&&!hl)?-1:0),(hh&&hl)?'Higher highs & higher lows — uptrend intact':((!hh&&!hl)?'Lower highs & lower lows — downtrend intact':'Mixed / transitioning structure'));}}
+  if(ohlc&&at){const look=Math.min(60,ohlc.length-1),seg=ohlc.slice(-look),hiN=Math.max(...seg.map(b=>b.h)),loN=Math.min(...seg.map(b=>b.l)),toHi=(hiN-price)/at,toLo=(price-loN)/at;
+    add('Breakout proximity',toHi<1?1:(toLo<1?-1:0),toHi<1?`${toHi.toFixed(1)}×ATR under the ${look}-bar high — coiled to break out`:(toLo<1?`${toLo.toFixed(1)}×ATR above the ${look}-bar low — breakdown risk`:'Mid-range — no imminent break'));}
   return out;
 }
 function biasStackHTML(s){
