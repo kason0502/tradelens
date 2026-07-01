@@ -15,6 +15,12 @@
 - **Intro polish (follow-up):** the boot bull sits at the **exact geometry of `#bgLogo`** (same center + `min(48vw,560px)` width) so it settles seamlessly onto the background watermark; the sequence is **longer (~4.8s + reveal)** to feel more official; caption moved to a fixed bottom band. **No flash** — the surround is **pitch black**, the bull is **dimmer** (`brightness .72`), and it carries a **subtle, steady green glow** (constant drop-shadow on the base filter; the fade-in never pulses it). Verified the filter is byte-identical across time (no flicker).
 - **PO3 card (site):** moved **further down** the Futures tab (now below the trade plan + metrics) and its schematic is now drawn with **candlesticks** — a coiling range, a sweep candle with a long wick past the range, then an expansion run (illustrative demo data; bearish flips it vertically). Verified live: clean geometry within the viewBox for all phases/directions.
 
+## 2026-06-30 (session 61) — 3-tier membership (Free / $20 Plus / $50 Pro)
+- **Tiered access.** The binary paywall became **three tiers**: **Free** (live Futures signal + chart + plan · Playbook · Learn), **Plus $20** (the whole website — bias stack, PO3, Backtester, Matrix, Charts, Split, Strength, Sessions, Risk Calc, AI, alerts), **Pro $50** (+ the STRATA Live desktop app). `PAY.tiers`, `TAB_TIER`, `tierOf()`, `requireTier()`.
+- **Gating:** `launchApp` lets Free in; `mainTab` gates premium tabs → opens the plan picker; the Futures tab shows locked **PO3** + **bias-stack** teasers (`payLock`) to Free. The **STRATA Live app** (`/trader/app/`) shows a Pro gate on the deployed origin (skipped on localhost). A tier chip (Free/Plus/Pro + upgrade/sign-out) sits top-right.
+- **Paywall modal** rebuilt into a 3-plan picker (highlights the tier a feature needs). Test mode: click a plan (instant) or codes **`STRATA-PLUS`** / **`STRATA-PRO`**. Backend: `api/checkout.js` picks the price by tier (`STRIPE_PRICE_PLUS`/`STRIPE_PRICE_PRO`, stores tier in metadata), `api/me.js` returns the tier; `DEPLOY_PAYWALL.md` updated.
+- Verified: tier logic, gating, 3-card modal, locked teasers, and the app gate (skipped on localhost).
+
 ## 2026-06-30 (session 60) — landing remodeled around futures only
 - Rebuilt the landing to speak **only about futures** (matching the purely-futures app):
   - **Hero:** "Trade futures on structure"; lead names the six markets (ES/NQ/YM/RTY/CL/GC); status "Live · CME futures data"; hero symbol ES.

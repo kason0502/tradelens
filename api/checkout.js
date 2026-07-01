@@ -8,7 +8,10 @@
 // and the frontend stays in local test mode.
 
 const KEY = process.env.STRIPE_SECRET_KEY;
-const PRICE = process.env.STRIPE_PRICE_ID;
+// Per-tier recurring Price ids. STRIPE_PRICE_PLUS = $20 plan, STRIPE_PRICE_PRO = $50
+// plan. STRIPE_PRICE_ID stays supported as a fallback for a single-plan setup.
+const PRICE_PLUS = process.env.STRIPE_PRICE_PLUS || process.env.STRIPE_PRICE_ID;
+const PRICE_PRO = process.env.STRIPE_PRICE_PRO || process.env.STRIPE_PRICE_ID;
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,18 +19,21 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  if (!KEY || !PRICE) return res.status(503).json({ error: 'Stripe not configured — see DEPLOY_PAYWALL.md' });
-
   let b = req.body;
   if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } }
   b = b || {};
+  const tier = String(b.tier) === '2' ? 2 : 1;
+  const price = tier === 2 ? PRICE_PRO : PRICE_PLUS;
+  if (!KEY || !price) return res.status(503).json({ error: 'Stripe not configured — see DEPLOY_PAYWALL.md' });
   const email = String(b.email || '').slice(0, 120);
   const origin = req.headers.origin || ('https://' + (req.headers.host || ''));
 
   const f = new URLSearchParams();
   f.set('mode', 'subscription');
-  f.set('line_items[0][price]', PRICE);
+  f.set('line_items[0][price]', price);
   f.set('line_items[0][quantity]', '1');
+  f.set('metadata[tier]', String(tier));            // so /api/me can return the plan
+  f.set('subscription_data[metadata][tier]', String(tier));
   f.set('success_url', origin + '/?pro=success&session_id={CHECKOUT_SESSION_ID}');
   f.set('cancel_url', origin + '/?pro=cancel');
   f.set('allow_promotion_codes', 'true');

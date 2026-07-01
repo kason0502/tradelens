@@ -125,6 +125,23 @@
 <canvas id="bg"></canvas>
 <div id="bgLogo"><img src="/logo.png" alt=""/></div>
 <div id="boot"><img id="bootLogo" src="/logo.png" alt=""/><div class="boot-cap"><div class="bt">STRATA</div><div class="bs" id="bootMsg">booting live engine…</div></div></div>
+<!-- Pro-tier gate: STRATA Live (the desktop app) is included with the $50 Pro plan.
+     On the deployed site this shares localStorage with the website. Skipped on
+     localhost so local dev use isn't blocked. -->
+<div id="proGate" style="display:none;position:fixed;inset:0;z-index:60;background:radial-gradient(circle at 50% 40%,#0c0c14,#050507 70%);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px">
+  <img src="/logo.png" style="width:120px;opacity:.85;filter:drop-shadow(0 0 26px rgba(34,197,94,.4))"/>
+  <div style="font-size:26px;font-weight:900;letter-spacing:.02em">STRATA <span style="color:var(--ac2)">Live</span></div>
+  <div style="font-size:15px;color:var(--ink);max-width:440px;line-height:1.6">The live desktop terminal is part of the <b>Pro</b> plan ($50/mo). Unlock it on the website, then reopen the app.</div>
+  <a href="/" style="margin-top:6px;text-decoration:none;background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.45);color:#aef0c8;font-weight:800;padding:11px 22px;border-radius:11px">Go to STRATA · upgrade →</a>
+</div>
+<script>
+(function(){try{
+  var loc=/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname);
+  var s=JSON.parse(localStorage.getItem('tlpro_account_v1')||'{}');
+  var tier=(s.tier&&(!s.until||s.until>Date.now()))?s.tier:0;
+  if(!loc && tier<2){ var g=document.getElementById('proGate'); if(g)g.style.display='flex'; }
+}catch(e){}})();
+</script>
 <div class="wrap">
   <div class="top">
     <div class="brand"><img id="brandImg" src="/bull.png" alt=""/>STRATA <small>Live</small></div>

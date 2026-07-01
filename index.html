@@ -104,7 +104,22 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .mbtn.sec{background:var(--s3);color:var(--tx);border:1px solid var(--b2);margin-top:8px}
 /* ── STRATA Pro paywall + account chip ── */
 #moPay{z-index:2000}   /* above #landing (z-index 1000) so the gate shows when launched from the landing */
-.pay-modal{max-width:430px}
+.pay-modal{max-width:760px}
+.pay-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.pt-card{border:1px solid var(--b2);border-radius:14px;padding:15px 15px 16px;background:var(--s1);display:flex;flex-direction:column}
+.pt-card.hot{border-color:rgba(var(--ac-rgb),.6);box-shadow:0 0 0 1px rgba(var(--ac-rgb),.3),0 10px 30px rgba(0,0,0,.4)}
+.pt-card.owned{opacity:.7}
+.pt-name{font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--act)}
+.pt-price{margin:6px 0 10px}.pt-price b{font-size:26px;font-weight:900;letter-spacing:-.02em}.pt-price span{font-size:12px;color:var(--fa)}
+.pt-feats{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:7px;flex:1}
+.pt-feats li{font-size:11.5px;color:var(--ink2);padding-left:18px;position:relative;line-height:1.4}
+.pt-feats li::before{content:'✓';position:absolute;left:0;color:var(--gt);font-weight:900;font-size:11px}
+.pt-cur{text-align:center;font-size:12px;font-weight:700;color:var(--gt);padding:11px 0}
+.pt-card .mbtn{padding:10px;font-size:12.5px}
+.pay-lock{cursor:pointer;border-style:dashed!important;transition:border-color .15s,transform .15s}
+.pay-lock:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
+.pl-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--act);border:1px solid rgba(var(--ac-rgb),.35);background:rgba(var(--ac-rgb),.08);padding:3px 9px;border-radius:99px;margin-bottom:9px}
+@media(max-width:640px){.pay-modal{max-width:94vw}.pay-tiers{grid-template-columns:1fr}}
 .pay-badge{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--gt);border:1px solid rgba(38,229,143,.4);background:rgba(38,229,143,.08);padding:4px 10px;border-radius:99px;margin-bottom:12px}
 .pay-badge b{color:var(--tx)}
 .pay-feats{list-style:none;margin:14px 0;padding:0;display:flex;flex-direction:column;gap:9px}
@@ -1872,20 +1887,13 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 <div class="mo" id="moPay">
   <div class="modal pay-modal">
     <button class="mx" onclick="closePaywall()">✕</button>
-    <div class="pay-badge">STRATA <b>PRO</b></div>
-    <div class="mtitle">Unlock the full terminal</div>
-    <div class="msub">Sign up to access every gated feature below.</div>
-    <ul class="pay-feats">
-      <li>Live <b>validated</b> buy/sell signals on every market</li>
-      <li>The 12-factor <b>edge bias stack</b> + PO3 cycle zones</li>
-      <li>Unlimited <b>backtests</b>, saved to your account</li>
-      <li>Market Matrix, Split View, Relative Strength &amp; alerts</li>
-    </ul>
-    <div class="pay-price"><b id="payPrice">$29</b><span>/month</span></div>
-    <div class="flbl">Email</div><input class="fi" id="payEmail" type="email" placeholder="you@email.com"/>
-    <button class="mbtn" onclick="paySubscribe()">Subscribe <span id="paySubTag" style="opacity:.85;font-weight:700"></span></button>
-    <div class="pay-or">— or —</div>
-    <div style="display:flex;gap:8px"><input class="fi" id="payCode" placeholder="Access / test code" style="margin:0;flex:1"/><button class="mbtn sec" style="width:auto;padding:12px 16px;margin:0" onclick="payRedeem()">Unlock</button></div>
+    <div class="pay-badge">STRATA <b>MEMBERSHIP</b></div>
+    <div class="mtitle" id="payHead">Choose your plan</div>
+    <div class="msub" id="paySub">Free gets you the live signal. Plus unlocks the whole website. Pro adds the desktop app.</div>
+    <div class="pay-tiers" id="payTiers"></div>
+    <div class="flbl" style="margin-top:14px">Email (for your subscription)</div><input class="fi" id="payEmail" type="email" placeholder="you@email.com"/>
+    <div class="pay-or">— or enter an access / test code —</div>
+    <div style="display:flex;gap:8px"><input class="fi" id="payCode" placeholder="e.g. STRATA-PLUS" style="margin:0;flex:1"/><button class="mbtn sec" style="width:auto;padding:12px 16px;margin:0" onclick="payRedeem()">Unlock</button></div>
     <div id="payMsg" class="pay-msg"></div>
     <div id="payTestNote" class="pay-testnote"></div>
   </div>
@@ -2188,12 +2196,22 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 //    temporal-dead-zone if any later top-level statement throws. ──
 const PAY={
   testMode:true,               // true = local test unlock (no backend); false = real /api Stripe backend
-  price:'$29',
-  testCode:'STRATA-TEST',      // enter this in the paywall to unlock in test mode
-  key:'tlpro_account_v1'
+  key:'tlpro_account_v1',
+  tiers:[
+    {id:0,name:'Free',price:'$0', code:''},
+    {id:1,name:'Plus',price:'$20',code:'STRATA-PLUS'},
+    {id:2,name:'Pro', price:'$50',code:'STRATA-PRO'}
+  ]
 };
-let _pendingLaunch=false;   // hoisted with PAY so launchApp never hits a dead-zone
-// run the account hydrate/chip once the DOM is ready, independent of the main init
+// Membership tier each app tab needs: 0 = Free · 1 = Plus ($20, whole website) · 2 = Pro ($50, + the app).
+const TAB_TIER={futures:0,learn:0,playbook:0, matrix:1,charts:1,split:1,strength:1,backtester:1,calc:1,sessions:1,ai:1,alerts:1,feedback:1};
+const TIER_FEATS=[
+  ['The live Futures signal, chart &amp; trade plan','Interactive Playbook diagram','Learn academy — visual lessons'],
+  ['Everything in Free','All six futures markets','12-factor edge bias stack + PO3 cycle zones','Backtester · Matrix · Charts · Split View','Relative Strength · Sessions · Risk Calc · alerts · AI'],
+  ['Everything in Plus','The STRATA Live desktop app','Saved backtests synced across devices','Priority data + server-side AI']
+];
+const TIER_FEATURE_LABEL={po3:'The PO3 cycle zone',bias:'The edge bias stack',matrix:'The Market Matrix',charts:'Charts',split:'Split View',strength:'Relative Strength',backtester:'The Backtester',calc:'The Risk Calculator',sessions:'The Session Clock',ai:'AI Chat',alerts:'Alerts',app:'The STRATA Live app'};
+let _payNeed=1;   // tier the current upsell targets
 window.addEventListener('DOMContentLoaded',()=>{try{payHydrate();updateAcctChip();}catch(e){}});
 
 // ── PARTICLES ──────────────────────────────────────────────────────────
@@ -2213,6 +2231,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 
 // ── TABS ──────────────────────────────────────────────────────────────
 function mainTab(name,btn){
+  if((TAB_TIER[name]||0)>tierOf()){ openPaywall(TAB_TIER[name],name); return; }   // membership gate
   document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.ntab,.snav').forEach(b=>b.classList.remove('active'));
   const pane=document.getElementById('tab-'+name); if(pane)pane.classList.add('active');
@@ -5172,7 +5191,14 @@ function paintFutures(){
     <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (S&amp;P &amp; Nasdaq, futures &amp; ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
     <div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
   </div>`;
-  let po3card=''; if(s.ohlc){const p3=po3Analyze(s.ohlc); if(p3)po3card=po3CardHTML(p3,mkt);}
+  let po3card='', biasBlock='';
+  if(tierOf()>=1){
+    if(s.ohlc){const p3=po3Analyze(s.ohlc); if(p3)po3card=po3CardHTML(p3,mkt);}
+    biasBlock=biasStackHTML(s);
+  } else {
+    po3card=payLock('Market cycle — PO3 zone','See exactly where price sits in its accumulation → manipulation → distribution cycle, with the trade plan for each phase.',1,'po3');
+    biasBlock=payLock('Edge bias stack','12 independent real-data factors — trend, momentum, structure, volatility, PO3 — scored into one net long/short lean.',1,'bias');
+  }
   el.innerHTML=scan+alertBanner+`<div class="fut-layout"><div class="fut-main">
     <div class="fut-sig ${s.cls}">
       <div class="fs-px"><div class="fs-price">$${money(s.price)}</div><div class="chg-badge ${up?'up':'down'}">${up?'+':''}${money(q.change)} (${up?'+':''}${q.pct.toFixed(2)}%)</div></div>
@@ -5197,7 +5223,7 @@ function paintFutures(){
       <div class="bt-score"><div class="bt-score-val">${atrPct.toFixed(1)}%</div><div class="bt-score-lbl">Daily range (ATR)</div></div>
     </div>
     ${po3card}
-    ${biasStackHTML(s)}
+    ${biasBlock}
     ${edge}
     </div><div class="fut-rail">${futSentimentGauge(sigs)}<div id="futStratPerf"></div></div></div>`;
   futLoadEdge();
@@ -7680,48 +7706,60 @@ updateJournalBadge(); setTimeout(()=>{if(bgIdle())journalTick();},26000); setInt
 // keys for real Stripe test checkout (still fake money). See DEPLOY_PAYWALL.md.
 function acctState(){try{return JSON.parse(localStorage.getItem(PAY.key))||{};}catch(e){return {};}}
 function acctSave(s){try{localStorage.setItem(PAY.key,JSON.stringify(s));}catch(e){}}
-function hasAccess(){const s=acctState();return !!(s.pro&&(!s.until||s.until>Date.now()));}
-function acctGrant(email,days,how){const until=days?Date.now()+days*86400000:0;acctSave({pro:true,email:email||acctState().email||'',until,how,ts:Date.now()});updateAcctChip();}
+function tierOf(){const s=acctState();return (s.tier&&(!s.until||s.until>Date.now()))?s.tier:0;}
+function tierName(t){return (PAY.tiers[t]||PAY.tiers[0]).name;}
+function hasAccess(){return tierOf()>=1;}   // legacy alias
+function requireTier(level,feature){ if(tierOf()>=level)return true; openPaywall(level,feature); return false; }
+function acctGrant(tier,email,days,how){const until=days?Date.now()+days*86400000:0;acctSave({tier,email:email||acctState().email||'',until,how,ts:Date.now()});updateAcctChip();}
 function acctSignOut(){acctSave({});updateAcctChip();showLanding();}
-function updateAcctChip(){const el=document.getElementById('acctChip');if(!el)return;const s=acctState();
-  if(hasAccess()){el.style.display='';el.innerHTML=`<span class="ac-dot"></span><span class="ac-em">${s.email||'PRO'}</span><span class="ac-badge">PRO</span><a class="ac-out" onclick="acctSignOut()">sign out</a>`;}
-  else{el.style.display='none';}}
+function updateAcctChip(){const el=document.getElementById('acctChip');if(!el)return;const s=acctState(),t=tierOf();
+  if(t>=1){el.style.display='';el.innerHTML=`<span class="ac-dot"></span><span class="ac-em">${s.email||tierName(t)}</span><span class="ac-badge">${tierName(t).toUpperCase()}</span>${t<2?`<a class="ac-out" style="color:var(--act)" onclick="openPaywall(2)">upgrade</a>`:''}<a class="ac-out" onclick="acctSignOut()">sign out</a>`;}
+  else{el.style.display='';el.innerHTML=`<span class="ac-dot" style="background:var(--fa);box-shadow:none"></span><span class="ac-em">Free</span><a class="ac-out" style="color:var(--act)" onclick="openPaywall(1)">upgrade</a>`;}}
 
-function launchApp(){ if(!hasAccess()){_pendingLaunch=true;openPaywall();return;} _doLaunch(); }
+function launchApp(){ _doLaunch(); }   // Free can enter; premium tabs/features gate individually
 function _doLaunch(){
   const l=document.getElementById('landing');if(l)l.style.display='none';
   window.scrollTo(0,0); try{updateAcctChip();}catch(e){}
   try{ if(lastData){const{ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral}=lastData;applyChartView(ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral);} }catch(e){}
 }
-function openPaywall(){const m=document.getElementById('moPay');if(!m)return;
-  const s=acctState();const em=document.getElementById('payEmail');if(em&&s.email)em.value=s.email;
-  const note=document.getElementById('payTestNote');
-  if(note)note.innerHTML=PAY.testMode?`🔓 <b>Test mode</b> — no real charge. Use code <b>${PAY.testCode}</b>, or “Subscribe” runs a simulated free checkout so you can test the full flow.`:`Secure checkout by Stripe. Test cards work while in Stripe test mode.`;
-  const st=document.getElementById('paySubTag');if(st)st.textContent=PAY.testMode?'(simulated)':(PAY.price+'/mo');
-  const pp=document.getElementById('payPrice');if(pp)pp.textContent=PAY.price;
-  document.getElementById('payMsg').textContent='';
-  m.classList.add('open');}
+// Locked-feature teaser card (shown to Free users in place of a premium panel).
+function payLock(title,desc,need,feat){return `<div class="card pay-lock" onclick="openPaywall(${need},'${feat}')"><div class="pl-badge">🔒 ${tierName(need)}</div><div class="card-title" style="margin:0 0 6px">${title}</div><div style="font-size:12.5px;color:var(--ink2);line-height:1.55">${desc}</div><button class="dp-fu" style="margin-top:11px">Unlock with ${tierName(need)} →</button></div>`;}
+function openPaywall(need,feature){ _payNeed=need||1; const m=document.getElementById('moPay');if(!m)return; renderPaywall(feature); const e=document.getElementById('payMsg');if(e)e.textContent=''; m.classList.add('open'); }
 function closePaywall(){const m=document.getElementById('moPay');if(m)m.classList.remove('open');}
 function payMsg(t,ok){const e=document.getElementById('payMsg');if(e){e.textContent=t;e.style.color=ok?'var(--gt)':'var(--rt)';}}
-function payRedeem(){const code=(document.getElementById('payCode').value||'').trim().toUpperCase();
-  if(PAY.testMode){ if(code===PAY.testCode){acctGrant(document.getElementById('payEmail').value,0,'test-code');payUnlocked();} else payMsg('Invalid code. In test mode use '+PAY.testCode+'.'); return; }
-  // live mode: comp/redeem codes would be validated server-side (not built in v1)
-  payMsg('Redeem codes are handled by the backend in live mode.'); }
-async function paySubscribe(){const email=(document.getElementById('payEmail').value||'').trim();
-  if(!/.+@.+\..+/.test(email)){payMsg('Enter a valid email first.');return;}
-  if(PAY.testMode){ acctGrant(email,30,'test-subscribe'); payMsg('✓ Simulated subscription active (test mode).',true); setTimeout(payUnlocked,650); return; }
+function renderPaywall(feature){
+  const need=_payNeed, cur=tierOf();
+  const head=document.getElementById('payHead'), sub=document.getElementById('paySub'), tiersEl=document.getElementById('payTiers'), note=document.getElementById('payTestNote');
+  if(head)head.textContent=need>=2?'Unlock the full platform':'Unlock STRATA Plus';
+  if(sub)sub.innerHTML=feature?`<b>${TIER_FEATURE_LABEL[feature]||feature}</b> needs ${tierName(need)}. Choose a plan:`:`Choose the plan that fits how you trade.`;
+  if(tiersEl)tiersEl.innerHTML=PAY.tiers.map(t=>{
+    const owned=cur>=t.id, isNeed=t.id===need;
+    return `<div class="pt-card ${isNeed?'hot':''} ${owned&&t.id>0?'owned':''}">
+      <div class="pt-name">${t.name}</div><div class="pt-price"><b>${t.price}</b>${t.id?'<span>/mo</span>':''}</div>
+      <ul class="pt-feats">${TIER_FEATS[t.id].map(f=>`<li>${f}</li>`).join('')}</ul>
+      ${t.id===0?`<div class="pt-cur">Always free</div>`:(owned?`<div class="pt-cur">✓ Your plan</div>`:`<button class="mbtn ${isNeed?'':'sec'}" onclick="payChoose(${t.id})">Get ${t.name}${PAY.testMode?'':' · '+t.price}</button>`)}
+    </div>`;}).join('');
+  if(note)note.innerHTML=PAY.testMode?`🔓 <b>Test mode</b> — no real charge. Click a plan to unlock it instantly, or enter its code (<b>STRATA-PLUS</b> / <b>STRATA-PRO</b>) below.`:`Secure checkout by Stripe — in test mode only fake test cards work, no real money.`;
+}
+async function payChoose(tier){
+  const email=(document.getElementById('payEmail').value||'').trim();
+  if(PAY.testMode){ acctGrant(tier,email,30,'test'); payMsg('✓ '+tierName(tier)+' unlocked (test mode).',true); setTimeout(()=>{closePaywall();location.reload();},700); return; }
+  if(!/.+@.+\..+/.test(email)){payMsg('Enter your email first.');return;}
   payMsg('Redirecting to secure Stripe checkout…',true);
-  try{const r=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email})});
+  try{const r=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email,tier})});
     const d=await r.json(); if(d.url){acctSave({email});location.href=d.url;} else payMsg(d.error||'Checkout unavailable — see DEPLOY_PAYWALL.md.'); }
-  catch(e){payMsg('Checkout unavailable — is the backend deployed?');}}
-function payUnlocked(){closePaywall();if(_pendingLaunch){_pendingLaunch=false;_doLaunch();}}
-// On return from Stripe (live mode), confirm the session server-side then grant.
+  catch(e){payMsg('Checkout unavailable — is the backend deployed?');}
+}
+function payRedeem(){const code=(document.getElementById('payCode').value||'').trim().toUpperCase();
+  const t=PAY.tiers.find(x=>x.code&&x.code===code);
+  if(PAY.testMode){ if(t){acctGrant(t.id,document.getElementById('payEmail').value,0,'code');payMsg('✓ '+t.name+' unlocked.',true);setTimeout(()=>{closePaywall();location.reload();},700);} else payMsg('Invalid code. Try STRATA-PLUS or STRATA-PRO.'); return; }
+  payMsg('Redeem codes are validated by the backend in live mode.'); }
 async function payHydrate(){
   const p=new URLSearchParams(location.search);
   if(PAY.testMode) return;
   if(p.get('pro')==='success'&&p.get('session_id')){
     try{const r=await fetch('/api/me?session_id='+encodeURIComponent(p.get('session_id')));const d=await r.json();
-      if(d.active){acctGrant(d.email,31,'stripe');history.replaceState({},'',location.pathname);_doLaunch();}}catch(e){}
+      if(d.active){acctGrant(d.tier||1,d.email,31,'stripe');history.replaceState({},'',location.pathname);}}catch(e){}
   }
 }
 function showLanding(){const l=document.getElementById('landing');if(l){l.style.display='block';l.scrollTop=0;lxObserve();}}

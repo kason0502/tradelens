@@ -14,18 +14,25 @@ Nothing here ever charges a real card on its own. Even "live" starts with Stripe
 
 ## 1. Test it right now (no setup, no money)
 
-`index.html` ships with `PAY.testMode = true`. On the landing page:
+`index.html` ships with `PAY.testMode = true`. There are **three tiers**:
 
-1. Click **Launch App** → the **STRATA PRO** paywall appears.
-2. Either:
-   - type any email and click **Subscribe** → a *simulated* subscription unlocks
-     the app (30-day local pass), **or**
-   - enter the code **`STRATA-TEST`** in the "Access / test code" box → **Unlock**.
-3. You're in. A **PRO** chip shows top-right; **sign out** clears it and the gate
-   returns.
+| Tier | Price | Test code | Unlocks |
+|------|-------|-----------|---------|
+| **Free** | $0 | — | Live Futures signal + chart + plan · Playbook · Learn |
+| **Plus** | $20/mo | `STRATA-PLUS` | The **whole website** — bias stack, PO3, Backtester, Matrix, Charts, Split, Strength, Sessions, Risk Calc, AI, alerts |
+| **Pro** | $50/mo | `STRATA-PRO` | Everything in Plus **+ the STRATA Live desktop app** (`/trader/app/`) |
 
-This proves the whole gated experience without a backend or a cent. Saved
-backtests persist in your browser (localStorage) in this mode.
+To test:
+1. Click **Launch App** — you're in on **Free** (limited). Locked panels (PO3,
+   bias stack) show a teaser; locked tabs open the plan picker.
+2. To unlock a tier: open the paywall (click a locked feature, or the **upgrade**
+   chip top-right) → **click a plan** (simulated, instant) **or** type its code
+   (`STRATA-PLUS` / `STRATA-PRO`) → **Unlock**.
+3. A tier chip shows top-right (Free/Plus/Pro) with **upgrade** + **sign out**.
+
+This proves the whole tiered experience with no backend and no money. The STRATA
+Live app gate only enforces on the **deployed** origin (localhost is skipped so
+your local dev use isn't blocked).
 
 ---
 
@@ -46,10 +53,15 @@ charges.
 ### b. Add the keys to Vercel (you do this — never paste keys into chat)
 In your Vercel project → **Settings → Environment Variables**, add:
 
-| Name                | Value                    |
-|---------------------|--------------------------|
-| `STRIPE_SECRET_KEY` | `sk_test_…` (your test secret key) |
-| `STRIPE_PRICE_ID`   | `price_…` (the recurring price)    |
+| Name                 | Value                    |
+|----------------------|--------------------------|
+| `STRIPE_SECRET_KEY`  | `sk_test_…` (your test secret key) |
+| `STRIPE_PRICE_PLUS`  | `price_…` (the **$20** recurring price) |
+| `STRIPE_PRICE_PRO`   | `price_…` (the **$50** recurring price) |
+
+Create **two** products in Stripe (Plus $20, Pro $50), copy each Price ID. The
+plan the user picks is sent as `tier` and stored on the subscription's metadata,
+so `/api/me` returns which tier they bought.
 
 Redeploy (Vercel does this automatically on the next push, or hit **Redeploy**).
 

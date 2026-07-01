@@ -21,7 +21,8 @@ module.exports = async (req, res) => {
     if (!r.ok) return res.status(500).json({ active: false });
     const active = d.payment_status === 'paid' || d.status === 'complete';
     const email = d.customer_email || (d.customer_details && d.customer_details.email) || '';
-    return res.status(200).json({ active, email });
+    const tier = (d.metadata && +d.metadata.tier) || 1;   // 1 = Plus, 2 = Pro
+    return res.status(200).json({ active, email, tier });
   } catch (e) {
     return res.status(500).json({ active: false });
   }
