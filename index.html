@@ -102,6 +102,22 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .mbtn{width:100%;padding:12px;border-radius:var(--rsm);border:none;background:var(--ac);color:#fff;font-size:13px;font-weight:800;cursor:pointer;transition:opacity .15s}
 .mbtn:hover{opacity:.85}
 .mbtn.sec{background:var(--s3);color:var(--tx);border:1px solid var(--b2);margin-top:8px}
+/* ── STRATA Pro paywall + account chip ── */
+.pay-modal{max-width:430px}
+.pay-badge{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--gt);border:1px solid rgba(38,229,143,.4);background:rgba(38,229,143,.08);padding:4px 10px;border-radius:99px;margin-bottom:12px}
+.pay-badge b{color:var(--tx)}
+.pay-feats{list-style:none;margin:14px 0;padding:0;display:flex;flex-direction:column;gap:9px}
+.pay-feats li{font-size:13px;color:var(--ink2);padding-left:22px;position:relative;line-height:1.4}
+.pay-feats li::before{content:'✓';position:absolute;left:0;color:var(--gt);font-weight:900}
+.pay-price{font-size:14px;color:var(--fa);margin:8px 0 14px}.pay-price b{font-size:30px;color:var(--tx);font-weight:900;letter-spacing:-.02em}
+.pay-or{text-align:center;font-size:11px;color:var(--fa);margin:12px 0;letter-spacing:.12em}
+.pay-msg{font-size:12px;margin-top:10px;min-height:16px;font-weight:600}
+.pay-testnote{font-size:11.5px;color:var(--ink3);margin-top:12px;line-height:1.5;padding:9px 11px;border-radius:8px;border:1px dashed var(--b2);background:rgba(255,255,255,.02)}
+.acct-chip{position:fixed;top:12px;right:16px;z-index:400;display:flex;align-items:center;gap:8px;background:rgba(12,12,14,.9);border:1px solid var(--b2);border-radius:99px;padding:6px 12px;font-size:12px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.acct-chip .ac-dot{width:7px;height:7px;border-radius:50%;background:var(--gt);box-shadow:0 0 8px var(--gt)}
+.acct-chip .ac-em{color:var(--ink2);font-weight:700;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-chip .ac-badge{font-size:9px;font-weight:900;letter-spacing:.06em;color:var(--gt);border:1px solid rgba(38,229,143,.4);border-radius:20px;padding:2px 7px}
+.acct-chip .ac-out{color:var(--fa);cursor:pointer;font-size:11px}.acct-chip .ac-out:hover{color:var(--rt)}
 
 /* ── PAGE LAYOUT ── */
 .page-wrap{position:relative;z-index:1;display:block;min-height:calc(100vh - var(--nav-h))}
@@ -1834,6 +1850,30 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div style="margin-top:13px" id="moAlertList"></div>
   </div>
 </div>
+
+<!-- STRATA Pro paywall -->
+<div class="mo" id="moPay">
+  <div class="modal pay-modal">
+    <button class="mx" onclick="closePaywall()">✕</button>
+    <div class="pay-badge">STRATA <b>PRO</b></div>
+    <div class="mtitle">Unlock the full terminal</div>
+    <div class="msub">Sign up to access every gated feature below.</div>
+    <ul class="pay-feats">
+      <li>Live <b>validated</b> buy/sell signals on every market</li>
+      <li>The 12-factor <b>edge bias stack</b> + PO3 cycle zones</li>
+      <li>Unlimited <b>backtests</b>, saved to your account</li>
+      <li>Market Matrix, Split View, Relative Strength &amp; alerts</li>
+    </ul>
+    <div class="pay-price"><b id="payPrice">$29</b><span>/month</span></div>
+    <div class="flbl">Email</div><input class="fi" id="payEmail" type="email" placeholder="you@email.com"/>
+    <button class="mbtn" onclick="paySubscribe()">Subscribe <span id="paySubTag" style="opacity:.85;font-weight:700"></span></button>
+    <div class="pay-or">— or —</div>
+    <div style="display:flex;gap:8px"><input class="fi" id="payCode" placeholder="Access / test code" style="margin:0;flex:1"/><button class="mbtn sec" style="width:auto;padding:12px 16px;margin:0" onclick="payRedeem()">Unlock</button></div>
+    <div id="payMsg" class="pay-msg"></div>
+    <div id="payTestNote" class="pay-testnote"></div>
+  </div>
+</div>
+<div id="acctChip" class="acct-chip" style="display:none"></div>
 
 <div class="mo" id="moAI">
   <div class="modal">
@@ -5212,7 +5252,8 @@ async function renderBacktester(force){
       ${d.synthetic?'<div class="fut-alert" style="margin-top:10px;color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)">Sample data — run the engine for real numbers.</div>':''}
     </div>`;
   btLoadTrade(bi);   // draw the featured trade on real candles
-  btRenderHistory(); // show any permanently-saved in-browser runs
+  btRenderHistory(); // show any saved runs (local now)
+  btSyncServer();    // + merge shared runs from the backend when it's deployed
 }
 function btShowTrade(i){const t=_btTradesArr[i];if(!t)return;const w=document.getElementById('btTradeWrap');if(w)w.innerHTML=btTradeBlock(t,i);document.querySelectorAll('#btLog tbody tr').forEach((r,idx)=>r.classList.toggle('sel',idx===i));btLoadTrade(i);}
 // ── IN-BROWSER backtest runner — run the trend-pullback rule on real daily data ──
@@ -5254,19 +5295,26 @@ async function btRunLive(){
 const BT_STORE='tlpro_backtests_v1';
 function btLoadRuns(){try{return JSON.parse(localStorage.getItem(BT_STORE))||[];}catch(e){return [];}}
 function btSaveRuns(a){try{localStorage.setItem(BT_STORE,JSON.stringify(a));}catch(e){}}
-function btSaveRun(r){const m=r.m,a=btLoadRuns();
-  a.unshift({id:Date.now()+'_'+Math.random().toString(36).slice(2,6),ranAt:Date.now(),sym:r.sym,yrs:r.yrs,bars:r.bars,
-    m:{n_trades:m.n_trades,win_rate_pct:m.win_rate_pct,profit_factor:isFinite(m.profit_factor)?m.profit_factor:null,total_return_pct:m.total_return_pct,avg_trade_pct:m.avg_trade_pct,best_pct:m.best_pct,worst_pct:m.worst_pct,max_drawdown_pct:m.max_drawdown_pct,equity:m.equity}});
-  if(a.length>60)a.length=60; btSaveRuns(a);}
+let _btServerRuns=null;   // populated from /api/backtests when the backend is deployed
+function btSaveRun(r){const m=r.m;
+  const rec={id:Date.now()+'_'+Math.random().toString(36).slice(2,6),ranAt:Date.now(),sym:r.sym,yrs:r.yrs,bars:r.bars,
+    m:{n_trades:m.n_trades,win_rate_pct:m.win_rate_pct,profit_factor:isFinite(m.profit_factor)?m.profit_factor:null,total_return_pct:m.total_return_pct,avg_trade_pct:m.avg_trade_pct,best_pct:m.best_pct,worst_pct:m.worst_pct,max_drawdown_pct:m.max_drawdown_pct,equity:m.equity}};
+  const a=btLoadRuns(); a.unshift(rec); if(a.length>60)a.length=60; btSaveRuns(a);
+  try{fetch('/api/backtests',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({run:rec})});}catch(e){}   // best-effort shared/server save (falls back to local)
+  return rec;}
+// Pull shared runs from the backend (Vercel KV). Silent no-op if it isn't deployed.
+async function btSyncServer(){try{const r=await fetch('/api/backtests');if(!r.ok)return;const d=await r.json();if(d&&Array.isArray(d.runs)){_btServerRuns=d.runs;btRenderHistory();}}catch(e){}}
 function btDeleteRun(id){btSaveRuns(btLoadRuns().filter(r=>r.id!==id));btRenderHistory();}
 function btClearRuns(){if(confirm('Clear all saved backtests?')){btSaveRuns([]);btRenderHistory();}}
 function btRenderHistory(){
   const el=document.getElementById('btHistoryWrap');if(!el)return;
-  const a=btLoadRuns();
-  if(!a.length){el.innerHTML=`<div style="font-size:11.5px;color:var(--ink3);margin-top:14px">No saved backtests yet — run one above and it’s stored here permanently (in this browser).</div>`;return;}
+  let a=btLoadRuns();
+  if(_btServerRuns&&_btServerRuns.length){const seen=new Set(a.map(r=>r.id));a=a.concat(_btServerRuns.filter(r=>r&&!seen.has(r.id)));a.sort((x,y)=>(y.ranAt||0)-(x.ranAt||0));}
+  const scope=_btServerRuns?'synced across your devices':'this browser';
+  if(!a.length){el.innerHTML=`<div style="font-size:11.5px;color:var(--ink3);margin-top:14px">No saved backtests yet — run one above and it’s stored here (${scope}).</div>`;return;}
   const rows=a.map(r=>{const m=r.m,pf=m.profit_factor==null?'∞':m.profit_factor.toFixed(2),ret=m.total_return_pct,d=new Date(r.ranAt);
     return `<tr onclick="btViewSaved('${r.id}')"><td>${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}, ${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</td><td>${r.sym.replace('=F','')}</td><td>${r.yrs==='max'?'max':r.yrs+'y'}</td><td class="num ${ret>=0?'g':'r'}">${ret>=0?'+':''}${ret.toFixed(0)}%</td><td class="num ${(m.profit_factor==null||m.profit_factor>=1)?'g':'r'}">${pf}</td><td class="num">${m.win_rate_pct.toFixed(0)}%</td><td class="num">${m.n_trades}</td><td class="num r">${m.max_drawdown_pct.toFixed(0)}%</td><td><span class="bt-del" onclick="event.stopPropagation();btDeleteRun('${r.id}')" title="Delete this run">✕</span></td></tr>`;}).join('');
-  el.innerHTML=`<div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="card-title" style="margin:0">Saved backtests <span class="pill">${a.length} stored · this browser</span></div><button class="dp-fu" style="padding:5px 11px;font-size:11px" onclick="btClearRuns()">Clear all</button></div>
+  el.innerHTML=`<div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="card-title" style="margin:0">Saved backtests <span class="pill">${a.length} stored · ${scope}</span></div><button class="dp-fu" style="padding:5px 11px;font-size:11px" onclick="btClearRuns()">Clear all</button></div>
     <div class="bt-log-wrap" style="margin-top:10px"><table class="bt-log"><thead><tr><th>Run at</th><th>Symbol</th><th>Window</th><th class="num">Return</th><th class="num">PF</th><th class="num">Win</th><th class="num">Trades</th><th class="num">Max DD</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div style="font-size:11px;color:var(--ink3);margin-top:7px">Click a row to re-open its stats + equity curve. Stored locally in this browser (persists across reloads) — clearing site data removes them.</div>
     <div id="btSavedView"></div>`;
@@ -7561,12 +7609,69 @@ setTimeout(()=>{if(AI_AUTO&&bgIdle())aiAutoLearnOnce();},40000); setInterval(()=
 updateJournalBadge(); setTimeout(()=>{if(bgIdle())journalTick();},26000); setInterval(()=>{if(bgIdle())journalTick();},45000); // grade tracked setups vs live price
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
-function launchApp(){
+// ── ACCOUNT + PAYWALL ──────────────────────────────────────────────────────
+// STRATA Pro gate. In TEST MODE (PAY.testMode = true) you can exercise the FULL
+// paid experience with NO real money and NO backend: a "test access" code, and a
+// "Subscribe" that runs a simulated (free) checkout. Set testMode=false and
+// deploy the api/ functions with your Stripe TEST keys to use real Stripe test
+// checkout (still fake money — test cards). See DEPLOY_PAYWALL.md. Nothing here
+// ever charges a real card on its own.
+const PAY={
+  testMode:true,               // ← true = local test unlock (no backend); false = real /api Stripe backend
+  price:'$29',
+  testCode:'STRATA-TEST',      // enter this in the paywall to unlock in test mode
+  key:'tlpro_account_v1',
+  trialDays:0
+};
+function acctState(){try{return JSON.parse(localStorage.getItem(PAY.key))||{};}catch(e){return {};}}
+function acctSave(s){try{localStorage.setItem(PAY.key,JSON.stringify(s));}catch(e){}}
+function hasAccess(){const s=acctState();return !!(s.pro&&(!s.until||s.until>Date.now()));}
+function acctGrant(email,days,how){const until=days?Date.now()+days*86400000:0;acctSave({pro:true,email:email||acctState().email||'',until,how,ts:Date.now()});updateAcctChip();}
+function acctSignOut(){acctSave({});updateAcctChip();showLanding();}
+function updateAcctChip(){const el=document.getElementById('acctChip');if(!el)return;const s=acctState();
+  if(hasAccess()){el.style.display='';el.innerHTML=`<span class="ac-dot"></span><span class="ac-em">${s.email||'PRO'}</span><span class="ac-badge">PRO</span><a class="ac-out" onclick="acctSignOut()">sign out</a>`;}
+  else{el.style.display='none';}}
+
+let _pendingLaunch=false;
+function launchApp(){ if(!hasAccess()){_pendingLaunch=true;openPaywall();return;} _doLaunch(); }
+function _doLaunch(){
   const l=document.getElementById('landing');if(l)l.style.display='none';
-  window.scrollTo(0,0);
+  window.scrollTo(0,0); updateAcctChip();
   if(lastData){try{const{ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral}=lastData;applyChartView(ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral);}catch(e){}}
 }
+function openPaywall(){const m=document.getElementById('moPay');if(!m)return;
+  const s=acctState();const em=document.getElementById('payEmail');if(em&&s.email)em.value=s.email;
+  const note=document.getElementById('payTestNote');
+  if(note)note.innerHTML=PAY.testMode?`🔓 <b>Test mode</b> — no real charge. Use code <b>${PAY.testCode}</b>, or “Subscribe” runs a simulated free checkout so you can test the full flow.`:`Secure checkout by Stripe. Test cards work while in Stripe test mode.`;
+  const st=document.getElementById('paySubTag');if(st)st.textContent=PAY.testMode?'(simulated)':(PAY.price+'/mo');
+  const pp=document.getElementById('payPrice');if(pp)pp.textContent=PAY.price;
+  document.getElementById('payMsg').textContent='';
+  m.classList.add('open');}
+function closePaywall(){const m=document.getElementById('moPay');if(m)m.classList.remove('open');}
+function payMsg(t,ok){const e=document.getElementById('payMsg');if(e){e.textContent=t;e.style.color=ok?'var(--gt)':'var(--rt)';}}
+function payRedeem(){const code=(document.getElementById('payCode').value||'').trim().toUpperCase();
+  if(PAY.testMode){ if(code===PAY.testCode){acctGrant(document.getElementById('payEmail').value,0,'test-code');payUnlocked();} else payMsg('Invalid code. In test mode use '+PAY.testCode+'.'); return; }
+  // live mode: comp/redeem codes would be validated server-side (not built in v1)
+  payMsg('Redeem codes are handled by the backend in live mode.'); }
+async function paySubscribe(){const email=(document.getElementById('payEmail').value||'').trim();
+  if(!/.+@.+\..+/.test(email)){payMsg('Enter a valid email first.');return;}
+  if(PAY.testMode){ acctGrant(email,30,'test-subscribe'); payMsg('✓ Simulated subscription active (test mode).',true); setTimeout(payUnlocked,650); return; }
+  payMsg('Redirecting to secure Stripe checkout…',true);
+  try{const r=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email})});
+    const d=await r.json(); if(d.url){acctSave({email});location.href=d.url;} else payMsg(d.error||'Checkout unavailable — see DEPLOY_PAYWALL.md.'); }
+  catch(e){payMsg('Checkout unavailable — is the backend deployed?');}}
+function payUnlocked(){closePaywall();if(_pendingLaunch){_pendingLaunch=false;_doLaunch();}}
+// On return from Stripe (live mode), confirm the session server-side then grant.
+async function payHydrate(){
+  const p=new URLSearchParams(location.search);
+  if(PAY.testMode) return;
+  if(p.get('pro')==='success'&&p.get('session_id')){
+    try{const r=await fetch('/api/me?session_id='+encodeURIComponent(p.get('session_id')));const d=await r.json();
+      if(d.active){acctGrant(d.email,31,'stripe');history.replaceState({},'',location.pathname);_doLaunch();}}catch(e){}
+  }
+}
 function showLanding(){const l=document.getElementById('landing');if(l){l.style.display='block';l.scrollTop=0;lxObserve();}}
+try{payHydrate();updateAcctChip();}catch(e){}   // handle Stripe return (live mode) + reflect logged-in state
 function lpScroll(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
 
 // ── LANDING MOTION ────────────────────────────────────────────────────
