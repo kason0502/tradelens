@@ -3,6 +3,9 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-07-01 — new `strata-debugger` subagent
+- **New custom agent `.claude/agents/strata-debugger.md`** — debugs and enriches BOTH surfaces (site `index.html` + STRATA Live `trader/app/index.html`). Has Edit/Write + preview tools so it can fix and verify (console/network/eval — screenshots don't work on these pages); bound by the house rules (real data only, honesty over hype, no "OOS" labels on full-sample stats). Read-only critique stays with the existing `futures-trader-critic` agent. Agents are plain markdown files in `.claude/agents/`; there's no count limit.
+
 ## 2026-06-30 (session 52) — new bull/bear indicator badges + PO3 market-cycle zones
 - **New indicator art (both surfaces):** the user's new low-poly **bull/bear head badges** are now the canonical "indicator" graphics. Copied to repo root as **`bull-ind.png` / `bear-ind.png`** (root so the Vercel-deployed site can use them — `.vercelignore` excludes `trader/`). One source of truth, served to both the site and the local STRATA Live app.
   - **STRATA Live app** (`trader/app/index.html`): chart demand/supply markers + the Legend now point to `/bull-ind.png` / `/bear-ind.png` (the old `/trader/bull indicator.png` refs were **broken** — those files were deleted). Removed the redundant space-named copies from `trader/`.
