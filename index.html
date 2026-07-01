@@ -103,6 +103,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .mbtn:hover{opacity:.85}
 .mbtn.sec{background:var(--s3);color:var(--tx);border:1px solid var(--b2);margin-top:8px}
 /* ── STRATA Pro paywall + account chip ── */
+#moPay{z-index:2000}   /* above #landing (z-index 1000) so the gate shows when launched from the landing */
 .pay-modal{max-width:430px}
 .pay-badge{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--gt);border:1px solid rgba(38,229,143,.4);background:rgba(38,229,143,.08);padding:4px 10px;border-radius:99px;margin-bottom:12px}
 .pay-badge b{color:var(--tx)}
@@ -2167,6 +2168,18 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   </div>
 </div>
 <script>
+// ── STRATA Pro paywall config — defined FIRST so the gate never hits a
+//    temporal-dead-zone if any later top-level statement throws. ──
+const PAY={
+  testMode:true,               // true = local test unlock (no backend); false = real /api Stripe backend
+  price:'$29',
+  testCode:'STRATA-TEST',      // enter this in the paywall to unlock in test mode
+  key:'tlpro_account_v1'
+};
+let _pendingLaunch=false;   // hoisted with PAY so launchApp never hits a dead-zone
+// run the account hydrate/chip once the DOM is ready, independent of the main init
+window.addEventListener('DOMContentLoaded',()=>{try{payHydrate();updateAcctChip();}catch(e){}});
+
 // ── PARTICLES ──────────────────────────────────────────────────────────
 (function(){const w=document.getElementById('particles');for(let i=0;i<18;i++){const p=document.createElement('div');p.className='particle';const sz=1+Math.random()*2.2;p.style.cssText=`left:${Math.random()*100}%;width:${sz}px;height:${sz}px;animation-duration:${14+Math.random()*20}s;animation-delay:${Math.random()*24}s`;w.appendChild(p);}})();
 
@@ -7610,19 +7623,11 @@ updateJournalBadge(); setTimeout(()=>{if(bgIdle())journalTick();},26000); setInt
 
 // ── LANDING ↔ APP ─────────────────────────────────────────────────────
 // ── ACCOUNT + PAYWALL ──────────────────────────────────────────────────────
-// STRATA Pro gate. In TEST MODE (PAY.testMode = true) you can exercise the FULL
-// paid experience with NO real money and NO backend: a "test access" code, and a
-// "Subscribe" that runs a simulated (free) checkout. Set testMode=false and
-// deploy the api/ functions with your Stripe TEST keys to use real Stripe test
-// checkout (still fake money — test cards). See DEPLOY_PAYWALL.md. Nothing here
-// ever charges a real card on its own.
-const PAY={
-  testMode:true,               // ← true = local test unlock (no backend); false = real /api Stripe backend
-  price:'$29',
-  testCode:'STRATA-TEST',      // enter this in the paywall to unlock in test mode
-  key:'tlpro_account_v1',
-  trialDays:0
-};
+// STRATA Pro gate. In TEST MODE (PAY.testMode = true — defined at the top of this
+// script) you can exercise the FULL paid experience with NO real money and NO
+// backend: a "test access" code, and a "Subscribe" that runs a simulated (free)
+// checkout. Set testMode=false and deploy the api/ functions with your Stripe TEST
+// keys for real Stripe test checkout (still fake money). See DEPLOY_PAYWALL.md.
 function acctState(){try{return JSON.parse(localStorage.getItem(PAY.key))||{};}catch(e){return {};}}
 function acctSave(s){try{localStorage.setItem(PAY.key,JSON.stringify(s));}catch(e){}}
 function hasAccess(){const s=acctState();return !!(s.pro&&(!s.until||s.until>Date.now()));}
@@ -7632,12 +7637,11 @@ function updateAcctChip(){const el=document.getElementById('acctChip');if(!el)re
   if(hasAccess()){el.style.display='';el.innerHTML=`<span class="ac-dot"></span><span class="ac-em">${s.email||'PRO'}</span><span class="ac-badge">PRO</span><a class="ac-out" onclick="acctSignOut()">sign out</a>`;}
   else{el.style.display='none';}}
 
-let _pendingLaunch=false;
 function launchApp(){ if(!hasAccess()){_pendingLaunch=true;openPaywall();return;} _doLaunch(); }
 function _doLaunch(){
   const l=document.getElementById('landing');if(l)l.style.display='none';
-  window.scrollTo(0,0); updateAcctChip();
-  if(lastData){try{const{ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral}=lastData;applyChartView(ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral);}catch(e){}}
+  window.scrollTo(0,0); try{updateAcctChip();}catch(e){}
+  try{ if(lastData){const{ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral}=lastData;applyChartView(ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral);} }catch(e){}
 }
 function openPaywall(){const m=document.getElementById('moPay');if(!m)return;
   const s=acctState();const em=document.getElementById('payEmail');if(em&&s.email)em.value=s.email;
