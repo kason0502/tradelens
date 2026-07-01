@@ -15,6 +15,15 @@
 - **Intro polish (follow-up):** the boot bull sits at the **exact geometry of `#bgLogo`** (same center + `min(48vw,560px)` width) so it settles seamlessly onto the background watermark; the sequence is **longer (~4.8s + reveal)** to feel more official; caption moved to a fixed bottom band. **No flash** — the surround is **pitch black**, the bull is **dimmer** (`brightness .72`), and it carries a **subtle, steady green glow** (constant drop-shadow on the base filter; the fade-in never pulses it). Verified the filter is byte-identical across time (no flicker).
 - **PO3 card (site):** moved **further down** the Futures tab (now below the trade plan + metrics) and its schematic is now drawn with **candlesticks** — a coiling range, a sweep candle with a long wick past the range, then an expansion run (illustrative demo data; bearish flips it vertically). Verified live: clean geometry within the viewBox for all phases/directions.
 
+## 2026-06-30 (session 60) — landing remodeled around futures only
+- Rebuilt the landing to speak **only about futures** (matching the purely-futures app):
+  - **Hero:** "Trade futures on structure"; lead names the six markets (ES/NQ/YM/RTY/CL/GC); status "Live · CME futures data"; hero symbol ES.
+  - **Live tape + watchlist** now pull the six index/commodity futures (`SYMS` → `ES=F…GC=F`, tape strips `=F`); bento example numbers rescaled to ES (~5512); trust strip → **CME Group · Globex** (was NYSE/NASDAQ).
+  - **Feature row 1** "Strategy Engine" → **Validated Signal** (the OOS-tested trend-pullback system) with an ES setup card; micro-contract sizing bullet.
+  - **How it works:** Pick your market → Read the signal → Act (backtest + micro sizing).
+  - **Pricing** bullets futures-ified (live futures dashboard, validated signal, in-browser backtesting, PO3 + Matrix, saved backtests, BUY-setup alerts); footer tagline → "a precision futures terminal."
+- No stock tickers remain anywhere on the landing (app internals unchanged). Verified live.
+
 ## 2026-06-30 (session 59) — remove AI self-learning from the front page
 - Scrubbed all AI **self-learning** messaging from the landing and reframed it around the real, current edge:
   - Replaced the "Self-Learning Engine" row ("an edge that sharpens itself", learned-confidence bars) with an **Edge Bias Stack** row ("Twelve reasons. One read.") + a live-confluence preview (factor rows with Bull/Bear/Neutral leans + a net lean).

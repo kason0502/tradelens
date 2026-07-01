@@ -1507,9 +1507,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="lx">
       <div class="lx-hero-head lx-reveal in">
         <div class="lx-mascots"><img src="bull.png" class="mz bull" alt="bull"/><img src="bear.png" class="mz bear" alt="bear"/></div>
-        <div class="lx-status"><span class="pulse"></span> <b>Live</b>&nbsp;·&nbsp;real-time market data</div>
-        <h1 class="lx-h1">Trade on <span class="glo">structure</span>,<br>not on noise.</h1>
-        <p class="lx-lead">STRATA turns live market data into structure-based plans — entry, stop, and targets from real swing levels and volatility, with a validated, backtested edge behind every read.</p>
+        <div class="lx-status"><span class="pulse"></span> <b>Live</b>&nbsp;·&nbsp;CME futures data</div>
+        <h1 class="lx-h1">Trade futures on <span class="glo">structure</span>,<br>not on noise.</h1>
+        <p class="lx-lead">STRATA is a futures terminal for the index &amp; commodity markets — ES, NQ, YM, RTY, CL, GC. Live data, a validated trend-pullback signal, PO3 cycle zones, a 12-factor edge bias stack, and in-browser backtesting on every one.</p>
         <div class="lx-hero-cta">
           <button class="lx-btn primary lg" onclick="launchApp()">Launch terminal →</button>
           <button class="lx-btn ghost lg" onclick="lpScroll('lxFeatures')">See how it works</button>
@@ -1519,33 +1519,32 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="lx-bento lx-reveal">
         <!-- chart -->
         <div class="tp tp-chart">
-          <div class="tp-h"><div class="tp-price"><span class="s" id="heroSym">NVDA</span><span class="p" id="heroPx">—</span><span class="c up" id="heroCh">live</span></div><span class="tp-tag">structure read · live</span></div>
+          <div class="tp-h"><div class="tp-price"><span class="s" id="heroSym">ES</span><span class="p" id="heroPx">—</span><span class="c up" id="heroCh">live</span></div><span class="tp-tag">S&amp;P 500 E-mini · live</span></div>
           <div class="tp-canvas-wrap"><canvas id="heroCanvas"></canvas><span class="tp-live">Streaming</span></div>
         </div>
         <!-- watchlist -->
         <div class="tp tp-tall">
           <div class="tp-h"><span class="tp-lbl">Watchlist</span></div>
           <div class="wl">
-            <div class="wl-r" data-sym="NVDA"><span class="t">NVDA</span><span class="p">131.38</span><span class="c up">+3.24%</span></div>
-            <div class="wl-r" data-sym="AAPL"><span class="t">AAPL</span><span class="p">294.30</span><span class="c up">+1.42%</span></div>
-            <div class="wl-r" data-sym="MSFT"><span class="t">MSFT</span><span class="p">455.72</span><span class="c up">+0.88%</span></div>
-            <div class="wl-r" data-sym="TSLA"><span class="t">TSLA</span><span class="p">248.23</span><span class="c dn">−4.17%</span></div>
-            <div class="wl-r" data-sym="META"><span class="t">META</span><span class="p">612.30</span><span class="c up">+2.11%</span></div>
-            <div class="wl-r" data-sym="AMD"><span class="t">AMD</span><span class="p">162.45</span><span class="c up">+1.88%</span></div>
-            <div class="wl-r" data-sym="COIN"><span class="t">COIN</span><span class="p">244.18</span><span class="c up">+5.33%</span></div>
+            <div class="wl-r" data-sym="ES=F"><span class="t">ES</span><span class="p">5512.25</span><span class="c up">+0.42%</span></div>
+            <div class="wl-r" data-sym="NQ=F"><span class="t">NQ</span><span class="p">19845.50</span><span class="c up">+0.61%</span></div>
+            <div class="wl-r" data-sym="YM=F"><span class="t">YM</span><span class="p">41320</span><span class="c up">+0.18%</span></div>
+            <div class="wl-r" data-sym="RTY=F"><span class="t">RTY</span><span class="p">2214.80</span><span class="c dn">−0.33%</span></div>
+            <div class="wl-r" data-sym="CL=F"><span class="t">CL</span><span class="p">78.44</span><span class="c up">+1.12%</span></div>
+            <div class="wl-r" data-sym="GC=F"><span class="t">GC</span><span class="p">2348.60</span><span class="c up">+0.27%</span></div>
           </div>
         </div>
         <!-- volume profile -->
         <div class="tp tp-tall">
           <div class="tp-h"><span class="tp-lbl">Volume profile</span></div>
           <div class="vp">
-            <div class="vp-r"><span>318</span><div class="vp-bar" style="width:32%"></div></div>
-            <div class="vp-r"><span>308</span><div class="vp-bar" style="width:54%"></div></div>
-            <div class="vp-r poc"><span>296</span><div class="vp-bar" style="width:92%"></div></div>
-            <div class="vp-r"><span>293</span><div class="vp-bar" style="width:74%"></div></div>
-            <div class="vp-r"><span>284</span><div class="vp-bar" style="width:46%"></div></div>
-            <div class="vp-r"><span>276</span><div class="vp-bar" style="width:28%"></div></div>
-            <div class="vp-r"><span>268</span><div class="vp-bar" style="width:18%"></div></div>
+            <div class="vp-r"><span>5560</span><div class="vp-bar" style="width:32%"></div></div>
+            <div class="vp-r"><span>5540</span><div class="vp-bar" style="width:54%"></div></div>
+            <div class="vp-r poc"><span>5512</span><div class="vp-bar" style="width:92%"></div></div>
+            <div class="vp-r"><span>5500</span><div class="vp-bar" style="width:74%"></div></div>
+            <div class="vp-r"><span>5480</span><div class="vp-bar" style="width:46%"></div></div>
+            <div class="vp-r"><span>5460</span><div class="vp-bar" style="width:28%"></div></div>
+            <div class="vp-r"><span>5440</span><div class="vp-bar" style="width:18%"></div></div>
           </div>
         </div>
         <!-- AI probability -->
@@ -1566,9 +1565,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div class="tp">
           <div class="tp-h"><span class="tp-lbl">Risk / reward</span></div>
           <div class="rr-rows">
-            <div class="rr-row"><span class="k">Entry</span><span>293.08</span></div>
-            <div class="rr-row"><span class="k">Stop</span><span class="dn">283.45</span></div>
-            <div class="rr-row"><span class="k">Target</span><span class="up">317.40</span></div>
+            <div class="rr-row"><span class="k">Entry</span><span>5512.00</span></div>
+            <div class="rr-row"><span class="k">Stop</span><span class="dn">5468.00</span></div>
+            <div class="rr-row"><span class="k">Target</span><span class="up">5653.00</span></div>
           </div>
           <div class="tp-rr">1 : 3.2</div>
         </div>
@@ -1586,9 +1585,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <!-- TRUST STRIP -->
   <div class="lx-trust">
     <div class="lx lx-trust-in">
-      <span>Real-time data from</span>
-      <span class="src">NYSE</span><span class="sep"></span>
-      <span class="src">NASDAQ</span><span class="sep"></span>
+      <span>Live futures data from</span>
+      <span class="src">CME Group</span><span class="sep"></span>
+      <span class="src">Globex</span><span class="sep"></span>
       <span class="src">Yahoo Finance</span><span class="sep"></span>
       <span class="src">TradingView</span><span class="sep"></span>
       <span class="src">Stooq</span>
@@ -1612,19 +1611,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <!-- row 1: strategy engine -->
     <div class="lx lx-row">
       <div class="lx-row-text lx-reveal l">
-        <div class="lx-eyebrow">Strategy Engine</div>
-        <h3 class="lx-h3">Plans built from structure, not from a hunch.</h3>
-        <p>Five structure-aware strategies read the chart in front of them, pick the one that fits, then derive entry, stop and targets from real swing levels and ATR volatility — with a reward-to-risk that always makes sense.</p>
+        <div class="lx-eyebrow">Validated Signal</div>
+        <h3 class="lx-h3">One futures edge, proven out-of-sample.</h3>
+        <p>The daily trend-pullback system — buy the dip to the 10-day average while price holds above the 50-day, ride it, exit on a trend break. It's the one strategy that passed out-of-sample, cross-market (ES &amp; NQ), and robustness tests — after pessimistic fills, slippage and commission.</p>
         <div class="lx-bullets">
-          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Real levels.</b> <span>Support, resistance and swings — not round percentages.</span></div></div>
-          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Volatility-aware stops.</b> <span>Sized from ATR so they breathe with the market.</span></div></div>
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Real levels.</b> <span>Swing structure and the moving averages — not round numbers.</span></div></div>
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Micro-contract sizing.</b> <span>Position size to your risk on MES/MNQ from live CME specs.</span></div></div>
         </div>
       </div>
       <div class="lx-row-media lx-reveal r">
         <div class="lx-media">
-          <div class="lx-media-h"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:var(--ac)"></span><span class="lx-panel-tag">Trade Setup · NVDA</span></div>
+          <div class="lx-media-h"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:var(--ac)"></span><span class="lx-panel-tag">Trade Setup · ES</span></div>
           <div class="lx-media-b">
-            <div class="lx-pr"><span class="sym">NVDA</span><span class="px">$131.50</span><span class="chg">▲ 2.1%</span></div>
+            <div class="lx-pr"><span class="sym">ES</span><span class="px">5512.25</span><span class="chg">▲ 0.4%</span></div>
             <div class="lx-chart" style="height:150px">
               <svg viewBox="0 0 520 150" preserveAspectRatio="none">
                 <line x1="0" y1="44" x2="520" y2="44" stroke="rgba(var(--ac-rgb),.45)" stroke-width="1" stroke-dasharray="5 4"/>
@@ -1643,10 +1642,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
               </svg>
             </div>
             <div class="lx-levels">
-              <div class="lx-lv"><div class="k">Entry</div><div class="v" style="color:var(--bt)">$131.50</div></div>
-              <div class="lx-lv"><div class="k">Stop</div><div class="v" style="color:var(--rt)">$124.00</div></div>
-              <div class="lx-lv"><div class="k">Target 1</div><div class="v" style="color:var(--gt)">$155.00</div></div>
-              <div class="lx-lv"><div class="k">Target 2</div><div class="v" style="color:var(--gt)">$165.00</div></div>
+              <div class="lx-lv"><div class="k">Entry</div><div class="v" style="color:var(--bt)">5512.00</div></div>
+              <div class="lx-lv"><div class="k">Exit (trend)</div><div class="v" style="color:var(--rt)">5468.00</div></div>
+              <div class="lx-lv"><div class="k">Hard stop</div><div class="v" style="color:var(--rt)">5405.00</div></div>
+              <div class="lx-lv"><div class="k">Target</div><div class="v" style="color:var(--gt)">ride it</div></div>
             </div>
           </div>
         </div>
@@ -1748,11 +1747,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
   <!-- HOW IT WORKS -->
   <section class="lx-sec">
     <div class="lx">
-      <div class="lx-reveal" style="max-width:560px"><div class="lx-kicker lx-grad">How it works</div><h2 class="lx-h2">From symbol to plan in seconds.</h2></div>
+      <div class="lx-reveal" style="max-width:560px"><div class="lx-kicker lx-grad">How it works</div><h2 class="lx-h2">From market to plan in seconds.</h2></div>
       <div class="lx-steps">
-        <div class="lx-step lx-reveal"><div class="no">01</div><h4>Pull any ticker</h4><p>Type a symbol and STRATA pulls live price, structure and volatility — and renders a professional chart instantly.</p></div>
-        <div class="lx-step lx-reveal" style="transition-delay:.08s"><div class="no">02</div><h4>Read the setup</h4><p>The engine picks the fitting strategy and lays out entry, stop and targets with a clear reward-to-risk you can act on.</p></div>
-        <div class="lx-step lx-reveal" style="transition-delay:.16s"><div class="no">03</div><h4>Act with conviction</h4><p>Practice it risk-free, get an AI read on the context, and step into the trade knowing exactly where you're wrong.</p></div>
+        <div class="lx-step lx-reveal"><div class="no">01</div><h4>Pick your market</h4><p>Choose ES, NQ, YM, RTY, CL or GC — STRATA pulls live CME data, structure and volatility and renders a pro chart instantly.</p></div>
+        <div class="lx-step lx-reveal" style="transition-delay:.08s"><div class="no">02</div><h4>Read the signal</h4><p>The validated trend-pullback system lays out entry, trend-exit and hard stop — with the 12-factor bias stack and PO3 cycle zone behind it.</p></div>
+        <div class="lx-step lx-reveal" style="transition-delay:.16s"><div class="no">03</div><h4>Act with conviction</h4><p>Backtest it in-browser on real data, size to your risk on micro contracts, and step in knowing exactly where you're wrong.</p></div>
       </div>
     </div>
   </section>
@@ -1764,12 +1763,12 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="lx-prices">
         <div class="lx-plan lx-reveal">
           <div class="pname">Starter</div><div class="pamt">$0<small> / forever</small></div>
-          <div class="pdesc">Everything you need to read the market with precision.</div>
+          <div class="pdesc">Everything you need to trade futures with precision.</div>
           <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Real-time dashboard &amp; pro charts</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> 5 AI strategies with entry/stop/TP</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Risk-free backtesting</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> News &amp; screener</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Live futures dashboard (ES · NQ · YM · RTY · CL · GC)</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Validated trend-pullback signal + trade plan</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> In-browser backtesting on real data</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> PO3 cycle zones + Market Matrix</li>
           </ul>
           <button class="lx-btn ghost" onclick="launchApp()">Launch App</button>
         </div>
@@ -1778,10 +1777,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div class="pdesc">Real Claude AI working across the whole platform.</div>
           <ul>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Starter</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI deep-reads of any ticker</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI deep-reads of any futures market</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> 12-factor edge bias stack</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI coach &amp; performance review</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom price alerts</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Saved backtests + PO3 zone reads</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> BUY-setup alerts</li>
           </ul>
           <button class="lx-btn primary" onclick="launchApp()">Launch App</button>
         </div>
@@ -1790,9 +1789,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div class="pdesc">For desks and operators who run on data.</div>
           <ul>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Pro</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Multi-watchlist &amp; priority data</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Split View across all six markets</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Server-side AI — no per-user key</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom strategy tuning</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom signal &amp; risk tuning</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Priority support</li>
           </ul>
           <button class="lx-btn ghost" onclick="launchApp()">Launch App</button>
@@ -1819,7 +1818,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div class="logo-mark"><img src="logo.png" class="logo-pic" alt="STRATA logo"/></div>
           <div class="logo-text"><div class="logo-name">STRATA</div><div class="logo-sub">Futures Terminal</div></div>
         </div>
-        <p>Precision market analysis and AI strategy tools for serious, independent traders.</p>
+        <p>A precision futures terminal — index &amp; commodity markets — for serious, independent traders.</p>
       </div>
       <div class="lx-foot-col"><h5>Platform</h5><a onclick="launchApp()">Dashboard</a><a onclick="launchApp()">Charts</a><a onclick="launchApp()">Backtesting</a><a onclick="launchApp()">Bias Stack</a></div>
       <div class="lx-foot-col"><h5>Explore</h5><a onclick="lpScroll('lxFeatures')">Features</a><a onclick="lpScroll('lxMetrics')">Performance</a><a onclick="lpScroll('lxPricing')">Pricing</a></div>
@@ -7740,12 +7739,12 @@ if(lxLanding){
 // ══════════════════════════════════════════════════════════════════════
 (function(){
   const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const SYMS=[['SPY','S&P 500'],['QQQ','Nasdaq 100'],['NVDA',''],['AAPL',''],['MSFT',''],['TSLA',''],['META',''],['AMD',''],['COIN',''],['GOOGL','']];
+  const SYMS=[['ES=F','S&P 500'],['NQ=F','Nasdaq 100'],['YM=F','Dow'],['RTY=F','Russell 2000'],['CL=F','Crude Oil'],['GC=F','Gold']];
 
   // ── streaming ticker tape ──
   function buildTape(){
     const tr=document.getElementById('lxTapeTrack'); if(!tr)return;
-    const cell=s=>`<span class="tk" data-sym="${s[0]}"><span class="sym">${s[0]}</span><span class="px">—</span><span class="ch"></span></span>`;
+    const cell=s=>`<span class="tk" data-sym="${s[0]}"><span class="sym">${s[0].replace('=F','')}</span><span class="px">—</span><span class="ch"></span></span>`;
     const html=SYMS.map(cell).join('');
     tr.innerHTML=html+html;  // duplicated → seamless -50% loop
   }
