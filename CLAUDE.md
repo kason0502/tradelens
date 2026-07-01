@@ -23,6 +23,20 @@ Keep docs concise and high-signal; they exist so work can continue after context
 - Prefer line-icon SVGs over emoji in UI chrome; plain-language labels with tooltips for jargon.
 - Commit when work is done; LF→CRLF warnings are harmless.
 
+## The agent team & pipeline (`.claude/agents/`)
+Five agents, one pipeline. Agents cannot call each other — the MAIN SESSION orchestrates: run a stage, pass its report into the next stage's prompt, enforce the loops.
+
+```
+edge-finder → critic → architect → builder → qa-test
+```
+- **edge-finder** 🧠 — strategy research on real data (gated: OOS/robustness/costs). Research only; NEVER edits the product. "No edge found" is a normal verdict.
+- **critic** 🔍 — adversarial review (bugs, UI/UX, security, logic, performance) + challenges edge-finder's research. Read-only; findings carry file:line + the fix.
+- **architect** 👷 — reviews designs BEFORE implementation: fit, duplication, scale, simpler way, future cost. APPROVE / APPROVE-WITH-CHANGES / REJECT; its required changes bind the builder. Read-only.
+- **builder** 🔨 — implements ONLY approved/assigned scope on both surfaces, verifies in-preview (incl. a fresh-browser `localStorage.clear()` pass). Never invents features. Does not commit.
+- **qa-test** ✅ — regression sweep after the builder (landing, tabs, paywall test-mode flows, backtester, desktop app). PASS/FAIL with repro steps.
+
+**Loops:** QA FAIL → back to builder with the regression list. Architect REJECT → back to the proposer (redesign before any code). Not every task needs all five: a pure bugfix = critic(or user report) → builder → qa-test; research without shipping = edge-finder → critic. The main session commits, pushes, and updates the living docs after QA passes.
+
 ## Preview / verify
 - No Node/Python on this machine. Use preview config `tradelens` (`.claude/serve.ps1`, port 8777) → `http://localhost:8777`.
 - **`serve.ps1` is also the live-data proxy** (`/api/yf?url=…`, server-side PowerShell fetch of Yahoo/Stooq) — this is what makes stock data load reliably without flaky public CORS proxies. If you change `serve.ps1`, **restart the preview** for it to take effect.

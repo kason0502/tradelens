@@ -3,6 +3,11 @@
 > Living doc. Add an entry (newest first) each session that ships changes.
 > Dates are YYYY-MM-DD. Mirrors git history; group by session/day.
 
+## 2026-07-01 — agent team restructured into a 5-stage pipeline
+- **Rebuilt `.claude/agents/` as a five-agent team** (user's spec): `edge-finder` 🧠 (strategy research, gated, research-only — no longer implements), `critic` 🔍 (adversarial: bugs + UI/UX + security + logic + perf + challenges edge-finder; absorbs the old `futures-trader-critic` trader persona), `architect` 👷 (NEW — pre-implementation design review: fit/duplication/scale/simpler-way/future-cost; APPROVE/REJECT binds the builder), `builder` 🔨 (implements ONLY approved scope, verifies incl. a mandatory fresh-browser pass; never invents), `qa-test` ✅ (NEW — regression sweep: fresh-browser, paywall test-mode flows, backtester, both surfaces; PASS/FAIL with repro steps).
+- **Pipeline** documented in `CLAUDE.md`: edge-finder → critic → architect → builder → qa-test; QA fail loops to builder, architect reject loops to redesign; the main session orchestrates (agents can't call each other) and commits after QA passes.
+- Removed the superseded `futures-trader-critic` / `strata-debugger` / `edge-hunter` definitions (roles fully absorbed; in git history). Institutional knowledge carried forward: the burned 2025-09→2026-07 hourly holdout (edge-finder), the TDZ fresh-browser precedent (critic/builder/qa), honesty-labeling rules (all).
+
 ## 2026-07-01 — three-agent pass: critic round 4 honesty fixes + fresh-browser init crash fix
 - **Ran the full agent team** (futures-trader-critic → edge-hunter → strata-debugger). Critic report + edge-hunter post-mortem fed a 10-item fix list; all fixed and verified in-preview (console clean on both surfaces).
 - **Honesty/copy fixes (site `index.html`):** Free pricing card no longer promises "Long & short reads" (site signal is long-only) — now "Live long-side signal on all six markets"; hero + how-it-works say **backtest-validated on ES & NQ** (same pattern, not validated, on the rest) instead of "validated … on every one"; the edge card's ES tile is labeled **(full sample)** with a caption separating it from the true OOS runs (never label full-sample "OOS"); the three static hero bento tiles (AI probability / setup score / R:R) carry an "example" tag so they don't masquerade as live.
