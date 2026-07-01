@@ -1530,7 +1530,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div class="lx-mascots"><img src="bull.png" class="mz bull" alt="bull"/><img src="bear.png" class="mz bear" alt="bear"/></div>
         <div class="lx-status"><span class="pulse"></span> <b>Live</b>&nbsp;·&nbsp;CME futures data</div>
         <h1 class="lx-h1">Trade futures on <span class="glo">structure</span>,<br>not on noise.</h1>
-        <p class="lx-lead">STRATA is a futures terminal for the index &amp; commodity markets — ES, NQ, YM, RTY, CL, GC. Live data, a validated trend-pullback signal, PO3 cycle zones, a 12-factor edge bias stack, and in-browser backtesting on every one.</p>
+        <p class="lx-lead">STRATA is a futures terminal for the index &amp; commodity markets — ES, NQ, YM, RTY, CL, GC. Live data, a trend-pullback signal backtest-validated on ES &amp; NQ (the same pattern, not yet validated, on the rest), PO3 cycle zones, a 12-factor edge bias stack, and in-browser backtesting on every one.</p>
         <div class="lx-hero-cta">
           <button class="lx-btn primary lg" onclick="launchApp()">Launch terminal →</button>
           <button class="lx-btn ghost lg" onclick="lpScroll('lxFeatures')">See how it works</button>
@@ -1570,21 +1570,21 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         </div>
         <!-- AI probability -->
         <div class="tp">
-          <div class="tp-h"><span class="tp-lbl">AI probability</span></div>
+          <div class="tp-h"><span class="tp-lbl">AI probability</span><span class="tp-tag">example</span></div>
           <div class="tp-big up">73<span style="font-size:20px">%</span></div>
           <div class="tp-sub">Long setup confidence</div>
           <div class="tp-bar"><i style="width:73%"></i></div>
         </div>
         <!-- setup score -->
         <div class="tp">
-          <div class="tp-h"><span class="tp-lbl">Setup score</span></div>
+          <div class="tp-h"><span class="tp-lbl">Setup score</span><span class="tp-tag">example</span></div>
           <div class="tp-big">8.4<span style="font-size:18px;color:var(--ink3)"> / 10</span></div>
           <div class="tp-sub">Trend · momentum · structure aligned</div>
           <div class="tp-bar"><i style="width:84%"></i></div>
         </div>
         <!-- risk / reward -->
         <div class="tp">
-          <div class="tp-h"><span class="tp-lbl">Risk / reward</span></div>
+          <div class="tp-h"><span class="tp-lbl">Risk / reward</span><span class="tp-tag">example</span></div>
           <div class="rr-rows">
             <div class="rr-row"><span class="k">Entry</span><span>5512.00</span></div>
             <div class="rr-row"><span class="k">Stop</span><span class="dn">5468.00</span></div>
@@ -1771,7 +1771,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="lx-reveal" style="max-width:560px"><div class="lx-kicker lx-grad">How it works</div><h2 class="lx-h2">From market to plan in seconds.</h2></div>
       <div class="lx-steps">
         <div class="lx-step lx-reveal"><div class="no">01</div><h4>Pick your market</h4><p>Choose ES, NQ, YM, RTY, CL or GC — STRATA pulls live CME data, structure and volatility and renders a pro chart instantly.</p></div>
-        <div class="lx-step lx-reveal" style="transition-delay:.08s"><div class="no">02</div><h4>Read the signal</h4><p>The validated trend-pullback system lays out entry, trend-exit and hard stop — with the 12-factor bias stack and PO3 cycle zone behind it.</p></div>
+        <div class="lx-step lx-reveal" style="transition-delay:.08s"><div class="no">02</div><h4>Read the signal</h4><p>The trend-pullback system — backtest-validated on ES &amp; NQ, same pattern applied to the other markets — lays out entry, trend-exit and hard stop, with the 12-factor bias stack and PO3 cycle zone behind it.</p></div>
         <div class="lx-step lx-reveal" style="transition-delay:.16s"><div class="no">03</div><h4>Act with conviction</h4><p>Backtest it in-browser on real data, size to your risk on micro contracts, and step in knowing exactly where you're wrong.</p></div>
       </div>
     </div>
@@ -1787,7 +1787,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div class="pdesc">A real taste of the terminal — no card.</div>
           <ul>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Live Futures signal, chart &amp; trade plan</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Long &amp; short reads on all six markets</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Live long-side signal on all six markets</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Interactive Playbook diagram</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Learn academy — visual lessons</li>
           </ul>
@@ -2262,6 +2262,12 @@ function snavGlideTo(el){
 function snavHoverTo(el){const h=document.getElementById('snavHover'); if(!h||!el)return; h.style.transform=`translateY(${el.offsetTop}px)`; h.style.height=el.offsetHeight+'px'; h.style.opacity='1';}
 function snavHoverHide(){const h=document.getElementById('snavHover'); if(h)h.style.opacity='0';}
 function initPremiumNav(){
+  // Accessibility: give every sidebar button a real title + aria-label from its visible label
+  // (the label text is hidden at narrow widths, so these matter for icon-only mode too).
+  document.querySelectorAll('.snav').forEach(b=>{
+    const t=(b.querySelector('.lbl')||{}).textContent||'';
+    if(t){b.title=t; b.setAttribute('aria-label',t);}
+  });
   const sc=document.querySelector('.appnav-scroll'); if(!sc)return;
   const cursor=document.getElementById('snavCursor');
   sc.querySelectorAll('.snav').forEach(el=>{
@@ -3400,7 +3406,9 @@ function structureLevels(candles,dir,atrVal,cfg,band){
 // learned confidence then biases the home-page analysis + entry/stop/TP.
 // ══════════════════════════════════════════════════════════════════════
 const AI_MEMORY_KEY='tlpro_ai_memory_v1';
-let AI_MEMORY=loadAIMemory();
+// (AI_MEMORY is initialized AFTER the TF_BUCKETS consts below — loadAIMemory()'s
+// defaultMemory() fallback reads TF_BUCKETS, so initializing it here throws a
+// TDZ ReferenceError on any fresh browser and kills the whole init sequence.)
 // ── TIMEFRAME BUCKETS — the AI learns each horizon class SEPARATELY ──
 // so a short scalp and a long position each get their own trade-construction
 // genome + strategy edge, and the dashboard uses the bucket that matches the
@@ -3415,6 +3423,7 @@ function tfBucket(dte){ if(dte==='0dte')return 'intraday'; if(dte==='1w'||dte===
 // so a short cap counts fast losses but truncates slow winners). These give
 // targets a fair chance while still capping absurdly long holds.
 const FWD_CAP={intraday:200,swing:50,position:250};
+let AI_MEMORY=loadAIMemory();
 function defaultMemory(){
   const m={strats:{},trials:0,wins:0,log:[],params:defaultParams(),model:{}};
   LAB_STRATEGIES.forEach(s=>{m.strats[s.key]={name:s.name,bias:s.bias,wins:0,losses:0,pnl:0,conf:0.5};});
@@ -5184,9 +5193,9 @@ function paintFutures(){
     </div>`:'';
   const edge=`<div class="card"><div class="card-title">Backtested edge — validated, honest</div>
     <div class="bt-scoreboard">
-      ${FUT_MARKETS.map(m=>`<div class="bt-score"><div class="bt-score-val ${FUT_PF[m.sym]>=1?'g':'r'}"${m.sym==='ES=F'?' id="futPfReal"':''}>${FUT_PF[m.sym]}</div><div class="bt-score-lbl">${m.label} profit factor (OOS)${m.sym===_futSel?' ·now':''}</div></div>`).join('')}
+      ${FUT_MARKETS.map(m=>`<div class="bt-score"><div class="bt-score-val ${FUT_PF[m.sym]>=1?'g':'r'}"${m.sym==='ES=F'?' id="futPfReal"':''}>${FUT_PF[m.sym]}</div><div class="bt-score-lbl">${m.label} profit factor${m.sym==='ES=F'?' (full sample)':' (OOS)'}${m.sym===_futSel?' ·now':''}</div></div>`).join('')}
     </div>
-    <div style="font-size:11px;color:var(--ink3);margin-top:7px">Out-of-sample profit factors from the <b>/backtester</b> runs (2021–2026, never tuned on). Trade count &amp; exact period for the latest run are below — a PF without a sample size means little.</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:7px">Profit factors from the <b>/backtester</b> engine. <b>ES is the full-sample run (2015–2026)</b> — it matches the Backtester tab live. The others are prior <b>out-of-sample</b> runs (2021–2026, never tuned on). Trade count &amp; exact period for the latest run are below — a PF without a sample size means little.</div>
     <div id="futLatestRun" style="font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:6px">Latest engine run: (run the backtester to populate)…</div>
     <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (S&amp;P &amp; Nasdaq, futures &amp; ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
     <div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
@@ -5278,6 +5287,13 @@ async function renderBacktester(force){
     ${stat('Best trade',_bt$(m.best_trade),'g')}
     ${stat('Worst trade',_bt$(m.worst_trade),'r')}
   </div>`;
+  // Honest yardstick: buy & hold over the same span, computed from the actual trades.
+  let bhLine='';
+  const _t0=trades[0],_tN=trades[trades.length-1];
+  if(_t0&&_tN&&ptv&&_t0.entry_fill_price&&_tN.exit_fill_price){
+    const bhPnl=(_tN.exit_fill_price-_t0.entry_fill_price)*ptv;
+    bhLine=`<div style="font-size:11.5px;color:var(--ink3);margin-top:10px;line-height:1.6">Yardstick: simply <b>buying &amp; holding</b> ${instr} from the first entry (${_t0.day} @ $${_t0.entry_fill_price.toLocaleString()}) to the last exit (${(_tN.exit_ts||'').slice(0,10)} @ $${_tN.exit_fill_price.toLocaleString()}) would have made <b class="${bhPnl>=0?'g':'r'}">${_bt$(bhPnl)}</b> vs the strategy's <b class="${m.total_pnl>=0?'g':'r'}">${_bt$(m.total_pnl)}</b>. The strategy's value is smaller drawdowns and defined risk — not beating buy &amp; hold.</div>`;
+  }
   const logRows=trades.map((t,i)=>{const mv=(t.exit_fill_price-t.entry_fill_price)/t.entry_fill_price*100,win=t.pnl>=0;
     return `<tr onclick="btShowTrade(${i})" class="${i===bi?'sel':''}"><td>${i+1}</td><td>${t.day}</td><td>${(t.exit_ts||'').slice(0,10)}</td><td>Long</td><td class="num">$${t.entry_fill_price.toLocaleString()}</td><td class="num">$${t.exit_fill_price.toLocaleString()}</td><td class="num ${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</td><td class="num ${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</td><td class="num">${Math.round((t.hold_minutes||0)/1440)}d</td><td style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</td></tr>`;}).join('');
   el.innerHTML=`
@@ -5287,7 +5303,7 @@ async function renderBacktester(force){
         <div class="bt-rule"><div class="bt-rule-n">2</div><b>Buy the pullback</b><span>Wait for a dip to the 10-period average, then a bar that turns back up. Buy weakness inside strength.</span></div>
         <div class="bt-rule"><div class="bt-rule-n">3</div><b>Ride, exit on the break</b><span>Hold while the trend holds; exit when a bar closes below the 50-period average. A −8% hard stop is the backstop.</span></div>
       </div>
-      <div class="dp-struct off" style="margin-top:12px">Why it works: trends persist more often than they snap, and buying pullbacks (not breakouts) gets a better price with a tighter, structure-based stop. The <b>win rate is intentionally under 50%</b> — the edge is letting winners run far past small, quick losers. Run it <b>Hourly</b> below for a short-hold version of the exact same logic.</div>
+      <div class="dp-struct off" style="margin-top:12px">Why it works: trends persist more often than they snap, and buying pullbacks (not breakouts) gets a better price with a tighter, structure-based stop. The <b>win rate is intentionally under 50%</b> — the edge is letting winners run far past small, quick losers. You can run it <b>Hourly</b> below to explore the same rule on faster bars — exploration only, not a validated edge.</div>
     </div>
     <div class="card"><div class="card-title">Run a fresh backtest <span class="pill">in-browser · real data</span></div>
       <div class="btrun-bar">
@@ -5296,11 +5312,11 @@ async function renderBacktester(force){
         <select id="btRunYears" class="sp-sel"><option value="5">5 years</option><option value="10" selected>10 years</option><option value="max">Max history</option></select>
         <button class="dp-fu" onclick="btRunLive()" id="btRunBtn">▶ Run backtest</button>
       </div>
-      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Runs the exact trend-pullback rule on <b>real candles</b>, live. Pick <b>Hourly</b> for a genuinely short-hold edge (positions measured in hours, not weeks) — same rule, faster timeframe, real data. Results are <b>% per trade, gross of costs</b> (an honest cross-check of the Python engine below, which adds fills + slippage + commission). <span style="color:var(--ink3)">Hourly uses Yahoo's ~2-year 60-min history.</span></div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Runs the exact trend-pullback rule on <b>real candles</b>, live. <b>Daily</b> is the validated swing setting. <b>Hourly is a data explorer, not a validated edge</b> — research (2026-07) found this daily rule net-<b style="color:var(--rt)">negative</b> out-of-sample on hourly bars once costs are included. Results are <b>% per trade, gross of costs</b> (an honest cross-check of the Python engine below, which adds fills + slippage + commission). <span style="color:var(--ink3)">Hourly uses Yahoo's ~2-year 60-min history.</span></div>
       <div id="btLiveResults"></div>
       <div id="btHistoryWrap"></div>
     </div>
-    <div class="card"><div class="card-title">Python engine results — ${c.symbol||'ES=F'} · ${per} <span class="pill">net of costs</span></div>${grid}</div>
+    <div class="card"><div class="card-title">Python engine results — ${c.symbol||'ES=F'} · ${per} <span class="pill">net of costs</span></div>${grid}${bhLine}</div>
     <div class="card"><div class="card-title">Equity curve — grew $${(m.starting_capital||0).toLocaleString()} → $${Math.round((m.starting_capital||0)+m.total_pnl).toLocaleString()}</div>${btEquitySVG(m.equity_curve,m.starting_capital)}
       <div style="font-size:11px;color:var(--ink3);margin-top:8px">Dashed line = starting capital. Modeled as <b>${instr}${ptv?' ($'+ptv+'/point)':''}</b>, 1 contract, compounding off, after pessimistic fills + slippage + commission.</div>
     </div>
@@ -5357,7 +5373,8 @@ async function btRunLive(){
         <div style="font-size:11px;color:var(--ink3);margin-top:6px">Real ${sym} ${tfLbl} closes over the whole test. <span style="color:var(--gt)">▲</span> = where the rule <b>entered a long</b>; <span style="color:var(--gt)">●</span>/<span style="color:var(--rt)">●</span> = the exit (green win / red loss). This is exactly when the backtester fires.</div>
       </div>
       <div style="margin-top:16px">${btEquityPctSVG(m.equity)}</div>
-      <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} ${tfLbl} bars · ${trades.length} trades · avg hold <b>${holdStr}</b> · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}. <span style="color:var(--gt)">✓ saved below</span></div>`;
+      <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} ${tfLbl} bars · ${trades.length} trades · avg hold <b>${holdStr}</b> · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}. <span style="color:var(--gt)">✓ saved below</span></div>
+      ${hourly?`<div class="dp-struct off" style="margin-top:10px"><b>Hourly = data explorer, not a validated edge.</b> These numbers are gross of costs — research (2026-07) found this daily rule net-negative out-of-sample on hourly bars after realistic costs. Use Hourly to study behavior, not to trade it.</div>`:''}`;
     btSaveRun({sym,yrs:hourly?'1h':yrs,tf,bars:candles.length,m});   // permanently store this run (this browser)
     btRenderHistory();
   }catch(e){out.innerHTML='<div class="bt-empty" style="padding:16px">Data feed busy — try again in a moment.</div>';}

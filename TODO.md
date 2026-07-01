@@ -1,7 +1,24 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-06-30 (session 52)
+> Last updated: 2026-07-01 (three-agent pass)
+
+## Done (2026-07-01 — three-agent pass: critic round 4 + edge research + fixes)
+- [x] **Built `strata-debugger` + `edge-hunter` subagents** (`.claude/agents/`) — the fix-and-verify robot and the gated strategy-research robot.
+- [x] **Hourly edge research: NO EDGE** — 40 configs / 4 families on ~2y of ES 60-min bars; in-sample PF 1.58 → holdout PF 0.92. Post-mortem in CHANGELOG. ⚠️ The 2025-09→2026-07 hourly holdout is **burned** for these families — don't re-test variants against it and call it OOS.
+- [x] **Critic round 4 honesty fixes** — Free-tier copy (no phantom "long & short"), hero "validated on ES & NQ" scoping, ES PF "(full sample)" relabel, hourly-mode "data explorer" caveat, hero bento "example" tags, buy-&-hold yardstick on the Backtester, snav `title`/`aria-label`.
+- [x] **Fresh-browser TDZ init crash fixed** (`AI_MEMORY` before `TF_BUCKETS` → whole init aborted for new visitors).
+- [x] **App: stale long-only PO3 copy removed; Longs/Shorts stat split + "shorts not OOS-tested" disclosure; Legend softened.**
+
+## Next (from critic round 4 — not yet done)
+- [ ] **Lock icons on gated nav tabs** — Free users currently discover the paywall by click-surprise; mark Plus/Pro tabs in the sidebar itself.
+- [ ] **Verify Plus "alerts" claim before going live on Stripe** — `TIER_FEATS` sells alerts; in-app banner/notification exists only while the page is open. Don't bill for server-side alerts until they exist.
+- [ ] **Split the app's EDGE HOLDS verdict by direction** (disclosure shipped; the badge itself still grades the combined record — on ES daily the unvalidated shorts drag PF below 1).
+- [ ] **Downgrade the in-browser hourly verdict wording** — an hourly run can still print a green "edge holds" (gross of costs) above the new caveat.
+- [ ] **Edge card: add a "YM/RTY/CL/GC pattern-only" note** to close the loop with the Matrix flags.
+- [ ] **Data-freshness chip on the signal card** ("as of HH:MM:SS · refreshed Ns ago" + a visible warning when running on fallback proxies instead of `/api/yf`).
+- [ ] **Wire the hero bento tiles to the real engine** (labeled "example" for now; `winProb`/`edgeFromProb` exist in legacy code).
+- [ ] **Reactivate the Journal for futures paper-trades** (real $ P&L, CSV export) — the accountability hook that converts free → Plus; old engine exists as dead code.
 
 ## Done (session 52 — new indicator badges + PO3 market-cycle zones)
 - [x] **New bull/bear indicator badges** wired into both surfaces — root `bull-ind.png` / `bear-ind.png` (one source of truth; root so Vercel serves them). Fixed the **broken** STRATA Live marker refs (old `/trader/bull indicator.png` files were deleted) + the Legend.
