@@ -707,6 +707,15 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lx-bartrack{height:8px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
 .lx-barfill{height:100%;border-radius:6px;width:0;background:var(--ac);transition:width 1.4s cubic-bezier(.3,1,.4,1)}
 .in .lx-barfill{width:var(--w)}
+/* landing edge-bias-stack preview */
+.lx-bstack{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.lx-brow{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink2)}
+.lx-blean{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 11px;border-radius:99px;border:1px solid var(--line)}
+.lx-blean.bull{color:var(--gt);border-color:rgba(38,229,143,.4);background:rgba(38,229,143,.08)}
+.lx-blean.bear{color:var(--rt);border-color:rgba(240,68,90,.4);background:rgba(240,68,90,.08)}
+.lx-blean.neu{color:var(--mu)}
+.lx-bnet{display:flex;justify-content:space-between;align-items:center;margin-top:5px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--fa)}
+.lx-bnet b{font-size:13px}.lx-bnet b.g{color:var(--gt)}
 .lx-barrow .pc{font-family:var(--mono);font-weight:700;text-align:right;color:var(--cy)}
 .lx-scrub{margin-top:18px}
 .lx-scrubtrack{height:6px;border-radius:6px;background:rgba(255,255,255,.06);position:relative;margin:10px 0 6px}
@@ -1500,7 +1509,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div class="lx-mascots"><img src="bull.png" class="mz bull" alt="bull"/><img src="bear.png" class="mz bear" alt="bear"/></div>
         <div class="lx-status"><span class="pulse"></span> <b>Live</b>&nbsp;·&nbsp;real-time market data</div>
         <h1 class="lx-h1">Trade on <span class="glo">structure</span>,<br>not on noise.</h1>
-        <p class="lx-lead">STRATA turns live market data into structure-based plans — entry, stop, and targets from real swing levels and volatility, with a self-learning strategy engine behind every read.</p>
+        <p class="lx-lead">STRATA turns live market data into structure-based plans — entry, stop, and targets from real swing levels and volatility, with a validated, backtested edge behind every read.</p>
         <div class="lx-hero-cta">
           <button class="lx-btn primary lg" onclick="launchApp()">Launch terminal →</button>
           <button class="lx-btn ghost lg" onclick="lpScroll('lxFeatures')">See how it works</button>
@@ -1678,26 +1687,28 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       </div>
     </div>
 
-    <!-- row 3: self-learning AI -->
+    <!-- row 3: edge bias stack (real data, no black box) -->
     <div class="lx lx-row">
       <div class="lx-row-text lx-reveal l">
-        <div class="lx-eyebrow">Self-Learning Engine</div>
-        <h3 class="lx-h3">An edge that sharpens itself.</h3>
-        <p>The engine back-tests its own picks across years of history, logs every win and loss, and continuously re-weights how much it trusts each strategy — so the levels on your screen get smarter the more it runs.</p>
+        <div class="lx-eyebrow">Edge Bias Stack</div>
+        <h3 class="lx-h3">Twelve reasons. One read.</h3>
+        <p>Every market is scored by a dozen independent, real-data factors — trend, momentum, mean-distance, volatility, market structure, and the PO3 cycle zone. When they line up, that's your edge. No black box and no fake confidence — just confluence you can see and check.</p>
         <div class="lx-bullets">
-          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Earned confidence.</b> <span>Weighting is learned from results, not assumed.</span></div></div>
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Read the whole board.</b> <span>A net long/short lean with every factor shown and plainly explained.</span></div></div>
         </div>
       </div>
       <div class="lx-row-media lx-reveal r">
         <div class="lx-media">
-          <div class="lx-media-h"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:var(--ac)"></span><span class="lx-panel-tag">AI Lab · learned confidence</span></div>
+          <div class="lx-media-h"><span class="lx-dot" style="background:#f43f5e"></span><span class="lx-dot" style="background:#f0a500"></span><span class="lx-dot" style="background:var(--ac)"></span><span class="lx-panel-tag">Edge bias stack · live confluence</span></div>
           <div class="lx-media-b">
-            <div class="lx-bars">
-              <div class="lx-barrow"><span class="nm">Trend Pullback</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:84%"></div></div><span class="pc">84%</span></div>
-              <div class="lx-barrow"><span class="nm">Breakout</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:71%"></div></div><span class="pc">71%</span></div>
-              <div class="lx-barrow"><span class="nm">Oversold Bounce</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:63%"></div></div><span class="pc">63%</span></div>
-              <div class="lx-barrow"><span class="nm">Range Fade</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:58%"></div></div><span class="pc">58%</span></div>
-              <div class="lx-barrow"><span class="nm">Breakdown</span><div class="lx-bartrack"><div class="lx-barfill" style="--w:49%"></div></div><span class="pc">49%</span></div>
+            <div class="lx-bstack">
+              <div class="lx-brow"><span>Primary trend</span><span class="lx-blean bull">Bull</span></div>
+              <div class="lx-brow"><span>Momentum (RSI)</span><span class="lx-blean bull">Bull</span></div>
+              <div class="lx-brow"><span>MA alignment</span><span class="lx-blean bull">Bull</span></div>
+              <div class="lx-brow"><span>PO3 cycle zone</span><span class="lx-blean bull">Bull</span></div>
+              <div class="lx-brow"><span>Volatility regime</span><span class="lx-blean neu">Neutral</span></div>
+              <div class="lx-brow"><span>Extension</span><span class="lx-blean bear">Bear</span></div>
+              <div class="lx-bnet"><span>Net lean</span><b class="g">LEAN LONG · 8 of 12</b></div>
             </div>
           </div>
         </div>
@@ -1712,9 +1723,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div class="lx-kicker lx-grad">By the numbers</div>
         <h2 class="lx-h2" style="margin-bottom:40px">Built to keep<br>you in sync<br>with the tape.</h2>
         <div class="lx-bigstats">
-          <div class="lx-bigstat"><div class="n lx-grad"><span class="lx-count" data-to="12400" data-suffix="+">0</span></div><div class="l">Historical setups the AI has tested on itself</div></div>
+          <div class="lx-bigstat"><div class="n lx-grad"><span class="lx-count" data-to="12">0</span></div><div class="l">Independent, real-data factors in the edge bias stack</div></div>
           <div class="lx-bigstat"><div class="n">&lt;<span class="lx-count" data-to="15">0</span>s</div><div class="l">Between live price refreshes on the dashboard</div></div>
-          <div class="lx-bigstat"><div class="n"><span class="lx-count" data-to="5">0</span></div><div class="l">Structure-aware strategies, each self-scored</div></div>
+          <div class="lx-bigstat"><div class="n"><span class="lx-count" data-to="6">0</span></div><div class="l">Index &amp; commodity futures markets tracked live</div></div>
           <div class="lx-bigstat"><div class="n"><span class="lx-count" data-to="100">0</span>%</div><div class="l">Real market data — never simulated or faked</div></div>
         </div>
       </div>
@@ -1768,7 +1779,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <ul>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Starter</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI deep-reads of any ticker</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Self-learning AI engine</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> 12-factor edge bias stack</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI coach &amp; performance review</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Custom price alerts</li>
           </ul>
@@ -1810,7 +1821,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         </div>
         <p>Precision market analysis and AI strategy tools for serious, independent traders.</p>
       </div>
-      <div class="lx-foot-col"><h5>Platform</h5><a onclick="launchApp()">Dashboard</a><a onclick="launchApp()">Charts</a><a onclick="launchApp()">Backtesting</a><a onclick="launchApp()">AI Lab</a></div>
+      <div class="lx-foot-col"><h5>Platform</h5><a onclick="launchApp()">Dashboard</a><a onclick="launchApp()">Charts</a><a onclick="launchApp()">Backtesting</a><a onclick="launchApp()">Bias Stack</a></div>
       <div class="lx-foot-col"><h5>Explore</h5><a onclick="lpScroll('lxFeatures')">Features</a><a onclick="lpScroll('lxMetrics')">Performance</a><a onclick="lpScroll('lxPricing')">Pricing</a></div>
       <div class="lx-foot-col"><h5>Company</h5><a onclick="lpScroll('lxTop')">About</a><a href="#">Contact</a><a href="#">Disclaimer</a></div>
     </div>

@@ -15,6 +15,14 @@
 - **Intro polish (follow-up):** the boot bull sits at the **exact geometry of `#bgLogo`** (same center + `min(48vw,560px)` width) so it settles seamlessly onto the background watermark; the sequence is **longer (~4.8s + reveal)** to feel more official; caption moved to a fixed bottom band. **No flash** — the surround is **pitch black**, the bull is **dimmer** (`brightness .72`), and it carries a **subtle, steady green glow** (constant drop-shadow on the base filter; the fade-in never pulses it). Verified the filter is byte-identical across time (no flicker).
 - **PO3 card (site):** moved **further down** the Futures tab (now below the trade plan + metrics) and its schematic is now drawn with **candlesticks** — a coiling range, a sweep candle with a long wick past the range, then an expansion run (illustrative demo data; bearish flips it vertically). Verified live: clean geometry within the viewBox for all phases/directions.
 
+## 2026-06-30 (session 59) — remove AI self-learning from the front page
+- Scrubbed all AI **self-learning** messaging from the landing and reframed it around the real, current edge:
+  - Replaced the "Self-Learning Engine" row ("an edge that sharpens itself", learned-confidence bars) with an **Edge Bias Stack** row ("Twelve reasons. One read.") + a live-confluence preview (factor rows with Bull/Bear/Neutral leans + a net lean).
+  - Hero lead: "self-learning strategy engine" → "validated, backtested edge".
+  - Metrics band: "setups the AI has tested on itself" → "12 real-data factors in the edge bias stack"; "strategies, each self-scored" → "6 futures markets tracked live".
+  - Pricing: "Self-learning AI engine" → "12-factor edge bias stack". Footer "AI Lab" → "Bias Stack".
+- (The app's AI Lab tab + adaptive-learning engine are untouched — only the front page changed.)
+
 ## 2026-06-30 (session 58b) — fix: paywall buttons did nothing
 - The paywall opened **behind** the landing page — `.mo` modals are `z-index:500` but `#landing` is `1000`, so clicking "Launch App" showed nothing. Fixed with `#moPay{z-index:2000}`.
 - Hardened the gate: hoisted the `PAY` config + `_pendingLaunch` to the very top of the script (so `launchApp`/`hasAccess` can never hit a temporal-dead-zone if a later top-level statement throws), and wrapped `_doLaunch`'s `lastData` access in try/catch. Verified the full flow end-to-end: Launch → paywall (above landing) → `STRATA-TEST` unlock → app launches → PRO chip → sign-out re-locks.
