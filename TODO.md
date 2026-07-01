@@ -1,7 +1,25 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-07-01 (first full 5-agent pipeline run)
+> Last updated: 2026-07-01 (pipeline run 2: evidence + visual system)
+
+## Done (2026-07-01 — pipeline run 2: backtester-backed info + STRATA visual system)
+- [x] **Generalization artifact** (`results-generalization.json`, 8 markets, frozen rule, reproducible generator) — wired into the edge card (FUT_PF hardcodes DELETED, both ES windows shown), a Backtester generalization table, Matrix evidence lines, the app rail `#genEv`, and the landing big-stats band.
+- [x] **"Inside the trades" analysis card** — yearly returns, drawdown periods w/ recovery, exit-reason breakdown (stop fired 0/59 — computed), expectancy/streaks, hold histogram, time-in-market, rolling PF.
+- [x] **Hourly verdict can never print green** (forced amber "exploration only"); saved-run tf tagging; "1hy" + "daily bars" bugs fixed; synced saved-run rows clickable (✕ local-only).
+- [x] **Fetch dedupe** (results.json ×2 gone; fetchLivePrice 5s memo) — was ~39 proxy hits/load.
+- [x] **Visual system:** tabular-nums + U+2212 + `.nu` units · `strataChart` (time-scaled equity — deleted both old renderers) · unified tile spec · `.ct-glyph` strata motif ×3 + layered landing dividers · app long-only stat default + shorts toggle · ≤520px bottom-dock nav (root-cause of the 267px column).
+
+## Next (pipeline run 2 leftovers)
+- [ ] **`btViewSaved` unguarded `${r.bars}`** (index.html ~5696) — "undefined daily bars" if a record ever lacks `bars`; add `r.bars||'—'`.
+- [ ] **serve.ps1 directory URLs** — `/trader/app/` 404s locally (only `/` maps to index.html); links use the full path so it works, but a dir→index fallback would make the documented URL valid.
+- [ ] **App chart markers still plot short trades** while tiles/curve are long-only by default — legend discloses it; consider dimming short markers when the shorts toggle is off.
+- [ ] **Two competing `.bt-stat` definitions** (~426 sim-trainer vs ~1131 backtester) share a class name — rules leak across; rename one when next touched.
+- [ ] **`?t=Date.now()` cache-busters** on results fetches defeat HTTP caching on Vercel — consider a version param or plain URLs.
+- [ ] **App rail note** still says "validated by the Python backtester" generically — name the ES window.
+- [ ] **App full `strataChart` port** (rail sparkline stays compact by design; a bigger app chart could adopt the full frame).
+- [ ] **Roll-adjusted continuous futures data** would clean up the CL/GC splice caveat (paid data).
+- [ ] **Daily-rule improvements** can no longer use the 8-market daily runs as holdout (consumed as evidence) — only the ES-daily incremental-holdout discipline remains.
 
 ## ⚠️ HARD PRECONDITIONS before `PAY.testMode=false` (going live on Stripe)
 - [ ] **`api/me.js` re-grant loophole:** any historic `session_id` re-grants 31 days with no subscription-status check — a canceled subscriber can bookmark the success URL and re-unlock forever. Needs `api/stripe-webhook.js` + server-verified entitlement.

@@ -242,6 +242,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .card:hover{border-color:rgba(var(--ac-rgb),.26)}
 @media(prefers-reduced-motion:reduce){.card{transition:none}}
 .card-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--fa);margin-bottom:15px;display:flex;align-items:center;gap:7px}
+/* STRATA glyph — the 3-ascending-strata logo geometry. Flagship cards ONLY
+   (edge card, Backtester lead card; the app rail's backtest card has its own copy). */
+.card-title.ct-glyph::before{content:'';width:11px;height:11px;flex:none;background:var(--ac);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='0' y='8.5' width='3.8' height='5.5' rx='0.8'/%3E%3Crect x='5.1' y='4.5' width='3.8' height='9.5' rx='0.8'/%3E%3Crect x='10.2' y='0.5' width='3.8' height='13.5' rx='0.8'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='0' y='8.5' width='3.8' height='5.5' rx='0.8'/%3E%3Crect x='5.1' y='4.5' width='3.8' height='9.5' rx='0.8'/%3E%3Crect x='10.2' y='0.5' width='3.8' height='13.5' rx='0.8'/%3E%3C/svg%3E") center/contain no-repeat}
 .pdot{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:blink 2s ease-in-out infinite;flex-shrink:0}
 
 /* ── SENTIMENT ── */
@@ -424,8 +429,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bt-result.lose .bt-result-title{color:var(--rt)}
 .bt-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;margin:12px 0}
 .bt-stat{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rsm);padding:10px 13px}
-.bt-stat-lbl{font-size:9px;color:var(--fa);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:3px}
-.bt-stat-val{font-size:16px;font-weight:800;font-family:var(--mono)}
+.bt-stat-lbl{font-size:10px;color:var(--fa);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:3px}
+.bt-stat-val{font-size:22px;font-weight:800;font-family:var(--mono)}
 .bt-explain{font-size:12px;color:var(--mu);line-height:1.75;margin-top:8px}
 .bt-explain b{color:var(--tx)}
 .bt-again{margin-top:14px;padding:10px 20px;border-radius:var(--rsm);border:none;background:var(--gr);color:#000;font-size:13px;font-weight:800;cursor:pointer}
@@ -433,7 +438,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bt-scoreboard{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .bt-score{flex:1;min-width:90px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--rsm);padding:12px 14px;text-align:center}
 .bt-score-val{font-size:22px;font-weight:900;font-family:var(--mono)}
-.bt-score-lbl{font-size:9px;color:var(--fa);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:2px}
+.bt-score-lbl{font-size:10px;color:var(--fa);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:2px}
 /* Playbook */
 .playbook{display:flex;flex-direction:column;gap:11px}
 .pb-item{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rsm);overflow:hidden;transition:border-color .15s}
@@ -788,6 +793,19 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lx-foot-col a{display:block;color:var(--ink2);font-size:14.5px;text-decoration:none;margin-bottom:12px;cursor:pointer;transition:color .15s}
 .lx-foot-col a:hover{color:var(--ink)}
 .lx-foot-bottom{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:26px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink3)}
+/* STRATA layered section dividers — three stacked, offset hairlines (6/4/2% white)
+   replace the flat 1px borders between landing sections. Static CSS, brand motif. */
+.lx-trust,.lx-band{border-top:0;border-bottom:0}
+.lx-footer{border-top:0}
+.lx-trust,.lx-band,.lx-footer{position:relative}
+.lx-trust::after,.lx-band::after,.lx-footer::after{content:'';position:absolute;top:0;left:0;right:0;height:5px;pointer-events:none;z-index:3;background:
+  linear-gradient(rgba(255,255,255,.06),rgba(255,255,255,.06)) 50% 0/100% 1px no-repeat,
+  linear-gradient(rgba(255,255,255,.04),rgba(255,255,255,.04)) 50% 2px/94% 1px no-repeat,
+  linear-gradient(rgba(255,255,255,.02),rgba(255,255,255,.02)) 50% 4px/88% 1px no-repeat}
+.lx-trust::before,.lx-band::before{content:'';position:absolute;bottom:0;left:0;right:0;height:5px;pointer-events:none;z-index:3;background:
+  linear-gradient(rgba(255,255,255,.06),rgba(255,255,255,.06)) 50% 4px/100% 1px no-repeat,
+  linear-gradient(rgba(255,255,255,.04),rgba(255,255,255,.04)) 50% 2px/94% 1px no-repeat,
+  linear-gradient(rgba(255,255,255,.02),rgba(255,255,255,.02)) 50% 0/88% 1px no-repeat}
 
 /* ── HERO TERMINAL BENTO ── */
 .lx-hero{padding:48px 0 60px}
@@ -1117,16 +1135,20 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .sp-hero-v.g{color:var(--gt)}.sp-hero-v.r{color:var(--rt)}
 .sp-hero-l{font-size:11.5px;color:var(--mu);margin-top:6px}
 .sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.sp-grid .sp-l{font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
-.sp-grid .sp-v{font-size:20px;font-weight:900;font-family:var(--mono);margin-top:2px;letter-spacing:-.02em}
+.sp-grid .sp-l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.sp-grid .sp-v{font-size:22px;font-weight:900;font-family:var(--mono);margin-top:2px;letter-spacing:-.02em}
 .sp-grid .sp-v.g{color:var(--gt)}.sp-grid .sp-v.r{color:var(--rt)}
 /* Backtester tab */
 .bt-statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .bt-stat{background:var(--s1);padding:14px 16px}
-.bt-stat-v{font-size:23px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em;line-height:1.1}
+.bt-stat-v{font-size:22px;font-weight:900;font-family:var(--mono);letter-spacing:-.02em;line-height:1.1}
 .bt-stat-v.g{color:var(--gt)}.bt-stat-v.r{color:var(--rt)}.bt-stat-v.at{color:var(--at)}
-.bt-stat-l{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:5px}
+.bt-stat-l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:5px}
 .bt-stat-s{font-size:10.5px;color:var(--ink3);margin-top:2px}
+/* number craft: tabular digits on every numeric surface (no jitter, columns align)
+   + ~70%-size muted units ($ % x d) rendered via .nu spans in the tile templates */
+.bt-stat-v,.bt-stat-val,.bt-score-val,.sp-v,.lv-table,.mx-px,.bt-log .num,.th-price,.chg-badge{font-variant-numeric:tabular-nums}
+.nu{font-size:.7em;color:var(--ink3);font-weight:700}
 .bt-trade-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .bt-ti{background:var(--s2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .bt-ti span{display:block;font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:3px}
@@ -1442,6 +1464,21 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 @media(max-width:1080px){.appnav{width:66px}.appnav .lbl,.appnav-grp,.appnav .pill,.appnav-logo .logo-text,.appnav-live{display:none}.appnav-logo{justify-content:center;padding:18px 0 14px}.snav{justify-content:center;padding:12px 0}.snav-glide,.snav-hover{left:9px;right:9px}.appnav-foot{padding:10px 8px}.page-wrap{margin-left:94px}.main-col{padding:24px 22px 90px}}
 @media(max-width:640px){.appnav{width:58px;top:10px;left:10px;bottom:10px}.page-wrap{margin-left:80px}.main-col{padding:16px 14px 70px}.appbar-lead{display:none}}
 @media(max-width:480px){.acct-chip{max-width:calc(100vw - 24px);right:12px}.bt-scoreboard{flex-wrap:wrap}}   /* .fut-scan stays 2×2 — the ≤520px rule already uses shrink-safe minmax(0,1fr) tracks */
+/* ── PHONE NAV: ≤520px the sidebar becomes a fixed BOTTOM DOCK — a horizontally
+   scrollable row of the SAME .snav buttons. Stateless CSS only: no open/close JS,
+   no focus trap, nothing to tear down. (.acct-chip stays top-right — no collision.) */
+@media(max-width:520px){
+  .appnav{top:auto;left:10px;right:10px;bottom:10px;width:auto;height:62px;flex-direction:row;border-radius:20px}
+  .appnav::before{left:16px;right:16px}
+  .appnav-logo{display:none}
+  .appnav-scroll{flex-direction:row;align-items:center;overflow-x:auto;overflow-y:hidden;padding:0 6px;scrollbar-width:none}
+  .snav-cursor,.snav-hover,.snav-glide{display:none}
+  .appnav .snav{width:auto;flex:0 0 auto;padding:10px 13px;justify-content:center}
+  .snav-pri::before{display:none}
+  .appnav-foot{border-top:0;border-left:1px solid rgba(255,255,255,.05);padding:0 4px;flex-direction:row;align-items:center;gap:0}
+  .page-wrap{margin-left:0}
+  .main-col{padding:16px 12px 104px}
+}
 
 /* ── HIGH VOLUME / MOVERS tab ── */
 .mv-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
@@ -1646,8 +1683,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="lx lx-row">
       <div class="lx-row-text lx-reveal l">
         <div class="lx-eyebrow">Validated Signal</div>
-        <h3 class="lx-h3">One futures edge, proven out-of-sample.</h3>
-        <p>The daily trend-pullback system — buy the dip to the 10-day average while price holds above the 50-day, ride it, exit on a trend break. It's the one strategy that passed out-of-sample, cross-market (ES &amp; NQ), and robustness tests — after pessimistic fills, slippage and commission.</p>
+        <h3 class="lx-h3">One futures edge, tested the honest way.</h3>
+        <p>The daily trend-pullback system — buy the dip to the 10-day average while price holds above the 50-day, ride it, exit on a trend break. Validated on the ES 10-year run, then re-run frozen on more index, metal and energy markets with results consistent with the edge generalizing — all after pessimistic fills, slippage and commission.</p>
         <div class="lx-bullets">
           <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Real levels.</b> <span>Swing structure and the moving averages — not round numbers.</span></div></div>
           <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Micro-contract sizing.</b> <span>Position size to your risk on MES/MNQ from live CME specs.</span></div></div>
@@ -1756,11 +1793,15 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div class="lx-kicker lx-grad">By the numbers</div>
         <h2 class="lx-h2" style="margin-bottom:40px">Built to keep<br>you in sync<br>with the tape.</h2>
         <div class="lx-bigstats">
-          <div class="lx-bigstat"><div class="n lx-grad"><span class="lx-count" data-to="12">0</span></div><div class="l">Independent, real-data factors in the edge bias stack</div></div>
-          <div class="lx-bigstat"><div class="n">&lt;<span class="lx-count" data-to="15">0</span>s</div><div class="l">Between live price refreshes on the dashboard</div></div>
+          <!-- The first two stats are replaced with REAL backtest evidence from
+               backtester/results.json once it loads (see pullEdge in the landing
+               IIFE); if the fetch fails these fallbacks stay untouched. -->
+          <div class="lx-bigstat" id="lxEvA"><div class="n lx-grad"><span class="lx-count" data-to="12">0</span></div><div class="l">Independent, real-data factors in the edge bias stack</div></div>
+          <div class="lx-bigstat" id="lxEvB"><div class="n">&lt;<span class="lx-count" data-to="15">0</span>s</div><div class="l">Between live price refreshes on the dashboard</div></div>
           <div class="lx-bigstat"><div class="n"><span class="lx-count" data-to="6">0</span></div><div class="l">Index &amp; commodity futures markets tracked live</div></div>
           <div class="lx-bigstat"><div class="n"><span class="lx-count" data-to="100">0</span>%</div><div class="l">Real market data — never simulated or faked</div></div>
         </div>
+        <div id="lxEvCap" style="display:none;font-size:12px;color:var(--ink3);margin-top:14px;font-family:var(--mono)">ES daily system · net of pessimistic costs · full log in the app</div>
       </div>
       <div class="lx-viz lx-reveal r">
         <svg viewBox="0 0 480 200" preserveAspectRatio="none">
@@ -2014,7 +2055,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="fut-head-row">
         <div>
           <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">ES Futures <span class="pill">S&amp;P 500 E-mini</span></div>
-          <div style="font-size:13px;color:var(--mu);line-height:1.6">Daily trend-pullback system — the one strategy that passed out-of-sample, generalization, and robustness tests. Free Yahoo data.</div>
+          <div style="font-size:13px;color:var(--mu);line-height:1.6">Daily trend-pullback system — validated on the ES 10-year run; frozen-rule runs on other markets are consistent with the edge generalizing. Free Yahoo data.</div>
         </div>
         <button class="dp-fu" onclick="renderFutures(true)" id="futRefresh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v5h-5"/></svg>Refresh</button>
       </div>
@@ -4931,8 +4972,11 @@ function cpInit(){renderDash('AAPL');}
 // ══════════════════════════════════════════════════════════════════════
 // ── FUTURES TERMINAL — the validated daily trend-pullback signal on ES ──
 // Buy pullbacks to the 10-day avg while above the 50-day avg; exit on trend
-// break (close below the 50-day). The one strategy that passed out-of-sample,
-// generalization, and robustness tests. Free Yahoo data via the proxy.
+// break (close below the 50-day). Validated on the ES 10-year run; the frozen
+// rule's one-shot runs on 7 more markets (results-generalization.json) are
+// consistent with the edge generalizing. Free Yahoo data via the proxy.
+// Edge numbers are NEVER hardcoded — the edge card renders from
+// loadBacktest() + loadGeneral() (see futLoadEdge).
 // ══════════════════════════════════════════════════════════════════════
 const FUT_MARKETS=[
   {sym:'ES=F',label:'ES',name:'S&P 500 E-mini'},
@@ -4940,9 +4984,6 @@ const FUT_MARKETS=[
   {sym:'SPY',label:'SPY',name:'S&P 500 ETF'},
   {sym:'QQQ',label:'QQQ',name:'Nasdaq 100 ETF'},
 ];
-// ES=F is overwritten live from results.json (see futLoadEdge) so it never
-// contradicts the Backtester tab; the rest are prior OOS runs.
-const FUT_PF={'ES=F':1.99,'NQ=F':2.73,'SPY':1.41,'QQQ':1.32};
 let _futSel='ES=F', _futCache={}, _futNotified={};
 function _smaAt(a,n,i){if(i<n-1)return null;let s=0;for(let j=i-n+1;j<=i;j++)s+=a[j];return s/n;}
 function _smaSeries(a,n){return a.map((_,i)=>_smaAt(a,n,i));}
@@ -5207,15 +5248,7 @@ function paintFutures(){
       ${sizeLine?`<div class="dp-size">${sizeLine}</div>`:''}
       <div class="dp-rr">Hold time is typically days to weeks. ~5–6 trades a year. Profit comes from a few big winners — most trades are small.</div>
     </div>`:'';
-  const edge=`<div class="card"><div class="card-title">Backtested edge — validated, honest</div>
-    <div class="bt-scoreboard">
-      ${FUT_MARKETS.map(m=>`<div class="bt-score"><div class="bt-score-val ${FUT_PF[m.sym]>=1?'g':'r'}"${m.sym==='ES=F'?' id="futPfReal"':''}>${FUT_PF[m.sym]}</div><div class="bt-score-lbl">${m.label} profit factor${m.sym==='ES=F'?' (full sample)':' (OOS)'}${m.sym===_futSel?' ·now':''}</div></div>`).join('')}
-    </div>
-    <div style="font-size:11px;color:var(--ink3);margin-top:7px">Profit factors from the <b>/backtester</b> engine. <b>ES is the full-sample run (2015–2026)</b> — it matches the Backtester tab live. The others are prior <b>out-of-sample</b> runs (2021–2026, never tuned on). Trade count &amp; exact period for the latest run are below — a PF without a sample size means little.</div>
-    <div id="futLatestRun" style="font-size:11.5px;color:var(--ink3);font-family:var(--mono);margin-top:6px">Latest engine run: (run the backtester to populate)…</div>
-    <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">Passed all three tests that kill most strategies: <b>out-of-sample</b> (2021–2026, never tuned on), <b>generalization</b> (S&amp;P &amp; Nasdaq, futures &amp; ETFs), and <b>parameter robustness</b> — all after pessimistic costs + a +50% slippage stress test.</div>
-    <div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears), drawdowns run <b>25–37%</b>, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>
-  </div>`;
+  const edge=`<div class="card"><div class="card-title ct-glyph">Backtested edge — the receipts</div><div id="futEdgeBody">${skelCard(150)}</div></div>`;
   let po3card='', biasBlock='';
   if(tierOf()>=1){
     if(s.ohlc){const p3=po3Analyze(s.ohlc); if(p3)po3card=po3CardHTML(p3,mkt);}
@@ -5255,41 +5288,107 @@ function paintFutures(){
   futLoadEdge();
   futStratPerfFill();
 }
+// ── Evidence helpers — shared by the edge card, the Backtester tab and Matrix.
+// Every number they render comes from results.json / results-generalization.json
+// at runtime; nothing is transcribed into the source.
+function _evEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function _evAttr(s){return _evEsc(s).replace(/"/g,'&quot;');}
+function _evWin(p){return (p&&p.from)?`${p.from.slice(0,4)}–${p.to.slice(0,4)}`:'';}
+function _evVerdictCol(mk){
+  const s=String((mk&&mk.verdict)||'');
+  if((mk&&mk.profit_factor<1)||/no edge|negative|fails/i.test(s))return 'var(--rt)';
+  if(/marginal/i.test(s))return 'var(--at)';
+  return 'var(--gt)';
+}
+function _evChip(txt,col){return txt?`<span style="display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.02em;color:${col||'var(--ink3)'};border:1px solid ${col||'var(--ink3)'};border-radius:20px;padding:1px 8px;white-space:nowrap">${_evEsc(txt)}</span>`:'';}
+// The Futures-tab edge card body — the validated ES run (results.json, live)
+// + the frozen rule's one-shot generalization runs (results-generalization.json).
 async function futLoadEdge(){
-  const el=document.getElementById('futLatestRun');if(!el)return;
-  try{
-    const r=await fetch('backtester/results.json?t='+Date.now(),{cache:'no-store'});
-    if(!r.ok){el.textContent='';return;}
-    const d=await r.json(), m=d.metrics||{}, c=d.config||{};
-    if(!m.n_trades){el.textContent='';return;}
-    // keep the scoreboard's ES tile in lockstep with the real engine PF (no contradiction)
-    if((c.symbol==='ES=F')&&m.profit_factor!=null){const pf=document.getElementById('futPfReal');if(pf){pf.textContent=m.profit_factor;pf.className='bt-score-val '+(m.profit_factor>=1?'g':'r');}}
-    el.innerHTML=`Latest engine run — ${c.symbol||''} ${(c.start_date||'').slice(0,7)}→${(c.end_date||'').slice(0,7)}: `
-      +`<b>${m.n_trades}</b> trades · PF <b class="${m.profit_factor>=1?'g':'r'}">${m.profit_factor}</b> · `
-      +`<b class="${m.total_pnl>=0?'g':'r'}">${m.total_pnl>=0?'+':''}$${Math.round(m.total_pnl).toLocaleString()}</b>`
-      +(d.synthetic?' <span style="color:var(--rt)">(sample)</span>':'');
-  }catch(e){el.textContent='';}
+  const el=document.getElementById('futEdgeBody');if(!el)return;
+  const [d,g]=await Promise.all([loadBacktest(),loadGeneral()]);
+  const m=(d&&d.metrics&&d.metrics.n_trades)?d.metrics:null, c=(d&&d.config)||{};
+  const gm=(g&&Array.isArray(g.markets))?g.markets:[];
+  if(!m&&!gm.length){el.innerHTML=`<div class="bt-empty" style="padding:14px">Backtest evidence unavailable right now — the results files didn't load. Nothing is shown rather than stale numbers.</div>`;return;}
+  const esG=gm.find(x=>x.sym==='ES=F');
+  const win=`${(c.start_date||'').slice(0,4)}–${(c.end_date||'').slice(0,4)}`;
+  let esBlock='';
+  if(m){
+    esBlock+=`<div style="font-size:12.5px;line-height:1.8;color:var(--ink2)"><b>ES — S&amp;P 500</b> (the design market)
+      <div>PF <b class="${m.profit_factor>=1?'g':'r'}" id="futPfReal">${m.profit_factor}</b> · <b>${m.n_trades}</b> trades · ${win} ${_evChip('tuned, validated run','var(--gt)')} — net <b class="${m.total_pnl>=0?'g':'r'}">${m.total_pnl>=0?'+':''}${_bt$(m.total_pnl)}</b> after pessimistic costs${d.synthetic?' <span style="color:var(--rt)">(sample data)</span>':''}. Matches the Backtester tab live.</div>
+      ${esG?`<div>PF <b class="${esG.profit_factor>=1?'g':'r'}">${esG.profit_factor}</b> · <b>${esG.n_trades}</b> trades · ${_evWin(esG.period)} full sample ${_evChip(esG.verdict,_evVerdictCol(esG))} — the same rule over max history is weaker; the window matters.</div>`:''}
+    </div>`;
+  } else if(esG){
+    esBlock+=`<div style="font-size:12.5px;line-height:1.8;color:var(--ink2)"><b>ES — S&amp;P 500</b>: PF <b class="${esG.profit_factor>=1?'g':'r'}">${esG.profit_factor}</b> · <b>${esG.n_trades}</b> trades · ${_evWin(esG.period)} full sample ${_evChip(esG.verdict,_evVerdictCol(esG))}<div style="color:var(--ink3);font-size:11px">The validated 10-year engine run (results.json) didn't load — showing the full-sample artifact only.</div></div>`;
+  }
+  let genBlock='';
+  if(gm.length){
+    const others=gm.filter(x=>x.sym!=='ES=F');
+    const tiles=others.map(mk=>`<div class="bt-score" style="text-align:left"${mk.note?` title="${_evAttr(mk.note)}"`:''}>
+        <div class="bt-score-val ${mk.profit_factor>=1?'g':'r'}" style="font-size:19px">${mk.profit_factor}</div>
+        <div class="bt-score-lbl">${_evEsc(mk.label)} · ${mk.n_trades} trades · ${_evWin(mk.period)}</div>
+        <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${_evChip(mk.tuned)}${_evChip(mk.verdict,_evVerdictCol(mk))}</div>
+      </div>`).join('');
+    const tLow=gm.every(x=>(x.t_stat||0)<2);
+    const allPos=gm.every(x=>(x.strategy_usd||0)>0);
+    genBlock=`<div style="font-size:11px;color:var(--ink3);margin:12px 0 7px;letter-spacing:.04em;font-weight:700">THE SAME RULE, FROZEN, ON ${others.length} MORE MARKETS — profit factor · trades · window (hover for caveats)</div>
+      <div class="bt-scoreboard">${tiles}</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-top:8px">One-shot runs, zero re-tuning, pessimistic costs deducted — every market run is shown, marginal ones included. ${allPos?'All finished net positive, ':''}${tLow?'but no single market clears <b>t ≥ 2</b>':''} — <b>consistent with the edge generalizing</b>, supportive evidence rather than proof. Full table &amp; per-market caveats in the <b>Backtester</b> tab.</div>`;
+  } else {
+    genBlock=`<div class="dp-struct off" style="margin-top:10px">Generalization evidence unavailable right now — <code>results-generalization.json</code> didn't load, so no cross-market claims are shown.</div>`;
+  }
+  const ddFut=gm.filter(x=>/=F$/.test(x.sym)&&isFinite(x.max_dd_pct)).map(x=>Math.abs(x.max_dd_pct));
+  const ddTxt=ddFut.length?`${Math.round(Math.min(...ddFut))}–${Math.round(Math.max(...ddFut))}%`:(m?Math.abs(m.max_drawdown_pct).toFixed(0)+'%':'');
+  el.innerHTML=esBlock+genBlock
+    +`<div class="dp-struct off" style="margin-top:10px">Honest caveats: <b>long-only</b> (expect flat/down years in bears)${ddTxt?`, max drawdowns ran <b>${ddTxt}</b>${ddFut.length?' across the futures markets':''}`:''}, and a passing backtest is necessary, not sufficient — <b>paper-trade first</b>.</div>`;
 }
 // ── BACKTESTER — real stats, equity curve, and real trades from results.json ──
-let _btCache=null, _btTradesArr=[];
+// _btCache/_btGenCache hold RESOLVED data (btLoadTrade & paintMatrix read them
+// synchronously); _btPending/_btGenPending dedupe concurrent callers so a page
+// load hits each results file at most once.
+let _btCache=null, _btTradesArr=[], _btPending=null, _btGenCache=null, _btGenPending=null;
 async function loadBacktest(force){
-  if(_btCache&&!force)return _btCache;
-  try{const r=await fetch('backtester/results.json?t='+Date.now(),{cache:'no-store'});if(r.ok)_btCache=await r.json();}catch(e){}
-  return _btCache;
+  if(force){_btCache=null;_btPending=null;}
+  if(_btCache)return _btCache;
+  if(_btPending)return _btPending;
+  _btPending=(async()=>{
+    try{const r=await fetch('backtester/results.json?t='+Date.now(),{cache:'no-store'});if(r.ok)_btCache=await r.json();}catch(e){}
+    _btPending=null;
+    return _btCache;
+  })();
+  return _btPending;
 }
-const _bt$=v=>(v<0?'-$':'$')+Math.abs(Math.round(v)).toLocaleString();
+// The generalization artifact — the frozen ES rule re-run on 8 markets. ONE
+// source of truth for every generalization claim (edge card, Backtester tab,
+// Matrix). Returns null when unavailable — consumers must fail soft.
+async function loadGeneral(force){
+  if(force){_btGenCache=null;_btGenPending=null;}
+  if(_btGenCache)return _btGenCache;
+  if(_btGenPending)return _btGenPending;
+  _btGenPending=(async()=>{
+    try{const r=await fetch('backtester/results-generalization.json?t='+Date.now(),{cache:'no-store'});
+      if(r.ok){const d=await r.json();if(d&&Array.isArray(d.markets)&&d.markets.length)_btGenCache=d;}}catch(e){}
+    _btGenPending=null;
+    return _btGenCache;
+  })();
+  return _btGenPending;
+}
+const _bt$=v=>(v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString();   // true minus U+2212 — display-only, never parsed back
+// Display-only number craft for stat-tile VALUES: true minus + the unit ($ % x d R)
+// wrapped in a muted ~70%-size .nu span. Input is a finished display string.
+const _numU=v=>String(v).replace(/^-/,'−')
+  .replace(/^([+−]?)\$/,'$1<span class="nu">$</span>')
+  .replace(/(%|x|R|d)$/,'<span class="nu">$1</span>');
 async function renderBacktester(force){
   const el=document.getElementById('backtesterBody');if(!el)return;
-  if(force)_btCache=null;
   el.innerHTML=`<div class="card"><div class="loading-label">Loading backtest results…</div></div>`;
-  const d=await loadBacktest();
+  const [d,g]=await Promise.all([loadBacktest(force),loadGeneral(force)]);
   if(!d||!d.metrics||!d.metrics.n_trades){el.innerHTML=`<div class="card"><div class="bt-empty" style="padding:20px">No backtest results yet. Run the engine in <b>/backtester</b> (<code>python run_backtest.py</code>) to populate <code>results.json</code>.</div></div>`;return;}
   const m=d.metrics,c=d.config||{},trades=(d.trades||[]).slice();
   _btTradesArr=trades;
   const per=`${(c.start_date||'').slice(0,4)}–${(c.end_date||'').slice(0,4)}`;
   const acctC=c.account||{}, instr=acctC.instrument||'1 contract', ptv=acctC.point_value;
   let bi=0;trades.forEach((t,i)=>{if(t.pnl>trades[bi].pnl)bi=i;});
-  const stat=(lbl,val,cls,sub)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div>${sub?`<div class="bt-stat-s">${sub}</div>`:''}</div>`;
+  const stat=(lbl,val,cls,sub)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${_numU(val)}</div><div class="bt-stat-l">${lbl}</div>${sub?`<div class="bt-stat-s">${sub}</div>`:''}</div>`;
   const grid=`<div class="bt-statgrid">
     ${stat('Total return',(m.total_return_pct>=0?'+':'')+m.total_return_pct.toFixed(1)+'%',m.total_return_pct>=0?'g':'r','on $'+(m.starting_capital||0).toLocaleString())}
     ${stat('Net P&L',_bt$(m.total_pnl),m.total_pnl>=0?'g':'r',`per ${instr}${ptv?' ($'+ptv+'/pt)':''}`)}
@@ -5314,7 +5413,7 @@ async function renderBacktester(force){
   const logRows=trades.map((t,i)=>{const mv=(t.exit_fill_price-t.entry_fill_price)/t.entry_fill_price*100,win=t.pnl>=0;
     return `<tr onclick="btShowTrade(${i})" class="${i===bi?'sel':''}"><td>${i+1}</td><td>${t.day}</td><td>${(t.exit_ts||'').slice(0,10)}</td><td>Long</td><td class="num">$${t.entry_fill_price.toLocaleString()}</td><td class="num">$${t.exit_fill_price.toLocaleString()}</td><td class="num ${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</td><td class="num ${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</td><td class="num">${Math.round((t.hold_minutes||0)/1440)}d</td><td style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</td></tr>`;}).join('');
   el.innerHTML=`
-    <div class="card"><div class="card-title">How the strategy works <span class="pill">trend-pullback</span></div>
+    <div class="card"><div class="card-title ct-glyph">How the strategy works <span class="pill">trend-pullback</span></div>
       <div class="bt-rules">
         <div class="bt-rule"><div class="bt-rule-n">1</div><b>Trade with the trend</b><span>Only hunt longs while price is above its 50-period average — never counter-trend.</span></div>
         <div class="bt-rule"><div class="bt-rule-n">2</div><b>Buy the pullback</b><span>Wait for a dip to the 10-period average, then a bar that turns back up. Buy weakness inside strength.</span></div>
@@ -5334,9 +5433,12 @@ async function renderBacktester(force){
       <div id="btHistoryWrap"></div>
     </div>
     <div class="card"><div class="card-title">Python engine results — ${c.symbol||'ES=F'} · ${per} <span class="pill">net of costs</span></div>${grid}${bhLine}</div>
-    <div class="card"><div class="card-title">Equity curve — grew $${(m.starting_capital||0).toLocaleString()} → $${Math.round((m.starting_capital||0)+m.total_pnl).toLocaleString()}</div>${btEquitySVG(m.equity_curve,m.starting_capital)}
+    <div class="card"><div class="card-title">Equity curve — grew $${(m.starting_capital||0).toLocaleString()} → $${Math.round((m.starting_capital||0)+m.total_pnl).toLocaleString()}</div>${strataChart({points:m.equity_curve,labels:m.equity_labels||null,baseline:m.starting_capital,h:260})}
       <div style="font-size:11px;color:var(--ink3);margin-top:8px">Dashed line = starting capital. Modeled as <b>${instr}${ptv?' ($'+ptv+'/point)':''}</b>, 1 contract, compounding off, after pessimistic fills + slippage + commission.</div>
+      ${(()=>{const svg=btRollingPFSVG(trades);return svg?`<div style="margin-top:14px"><div class="card-title" style="margin-bottom:6px;font-size:12px">Rolling profit factor — last 20 trades</div>${svg}<div style="font-size:11px;color:var(--ink3);margin-top:5px">Computed over a sliding 20-trade window (capped at 5 for display). Dips below the dashed <b>1.0</b> line are real losing stretches — the edge is lumpy, not steady.</div></div>`:'';})()}
     </div>
+    ${btInsideCardHTML(d)}
+    ${btGeneralCardHTML(g)}
     <div class="card"><div class="card-title">Real trade example <span class="pill">click any trade below to replay it</span></div>
       <div id="btTradeWrap">${btTradeBlock(trades[bi],bi)}</div>
     </div>
@@ -5353,6 +5455,149 @@ async function renderBacktester(force){
   btSyncServer();    // + merge shared runs from the backend when it's deployed
 }
 function btShowTrade(i){const t=_btTradesArr[i];if(!t)return;const w=document.getElementById('btTradeWrap');if(w)w.innerHTML=btTradeBlock(t,i);document.querySelectorAll('#btLog tbody tr').forEach((r,idx)=>r.classList.toggle('sel',idx===i));btLoadTrade(i);}
+// ── "INSIDE THE TRADES" — evidence panels computed PURELY from d.trades /
+// d.metrics.equity_curve / d.metrics.equity_labels / d.config. No fetches,
+// no timers — every conclusion is computed from the trade log, not asserted.
+function btYearlyRows(trades){
+  const by={};
+  trades.forEach(t=>{const y=(t.exit_ts||t.day||'').slice(0,4);if(!y)return;const r=by[y]||(by[y]={y,n:0,w:0,pnl:0});r.n++;if((t.pnl||0)>0)r.w++;r.pnl+=t.pnl||0;});
+  return Object.keys(by).sort().map(y=>by[y]);
+}
+// Drawdown periods from the DATED closed-trade equity curve (labels = exit dates).
+function btDrawdownPeriods(curve,labels,start){
+  if(!curve||!curve.length||!isFinite(start))return [];
+  const eq=[start].concat(curve), dts=[null].concat((labels||[]).map(s=>(s||'').slice(0,10)));
+  let peak=eq[0],peakI=0,cur=null;const out=[];
+  for(let i=1;i<eq.length;i++){
+    if(eq[i]>=peak){ if(cur){cur.rec=dts[i]||null;out.push(cur);cur=null;} peak=eq[i];peakI=i; }
+    else { if(!cur)cur={peakDate:dts[peakI],peakV:peak,low:eq[i],lowDate:dts[i],rec:null};
+      if(eq[i]<cur.low){cur.low=eq[i];cur.lowDate=dts[i];} }
+  }
+  if(cur){cur.last=dts[dts.length-1];out.push(cur);}
+  out.forEach(o=>{o.d$=o.peakV-o.low;o.dPct=o.peakV?o.d$/o.peakV*100:0;});
+  return out.sort((a,b)=>b.d$-a.d$);
+}
+function btExitReasons(trades){
+  const by={};
+  trades.forEach(t=>{const k=t.exit_reason||'other';const r=by[k]||(by[k]={k,n:0,w:0,pnl:0});r.n++;if((t.pnl||0)>0)r.w++;r.pnl+=t.pnl||0;});
+  return Object.values(by).sort((a,b)=>b.n-a.n);
+}
+function btStreaks(trades){
+  let mw=0,ml=0,cw=0,cl=0;
+  trades.forEach(t=>{if((t.pnl||0)>0){cw++;cl=0;}else{cl++;cw=0;}if(cw>mw)mw=cw;if(cl>ml)ml=cl;});
+  return {mw,ml};
+}
+function btHoldBuckets(trades){
+  const B=[['< 3 days',0,3],['3–10 days',3,10],['10–30 days',10,30],['30–90 days',30,90],['90+ days',90,Infinity]];
+  return B.map(([l,a,b])=>({l,n:trades.filter(t=>{const d=(t.hold_minutes||0)/1440;return d>=a&&d<b;}).length}));
+}
+// Rolling profit factor over a sliding 20-trade window (capped for display).
+function btRollingPFSVG(trades,winN){
+  winN=winN||20;
+  if(!trades||trades.length<winN+5)return '';
+  const CAP=5,pts=[];
+  for(let i=winN-1;i<trades.length;i++){
+    let gw=0,gl=0;
+    for(let j=i-winN+1;j<=i;j++){const p=trades[j].pnl||0;if(p>0)gw+=p;else gl-=p;}
+    pts.push(gl>0?Math.min(CAP,gw/gl):CAP);
+  }
+  const W=900,H=120,padL=34,padR=10,padT=8,padB=14;
+  const X=i=>padL+i/(pts.length-1)*(W-padL-padR), Y=v=>padT+(1-v/CAP)*(H-padT-padB);
+  const gl=v=>`<line x1="${padL}" y1="${Y(v).toFixed(1)}" x2="${W-padR}" y2="${Y(v).toFixed(1)}" stroke="rgba(255,255,255,.06)"/><text x="6" y="${(Y(v)+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="var(--mono)">${v}</text>`;
+  const be=`<line x1="${padL}" y1="${Y(1).toFixed(1)}" x2="${W-padR}" y2="${Y(1).toFixed(1)}" stroke="rgba(255,201,77,.5)" stroke-dasharray="4 4"/><text x="6" y="${(Y(1)+3.5).toFixed(1)}" fill="var(--at)" font-size="10" font-family="var(--mono)">1.0</text>`;
+  const p=pts.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${gl(0)}${gl(2.5)}${gl(5)}${be}<polyline points="${p}" fill="none" stroke="var(--ac)" stroke-width="1.8"/></svg>`;
+}
+// The "Inside the N trades" card — title & every figure computed from the data.
+function btInsideCardHTML(d){
+  const trades=(d&&d.trades)||[],m=(d&&d.metrics)||{},c=(d&&d.config)||{};
+  if(!trades.length)return '';
+  const n=trades.length;
+  const yr=btYearlyRows(trades);
+  const yrRows=yr.map(r=>`<tr><td>${r.y}</td><td class="num">${r.n}</td><td class="num">${r.n?Math.round(r.w/r.n*100):0}%</td><td class="num ${r.pnl>=0?'g':'r'}">${r.pnl>=0?'+':''}${_bt$(r.pnl)}</td></tr>`).join('');
+  const loseYrs=yr.filter(r=>r.pnl<0).length;
+  const dds=btDrawdownPeriods(m.equity_curve,m.equity_labels,m.starting_capital).slice(0,5);
+  const mos=(a,b)=>{if(!a||!b)return null;const v=(new Date(b)-new Date(a))/(30.44*86400000);return Math.max(1,Math.round(v));};
+  const ddRows=dds.map(o=>{const end=o.rec||o.last;const dur=mos(o.peakDate||(c.start_date||'').slice(0,10),end);
+    return `<tr><td>${o.peakDate||'start'}</td><td class="num r">−${_bt$(o.d$)}</td><td class="num r">−${o.dPct.toFixed(1)}%</td><td class="num">${dur!=null?dur+(o.rec?'':'+')+' mo':'—'}</td><td>${o.rec?o.rec:'<span style="color:var(--at)">still underwater</span>'}</td></tr>`;}).join('');
+  const ers=btExitReasons(trades);
+  const erRows=ers.map(r=>`<tr><td style="text-transform:capitalize">${_evEsc(String(r.k).replace(/_/g,' '))}</td><td class="num">${r.n}</td><td class="num">${Math.round(r.w/r.n*100)}%</td><td class="num ${(r.pnl/r.n)>=0?'g':'r'}">${(r.pnl/r.n)>=0?'+':''}${_bt$(r.pnl/r.n)}</td></tr>`).join('');
+  const stopPct=(c.strategy&&c.strategy.hard_stop_pct)||10;
+  const hsN=(ers.find(r=>r.k==='hard_stop')||{n:0}).n;
+  const erNote=`The −${stopPct}% hard stop fired <b>${hsN}</b> of the ${n} trades${hsN===0?' — every exit came from the trend-break rule (or the end of the data), not the emergency stop':''}.`;
+  const losses=trades.filter(t=>(t.pnl||0)<=0);
+  const avg=trades.reduce((a,t)=>a+(t.pnl||0),0)/n;
+  const avgLoss=losses.length?Math.abs(losses.reduce((a,t)=>a+(t.pnl||0),0)/losses.length):null;
+  const expR=avgLoss?avg/avgLoss:null;
+  const st=btStreaks(trades);
+  const hb=btHoldBuckets(trades),hbMax=Math.max(1,...hb.map(b=>b.n));
+  const hbRows=hb.map(b=>`<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="width:78px;font-size:11px;color:var(--ink3);font-family:var(--mono)">${b.l}</span><div style="flex:1;height:9px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden"><div style="width:${(b.n/hbMax*100).toFixed(0)}%;height:100%;background:var(--ac);opacity:.75"></div></div><span style="width:26px;font-size:11px;text-align:right;font-family:var(--mono)">${b.n}</span></div>`).join('');
+  const sumHold=trades.reduce((a,t)=>a+(t.hold_minutes||0),0);
+  const spanMin=(c.start_date&&c.end_date)?(new Date(c.end_date)-new Date(c.start_date))/60000:null;
+  const tim=(spanMin&&spanMin>0)?Math.min(100,sumHold/spanMin*100):null;
+  return `<div class="card"><div class="card-title">Inside the ${n} trades <span class="pill">computed from the trade log</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px">
+      <div><div class="card-title" style="font-size:12px;margin-bottom:6px">Year by year${loseYrs?` — ${loseYrs} losing year${loseYrs>1?'s':''}, shown in red`:''}</div>
+        <div class="bt-log-wrap"><table class="bt-log"><thead><tr><th>Year</th><th class="num">Trades</th><th class="num">Win</th><th class="num">Net P&amp;L</th></tr></thead><tbody>${yrRows}</tbody></table></div>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:5px">Grouped by exit date · per ${_evEsc((c.account&&c.account.instrument)||'1 contract')}.</div>
+      </div>
+      ${ddRows?`<div><div class="card-title" style="font-size:12px;margin-bottom:6px">Worst drawdown stretches</div>
+        <div class="bt-log-wrap"><table class="bt-log"><thead><tr><th>From peak</th><th class="num">Depth $</th><th class="num">Depth %</th><th class="num">Length</th><th>Recovered</th></tr></thead><tbody>${ddRows}</tbody></table></div>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:5px">Measured on closed-trade equity (trade exits) — real intra-trade dips can run deeper.</div>
+      </div>`:''}
+      <div><div class="card-title" style="font-size:12px;margin-bottom:6px">How trades ended</div>
+        <div class="bt-log-wrap"><table class="bt-log"><thead><tr><th>Exit reason</th><th class="num">Count</th><th class="num">Win</th><th class="num">Avg P&amp;L</th></tr></thead><tbody>${erRows}</tbody></table></div>
+        <div style="font-size:11px;color:var(--ink2);margin-top:6px">${erNote}</div>
+      </div>
+      <div><div class="card-title" style="font-size:12px;margin-bottom:6px">Expectancy &amp; streaks</div>
+        <div class="bt-statgrid" style="grid-template-columns:repeat(2,1fr)">
+          <div class="bt-stat"><div class="bt-stat-v ${avg>=0?'g':'r'}">${_numU((avg>=0?'+':'')+_bt$(avg))}</div><div class="bt-stat-l">Expectancy / trade</div></div>
+          <div class="bt-stat"><div class="bt-stat-v ${(expR!=null&&expR>=0)?'g':'r'}">${_numU(expR!=null?(expR>=0?'+':'')+expR.toFixed(2)+'R':'—')}</div><div class="bt-stat-l">Expectancy in R</div><div class="bt-stat-s">R = the avg loss (${avgLoss!=null?_bt$(avgLoss):'—'})</div></div>
+          <div class="bt-stat"><div class="bt-stat-v r">${st.ml}</div><div class="bt-stat-l">Max consecutive losses</div></div>
+          <div class="bt-stat"><div class="bt-stat-v g">${st.mw}</div><div class="bt-stat-l">Max consecutive wins</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--ink2);margin-top:6px">Sitting through <b>${st.ml} losses in a row</b> is part of this system — size so that streak is survivable.</div>
+      </div>
+      <div><div class="card-title" style="font-size:12px;margin-bottom:6px">How long trades last</div>
+        ${hbRows}
+        ${tim!=null?`<div style="font-size:11px;color:var(--ink2);margin-top:8px">In a position <b>${tim.toFixed(0)}%</b> of the ${_evWin({from:c.start_date||'',to:c.end_date||''})} test window — the rest of the time it sits in cash, waiting.</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+// ── GENERALIZATION card — the frozen rule's one-shot runs on every market,
+// rendered verbatim from results-generalization.json (losers & caveats included).
+function btGeneralCardHTML(g){
+  const title='Generalization — the frozen rule on other markets';
+  if(!g||!Array.isArray(g.markets)||!g.markets.length){
+    return `<div class="card"><div class="card-title">${title}</div><div class="bt-empty" style="padding:14px">Generalization evidence unavailable — <code>backtester/results-generalization.json</code> didn't load. No cross-market claims are shown without it.</div></div>`;
+  }
+  const gm=g.markets;
+  const $s=v=>{const a=Math.abs(v||0);return (v<0?'−$':'$')+(a<10?a.toFixed(2):Math.round(a).toLocaleString());};
+  const rows=gm.map(mk=>`<tr${mk.note?` title="${_evAttr(mk.note)}"`:''}>
+      <td><b>${_evEsc(mk.label)}</b><div style="font-size:10px;color:var(--ink3)">${_evEsc(mk.micro||mk.sym)}</div></td>
+      <td>${_evWin(mk.period)}</td>
+      <td class="num">${mk.n_trades}</td>
+      <td class="num ${mk.profit_factor>=1?'g':'r'}">${mk.profit_factor}</td>
+      <td class="num ${mk.pf_2x_costs>=1?'g':'r'}">${mk.pf_2x_costs}</td>
+      <td class="num ${mk.net_expectancy_usd>=0?'g':'r'}">${$s(mk.net_expectancy_usd)}</td>
+      <td class="num r">${mk.max_dd_pct}%</td>
+      <td class="num">${mk.t_stat}</td>
+      <td class="num ${mk.strategy_usd>=0?'g':'r'}">${$s(mk.strategy_usd)}<div style="font-size:10px;color:var(--ink3)">B&amp;H ${$s(mk.buyhold_usd)}</div></td>
+      <td>${_evChip(mk.tuned)}</td>
+      <td>${_evChip(mk.verdict,_evVerdictCol(mk))}</td>
+    </tr>`).join('');
+  const notes=gm.filter(mk=>mk.note).map(mk=>`<div style="margin-top:5px"><b>${_evEsc(mk.label)}:</b> ${_evEsc(mk.note)}</div>`).join('');
+  const method=String(g.method||'');
+  const m1=_evEsc(method.split('. ')[0])+'.';
+  const tLow=gm.every(x=>(x.t_stat||0)<2);
+  return `<div class="card"><div class="card-title">${title} <span class="pill">one shot · zero tuning</span></div>
+    <div style="font-size:12px;color:var(--ink2);line-height:1.65;margin-bottom:10px">${m1} Pessimistic round-trip costs are deducted on every trade, and <b>every market that was run is shown</b> — marginal ones included. ${tLow?'No single market clears <b>t ≥ 2</b>, so read this as <b>consistent with the edge generalizing</b> — supportive evidence, not statistical proof.':''}</div>
+    <div class="bt-log-wrap"><table class="bt-log"><thead><tr><th>Market</th><th>Window</th><th class="num">Trades</th><th class="num">PF</th><th class="num">PF @2× costs</th><th class="num">Net / trade</th><th class="num">Max DD</th><th class="num">t-stat</th><th class="num">Strategy vs B&amp;H</th><th>Tuning</th><th>Verdict</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.6;margin-top:10px"><b>Per-market caveats (read these):</b>${notes}</div>
+    <details style="margin-top:10px;font-size:11px;color:var(--ink3)"><summary style="cursor:pointer">Full method &amp; holdout status</summary><div style="margin-top:6px;line-height:1.6">${_evEsc(method)}${g.holdout_status?`<div style="margin-top:6px"><b>Holdout status:</b> ${_evEsc(g.holdout_status)}</div>`:''}</div></details>
+  </div>`;
+}
 // ── IN-BROWSER backtest runner — run the trend-pullback rule on real daily data ──
 async function btRunLive(){
   const out=document.getElementById('btLiveResults');if(!out)return;
@@ -5372,10 +5617,15 @@ async function btRunLive(){
     const {trades,metrics:m}=btSimulate(candles);
     if(!trades.length){out.innerHTML='<div class="bt-empty" style="padding:16px">No trades triggered in this window.</div>';return;}
     const pf=isFinite(m.profit_factor)?m.profit_factor.toFixed(2):'∞';
+    // dated labels for the equity curve: point 0 = first entry, then each trade's exit
+    const eqLabels=[(trades[0].day||'').slice(0,10)].concat(trades.map(t=>(t.exit_ts||'').slice(0,10)));
     const avgHoldMin=trades.reduce((a,t)=>a+(t.hold_minutes||0),0)/trades.length;
     const holdStr=hourly?(avgHoldMin>=1440?(avgHoldMin/1440).toFixed(1)+'d':(avgHoldMin/60).toFixed(1)+'h'):Math.round(avgHoldMin/1440)+'d';
-    const tile=(lbl,val,cls)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div></div>`;
-    const verdict=(m.profit_factor>=1.3&&m.total_return_pct>0)?'<span style="color:var(--gt);font-weight:800">edge holds</span> — profit factor '+pf:(m.profit_factor>=1?'<span style="color:var(--at);font-weight:800">marginal edge</span>':'<span style="color:var(--rt);font-weight:800">no edge in this window</span>');
+    const tile=(lbl,val,cls)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${_numU(val)}</div><div class="bt-stat-l">${lbl}</div></div>`;
+    // Hourly is NEVER graded green — it's a gross-of-costs explorer, whatever the PF says.
+    const verdict=hourly
+      ?'<span style="color:var(--at);font-weight:800">exploration only — gross of costs, not a validated edge</span>'
+      :((m.profit_factor>=1.3&&m.total_return_pct>0)?'<span style="color:var(--gt);font-weight:800">edge holds</span> — profit factor '+pf:(m.profit_factor>=1?'<span style="color:var(--at);font-weight:800">marginal edge</span>':'<span style="color:var(--rt);font-weight:800">no edge in this window</span>'));
     out.innerHTML=`<div class="bt-statgrid" style="margin-top:14px">
         ${tile('Total return',(m.total_return_pct>=0?'+':'')+m.total_return_pct.toFixed(0)+'%',m.total_return_pct>=0?'g':'r')}
         ${tile('Win rate',m.win_rate_pct.toFixed(1)+'%')}
@@ -5389,10 +5639,10 @@ async function btRunLive(){
       <div style="margin-top:16px"><div class="card-title" style="margin-bottom:8px">When it would have traded <span class="pill">▲ entry · ● exit</span></div>${btSignalTimelineSVG(candles,trades)}
         <div style="font-size:11px;color:var(--ink3);margin-top:6px">Real ${sym} ${tfLbl} closes over the whole test. <span style="color:var(--gt)">▲</span> = where the rule <b>entered a long</b>; <span style="color:var(--gt)">●</span>/<span style="color:var(--rt)">●</span> = the exit (green win / red loss). This is exactly when the backtester fires.</div>
       </div>
-      <div style="margin-top:16px">${btEquityPctSVG(m.equity)}</div>
+      <div style="margin-top:16px">${strataChart({points:m.equity,labels:eqLabels,baseline:1,h:200,fmt:v=>v.toFixed(2)+'x'})}</div>
       <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} ${tfLbl} bars · ${trades.length} trades · avg hold <b>${holdStr}</b> · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}. <span style="color:var(--gt)">✓ saved below</span></div>
       ${hourly?`<div class="dp-struct off" style="margin-top:10px"><b>Hourly = data explorer, not a validated edge.</b> These numbers are gross of costs — research (2026-07) found this daily rule net-negative out-of-sample on hourly bars after realistic costs. Use Hourly to study behavior, not to trade it.</div>`:''}`;
-    btSaveRun({sym,yrs:hourly?'1h':yrs,tf,bars:candles.length,m});   // permanently store this run (this browser)
+    btSaveRun({sym,yrs:hourly?'1h':yrs,tf,bars:candles.length,m,labels:eqLabels});   // permanently store this run (this browser)
     btRenderHistory();
   }catch(e){out.innerHTML='<div class="bt-empty" style="padding:16px">Data feed busy — try again in a moment.</div>';}
   finally{if(btn){btn.disabled=false;btn.textContent='▶ Run backtest';}}
@@ -5402,9 +5652,20 @@ const BT_STORE='tlpro_backtests_v1';
 function btLoadRuns(){try{return JSON.parse(localStorage.getItem(BT_STORE))||[];}catch(e){return [];}}
 function btSaveRuns(a){try{localStorage.setItem(BT_STORE,JSON.stringify(a));}catch(e){}}
 let _btServerRuns=null;   // populated from /api/backtests when the backend is deployed
+// Timeframe of a saved run — old records didn't store tf, but hourly ones were
+// saved with yrs='1h', so infer from that.
+function _btIsHourly(r){return r&&(r.tf==='1h'||r.yrs==='1h');}
+function _btWinLbl(r){return _btIsHourly(r)?'~2y · 1h bars':(r.yrs==='max'?'max':r.yrs+'y');}
+// Local + server-synced runs merged, newest first — the ONE list every
+// consumer (history table, saved-run viewer) reads.
+function _btAllRuns(){
+  let a=btLoadRuns();
+  if(_btServerRuns&&_btServerRuns.length){const seen=new Set(a.map(r=>r.id));a=a.concat(_btServerRuns.filter(r=>r&&!seen.has(r.id)));a.sort((x,y)=>(y.ranAt||0)-(x.ranAt||0));}
+  return a;
+}
 function btSaveRun(r){const m=r.m;
-  const rec={id:Date.now()+'_'+Math.random().toString(36).slice(2,6),ranAt:Date.now(),sym:r.sym,yrs:r.yrs,bars:r.bars,
-    m:{n_trades:m.n_trades,win_rate_pct:m.win_rate_pct,profit_factor:isFinite(m.profit_factor)?m.profit_factor:null,total_return_pct:m.total_return_pct,avg_trade_pct:m.avg_trade_pct,best_pct:m.best_pct,worst_pct:m.worst_pct,max_drawdown_pct:m.max_drawdown_pct,equity:m.equity}};
+  const rec={id:Date.now()+'_'+Math.random().toString(36).slice(2,6),ranAt:Date.now(),sym:r.sym,yrs:r.yrs,tf:r.tf||(r.yrs==='1h'?'1h':'1d'),bars:r.bars,
+    m:{n_trades:m.n_trades,win_rate_pct:m.win_rate_pct,profit_factor:isFinite(m.profit_factor)?m.profit_factor:null,total_return_pct:m.total_return_pct,avg_trade_pct:m.avg_trade_pct,best_pct:m.best_pct,worst_pct:m.worst_pct,max_drawdown_pct:m.max_drawdown_pct,equity:m.equity,equity_labels:r.labels||undefined}};   // labels are new — OLD saved runs stay label-less and hit strataChart's per-trade fallback
   const a=btLoadRuns(); a.unshift(rec); if(a.length>60)a.length=60; btSaveRuns(a);
   try{fetch('/api/backtests',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({run:rec})});}catch(e){}   // best-effort shared/server save (falls back to local)
   return rec;}
@@ -5414,25 +5675,26 @@ function btDeleteRun(id){btSaveRuns(btLoadRuns().filter(r=>r.id!==id));btRenderH
 function btClearRuns(){if(confirm('Clear all saved backtests?')){btSaveRuns([]);btRenderHistory();}}
 function btRenderHistory(){
   const el=document.getElementById('btHistoryWrap');if(!el)return;
-  let a=btLoadRuns();
-  if(_btServerRuns&&_btServerRuns.length){const seen=new Set(a.map(r=>r.id));a=a.concat(_btServerRuns.filter(r=>r&&!seen.has(r.id)));a.sort((x,y)=>(y.ranAt||0)-(x.ranAt||0));}
+  const a=_btAllRuns();
+  const localIds=new Set(btLoadRuns().map(r=>r.id));   // delete (✕) is localStorage-only — server rows can't be deleted from here
   const scope=_btServerRuns?'synced across your devices':'this browser';
   if(!a.length){el.innerHTML=`<div style="font-size:11.5px;color:var(--ink3);margin-top:14px">No saved backtests yet — run one above and it’s stored here (${scope}).</div>`;return;}
-  const rows=a.map(r=>{const m=r.m,pf=m.profit_factor==null?'∞':m.profit_factor.toFixed(2),ret=m.total_return_pct,d=new Date(r.ranAt);
-    return `<tr onclick="btViewSaved('${r.id}')"><td>${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}, ${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</td><td>${r.sym.replace('=F','')}</td><td>${r.yrs==='max'?'max':r.yrs+'y'}</td><td class="num ${ret>=0?'g':'r'}">${ret>=0?'+':''}${ret.toFixed(0)}%</td><td class="num ${(m.profit_factor==null||m.profit_factor>=1)?'g':'r'}">${pf}</td><td class="num">${m.win_rate_pct.toFixed(0)}%</td><td class="num">${m.n_trades}</td><td class="num r">${m.max_drawdown_pct.toFixed(0)}%</td><td><span class="bt-del" onclick="event.stopPropagation();btDeleteRun('${r.id}')" title="Delete this run">✕</span></td></tr>`;}).join('');
+  const rows=a.map(r=>{const m=r.m,pf=m.profit_factor==null?'∞':m.profit_factor.toFixed(2),ret=m.total_return_pct,d=new Date(r.ranAt),hr=_btIsHourly(r);
+    return `<tr onclick="btViewSaved('${r.id}')"><td>${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}, ${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</td><td>${r.sym.replace('=F','')}</td><td${hr?' style="color:var(--at)" title="Hourly run — exploration only, gross of costs, not a validated edge"':''}>${_btWinLbl(r)}</td><td class="num ${ret>=0?'g':'r'}">${ret>=0?'+':''}${ret.toFixed(0)}%</td><td class="num ${(m.profit_factor==null||m.profit_factor>=1)?'g':'r'}">${pf}</td><td class="num">${m.win_rate_pct.toFixed(0)}%</td><td class="num">${m.n_trades}</td><td class="num r">${m.max_drawdown_pct.toFixed(0)}%</td><td>${localIds.has(r.id)?`<span class="bt-del" onclick="event.stopPropagation();btDeleteRun('${r.id}')" title="Delete this run">✕</span>`:`<span style="font-size:9px;color:var(--ink3);letter-spacing:.05em" title="Synced from the shared backend — visible on all devices; can't be deleted from here">SYNCED</span>`}</td></tr>`;}).join('');
   el.innerHTML=`<div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="card-title" style="margin:0">Saved backtests <span class="pill">${a.length} stored · ${scope}</span></div><button class="dp-fu" style="padding:5px 11px;font-size:11px" onclick="btClearRuns()">Clear all</button></div>
     <div class="bt-log-wrap" style="margin-top:10px"><table class="bt-log"><thead><tr><th>Run at</th><th>Symbol</th><th>Window</th><th class="num">Return</th><th class="num">PF</th><th class="num">Win</th><th class="num">Trades</th><th class="num">Max DD</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div style="font-size:11px;color:var(--ink3);margin-top:7px">Click a row to re-open its stats + equity curve. Stored locally in this browser (persists across reloads) — clearing site data removes them.</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:7px">Click a row to re-open its stats + equity curve. Rows with <b>✕</b> live in this browser's storage (clearing site data removes them; “Clear all” clears only these)${_btServerRuns&&_btServerRuns.length?'; rows marked <b>SYNCED</b> come from the shared backend and can be viewed but not deleted here':''}. <span style="color:var(--at)">Amber windows are hourly explorations — gross of costs, not a validated edge.</span></div>
     <div id="btSavedView"></div>`;
 }
 function btViewSaved(id){
-  const r=btLoadRuns().find(x=>x.id===id);if(!r)return;const v=document.getElementById('btSavedView');if(!v)return;
-  const m=r.m,pf=m.profit_factor==null?'∞':m.profit_factor.toFixed(2);
-  const tile=(lbl,val,cls)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div></div>`;
-  v.innerHTML=`<div class="card" style="margin-top:12px"><div class="card-title">${r.sym.replace('=F','')} · ${r.yrs==='max'?'max history':r.yrs+'y'} <span class="pill">saved ${new Date(r.ranAt).toLocaleString()}</span></div>
+  const r=_btAllRuns().find(x=>x.id===id);if(!r)return;const v=document.getElementById('btSavedView');if(!v)return;
+  const m=r.m,pf=m.profit_factor==null?'∞':m.profit_factor.toFixed(2),hr=_btIsHourly(r);
+  const tile=(lbl,val,cls)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${_numU(val)}</div><div class="bt-stat-l">${lbl}</div></div>`;
+  v.innerHTML=`<div class="card" style="margin-top:12px"><div class="card-title">${r.sym.replace('=F','')} · ${hr?'hourly · ~2y':(r.yrs==='max'?'max history':r.yrs+'y')} <span class="pill">saved ${new Date(r.ranAt).toLocaleString()}</span></div>
     <div class="bt-statgrid">${tile('Total return',(m.total_return_pct>=0?'+':'')+m.total_return_pct.toFixed(0)+'%',m.total_return_pct>=0?'g':'r')}${tile('Win rate',m.win_rate_pct.toFixed(1)+'%')}${tile('Profit factor',pf,(m.profit_factor==null||m.profit_factor>=1)?'g':'r')}${tile('Trades',m.n_trades)}${tile('Avg / trade',(m.avg_trade_pct>=0?'+':'')+m.avg_trade_pct.toFixed(2)+'%',m.avg_trade_pct>=0?'g':'r')}${tile('Max DD',m.max_drawdown_pct.toFixed(1)+'%','r')}</div>
-    <div style="margin-top:12px">${btEquityPctSVG(m.equity)}</div>
-    <div style="font-size:11px;color:var(--ink3);margin-top:8px">${r.bars} daily bars · ${r.sym.replace('=F','')} · gross of costs. Re-opened from your saved history.</div></div>`;
+    <div style="margin-top:12px">${strataChart({points:m.equity,labels:m.equity_labels||null,baseline:1,h:200,fmt:v=>v.toFixed(2)+'x'})}</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:8px">${r.bars} ${hr?'hourly':'daily'} bars · ${r.sym.replace('=F','')} · gross of costs. Re-opened from your saved history.</div>
+    ${hr?'<div class="dp-struct off" style="margin-top:10px"><b>Hourly = exploration only</b> — gross of costs, not a validated edge.</div>':''}</div>`;
   v.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function btSimulate(candles){
@@ -5458,16 +5720,82 @@ function btSimulate(candles){
   let peak=curve[0],dd=0;curve.forEach(v=>{if(v>peak)peak=v;const d=(v-peak)/peak*100;if(d<dd)dd=d;});
   return {trades,metrics:{n_trades:trades.length,win_rate_pct:trades.length?wins.length/trades.length*100:0,profit_factor:gL?gW/gL:(gW>0?Infinity:0),total_return_pct:(eq-1)*100,avg_trade_pct:rs.length?rs.reduce((a,b)=>a+b,0)/rs.length:0,best_pct:rs.length?Math.max(...rs):0,worst_pct:rs.length?Math.min(...rs):0,max_drawdown_pct:dd,equity:curve}};
 }
-function btEquityPctSVG(curve){
-  const c=curve||[];if(c.length<2)return '';
-  const W=900,H=200,padL=48,padR=12,padT=12,padB=14;
-  const min=Math.min(...c),max=Math.max(...c),rng=Math.max(1e-6,max-min);
-  const x=i=>padL+i/(c.length-1)*(W-padL-padR), y=v=>padT+(1-(v-min)/rng)*(H-padT-padB);
-  let line='',area='';c.forEach((v,i)=>{const xx=x(i).toFixed(1),yy=y(v).toFixed(1);line+=(i?'L':'M')+xx+' '+yy+' ';area+=(i?'L':'M')+xx+' '+yy+' ';});
-  area+=`L${x(c.length-1).toFixed(1)} ${(H-padB).toFixed(1)} L${x(0).toFixed(1)} ${(H-padB).toFixed(1)} Z`;
-  let grid='';for(let g=0;g<=2;g++){const v=min+rng*g/2,yy=y(v);grid+=`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.05)"/><text x="6" y="${(yy+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="var(--mono)">${v.toFixed(2)}x</text>`;}
-  const up=c[c.length-1]>=c[0];
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block"><defs><linearGradient id="bteqp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,197,94,.26)"/><stop offset="1" stop-color="rgba(34,197,94,0)"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#bteqp)"/><path d="${line}" fill="none" stroke="${up?'var(--gr)':'var(--rd)'}" stroke-width="2"/></svg>`;
+// ── STRATA CHART — THE shared equity/line frame (site-wide; the app keeps its
+// own compact renderer by design). Time-scaled x-axis when dated labels are
+// provided (labels[i] ↔ points[i]); labels:null falls back to even per-point
+// spacing with an explicit "spaced by trade, not time" caption. Draws the
+// strata-band background (the brand motif — implemented ONLY here), 3–4 y-ticks
+// with tick marks, year x-ticks, max-drawdown shading, a dashed baseline and an
+// end-of-line value chip. Replaces the old btEquitySVG / btEquityPctSVG.
+let _scUid=0;
+function strataChart({points,labels,baseline,markers,h,fmt}){
+  const c=points||[];
+  if(c.length<2)return '<div class="bt-empty" style="padding:14px">No equity data.</div>';
+  fmt=fmt||_bt$;
+  const W=900,H=h||240,padL=56,padR=14,padT=16,padB=24,plotW=W-padL-padR,plotH=H-padT-padB;
+  const base=isFinite(baseline)?baseline:null;
+  let min=Math.min(...c),max=Math.max(...c);
+  if(base!=null){min=Math.min(min,base);max=Math.max(max,base);}
+  const rng=Math.max(1e-9,max-min);
+  // x scale: real time when every label parses & advances; else index spacing
+  let ts=null;
+  if(labels&&labels.length===c.length){
+    ts=labels.map(s=>+new Date(s));
+    if(ts.some(t=>!isFinite(t))||ts[ts.length-1]<=ts[0])ts=null;
+  }
+  const t0=ts?ts[0]:0,tSpan=ts?(ts[ts.length-1]-t0):1;
+  const X=i=>padL+(ts?(ts[i]-t0)/tSpan:i/(c.length-1))*plotW;
+  const Y=v=>padT+(1-(v-min)/rng)*plotH;
+  // y gridlines + tick marks + STRATA BANDS between alternating gridlines
+  const NL=3;let grid='',bands='';
+  for(let g=0;g<=NL;g++){
+    const v=min+rng*g/NL,yy=Y(v);
+    grid+=`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.05)"/><line x1="${padL-5}" y1="${yy.toFixed(1)}" x2="${padL}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.22)"/><text x="6" y="${(yy+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10.5" font-family="var(--mono)">${fmt(v)}</text>`;
+    if(g<NL&&g%2===0)bands+=`<rect x="${padL}" y="${Y(min+rng*(g+1)/NL).toFixed(1)}" width="${plotW.toFixed(1)}" height="${(plotH/NL).toFixed(1)}" fill="rgba(255,255,255,.017)"/>`;
+  }
+  // x ticks: years when time-scaled (start/mid/end dates for sub-year spans)
+  let xt='';
+  if(ts){
+    const y0=new Date(ts[0]).getUTCFullYear(),y1=new Date(ts[ts.length-1]).getUTCFullYear();
+    const yrs=[];for(let y=y0+1;y<=y1;y++)yrs.push(y);
+    if(yrs.length){
+      const step=Math.max(1,Math.ceil(yrs.length/6));
+      for(let k=0;k<yrs.length;k+=step){
+        const t=Date.UTC(yrs[k],0,1);if(t<t0||t>t0+tSpan)continue;
+        const xx=padL+(t-t0)/tSpan*plotW;
+        xt+=`<line x1="${xx.toFixed(1)}" y1="${(H-padB).toFixed(1)}" x2="${xx.toFixed(1)}" y2="${(H-padB+4).toFixed(1)}" stroke="rgba(255,255,255,.25)"/><text x="${xx.toFixed(1)}" y="${(H-padB+15).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="var(--mono)" text-anchor="middle">${yrs[k]}</text>`;
+      }
+    } else {
+      const dl=t=>new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      [0,.5,1].forEach(f=>{const t=t0+tSpan*f,xx=padL+f*plotW;
+        xt+=`<line x1="${xx.toFixed(1)}" y1="${(H-padB).toFixed(1)}" x2="${xx.toFixed(1)}" y2="${(H-padB+4).toFixed(1)}" stroke="rgba(255,255,255,.25)"/><text x="${xx.toFixed(1)}" y="${(H-padB+15).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="var(--mono)" text-anchor="${f===0?'start':f===1?'end':'middle'}">${dl(t)}</text>`;});
+    }
+  } else {
+    xt=`<text x="${W-padR}" y="${(H-padB+15).toFixed(1)}" fill="var(--ink3)" font-size="10" font-family="var(--mono)" text-anchor="end">spaced by trade, not time</text>`;
+  }
+  // max-drawdown region (deepest peak→trough, shaded to recovery or the end)
+  let peak=c[0],peakI=0,ddMax=0,dPk=0,dLo=0;
+  for(let i=1;i<c.length;i++){
+    if(c[i]>peak){peak=c[i];peakI=i;}
+    const d=(peak-c[i])/Math.abs(peak||1);
+    if(d>ddMax){ddMax=d;dPk=peakI;dLo=i;}
+  }
+  let dd='';
+  if(ddMax>1e-4){
+    let rec=c.length-1;for(let j=dLo;j<c.length;j++){if(c[j]>=c[dPk]){rec=j;break;}}
+    dd=`<rect x="${X(dPk).toFixed(1)}" y="${padT}" width="${Math.max(1,X(rec)-X(dPk)).toFixed(1)}" height="${plotH.toFixed(1)}" fill="rgba(244,63,94,.06)"/>`;
+  }
+  let line='',area='';
+  c.forEach((v,i)=>{const xx=X(i).toFixed(1),yy=Y(v).toFixed(1);line+=(i?'L':'M')+xx+' '+yy+' ';area+=(i?'L':'M')+xx+' '+yy+' ';});
+  area+=`L${X(c.length-1).toFixed(1)} ${(H-padB).toFixed(1)} L${X(0).toFixed(1)} ${(H-padB).toFixed(1)} Z`;
+  const up=c[c.length-1]>=(base!=null?base:c[0]),col=up?'var(--gr)':'var(--rd)',gid='scg'+(++_scUid);
+  const baseLn=base!=null?`<line x1="${padL}" y1="${Y(base).toFixed(1)}" x2="${W-padR}" y2="${Y(base).toFixed(1)}" stroke="rgba(255,255,255,.25)" stroke-dasharray="4 4"/>`:'';
+  let mks='';(markers||[]).forEach(mk=>{if(mk&&mk.i>=0&&mk.i<c.length)mks+=`<circle cx="${X(mk.i).toFixed(1)}" cy="${Y(c[mk.i]).toFixed(1)}" r="3" fill="${mk.color||'var(--ac)'}"/>`;});
+  const lvTxt=fmt(c[c.length-1]),chW=lvTxt.length*7+16;
+  const chX=Math.min(W-padR-chW,Math.max(padL,X(c.length-1)-chW/2));
+  const chY=Math.max(padT,Math.min(H-padB-21,Y(c[c.length-1])-27));
+  const chip=`<rect x="${chX.toFixed(1)}" y="${chY.toFixed(1)}" width="${chW}" height="19" rx="9.5" fill="rgba(10,11,12,.88)" stroke="${col}" stroke-opacity=".55"/><text x="${(chX+chW/2).toFixed(1)}" y="${(chY+13).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" font-family="var(--mono)" fill="${col}">${lvTxt}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${up?'rgba(38,194,129,.28)':'rgba(240,68,90,.2)'}"/><stop offset="1" stop-color="${up?'rgba(38,194,129,0)':'rgba(240,68,90,0)'}"/></linearGradient></defs>${bands}${dd}${grid}${xt}<path d="${area}" fill="url(#${gid})"/>${baseLn}<path d="${line}" fill="none" stroke="${col}" stroke-width="2"/>${mks}${chip}</svg>`;
 }
 function btTradeInfoHTML(t){
   const e=t.entry_fill_price,x=t.exit_fill_price,hasD=t.pnl!=null,win=(hasD?t.pnl>=0:x>=e),mv=(x-e)/e*100,holdD=Math.round((t.hold_minutes||0)/1440),pts=x-e;
@@ -5569,22 +5897,7 @@ function btTradeChartSVG(t){
     <text x="${x1}" y="${(win?xy+2:xy+38).toFixed(1)}" fill="var(--ink3)" font-size="10.5" text-anchor="end">${(t.exit_ts||'').slice(0,10)}</text>
   </svg>`;
 }
-function btEquitySVG(curve,start){
-  const c=curve||[];if(c.length<2)return '<div class="bt-empty" style="padding:14px">No equity data.</div>';
-  const W=900,H=260,padL=56,padR=12,padT=14,padB=14;
-  const min=Math.min(...c,start),max=Math.max(...c,start),rng=Math.max(1,max-min);
-  const x=i=>padL+i/(c.length-1)*(W-padL-padR), y=v=>padT+(1-(v-min)/rng)*(H-padT-padB);
-  let line='',area='';
-  c.forEach((v,i)=>{const xx=x(i).toFixed(1),yy=y(v).toFixed(1);line+=(i?'L':'M')+xx+' '+yy+' ';area+=(i?'L':'M')+xx+' '+yy+' ';});
-  area+=`L${x(c.length-1).toFixed(1)} ${(H-padB).toFixed(1)} L${x(0).toFixed(1)} ${(H-padB).toFixed(1)} Z`;
-  let grid='';for(let g=0;g<=3;g++){const v=min+rng*g/3,yy=y(v);grid+=`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.05)"/><text x="6" y="${(yy+3.5).toFixed(1)}" fill="var(--ink3)" font-size="10.5" font-family="var(--mono)">$${Math.round(v).toLocaleString()}</text>`;}
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
-    <defs><linearGradient id="bteq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(34,197,94,.3)"/><stop offset="1" stop-color="rgba(34,197,94,0)"/></linearGradient></defs>
-    ${grid}<path d="${area}" fill="url(#bteq)"/>
-    <line x1="${padL}" y1="${y(start).toFixed(1)}" x2="${W-padR}" y2="${y(start).toFixed(1)}" stroke="rgba(255,255,255,.25)" stroke-dasharray="4 4"/>
-    <path d="${line}" fill="none" stroke="var(--gr)" stroke-width="2"/>
-  </svg>`;
-}
+// (btEquitySVG / btEquityPctSVG were replaced by strataChart — the one shared frame.)
 // Strategy-performance card (real backtest numbers) for the Futures dashboard.
 async function futStratPerfFill(){
   const el=document.getElementById('futStratPerf');if(!el)return;
@@ -5593,10 +5906,10 @@ async function futStratPerfFill(){
   el.innerHTML=`<div class="card sp-card"><div class="card-title">Strategy performance <span class="pill">backtest · ${c.symbol||'ES'} ${per}</span></div>
     <div class="sp-hero"><div class="sp-hero-v ${m.total_return_pct>=0?'g':'r'}">${m.total_return_pct>=0?'+':''}${m.total_return_pct.toFixed(1)}%</div><div class="sp-hero-l">total return on $${(m.starting_capital||0).toLocaleString()}</div></div>
     <div class="sp-grid">
-      <div><div class="sp-l">Win rate</div><div class="sp-v">${m.win_rate_pct.toFixed(1)}%</div></div>
+      <div><div class="sp-l">Win rate</div><div class="sp-v">${_numU(m.win_rate_pct.toFixed(1)+'%')}</div></div>
       <div><div class="sp-l">Profit factor</div><div class="sp-v ${m.profit_factor>=1?'g':'r'}">${m.profit_factor}</div></div>
       <div><div class="sp-l">Total trades</div><div class="sp-v">${m.n_trades}</div></div>
-      <div><div class="sp-l">Expectancy</div><div class="sp-v ${m.avg_trade>=0?'g':'r'}">${_bt$(m.avg_trade)}</div></div>
+      <div><div class="sp-l">Expectancy</div><div class="sp-v ${m.avg_trade>=0?'g':'r'}">${_numU(_bt$(m.avg_trade))}</div></div>
     </div>
     <button class="dp-fu" style="margin-top:13px;width:100%" onclick="mainTab('backtester',document.querySelector('.snav[data-tab=&quot;backtester&quot;]'))">See the full backtest &amp; real trades →</button>
   </div>`;
@@ -5648,7 +5961,7 @@ async function renderPlaybookTab(){
       <div style="font-size:11px;color:var(--ink3);margin-top:7px">Illustrative schematic of the rules — not live price.</div>
     </div>`
     +`<div class="card"><div class="card-title">The rules</div>${PB_RULES.map((r,i)=>`<div class="pb-rule"><div class="pb-num">${i+1}</div><div><div class="pr-b">${r.t}</div><div class="pr-d">${r.d}</div></div></div>`).join('')}</div>`
-    +`<div class="card"><div class="card-title">Why it's only these rules</div><div class="analysis-text">Every other variation we tried — shorts, breakouts, tighter stops, fixed targets — failed at least one of the out-of-sample, generalization, or robustness tests in the backtester. What survived was deliberately simple: buy pullbacks in uptrends, let winners run, cut on a trend break. Simplicity is the point — fewer knobs means less curve-fitting and a better chance the edge holds live. Paper-trade it first.</div></div>`;
+    +`<div class="card"><div class="card-title">Why it's only these rules</div><div class="analysis-text">Every other variation we tried — shorts, breakouts, tighter stops, fixed targets — failed the generalization or robustness tests in the backtester. What survived was deliberately simple: buy pullbacks in uptrends, let winners run, cut on a trend break. Simplicity is the point — fewer knobs means less curve-fitting and a better chance the edge holds live. Paper-trade it first.</div></div>`;
 }
 
 // ── RISK CALCULATOR — position sizing from real exchange contract specs ──
@@ -5786,9 +6099,11 @@ async function renderMatrix(force){
   if(!Object.keys(_mxCache).length){
     el.innerHTML=`<div class="card"><div class="loading-label">Loading markets…</div></div>`;
     window.__userFetch=Date.now();
-    await Promise.all(MATRIX_MARKETS.map(async m=>{try{_mxCache[m.sym]=await fetchQuote(m.sym);}catch(e){_mxCache[m.sym]=null;}}));
+    // The generalization artifact loads alongside the quotes — paintMatrix is
+    // sync and reads the resolved _btGenCache (fails soft to the plain flag).
+    await Promise.all([loadGeneral(),...MATRIX_MARKETS.map(async m=>{try{_mxCache[m.sym]=await fetchQuote(m.sym);}catch(e){_mxCache[m.sym]=null;}})]);
     window.__userFetch=0;
-  }
+  } else { await loadGeneral(); }
   paintMatrix();
   if(btn){btn.disabled=false;btn.style.opacity='';}
 }
@@ -5817,10 +6132,18 @@ function paintMatrix(){
         <div><span>vs 10-day</span><b class="${vs10>=0?'g':'r'}">${vs10>=0?'+':''}${vs10.toFixed(1)}%</b></div>
         <div><span>1-month</span><b class="${mret>=0?'g':'r'}">${mret>=0?'+':''}${mret.toFixed(1)}%</b></div>
       </div>
-      ${r.m.val?'':'<div class="mx-unval">Pattern only — not backtest-validated</div>'}</div>`;
+      ${r.m.val?'':_mxEvidenceLine(r.m.sym)}</div>`;
   }).join('');
+  const genOn=!!(_btGenCache&&_btGenCache.markets&&_btGenCache.markets.length);
   el.innerHTML=breadth+`<div class="mx-grid">${cards}</div>`
-    +`<div style="font-size:11px;color:var(--ink3);margin-top:12px">Click any market to open its chart. <b>ES &amp; NQ</b> carry the backtest-validated edge; the rest run the same pattern but are <b>not validated</b> (flagged on the card) and are excluded from the buy-setup count.</div>`;
+    +`<div style="font-size:11px;color:var(--ink3);margin-top:12px">Click any market to open its chart. <b>ES &amp; NQ</b> carry the backtest-validated edge; the rest run the same pattern and are excluded from the buy-setup count — ${genOn?'the frozen rule\'s one-shot untuned runs on them (shown on each card) are <b>consistent, not validated</b>; full table in the <b>Backtester</b> tab':'they are <b>not validated</b> (flagged on the card)'}.</div>`;
+}
+// Evidence line for unvalidated Matrix cards — the frozen rule's one-shot
+// untuned run from the resolved _btGenCache. Absent artifact → the old flag.
+function _mxEvidenceLine(sym){
+  const mk=_btGenCache&&_btGenCache.markets&&_btGenCache.markets.find(x=>x.sym===sym);
+  if(!mk||!mk.n_trades||mk.profit_factor==null)return '<div class="mx-unval">Pattern only — not backtest-validated</div>';
+  return `<div class="mx-unval"${mk.note?` title="${_evAttr(mk.note)}"`:''}>Untuned rule ${_evWin(mk.period)}: PF ${mk.profit_factor} · ${mk.n_trades} trades — consistent, not validated</div>`;
 }
 function matrixOpen(sym){const m=MATRIX_MARKETS.find(x=>x.sym===sym);if(m)_chartSym=m.tv;mainTab('charts',document.querySelector('.snav[data-tab="charts"]'));}
 // Tiny trend sparkline (last ~60 closes); green if higher than the window start.
@@ -7346,18 +7669,29 @@ function startLiveRefresh(){
 }
 
 // Lightweight: latest price + previous close from a single intraday request.
+// In-flight memo (~5s TTL) so quote bursts (tape + watchlist + grids asking for
+// the same symbol together) hit the network once. Rejections are evicted
+// immediately — a failure is never cached.
+let _lpMemo={};
 async function fetchLivePrice(ticker){
-  const iurl=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1m&range=1d`;
-  let idata=null;
-  try{idata=await raceAttempts(iurl);}catch(e){}
-  const res=idata?.chart?.result?.[0];
-  if(!res)throw new Error('no live price');
-  const meta=res.meta;
-  const closes=(res.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null);
-  const price=meta.regularMarketPrice||closes[closes.length-1];
-  if(price==null)throw new Error('no live price');
-  const prev=meta.chartPreviousClose||meta.previousClose||closes[0]||price;
-  return{price:+price,prev:+prev};
+  const now=Date.now(), hit=_lpMemo[ticker];
+  if(hit&&(now-hit.t)<5000)return hit.promise;
+  const p=(async()=>{
+    const iurl=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1m&range=1d`;
+    let idata=null;
+    try{idata=await raceAttempts(iurl);}catch(e){}
+    const res=idata?.chart?.result?.[0];
+    if(!res)throw new Error('no live price');
+    const meta=res.meta;
+    const closes=(res.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null);
+    const price=meta.regularMarketPrice||closes[closes.length-1];
+    if(price==null)throw new Error('no live price');
+    const prev=meta.chartPreviousClose||meta.previousClose||closes[0]||price;
+    return{price:+price,prev:+prev};
+  })();
+  _lpMemo[ticker]={t:now,promise:p};
+  p.catch(()=>{if(_lpMemo[ticker]&&_lpMemo[ticker].promise===p)delete _lpMemo[ticker];});
+  return p;
 }
 
 async function liveTick(){
@@ -7918,7 +8252,25 @@ if(lxLanding){
     if(!RM)raf=requestAnimationFrame(frame);
   }
 
-  function init(){ buildTape(); heroRiver(); pullQuotes(); setInterval(pullQuotes,30000); }
+  // Swap two trivia big-stats for REAL backtest evidence once results.json
+  // resolves. Written directly (and the lx-count spans replaced) so it never
+  // races the count-up IntersectionObserver. Fetch fails → trivia stays, no
+  // caption — nothing stale is ever shown.
+  async function pullEdge(){
+    try{
+      const d=await loadBacktest();
+      const m=d&&d.metrics, c=(d&&d.config)||{};
+      if(!m||!m.n_trades||m.profit_factor==null||m.total_pnl==null||d.synthetic)return;
+      const win=`${(c.start_date||'').slice(0,4)}–${(c.end_date||'').slice(0,4)}`;
+      const a=document.getElementById('lxEvA'), b=document.getElementById('lxEvB'), cap=document.getElementById('lxEvCap');
+      if(a){a.querySelector('.n').textContent=(m.total_pnl>=0?'+$':'-$')+Math.abs(Math.round(m.total_pnl)).toLocaleString();
+            a.querySelector('.l').textContent=`Net backtested P&L — the ES daily trend-pullback system, ${win}`;}
+      if(b){b.querySelector('.n').textContent='PF '+m.profit_factor;
+            b.querySelector('.l').textContent=`Profit factor across ${m.n_trades} backtested ES trades (${win})`;}
+      if(cap)cap.style.display='';
+    }catch(e){}
+  }
+  function init(){ buildTape(); heroRiver(); pullQuotes(); pullEdge(); setInterval(pullQuotes,30000); }
   if(document.readyState!=='loading')init(); else document.addEventListener('DOMContentLoaded',init);
 })();
 

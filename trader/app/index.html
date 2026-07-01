@@ -63,8 +63,16 @@
   .lv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Consolas,monospace}
   .lv:last-child{border-bottom:0} .lv span{color:var(--mut)} .lv b{font-weight:700}
   .stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .stat{background:rgba(26,28,34,.9);padding:9px 11px} .stat .v{font-size:18px;font-weight:900;font-family:ui-monospace,Consolas,monospace}
-  .stat .l{font-size:9.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .stat{background:rgba(26,28,34,.9);padding:9px 11px} .stat .v{font-size:22px;font-weight:900;font-family:ui-monospace,Consolas,monospace}
+  .stat .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+  /* number craft: tabular digits on numeric surfaces + muted ~70% units (via _statTxt) */
+  .stat .v,.sigbig,.lv,.tk,.wrow .px,.status{font-variant-numeric:tabular-nums}
+  .nu{font-size:.7em;color:var(--mut);font-weight:700}
+  /* STRATA glyph — tiny local copy (two single-file surfaces can't share CSS) */
+  h3.glyph{justify-content:flex-start;gap:6px;align-items:center}
+  h3.glyph::before{content:'';width:10px;height:10px;flex:none;background:var(--ac2);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='0' y='8.5' width='3.8' height='5.5' rx='0.8'/%3E%3Crect x='5.1' y='4.5' width='3.8' height='9.5' rx='0.8'/%3E%3Crect x='10.2' y='0.5' width='3.8' height='13.5' rx='0.8'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='0' y='8.5' width='3.8' height='5.5' rx='0.8'/%3E%3Crect x='5.1' y='4.5' width='3.8' height='9.5' rx='0.8'/%3E%3Crect x='10.2' y='0.5' width='3.8' height='13.5' rx='0.8'/%3E%3C/svg%3E") center/contain no-repeat}
   .g{color:var(--green)} .r{color:var(--red)} .a{color:var(--amber)}
   .verdict{margin-top:10px;padding:9px;border-radius:9px;font-weight:800;text-align:center;font-size:13px}
   .verdict.hold{background:rgba(38,229,143,.13);color:var(--green);border:1px solid rgba(38,229,143,.4)}
@@ -172,7 +180,7 @@
       <div class="card" id="sigCard"><h3>Live setup <span id="cfgTag" class="note" style="margin:0"></span></h3><div id="sigBody" class="note">Loading…</div></div>
       <div class="card" id="po3Card"><h3>Market cycle · PO3 <span id="po3Tag" class="note" style="margin:0"></span></h3><div id="po3Body" class="note">Loading…</div></div>
       <div class="card" id="biasCard"><h3>Edge bias stack <span id="biasTag" class="note" style="margin:0"></span></h3><div id="biasBody" class="note">Loading…</div></div>
-      <div class="card" id="btCard"><h3>Backtest · this timeframe</h3><div id="btBody" class="note">Loading…</div></div>
+      <div class="card" id="btCard"><h3 class="glyph">Backtest · this timeframe</h3><div id="btBody" class="note">Loading…</div></div>
       <div class="card" id="efCard" style="display:none"><h3><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>Edge Finder <span id="efClose" style="cursor:pointer;pointer-events:auto">✕</span></h3><div id="efBody" class="note">—</div></div>
       <div class="card"><h3>Legend</h3><div class="note"><img src="/bull-ind.png" style="width:16px;vertical-align:-4px"/> bull = a real <b>BUY</b> the strategy took · <img src="/bear-ind.png" style="width:16px;vertical-align:-4px"/> bear = the matching <b>SELL/exit</b>. Every symbol is a <b>backtest trade</b> on this data — <b>bigger = bigger move</b>. Click one for its entry/exit/result. Dashed lines = nearest demand/supply. 1m/5m/1H/1D · scroll/+− zoom · replay scrubber (speed 0.25–4×) · Edge Finder. <span style="color:#6a6e76">Backtested on real bars, gross of costs — not a guarantee. Longs follow the validated rule; shorts are the same rule mirrored (not OOS-validated).</span></div></div>
     </div>
@@ -186,6 +194,12 @@ const UNIVERSE=['ES=F','NQ=F','YM=F','RTY=F','CL=F','GC=F'];
 const TF={'1m':{range:'5d',lab:'1-min'},'5m':{range:'1mo',lab:'5-min'},'1h':{range:'180d',lab:'Hourly'},'1d':{range:'5y',lab:'Daily'}};
 const ACCOUNT=25000, RISKPCT=1;
 let SYM='ES=F', INTV='1d', DATA=null, VIEW=140, phase=0;
+let GENDATA=null;                   // backtester/results-generalization.json — fetched ONCE at boot (see loadGen), never inside renderRail
+// "+ shorts" toggle for the backtest card: OFF (default) = tiles/curve/verdict are
+// LONG-ONLY (the validated side, so numbers reconcile with the grade); ON = combined
+// longs+shorts numbers, explicitly NOT GRADED (shorts are the mirrored rule, unvalidated).
+let SHORTS=false; try{ SHORTS=localStorage.getItem('tlpro_app_shorts_v1')==='1'; }catch(e){}
+function toggleShorts(on){ SHORTS=!!on; try{localStorage.setItem('tlpro_app_shorts_v1',SHORTS?'1':'0');}catch(e){} if(DATA)renderRail(DATA,false); }
 let MTREND=50, MPULL=10;            // current strategy config (Edge Finder can change)
 let REPLAY=null, PLAYING=false;     // replay cutoff index (null=live)
 let SPEED=6, replayAccum=0, lastFrameT=performance.now();   // replay speed in BARS PER SECOND (time-based, frame-rate independent)
@@ -358,9 +372,11 @@ function renderBias(a){
 }
 
 // ── count-up tween ──
+// Display-only stat text: true minus (U+2212) + the unit as a muted ~70% .nu span.
+const _statTxt=(v,dec,suf,pre)=>((pre||'')+(dec?v.toFixed(dec):Math.round(v))).replace(/^-/,'−')+(suf?'<span class="nu">'+suf+'</span>':'');
 function countUp(el,to,dec,suf,pre){ const from=0,dur=600,t0=performance.now();
   (function step(t){ const k=Math.min(1,(t-t0)/dur); const v=from+(to-from)*(1-Math.pow(1-k,3));
-    el.textContent=(pre||'')+(dec?v.toFixed(dec):Math.round(v))+(suf||''); if(k<1)requestAnimationFrame(step); })(t0); }
+    el.innerHTML=_statTxt(v,dec,suf,pre); if(k<1)requestAnimationFrame(step); })(t0); }
 
 // ── rail ──
 function holdLabel(intv,avgBars){ if(intv==='1m')return `~${Math.round(avgBars)} min`; if(intv==='5m')return `~${Math.round(avgBars*5)} min`; if(intv==='1h')return `~${Math.round(avgBars)} hrs`; return `~${Math.round(avgBars)} days`; }
@@ -385,29 +401,62 @@ function renderRail(a,animate){
   renderBias(a);
   const m=metrics(a);
   if(!m){ $('#btBody').innerHTML='<div class="note">No trades on this config.</div>'; return; }
-  // Verdict is graded on the LONG side only — that's the side the Python backtester validated.
+  // HONESTY: by default the tiles AND the curve show the LONG-ONLY record — the side
+  // the Python backtester validated and the only side the verdict grades. The "+ shorts"
+  // toggle shows the combined record, but then the grade is withdrawn (NOT GRADED) —
+  // a green/amber grade must never sit beside numbers it didn't grade.
   const _lt=a.trades.filter(t=>t.dir===1), mL=_lt.length?metrics({trades:_lt}):null;
-  const v=mL?((mL.pf>=1.3&&mL.ret>0)?['hold','EDGE HOLDS']:(mL.pf>=1?['marg','MARGINAL']:['no','NO EDGE'])):['no','NO LONG TRADES'];
+  const mm=SHORTS?m:mL;
+  const v=SHORTS?['marg','NOT GRADED — shorts unvalidated']
+    :(mL?((mL.pf>=1.3&&mL.ret>0)?['hold','EDGE HOLDS']:(mL.pf>=1?['marg','MARGINAL']:['no','NO EDGE'])):['no','NO LONG TRADES']);
+  const shortTgl=`<label class="note" style="display:flex;align-items:center;gap:7px;cursor:pointer;margin-top:9px"><input type="checkbox" ${SHORTS?'checked ':''}onchange="toggleShorts(this.checked)" style="accent-color:var(--amber);margin:0"/> + shorts (experimental — combined record, not graded)</label>`;
+  if(!mm){
+    $('#btBody').innerHTML=`<div class="note" style="margin-top:0">No long trades on this config — the validated (graded) side has nothing to show. Flip on shorts to inspect the experimental combined record.</div>${shortTgl}<div class="note" id="genEv" style="display:none;margin-top:8px"></div>`;
+    patchGenEv(); return;
+  }
   $('#btBody').innerHTML=`<div class="stats">
-    <div class="stat"><div class="v ${m.ret>=0?'g':'r'}" id="m1"></div><div class="l">Return</div></div>
+    <div class="stat"><div class="v ${mm.ret>=0?'g':'r'}" id="m1"></div><div class="l">Return</div></div>
     <div class="stat"><div class="v" id="m2"></div><div class="l">Win rate</div></div>
-    <div class="stat"><div class="v ${m.pf>=1?'g':'r'}" id="m3"></div><div class="l">Profit factor</div></div>
+    <div class="stat"><div class="v ${mm.pf>=1?'g':'r'}" id="m3"></div><div class="l">Profit factor</div></div>
     <div class="stat"><div class="v" id="m4"></div><div class="l">Trades</div></div>
     <div class="stat"><div class="v r" id="m5"></div><div class="l">Max DD</div></div>
-    <div class="stat"><div class="v" style="font-size:13px">${holdLabel(INTV,m.avgBars)}</div><div class="l">Avg hold</div></div>
-  </div><div style="margin-top:10px">${equitySVG(m.curve)}</div><div class="verdict ${v[0]}">${v[1]} <span style="opacity:.75;font-weight:600">· long side</span></div>
+    <div class="stat"><div class="v" style="font-size:13px">${holdLabel(INTV,mm.avgBars)}</div><div class="l">Avg hold</div></div>
+  </div><div style="margin-top:10px">${equitySVG(mm.curve)}</div><div class="verdict ${v[0]}">${v[1]}${SHORTS?'':' <span style="opacity:.75;font-weight:600">· long side</span>'}</div>
+  ${shortTgl}
+  <div class="note" id="genEv" style="display:none;margin-top:8px"></div>
   ${(()=>{const L=a.trades.filter(t=>t.dir===1),S=a.trades.filter(t=>t.dir===-1);
     const pfOf=ts=>{const gw=ts.filter(t=>t.pct>0).reduce((p,t)=>p+t.pct,0),gl=Math.abs(ts.filter(t=>t.pct<=0).reduce((p,t)=>p+t.pct,0));return gl>0?(gw/gl).toFixed(2):(gw>0?'∞':'—');};
     return `<div class="note">Longs: <b>${L.length}</b> trades · PF <b>${pfOf(L)}</b>${S.length?` — Shorts: <b>${S.length}</b> trades · PF <b>${pfOf(S)}</b>`:''}. Long side is validated by the Python backtester; the short side is the same rule mirrored — <b>not yet OOS-tested</b>.</div>`;})()}
   <div class="note">Win rate is low by design — a few big winners carry it.</div>`;
-  const sv=(id,to,dec,suf,pre)=>{const el=$(id);if(!el)return; if(animate===false){el.textContent=(pre||'')+(dec?to.toFixed(dec):Math.round(to))+(suf||'');} else countUp(el,to,dec,suf,pre);};
-  sv('#m1',m.ret,0,'%',m.ret>=0?'+':''); sv('#m2',m.win,0,'%'); sv('#m3',isFinite(m.pf)?m.pf:0,2); sv('#m4',m.n,0); sv('#m5',m.dd,0,'%');
+  const sv=(id,to,dec,suf,pre)=>{const el=$(id);if(!el)return; if(animate===false){el.innerHTML=_statTxt(to,dec,suf,pre);} else countUp(el,to,dec,suf,pre);};
+  sv('#m1',mm.ret,0,'%',mm.ret>=0?'+':''); sv('#m2',mm.win,0,'%'); sv('#m3',isFinite(mm.pf)?mm.pf:0,2); sv('#m4',mm.n,0); sv('#m5',mm.dd,0,'%');
+  patchGenEv();
+}
+// ── generalization evidence line (from the committed artifact, cached once) ──
+// Fetched ONCE at boot by loadGen(); renderRail re-runs every 60s and only
+// reads GENDATA. Unavailable → the line stays hidden (fail-soft, never stale).
+async function loadGen(){
+  try{ const r=await fetch('/backtester/results-generalization.json');
+    if(r.ok){ const d=await r.json(); if(d&&Array.isArray(d.markets)&&d.markets.length)GENDATA=d; } }catch(e){}
+  patchGenEv();
+}
+function genEvHTML(){
+  if(!GENDATA)return '';
+  const mk=GENDATA.markets.find(m=>m.sym===SYM);
+  if(!mk||!mk.n_trades||mk.profit_factor==null||!mk.period)return '';
+  const tun=mk.tuned==='untuned'?'untuned market':(mk.tuned==='ES'?'tuned market (design)':mk.tuned);
+  return `Frozen daily rule ${mk.period.from.slice(0,4)}–${mk.period.to.slice(0,4)}: PF <b>${mk.profit_factor}</b> · <b>${mk.n_trades}</b> trades · ${tun} — ${mk.verdict}`;
+}
+function patchGenEv(){
+  const el=document.getElementById('genEv'); if(!el)return;
+  const h=genEvHTML(); el.innerHTML=h; el.style.display=h?'':'none';
 }
 function equitySVG(curve){ if(!curve||curve.length<2)return ''; const W=290,H=54,mn=Math.min(...curve),mx=Math.max(...curve),rg=Math.max(1e-6,mx-mn);
   const X=i=>i/(curve.length-1)*W, Y=v=>H-2-((v-mn)/rg)*(H-4); let d='',ar='';
   curve.forEach((v,i)=>{const x=X(i).toFixed(1),y=Y(v).toFixed(1);d+=(i?'L':'M')+x+' '+y+' ';ar+=(i?'L':'M')+x+' '+y+' ';});
   ar+=`L${W} ${H} L0 ${H} Z`; const up=curve[curve.length-1]>=1;
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:54px"><defs><linearGradient id="eg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(38,229,143,.35)"/><stop offset="1" stop-color="rgba(38,229,143,0)"/></linearGradient></defs><path d="${ar}" fill="url(#eg)"/><path d="${d}" fill="none" stroke="${up?'#26e58f':'#ff4d6a'}" stroke-width="1.6"/></svg>`; }
+  let bands=''; for(let g=0;g<4;g+=2)bands+=`<rect x="0" y="${(g*H/4).toFixed(1)}" width="${W}" height="${(H/4).toFixed(1)}" fill="rgba(255,255,255,.025)"/>`;   // strata bands — brand motif, styling only
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:54px"><defs><linearGradient id="eg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(38,229,143,.35)"/><stop offset="1" stop-color="rgba(38,229,143,0)"/></linearGradient></defs>${bands}<path d="${ar}" fill="url(#eg)"/><path d="${d}" fill="none" stroke="${up?'#26e58f':'#ff4d6a'}" stroke-width="1.6"/></svg>`; }
 
 // ── chart ──
 function resize(){ const r=cv.parentElement.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);
@@ -588,6 +637,7 @@ if(bootSeen){
   setTimeout(()=>{clearInterval(bootInt);const b=$('#boot');if(b){b.classList.add('gone');setTimeout(()=>{b.style.display='none';},1100);}},4200);
 }
 setInterval(()=>{ if(REPLAY==null)load(false); },60000);
+loadGen();   // one-time fetch of the generalization artifact (evidence line in the rail)
 </script>
 </body>
 </html>
