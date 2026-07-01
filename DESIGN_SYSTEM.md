@@ -1,7 +1,13 @@
 # TradeLens Pro — Design System
 
 > Living doc. Update when tokens, components, or visual conventions change.
-> Last updated: 2026-06-29 (session 34)
+> Last updated: 2026-07-01 (pipeline run: flat cards + paywall/skeleton components)
+
+**Flat card language is now app-wide (2026-07-01):** `.card` was rethemed from glass (blur + hover-lift + glow) to the flat panel language — `background:var(--s1)`, 1px `--line` border, hover = border-color shift only, **no backdrop-filter**. This unifies the app with `.dash-panel` and the landing's `lx-` surfaces (one chrome language) and removes 7+ simultaneous blurs from the Futures tab. `--glass` remains ONLY on `.appnav`, `.acct-chip`, `.dte-row`, `.metric` (next candidates if the flattening continues). New components:
+- **`.skel-card` + `skelCard(h)`** — shared skeleton loading block (fixed height, `skelShine` shimmer via `::after`; animation off under reduced-motion). Use instead of one-line "Loading…" cards to avoid layout shift. Adopted by the Futures tab; other `loading-label` call sites should adopt when touched.
+- **`.pay-lock` anatomy** — solid border + accent top hairline (`::before`), line-SVG lock badge (no emoji), optional **`.pl-prev`** blurred-real-content teaser behind the lock (`filter:blur(6px)`, `aria-hidden`, `pointer-events:none`, fade mask; must reuse the REAL renderer, e.g. `po3CardHTML` — never fork markup for a preview).
+- **`.ac-dot`/`.ac-badge`** now use accent tokens (`--ac`/`--act`/`--ac-rgb`) — they mood-flip and the green=P&L rule holds. NOTE (todo'd): `.pay-badge`/`.pt-cur`/`.pt-feats li::before` still use P&L green — same one-line fix when next touched.
+- **Trader-app boot fast-path:** full 4.8s cinematic only on first run (`tlpro_boot_seen_v1`); repeats reveal in ~0.3s on first data load with a 2.5s dead-feed fallback.
 
 **Backdrop wave ribbons (session 35):** the `#fxCanvas` living-market layer now renders **flowing market wave ribbons** (3 layered translucent price curves, scrolling + parallax, mood-tinted) instead of the old perspective floor-grid (`waves[]` config in the end-of-script IIFE; `waveT` drives the scroll). Backdrop intensity was raised overall (brighter aurora blobs + constellation, canvas opacity .96) so it reads more clearly behind the data without competing with it. Keep it ambient — the rule is still "noticeable, not distracting."
 
@@ -45,7 +51,7 @@ Aesthetic: **premium dark terminal** — near-black, data-first, professional, w
 - App headings smaller; labels are small-caps muted.
 
 ## Components
-- **Glass card** `.glass` / `.card` — translucent + blur + hairline border + soft shadow; hover lifts with a faint blue glow.
+- **Card** `.card` — FLAT since 2026-07-01: `var(--s1)` fill, hairline `--line` border, hover = border-color shift only (no blur/lift/glow — see the top note). `.glass` remains translucent where still used.
 - **Buttons:** `.lx-btn.primary` / `.go-btn` = animated gradient (`gradShift`), white text. `.lx-btn.ghost` / `.nbtn` = glass outline, blue hover.
 - **Nav:** glass blurred bar; active tab = gradient underline. Landing nav solidifies on scroll (`.scrolled`).
 - **Icons:** minimal **line SVGs** (stroke `--cy`), 1.8–2.2 stroke. **Avoid emoji** in chrome (legacy emoji still linger in some inner tabs — replace when touched).

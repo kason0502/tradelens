@@ -1,7 +1,30 @@
 # STRATA — TODO
 
 > Living doc. Keep prioritized; check items off and add new ones each session.
-> Last updated: 2026-07-01 (three-agent pass)
+> Last updated: 2026-07-01 (first full 5-agent pipeline run)
+
+## ⚠️ HARD PRECONDITIONS before `PAY.testMode=false` (going live on Stripe)
+- [ ] **`api/me.js` re-grant loophole:** any historic `session_id` re-grants 31 days with no subscription-status check — a canceled subscriber can bookmark the success URL and re-unlock forever. Needs `api/stripe-webhook.js` + server-verified entitlement.
+- [ ] **Client-side tier gating is bypassable** (`localStorage tlpro_account_v1 {"tier":2}` unlocks everything incl. the app's #proGate) — acceptable in test mode ONLY; server-side entitlement check required for real billing.
+- [ ] **Plus "setup alerts" copy vs reality:** alerts exist only in-page; don't bill for server-side alerts until the cron exists.
+
+## Done (2026-07-01 — five-agent pipeline run: Pro access + visuals + honesty)
+- [x] **Pro can reach the app from the site** — snav "STRATA Live · PRO" link + account-chip/paywall anchors (full `/trader/app/index.html` path; bare `/trader/app/` 404s locally).
+- [x] **Stripe-return race** — `payHydrate` reloads after grant; duplicate call removed.
+- [x] **Tier copy honesty ×3** — "dedicated live terminal (web)"; cut Priority-data/synced claims.
+- [x] **Flat `.card` retheme** (one chrome language) · **payLock premium + blurred real PO3 preview** · **skeleton loaders** (Futures) · **emoji→SVG chrome** · **acct-chip accent tokens** · **mobile ≤480 overflow fixed both surfaces** (incl. the QA-caught `.fut-scan` 2×2 regression) · **app boot fast-path** (`tlpro_boot_seen_v1`).
+- [x] **Hero honesty complete** (all 5 static tiles tagged "example"; watchlist seeds "—") · **EDGE HOLDS graded on longs only**.
+- [x] **Edge research round 2: NO EDGE** — GC compression / CL-GC time-of-day / daily-filter pass all dead in-sample; daily system proven stop-spec-insensitive; GC/CL hourly holdouts intact.
+
+## Next (pipeline leftovers — small)
+- [ ] **Matrix "↻ Refresh"** (`#mxRefresh`) still emoji — same SVG swap as the futures button.
+- [ ] **App rail "★ LONG/SHORT SIGNAL"** text stars → SVG (only the toast was swapped).
+- [ ] **Paywall greens** (`.pay-badge`/`.pt-cur`/`.pt-feats li::before`) still use P&L green — switch to accent tokens (same as the chip fix).
+- [ ] **`#futBody` at phone widths** renders ~267px in ~363px available (unused right gutter) — investigate next polish pass.
+- [ ] **`.po3-seg` labels clip <400px** inside the blurred teaser.
+- [ ] **`moAI` modal ✨ emoji** (~1906) → SVG.
+- [ ] **Skeleton adoption** at the other `loading-label` call sites (Matrix/Strength/Backtester) via `skelCard`.
+- [ ] **Edge research next avenue (no holdout cost):** run the frozen daily rule on YM/RTY/GC/CL daily as generalization evidence; per-market real PFs would also replace the remaining hardcoded NQ/SPY/QQQ constants.
 
 ## Done (2026-07-01 — three-agent pass: critic round 4 + edge research + fixes)
 - [x] **Built `strata-debugger` + `edge-hunter` subagents** (`.claude/agents/`) — the fix-and-verify robot and the gated strategy-research robot.

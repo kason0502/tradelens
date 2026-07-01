@@ -116,9 +116,13 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .pt-feats li::before{content:'✓';position:absolute;left:0;color:var(--gt);font-weight:900;font-size:11px}
 .pt-cur{text-align:center;font-size:12px;font-weight:700;color:var(--gt);padding:11px 0}
 .pt-card .mbtn{padding:10px;font-size:12.5px}
-.pay-lock{cursor:pointer;border-style:dashed!important;transition:border-color .15s,transform .15s}
-.pay-lock:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
-.pl-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--act);border:1px solid rgba(var(--ac-rgb),.35);background:rgba(var(--ac-rgb),.08);padding:3px 9px;border-radius:99px;margin-bottom:9px}
+.pay-lock{cursor:pointer;overflow:hidden;transition:border-color .15s}
+.pay-lock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(var(--ac-rgb),.85),rgba(var(--ac-rgb),0));pointer-events:none}
+.pay-lock:hover{border-color:rgba(var(--ac-rgb),.5)}
+.pl-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--act);border:1px solid rgba(var(--ac-rgb),.35);background:rgba(var(--ac-rgb),.08);padding:3px 9px;border-radius:99px;margin-bottom:9px}
+.pl-badge svg{flex-shrink:0}
+/* blurred real-content teaser inside a lock card — decorative only */
+.pl-prev{pointer-events:none;user-select:none;filter:blur(6px);opacity:.55;max-height:200px;overflow:hidden;margin:6px 0 0;mask-image:linear-gradient(#000 55%,transparent);-webkit-mask-image:linear-gradient(#000 55%,transparent)}
 @media(max-width:640px){.pay-modal{max-width:94vw}.pay-tiers{grid-template-columns:1fr}}
 .pay-badge{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--gt);border:1px solid rgba(38,229,143,.4);background:rgba(38,229,143,.08);padding:4px 10px;border-radius:99px;margin-bottom:12px}
 .pay-badge b{color:var(--tx)}
@@ -130,9 +134,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .pay-msg{font-size:12px;margin-top:10px;min-height:16px;font-weight:600}
 .pay-testnote{font-size:11.5px;color:var(--ink3);margin-top:12px;line-height:1.5;padding:9px 11px;border-radius:8px;border:1px dashed var(--b2);background:rgba(255,255,255,.02)}
 .acct-chip{position:fixed;top:12px;right:16px;z-index:400;display:flex;align-items:center;gap:8px;background:rgba(12,12,14,.9);border:1px solid var(--b2);border-radius:99px;padding:6px 12px;font-size:12px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
-.acct-chip .ac-dot{width:7px;height:7px;border-radius:50%;background:var(--gt);box-shadow:0 0 8px var(--gt)}
+.acct-chip .ac-dot{width:7px;height:7px;border-radius:50%;background:var(--ac);box-shadow:0 0 8px var(--ac)}
 .acct-chip .ac-em{color:var(--ink2);font-weight:700;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.acct-chip .ac-badge{font-size:9px;font-weight:900;letter-spacing:.06em;color:var(--gt);border:1px solid rgba(38,229,143,.4);border-radius:20px;padding:2px 7px}
+.acct-chip .ac-badge{font-size:9px;font-weight:900;letter-spacing:.06em;color:var(--act);border:1px solid rgba(var(--ac-rgb),.4);border-radius:20px;padding:2px 7px}
 .acct-chip .ac-out{color:var(--fa);cursor:pointer;font-size:11px}.acct-chip .ac-out:hover{color:var(--rt)}
 
 /* ── PAGE LAYOUT ── */
@@ -233,10 +237,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 @media(max-width:900px){.two-col{grid-template-columns:1fr}}
 
 /* ── CARDS ── */
-.card{background:var(--glass);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border:1px solid var(--b1);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .22s,box-shadow .25s,transform .2s;position:relative;box-shadow:var(--shadow)}
+.card{background:var(--s1);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .22s;position:relative}
 .card:last-child{margin-bottom:0}
-.card:hover{border-color:rgba(var(--ac-rgb),.26);box-shadow:var(--shadow),0 0 0 1px rgba(var(--ac-rgb),.12),0 0 42px rgba(var(--ac-rgb),.07);transform:translateY(-2px)}
-@media(prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
+.card:hover{border-color:rgba(var(--ac-rgb),.26)}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
 .card-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--fa);margin-bottom:15px;display:flex;align-items:center;gap:7px}
 .pdot{width:5px;height:5px;border-radius:50%;background:var(--ac);animation:blink 2s ease-in-out infinite;flex-shrink:0}
 
@@ -580,6 +584,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-ticker{font-size:22px;font-weight:900;font-family:var(--mono);color:var(--gt);margin-bottom:4px}
 .loading-label{font-size:12px;color:var(--fa)}
+/* skeleton loading blocks — approximate the final layout, shimmer while real data loads */
+.skel-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--s1);position:relative;overflow:hidden;margin-bottom:16px}
+.skel-card::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.05) 50%,transparent 70%);transform:translateX(-100%);animation:skelShine 1.5s linear infinite}
+@keyframes skelShine{to{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){.skel-card::after{animation:none}}
 .loading-steps{display:flex;justify-content:center;gap:5px;margin-top:13px}
 .ls{width:5px;height:5px;border-radius:50%;background:var(--b3);animation:lsb .9s ease-in-out infinite}
 .ls:nth-child(2){animation-delay:.15s}.ls:nth-child(3){animation-delay:.3s}
@@ -609,6 +618,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 #landing *{box-sizing:border-box}
 .lx{max-width:1200px;margin:0 auto;padding:0 32px}
 @media(max-width:680px){.lx{padding:0 22px}}
+@media(max-width:480px){.lx{padding:0 16px}.lx-prices{width:100%;min-width:0}.lx-plan{min-width:0;width:100%}}
 .lx-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .lx-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%);mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 78%)}
 .lx-orb{display:none}
@@ -784,7 +794,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .lx-hero-head{max-width:820px}
 .lx-bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
 @media(max-width:1000px){.lx-bento{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.lx-bento{grid-template-columns:1fr}}
+@media(max-width:560px){.lx-bento{grid-template-columns:minmax(0,1fr)}}
 .tp{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
 .tp:hover{border-color:rgba(255,255,255,.14);transform:translateY(-2px)}
 .tp-chart{grid-column:span 2;grid-row:span 2}
@@ -811,6 +821,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .wl-r .t{font-weight:700;font-family:var(--mono)}
 .wl-r .p{font-family:var(--mono);color:var(--ink2);font-size:12.5px}
 .wl-r .c{font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;min-width:56px}
+.wl-r .c:not(.up):not(.dn){color:var(--ink3)}   /* muted "—" until a real quote lands */
 .vp{display:flex;flex-direction:column;gap:8px;margin-top:2px}
 .vp-r{display:grid;grid-template-columns:48px 1fr;gap:9px;align-items:center;font-size:11px;font-family:var(--mono);color:var(--ink3)}
 .vp-bar{height:11px;border-radius:3px;background:rgba(var(--ac-rgb),.16)}
@@ -1034,7 +1045,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .po3-badge{width:54px;height:54px;flex:none;filter:drop-shadow(0 0 14px rgba(var(--ac-rgb),.45))}
 .po3-head{font-size:19px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
 .po3-strip{display:flex;gap:6px}
-.po3-seg{flex:1;text-align:center;padding:7px 4px;border-radius:9px;border:1px solid var(--line);font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--fa);background:rgba(255,255,255,.02);transition:all .3s}
+.po3-seg{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;padding:7px 4px;border-radius:9px;border:1px solid var(--line);font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--fa);background:rgba(255,255,255,.02);transition:all .3s}
 .po3-seg.on{color:#05130c}
 .po3-seg.on.acc{background:var(--at);border-color:var(--at);color:#1a1200;box-shadow:0 0 18px rgba(255,201,77,.3)}
 .po3-seg.on.man{background:var(--gr);border-color:var(--gr);box-shadow:0 0 18px rgba(38,194,129,.35)}
@@ -1095,7 +1106,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .dp-link:hover{text-decoration:underline}
 .mx-unval{margin-top:9px;font-size:10.5px;font-weight:700;color:var(--at);background:rgba(255,201,77,.1);border:1px solid rgba(255,201,77,.3);border-radius:7px;padding:4px 8px;text-align:center}
 @media(max-width:520px){
-  .fut-scan{grid-template-columns:1fr 1fr}
+  .fut-scan{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .fut-sig .fs-px{float:none;text-align:left;margin:0 0 8px}
   .fut-sig .fs-head{font-size:17px}
   .fut-sig .fs-price{font-size:20px}
@@ -1134,10 +1145,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .btrun-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .bt-canvas-box{min-height:120px}
 /* Futures dashboard: main + right rail (toward the reference mockup) */
-.fut-layout{display:grid;grid-template-columns:1fr 322px;gap:16px;align-items:start}
-.fut-rail{display:flex;flex-direction:column;gap:16px}
+.fut-layout{display:grid;grid-template-columns:minmax(0,1fr) 322px;gap:16px;align-items:start}
+.fut-main{min-width:0}
+.fut-rail{display:flex;flex-direction:column;gap:16px;min-width:0}
 .fut-rail .card{margin-bottom:0}
-@media(max-width:1100px){.fut-layout{grid-template-columns:1fr}}
+@media(max-width:1100px){.fut-layout{grid-template-columns:minmax(0,1fr)}}
 .sent-split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-top:4px}
 .sent-split .ss-v{font-size:17px;font-weight:900;font-family:var(--mono)}
 .sent-split .ss-v.g{color:var(--gt)}.sent-split .ss-v.r{color:var(--rt)}
@@ -1429,6 +1441,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .main-col{max-width:1340px;margin:0 auto;padding:30px 38px 120px}
 @media(max-width:1080px){.appnav{width:66px}.appnav .lbl,.appnav-grp,.appnav .pill,.appnav-logo .logo-text,.appnav-live{display:none}.appnav-logo{justify-content:center;padding:18px 0 14px}.snav{justify-content:center;padding:12px 0}.snav-glide,.snav-hover{left:9px;right:9px}.appnav-foot{padding:10px 8px}.page-wrap{margin-left:94px}.main-col{padding:24px 22px 90px}}
 @media(max-width:640px){.appnav{width:58px;top:10px;left:10px;bottom:10px}.page-wrap{margin-left:80px}.main-col{padding:16px 14px 70px}.appbar-lead{display:none}}
+@media(max-width:480px){.acct-chip{max-width:calc(100vw - 24px);right:12px}.bt-scoreboard{flex-wrap:wrap}}   /* .fut-scan stays 2×2 — the ≤520px rule already uses shrink-safe minmax(0,1fr) tracks */
 
 /* ── HIGH VOLUME / MOVERS tab ── */
 .mv-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
@@ -1547,17 +1560,17 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         <div class="tp tp-tall">
           <div class="tp-h"><span class="tp-lbl">Watchlist</span></div>
           <div class="wl">
-            <div class="wl-r" data-sym="ES=F"><span class="t">ES</span><span class="p">5512.25</span><span class="c up">+0.42%</span></div>
-            <div class="wl-r" data-sym="NQ=F"><span class="t">NQ</span><span class="p">19845.50</span><span class="c up">+0.61%</span></div>
-            <div class="wl-r" data-sym="YM=F"><span class="t">YM</span><span class="p">41320</span><span class="c up">+0.18%</span></div>
-            <div class="wl-r" data-sym="RTY=F"><span class="t">RTY</span><span class="p">2214.80</span><span class="c dn">−0.33%</span></div>
-            <div class="wl-r" data-sym="CL=F"><span class="t">CL</span><span class="p">78.44</span><span class="c up">+1.12%</span></div>
-            <div class="wl-r" data-sym="GC=F"><span class="t">GC</span><span class="p">2348.60</span><span class="c up">+0.27%</span></div>
+            <div class="wl-r" data-sym="ES=F"><span class="t">ES</span><span class="p">—</span><span class="c">—</span></div>
+            <div class="wl-r" data-sym="NQ=F"><span class="t">NQ</span><span class="p">—</span><span class="c">—</span></div>
+            <div class="wl-r" data-sym="YM=F"><span class="t">YM</span><span class="p">—</span><span class="c">—</span></div>
+            <div class="wl-r" data-sym="RTY=F"><span class="t">RTY</span><span class="p">—</span><span class="c">—</span></div>
+            <div class="wl-r" data-sym="CL=F"><span class="t">CL</span><span class="p">—</span><span class="c">—</span></div>
+            <div class="wl-r" data-sym="GC=F"><span class="t">GC</span><span class="p">—</span><span class="c">—</span></div>
           </div>
         </div>
         <!-- volume profile -->
         <div class="tp tp-tall">
-          <div class="tp-h"><span class="tp-lbl">Volume profile</span></div>
+          <div class="tp-h"><span class="tp-lbl">Volume profile</span><span class="tp-tag">example</span></div>
           <div class="vp">
             <div class="vp-r"><span>5560</span><div class="vp-bar" style="width:32%"></div></div>
             <div class="vp-r"><span>5540</span><div class="vp-bar" style="width:54%"></div></div>
@@ -1594,7 +1607,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         </div>
         <!-- sentiment -->
         <div class="tp">
-          <div class="tp-h"><span class="tp-lbl">Market sentiment</span></div>
+          <div class="tp-h"><span class="tp-lbl">Market sentiment</span><span class="tp-tag">example</span></div>
           <div class="tp-big" style="font-size:30px">Bullish</div>
           <div class="sentm"><i style="left:72%"></i></div>
           <div class="sentm-row"><span>Bearish</span><span>Bullish</span></div>
@@ -1807,12 +1820,12 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
         </div>
         <div class="lx-plan lx-reveal" style="transition-delay:.16s">
           <div class="pname">Pro</div><div class="pamt">$50<small> / mo</small></div>
-          <div class="pdesc">The website + the desktop application.</div>
+          <div class="pdesc">The website + STRATA Live, the dedicated live terminal.</div>
           <ul>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Everything in Plus</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> The <b>STRATA Live</b> desktop app</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Saved backtests synced across devices</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Priority data + server-side AI</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> <b>STRATA Live</b> — the dedicated live terminal (web)</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Live scanner · bar replay · Edge Finder</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Saved backtests</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Priority support</li>
           </ul>
           <button class="lx-btn ghost" onclick="openPaywall(2)">Get Pro →</button>
@@ -1912,7 +1925,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     </div>
     <div class="flbl">Anthropic API Key</div>
     <input class="fi" id="aiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off"/>
-    <div style="font-size:11px;color:var(--mu);line-height:1.6;margin:-4px 0 12px">🔒 Your key stays in this browser tab only — kept in memory, never written to disk and never sent anywhere except Anthropic's API.</div>
+    <div style="font-size:11px;color:var(--mu);line-height:1.6;margin:-4px 0 12px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Your key stays in this browser tab only — kept in memory, never written to disk and never sent anywhere except Anthropic's API.</div>
     <button class="mbtn" onclick="saveAIKey(true)">Save &amp; Test Connection</button>
     <button class="mbtn sec" onclick="clearAIKey()">Clear Key</button>
     <div id="aiKeyStatus" style="margin-top:12px;font-size:12px;text-align:center;line-height:1.6"></div>
@@ -1950,6 +1963,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <div class="appnav-grp">Trade</div>
     <button class="snav snav-pri active" data-tab="futures" onclick="mainTab('futures',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l5-5 3 3 8-9"/><path d="M14 7h6v6"/></svg><span class="lbl">Futures</span><span class="pill">ES·NQ</span></button>
     <button class="snav snav-pri" data-tab="matrix" onclick="mainTab('matrix',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Matrix</span><span class="pill">live</span></button>
+    <button class="snav" onclick="if(requireTier(2,'app'))window.open('/trader/app/index.html','_blank')"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg><span class="lbl">STRATA Live</span><span class="pill">PRO</span></button>
     <button class="snav snav-pri" data-tab="playbook" onclick="mainTab('playbook',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg><span class="lbl">Playbook</span></button>
     <div class="appnav-grp">Markets</div>
     <button class="snav" data-tab="charts" onclick="mainTab('charts',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg><span class="lbl">Charts</span></button>
@@ -2002,9 +2016,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div style="font-size:24px;font-weight:900;letter-spacing:-.04em">ES Futures <span class="pill">S&amp;P 500 E-mini</span></div>
           <div style="font-size:13px;color:var(--mu);line-height:1.6">Daily trend-pullback system — the one strategy that passed out-of-sample, generalization, and robustness tests. Free Yahoo data.</div>
         </div>
-        <button class="dp-fu" onclick="renderFutures(true)" id="futRefresh">↻ Refresh</button>
+        <button class="dp-fu" onclick="renderFutures(true)" id="futRefresh"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v5h-5"/></svg>Refresh</button>
       </div>
-      <div id="futBody"><div class="card"><div class="loading-label">Loading ES futures…</div></div></div>
+      <div id="futBody"><div class="fut-layout"><div class="fut-main"><div class="skel-card" style="height:180px" aria-hidden="true"></div><div class="skel-card" style="height:376px" aria-hidden="true"></div></div><div class="fut-rail"><div class="skel-card" style="height:322px" aria-hidden="true"></div></div></div></div>
     </div>
 
     <!-- MARKET MATRIX — live command center across every tracked future -->
@@ -2208,11 +2222,11 @@ const TAB_TIER={futures:0,learn:0,playbook:0, matrix:1,charts:1,split:1,strength
 const TIER_FEATS=[
   ['The live Futures signal, chart &amp; trade plan','Interactive Playbook diagram','Learn academy — visual lessons'],
   ['Everything in Free','All six futures markets','12-factor edge bias stack + PO3 cycle zones','Backtester · Matrix · Charts · Split View','Relative Strength · Sessions · Risk Calc · alerts · AI'],
-  ['Everything in Plus','The STRATA Live desktop app','Saved backtests synced across devices','Priority data + server-side AI']
+  ['Everything in Plus','STRATA Live — the dedicated live terminal (web)','Live scanner · bar replay · Edge Finder','Saved backtests']
 ];
 const TIER_FEATURE_LABEL={po3:'The PO3 cycle zone',bias:'The edge bias stack',matrix:'The Market Matrix',charts:'Charts',split:'Split View',strength:'Relative Strength',backtester:'The Backtester',calc:'The Risk Calculator',sessions:'The Session Clock',ai:'AI Chat',alerts:'Alerts',app:'The STRATA Live app'};
 let _payNeed=1;   // tier the current upsell targets
-window.addEventListener('DOMContentLoaded',()=>{try{payHydrate();updateAcctChip();}catch(e){}});
+window.addEventListener('DOMContentLoaded',()=>{try{updateAcctChip();}catch(e){}});   // payHydrate runs once, at the bottom of this script
 
 // ── PARTICLES ──────────────────────────────────────────────────────────
 (function(){const w=document.getElementById('particles');for(let i=0;i<18;i++){const p=document.createElement('div');p.className='particle';const sz=1+Math.random()*2.2;p.style.cssText=`left:${Math.random()*100}%;width:${sz}px;height:${sz}px;animation-duration:${14+Math.random()*20}s;animation-delay:${Math.random()*24}s`;w.appendChild(p);}})();
@@ -4952,12 +4966,14 @@ function futSignal(q){
   else{cls='ok2';head='In uptrend — no entry yet';short='Uptrend';sub='Trend is up, but price isn’t pulled back to the 10-day average. Wait for a dip toward it.';}
   return {q,closes,ohlc,price,prev,sma50,sma10,s50,s10,uptrend,pulledBack,turnUp,buySetup,cls,head,sub,short};
 }
+// Shared skeleton block — a shimmering placeholder shaped like the card it replaces.
+function skelCard(h){return `<div class="skel-card" style="height:${h}px" aria-hidden="true"></div>`;}
 async function renderFutures(force){
   const el=document.getElementById('futBody');if(!el)return;
   const btn=document.getElementById('futRefresh');if(btn&&force){btn.disabled=true;btn.style.opacity='.5';}
   if(force)_futCache={};
   if(!Object.keys(_futCache).length){
-    el.innerHTML=`<div class="card"><div class="loading-label">Loading futures (ES · NQ · SPY · QQQ)…</div></div>`;
+    el.innerHTML=`<div class="fut-layout"><div class="fut-main">${skelCard(180)}${skelCard(376)}</div><div class="fut-rail">${skelCard(322)}</div></div>`;
     window.__userFetch=Date.now();
     await Promise.all(FUT_MARKETS.map(async m=>{try{_futCache[m.sym]=await fetchQuote(m.sym);}catch(e){_futCache[m.sym]=null;}}));
     window.__userFetch=0;
@@ -5205,7 +5221,8 @@ function paintFutures(){
     if(s.ohlc){const p3=po3Analyze(s.ohlc); if(p3)po3card=po3CardHTML(p3,mkt);}
     biasBlock=biasStackHTML(s);
   } else {
-    po3card=payLock('Market cycle — PO3 zone','See exactly where price sits in its accumulation → manipulation → distribution cycle, with the trade plan for each phase.',1,'po3');
+    let po3Prev=''; try{ if(s.ohlc){const p3=po3Analyze(s.ohlc); if(p3)po3Prev=po3CardHTML(p3,mkt);} }catch(e){}
+    po3card=payLock('Market cycle — PO3 zone','See exactly where price sits in its accumulation → manipulation → distribution cycle, with the trade plan for each phase.',1,'po3',po3Prev);
     biasBlock=payLock('Edge bias stack','12 independent real-data factors — trend, momentum, structure, volatility, PO3 — scored into one net long/short lean.',1,'bias');
   }
   el.innerHTML=scan+alertBanner+`<div class="fut-layout"><div class="fut-main">
@@ -7730,7 +7747,7 @@ function requireTier(level,feature){ if(tierOf()>=level)return true; openPaywall
 function acctGrant(tier,email,days,how){const until=days?Date.now()+days*86400000:0;acctSave({tier,email:email||acctState().email||'',until,how,ts:Date.now()});updateAcctChip();}
 function acctSignOut(){acctSave({});updateAcctChip();showLanding();}
 function updateAcctChip(){const el=document.getElementById('acctChip');if(!el)return;const s=acctState(),t=tierOf();
-  if(t>=1){el.style.display='';el.innerHTML=`<span class="ac-dot"></span><span class="ac-em">${s.email||tierName(t)}</span><span class="ac-badge">${tierName(t).toUpperCase()}</span>${t<2?`<a class="ac-out" style="color:var(--act)" onclick="openPaywall(2)">upgrade</a>`:''}<a class="ac-out" onclick="acctSignOut()">sign out</a>`;}
+  if(t>=1){el.style.display='';el.innerHTML=`<span class="ac-dot"></span><span class="ac-em">${s.email||tierName(t)}</span><span class="ac-badge">${tierName(t).toUpperCase()}</span>${t<2?`<a class="ac-out" style="color:var(--act)" onclick="openPaywall(2)">upgrade</a>`:`<a class="ac-out" style="color:var(--act)" href="/trader/app/index.html" target="_blank" rel="noopener">Open STRATA Live ↗</a>`}<a class="ac-out" onclick="acctSignOut()">sign out</a>`;}
   else{el.style.display='';el.innerHTML=`<span class="ac-dot" style="background:var(--fa);box-shadow:none"></span><span class="ac-em">Free</span><a class="ac-out" style="color:var(--act)" onclick="openPaywall(1)">upgrade</a>`;}}
 
 function launchApp(){ _doLaunch(); }   // Free can enter; premium tabs/features gate individually
@@ -7740,7 +7757,7 @@ function _doLaunch(){
   try{ if(lastData){const{ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral}=lastData;applyChartView(ticker,q,entry,sl,tp1,tp2,a,isShort,isNeutral);} }catch(e){}
 }
 // Locked-feature teaser card (shown to Free users in place of a premium panel).
-function payLock(title,desc,need,feat){return `<div class="card pay-lock" onclick="openPaywall(${need},'${feat}')"><div class="pl-badge">🔒 ${tierName(need)}</div><div class="card-title" style="margin:0 0 6px">${title}</div><div style="font-size:12.5px;color:var(--ink2);line-height:1.55">${desc}</div><button class="dp-fu" style="margin-top:11px">Unlock with ${tierName(need)} →</button></div>`;}
+function payLock(title,desc,need,feat,previewHTML){return `<div class="card pay-lock" onclick="openPaywall(${need},'${feat}')"><div class="pl-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${tierName(need)}</div><div class="card-title" style="margin:0 0 6px">${title}</div><div style="font-size:12.5px;color:var(--ink2);line-height:1.55">${desc}</div>${previewHTML?`<div class="pl-prev" aria-hidden="true">${previewHTML}</div>`:''}<button class="dp-fu" style="margin-top:11px">Unlock with ${tierName(need)} →</button></div>`;}
 function openPaywall(need,feature){ _payNeed=need||1; const m=document.getElementById('moPay');if(!m)return; renderPaywall(feature); const e=document.getElementById('payMsg');if(e)e.textContent=''; m.classList.add('open'); }
 function closePaywall(){const m=document.getElementById('moPay');if(m)m.classList.remove('open');}
 function payMsg(t,ok){const e=document.getElementById('payMsg');if(e){e.textContent=t;e.style.color=ok?'var(--gt)':'var(--rt)';}}
@@ -7754,7 +7771,7 @@ function renderPaywall(feature){
     return `<div class="pt-card ${isNeed?'hot':''} ${owned&&t.id>0?'owned':''}">
       <div class="pt-name">${t.name}</div><div class="pt-price"><b>${t.price}</b>${t.id?'<span>/mo</span>':''}</div>
       <ul class="pt-feats">${TIER_FEATS[t.id].map(f=>`<li>${f}</li>`).join('')}</ul>
-      ${t.id===0?`<div class="pt-cur">Always free</div>`:(owned?`<div class="pt-cur">✓ Your plan</div>`:`<button class="mbtn ${isNeed?'':'sec'}" onclick="payChoose(${t.id})">Get ${t.name}${PAY.testMode?'':' · '+t.price}</button>`)}
+      ${t.id===0?`<div class="pt-cur">Always free</div>`:(owned?`<div class="pt-cur">✓ Your plan${t.id===2?` · <a href="/trader/app/index.html" target="_blank" rel="noopener" style="color:var(--act);font-weight:700">Open STRATA Live ↗</a>`:''}</div>`:`<button class="mbtn ${isNeed?'':'sec'}" onclick="payChoose(${t.id})">Get ${t.name}${PAY.testMode?'':' · '+t.price}</button>`)}
     </div>`;}).join('');
   if(note)note.innerHTML=PAY.testMode?`🔓 <b>Test mode</b> — no real charge. Click a plan to unlock it instantly, or enter its code (<b>STRATA-PLUS</b> / <b>STRATA-PRO</b>) below.`:`Secure checkout by Stripe — in test mode only fake test cards work, no real money.`;
 }
@@ -7776,7 +7793,7 @@ async function payHydrate(){
   if(PAY.testMode) return;
   if(p.get('pro')==='success'&&p.get('session_id')){
     try{const r=await fetch('/api/me?session_id='+encodeURIComponent(p.get('session_id')));const d=await r.json();
-      if(d.active){acctGrant(d.tier||1,d.email,31,'stripe');history.replaceState({},'',location.pathname);}}catch(e){}
+      if(d.active){acctGrant(d.tier||1,d.email,31,'stripe');history.replaceState({},'',location.pathname);location.reload();}}catch(e){}
   }
 }
 function showLanding(){const l=document.getElementById('landing');if(l){l.style.display='block';l.scrollTop=0;lxObserve();}}
