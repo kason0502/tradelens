@@ -1,5 +1,7 @@
+# Only local-only config is excluded from the deploy. Everything the app + site
+# need at runtime is served: index.html, api/*.js, the PNGs, backtester/results.json
+# (Backtester tab + Futures edge card fetch it), and the trader/ STRATA Live app
+# (reachable at /trader/app/ — it uses the deployed /api/yf proxy + the root PNGs).
 .claude
 .gitignore
 *.md
-trader
-backtester

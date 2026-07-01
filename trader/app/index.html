@@ -157,7 +157,7 @@
       <div class="card" id="biasCard"><h3>Edge bias stack <span id="biasTag" class="note" style="margin:0"></span></h3><div id="biasBody" class="note">Loading…</div></div>
       <div class="card" id="btCard"><h3>Backtest · this timeframe</h3><div id="btBody" class="note">Loading…</div></div>
       <div class="card" id="efCard" style="display:none"><h3>⚡ Edge Finder <span id="efClose" style="cursor:pointer;pointer-events:auto">✕</span></h3><div id="efBody" class="note">—</div></div>
-      <div class="card"><h3>Legend</h3><div class="note"><img src="/bull-ind.png" style="width:16px;vertical-align:-4px"/> bull = <b>demand</b> (institutional buying) · <img src="/bear-ind.png" style="width:16px;vertical-align:-4px"/> bear = <b>supply</b> (selling). <b>Bigger marker = higher conviction</b> (swing size + volume + trend). A pulsing marker on the right edge = price <b>approaching a zone</b>, anticipating the reaction. Click a marker for its level/conviction. 1m/5m/1H/1D timeframes · scroll/+− zoom · replay scrubber · Edge Finder. <span style="color:#6a6e76">Zones are estimates from structure, not guarantees.</span></div></div>
+      <div class="card"><h3>Legend</h3><div class="note"><img src="/bull-ind.png" style="width:16px;vertical-align:-4px"/> bull = a real <b>BUY</b> the strategy took · <img src="/bear-ind.png" style="width:16px;vertical-align:-4px"/> bear = the matching <b>SELL/exit</b>. Every symbol is a <b>validated backtest trade</b> on this data — <b>bigger = bigger move</b>. Click one for its entry/exit/result. Dashed lines = nearest demand/supply. 1m/5m/1H/1D · scroll/+− zoom · replay scrubber (speed 0.25–4×) · Edge Finder. <span style="color:#6a6e76">Backtested on real bars, gross of costs — not a guarantee.</span></div></div>
     </div>
   </div>
   <div class="disc">Educational only — not financial advice. Shows levels; does not place orders. Backtest gross of costs (cross-check of the /backtester engine).</div>
@@ -390,13 +390,20 @@ function draw(){
   // ── institutional zones: bull at DEMAND, bear at SUPPLY, SIZED + faded by IMPACT
   //    (conviction = swing size + volume + trend confluence). Bigger, more opaque,
   //    higher = stronger indicator. Each hops subtly on its own cadence. ──
+  // ── VALIDATED SIGNALS: a bull at every real backtest ENTRY, a bear at every
+  //    EXIT (from analyze's actual trades). Size + opacity scale with the trade's
+  //    magnitude, so a big symbol = a big real move. These aren't decorative
+  //    zones — each is a trade the strategy actually took on this data. ──
   markers=[];
-  const zs=(a.zones||[]).filter(z=>z.i>=start&&z.i<nEff&&z.conv>=0.4).sort((p,q)=>q.conv-p.conv).slice(0,16);
-  for(const z of zs){ const b=a.bars[z.i],x=X(z.i),sz=18+z.conv*64; let cy,img;
-    if(z.type==='demand'){cy=Y(b.l)+6+sz/2;img=bull;} else {cy=Y(b.h)-6-sz/2;img=bear;}
-    const by=markerBounce(z.i);
-    ctx.globalAlpha=0.5+0.5*z.conv; drawMarker(img,x,cy+by,sz); ctx.globalAlpha=1;
-    markers.push({x,cy,r:Math.max(14,sz/2),zone:z}); }
+  for(const t of (a.trades||[])){
+    const mag=Math.min(1,Math.abs(t.pct)/8), sz=24+mag*40;
+    if(t.i0>=start&&t.i0<nEff){ const b=a.bars[t.i0],x=X(t.i0),cy=Y(b.l)+6+sz/2,by=markerBounce(t.i0);
+      ctx.globalAlpha=0.7+0.3*mag; drawMarker(bull,x,cy+by,sz); ctx.globalAlpha=1;
+      markers.push({x,cy,r:Math.max(14,sz/2),trade:t,kind:'entry'}); }
+    if(t.i1>=start&&t.i1<nEff){ const b=a.bars[t.i1],x=X(t.i1),cy=Y(b.h)-6-sz/2,by=markerBounce(t.i1);
+      ctx.globalAlpha=0.7+0.3*mag; drawMarker(bear,x,cy+by,sz); ctx.globalAlpha=1;
+      markers.push({x,cy,r:Math.max(14,sz/2),trade:t,kind:'exit'}); }
+  }
   // nearest active support (demand below price) / resistance (supply above)
   const cur=a.c[nEff-1], at=a.atr||cur*0.01; let dem=null,sup=null;
   for(const z of (a.zones||[])){ if(z.i>=nEff)continue;
@@ -405,13 +412,8 @@ function draw(){
   const hline=(lvl,col,lbl)=>{ const y=Y(lvl); if(y<padT||y>H-padB)return; ctx.strokeStyle=col;ctx.globalAlpha=.5;ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.fillStyle=col;ctx.fillText(lbl,padL+6,y-7); };
   if(dem)hline(dem.price,'rgba(38,229,143,.7)','demand '+dem.price.toFixed(1));
   if(sup)hline(sup.price,'rgba(255,77,106,.7)','supply '+sup.price.toFixed(1));
-  // anticipation: price approaching a zone -> a pulsing marker BEFORE the move
-  const ante=(z,img2)=>{ const sz=30+z.conv*46+6*Math.sin(phase), x=W-padR-28, cy=Y(z.price);
-    ctx.save();ctx.globalAlpha=.92;ctx.strokeStyle=z.type==='demand'?'#26e58f':'#ff4d6a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,cy,sz/2+5,0,7);ctx.stroke();
-    drawMarker(img2,x,cy,sz);ctx.restore(); markers.push({x,cy,r:sz/2,zone:z}); };
-  const upTrend=a.s50[nEff-1]!=null&&cur>a.s50[nEff-1];
-  if(dem&&upTrend&&(cur-dem.price)<at*1.2) ante(dem,bull);
-  else if(sup&&!upTrend&&(sup.price-cur)<at*1.2) ante(sup,bear);
+  // (nearest demand/supply stay as dashed context lines above; the bull/bear
+  //  SYMBOLS are reserved for validated trade entries/exits only.)
   // last price + gentle dot
   const lp=Y(a.c[nEff-1]),lx=X(nEff-1); ctx.strokeStyle='rgba(232,234,237,.5)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(padL,lp);ctx.lineTo(W-padR,lp);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#e8eaed';const dr=4.5+0.6*Math.abs(Math.sin(phase));ctx.beginPath();ctx.arc(lx,lp,dr,0,7);ctx.fill();
@@ -429,6 +431,14 @@ function anim(){ phase+=0.045; if(phase>6.283)phase-=6.283;
     if(step>0){ replayAccum-=step; REPLAY+=step; if(REPLAY>=DATA.c.length){REPLAY=null;PLAYING=false;replayAccum=0;$('#play').textContent='▶';syncScrub();} else updateScrubUI(); } }
   draw(); requestAnimationFrame(anim); }
 
+// ── validated-signal popup: the real trade this symbol marks ──
+function tradeText(t,kind){ const win=t.pct>=0, entry=kind==='entry';
+  return `<h4 class="${entry?'g':(win?'g':'r')}">${entry?'▲ BUY · strategy entry':'▼ SELL · strategy exit'}</h4>
+  <div class="row"><span>Entry</span><b>${t.entry.toFixed(2)}</b></div>
+  <div class="row"><span>Exit</span><b>${t.exit.toFixed(2)}</b></div>
+  <div class="row"><span>Result</span><b class="${win?'g':'r'}">${win?'+':''}${t.pct.toFixed(1)}%</b></div>
+  <div class="row"><span>Held</span><b>${t.bars} bars</b></div>
+  <div class="row"><span>Exit reason</span><b>${(t.reason||'').replace(/_/g,' ')}</b></div>`; }
 // ── zone popup ──
 function zoneText(z){ const buy=z.type==='demand';
   return `<h4 class="${buy?'g':'r'}">${buy?'DEMAND · institutional buying':'SUPPLY · institutional selling'}</h4>
@@ -492,7 +502,7 @@ cv.addEventListener('wheel',e=>{e.preventDefault();VIEW=Math.max(40,Math.min(420
 cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mouseX=e.clientX-r.left;mouseY=e.clientY-r.top;});
 cv.addEventListener('mouseleave',()=>{mouseX=mouseY=-1;});
 cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,hit=markers.find(m=>{const dx=mx-m.x,dy=my-m.cy;return dx*dx+dy*dy<=m.r*m.r;}),pop=$('#pop');
-  if(hit){pop.innerHTML=zoneText(hit.zone);pop.style.display='block';pop.style.left=Math.min(mx+14,cv.clientWidth-220)+'px';pop.style.top=Math.min(my+14,cv.clientHeight-150)+'px';}else pop.style.display='none';});
+  if(hit){pop.innerHTML=hit.trade?tradeText(hit.trade,hit.kind):zoneText(hit.zone);pop.style.display='block';pop.style.left=Math.min(mx+14,cv.clientWidth-220)+'px';pop.style.top=Math.min(my+14,cv.clientHeight-150)+'px';}else pop.style.display='none';});
 window.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'&&DATA){REPLAY=Math.min(DATA.c.length,(REPLAY||DATA.c.length-VIEW)+1);updateScrubUI();} else if(e.key==='ArrowLeft'&&DATA){REPLAY=Math.max(60,(REPLAY||DATA.c.length)-1);updateScrubUI();} else if(e.key===' '){e.preventDefault();$('#play').click();} else if(e.key==='+'||e.key==='='){VIEW=Math.max(40,VIEW-20);} else if(e.key==='-'){VIEW=Math.min(420,VIEW+20);} });
 window.addEventListener('resize',resize);
 
