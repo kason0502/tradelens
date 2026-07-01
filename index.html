@@ -1048,6 +1048,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .bias-chip.neu{color:var(--mu)}
 .bt-del{cursor:pointer;color:var(--fa);font-weight:800;padding:0 4px}.bt-del:hover{color:var(--rt)}
 #btHistoryWrap .bt-log tbody tr{cursor:pointer}#btHistoryWrap .bt-log tbody tr:hover{background:rgba(var(--ac-rgb),.06)}
+.bt-rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.bt-rule{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rsm);padding:13px 14px}
+.bt-rule-n{width:22px;height:22px;border-radius:50%;background:rgba(var(--ac-rgb),.15);color:var(--act);font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.bt-rule b{display:block;font-size:13px;margin-bottom:4px}.bt-rule span{font-size:11.5px;color:var(--ink3);line-height:1.5}
 .fut-scan{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .fut-chip{border:1px solid var(--line);border-radius:14px;padding:15px 16px;text-align:left;cursor:pointer;background:rgba(255,255,255,.015);transition:transform .14s,border-color .14s,background .14s}
 .fut-chip:hover{border-color:rgba(var(--ac-rgb),.5);transform:translateY(-2px)}
@@ -1458,6 +1462,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 /* re-enable soft green aurora orbs on the landing for premium depth */
 #landing .lx-bg{position:fixed;inset:0;height:100%}
 #landing .lx-orb{display:block;position:absolute;opacity:.42;filter:blur(36px);mix-blend-mode:screen}
+#landing .lx-bg-bull{position:absolute;right:-4%;bottom:-3%;width:min(56vw,760px);opacity:.08;filter:drop-shadow(0 0 60px rgba(var(--ac-rgb),.22));pointer-events:none;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent);mask-image:linear-gradient(180deg,#000 55%,transparent)}
+@media(max-width:900px){#landing .lx-bg-bull{width:130vw;right:-30%;bottom:auto;top:12%;opacity:.05}}
 /* keep app surfaces readable above the canvas */
 .page-wrap,.main-col{position:relative;z-index:1}
 .appbar{background:rgba(6,6,8,.74)}
@@ -1481,7 +1487,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 
 <!-- ═══════════════════ LANDING ═══════════════════ -->
 <div id="landing">
-  <div class="lx-bg"><div class="lx-bg-grid"></div><div class="lx-orb a"></div><div class="lx-orb b"></div><div class="lx-orb c"></div></div>
+  <div class="lx-bg"><div class="lx-bg-grid"></div><img class="lx-bg-bull" src="bull.png" alt=""/><div class="lx-orb a"></div><div class="lx-orb b"></div><div class="lx-orb c"></div></div>
 
   <!-- NAV -->
   <header class="lx-nav" id="lxNav">
@@ -5249,13 +5255,22 @@ async function renderBacktester(force){
   const logRows=trades.map((t,i)=>{const mv=(t.exit_fill_price-t.entry_fill_price)/t.entry_fill_price*100,win=t.pnl>=0;
     return `<tr onclick="btShowTrade(${i})" class="${i===bi?'sel':''}"><td>${i+1}</td><td>${t.day}</td><td>${(t.exit_ts||'').slice(0,10)}</td><td>Long</td><td class="num">$${t.entry_fill_price.toLocaleString()}</td><td class="num">$${t.exit_fill_price.toLocaleString()}</td><td class="num ${win?'g':'r'}">${win?'+':''}${_bt$(t.pnl)}</td><td class="num ${mv>=0?'g':'r'}">${mv>=0?'+':''}${mv.toFixed(1)}%</td><td class="num">${Math.round((t.hold_minutes||0)/1440)}d</td><td style="text-transform:capitalize">${(t.exit_reason||'').replace(/_/g,' ')}</td></tr>`;}).join('');
   el.innerHTML=`
-    <div class="card"><div class="card-title">Run a fresh backtest <span class="pill">in-browser · real daily data</span></div>
+    <div class="card"><div class="card-title">How the strategy works <span class="pill">trend-pullback</span></div>
+      <div class="bt-rules">
+        <div class="bt-rule"><div class="bt-rule-n">1</div><b>Trade with the trend</b><span>Only hunt longs while price is above its 50-period average — never counter-trend.</span></div>
+        <div class="bt-rule"><div class="bt-rule-n">2</div><b>Buy the pullback</b><span>Wait for a dip to the 10-period average, then a bar that turns back up. Buy weakness inside strength.</span></div>
+        <div class="bt-rule"><div class="bt-rule-n">3</div><b>Ride, exit on the break</b><span>Hold while the trend holds; exit when a bar closes below the 50-period average. A −8% hard stop is the backstop.</span></div>
+      </div>
+      <div class="dp-struct off" style="margin-top:12px">Why it works: trends persist more often than they snap, and buying pullbacks (not breakouts) gets a better price with a tighter, structure-based stop. The <b>win rate is intentionally under 50%</b> — the edge is letting winners run far past small, quick losers. Run it <b>Hourly</b> below for a short-hold version of the exact same logic.</div>
+    </div>
+    <div class="card"><div class="card-title">Run a fresh backtest <span class="pill">in-browser · real data</span></div>
       <div class="btrun-bar">
         <select id="btRunSym" class="sp-sel">${[['ES=F','S&P 500 (ES)'],['NQ=F','Nasdaq 100 (NQ)'],['YM=F','Dow (YM)'],['RTY=F','Russell 2000 (RTY)'],['CL=F','Crude Oil (CL)'],['GC=F','Gold (GC)'],['SPY','SPY ETF'],['QQQ','QQQ ETF']].map(([v,l])=>`<option value="${v}"${v===(c.symbol||'ES=F')?' selected':''}>${l}</option>`).join('')}</select>
+        <select id="btRunTf" class="sp-sel"><option value="1d" selected>Daily (swing)</option><option value="1h">Hourly (short-term)</option></select>
         <select id="btRunYears" class="sp-sel"><option value="5">5 years</option><option value="10" selected>10 years</option><option value="max">Max history</option></select>
         <button class="dp-fu" onclick="btRunLive()" id="btRunBtn">▶ Run backtest</button>
       </div>
-      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Runs the exact trend-pullback rule on real daily candles, live. Results are in <b>% per trade</b> and <b>gross of costs</b> — an honest cross-check of the Python engine below (which adds pessimistic fills + slippage + commission).</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:8px">Runs the exact trend-pullback rule on <b>real candles</b>, live. Pick <b>Hourly</b> for a genuinely short-hold edge (positions measured in hours, not weeks) — same rule, faster timeframe, real data. Results are <b>% per trade, gross of costs</b> (an honest cross-check of the Python engine below, which adds fills + slippage + commission). <span style="color:var(--ink3)">Hourly uses Yahoo's ~2-year 60-min history.</span></div>
       <div id="btLiveResults"></div>
       <div id="btHistoryWrap"></div>
     </div>
@@ -5284,17 +5299,22 @@ async function btRunLive(){
   const out=document.getElementById('btLiveResults');if(!out)return;
   const sym=(document.getElementById('btRunSym')||{}).value||'ES=F';
   const yrs=(document.getElementById('btRunYears')||{}).value||'10';
+  const tf=(document.getElementById('btRunTf')||{}).value||'1d';
+  const hourly=tf==='1h', tfLbl=hourly?'hourly':'daily';
   const btn=document.getElementById('btRunBtn');if(btn){btn.disabled=true;btn.textContent='Running…';}
-  out.innerHTML=`<div class="loading-label" style="padding:18px">Fetching ${yrs==='max'?'max history':yrs+'y'} of ${sym} & simulating…</div>`;
+  out.innerHTML=`<div class="loading-label" style="padding:18px">Fetching ${hourly?'~2y of hourly':(yrs==='max'?'max history':yrs+'y')} ${sym} & simulating…</div>`;
   try{
-    const now=Math.floor(Date.now()/1000), from=yrs==='max'?0:now-(parseInt(yrs)+1)*365*86400;
+    const now=Math.floor(Date.now()/1000);
+    const from=hourly?now-700*86400:(yrs==='max'?0:now-(parseInt(yrs)+1)*365*86400);
     window.__userFetch=Date.now();
-    const candles=await btFetchOHLC(sym,from,now);
+    const candles=await btFetchOHLC(sym,from,now,tf);
     window.__userFetch=0;
     if(!candles||candles.length<80){out.innerHTML='<div class="bt-empty" style="padding:16px">Not enough data returned — try a different symbol or window.</div>';return;}
     const {trades,metrics:m}=btSimulate(candles);
     if(!trades.length){out.innerHTML='<div class="bt-empty" style="padding:16px">No trades triggered in this window.</div>';return;}
     const pf=isFinite(m.profit_factor)?m.profit_factor.toFixed(2):'∞';
+    const avgHoldMin=trades.reduce((a,t)=>a+(t.hold_minutes||0),0)/trades.length;
+    const holdStr=hourly?(avgHoldMin>=1440?(avgHoldMin/1440).toFixed(1)+'d':(avgHoldMin/60).toFixed(1)+'h'):Math.round(avgHoldMin/1440)+'d';
     const tile=(lbl,val,cls)=>`<div class="bt-stat"><div class="bt-stat-v ${cls||''}">${val}</div><div class="bt-stat-l">${lbl}</div></div>`;
     const verdict=(m.profit_factor>=1.3&&m.total_return_pct>0)?'<span style="color:var(--gt);font-weight:800">edge holds</span> — profit factor '+pf:(m.profit_factor>=1?'<span style="color:var(--at);font-weight:800">marginal edge</span>':'<span style="color:var(--rt);font-weight:800">no edge in this window</span>');
     out.innerHTML=`<div class="bt-statgrid" style="margin-top:14px">
@@ -5302,14 +5322,17 @@ async function btRunLive(){
         ${tile('Win rate',m.win_rate_pct.toFixed(1)+'%')}
         ${tile('Profit factor',pf,m.profit_factor>=1?'g':'r')}
         ${tile('Trades',m.n_trades)}
+        ${tile('Avg hold',holdStr,hourly?'g':'')}
         ${tile('Avg / trade',(m.avg_trade_pct>=0?'+':'')+m.avg_trade_pct.toFixed(2)+'%',m.avg_trade_pct>=0?'g':'r')}
         ${tile('Best',(m.best_pct>=0?'+':'')+m.best_pct.toFixed(1)+'%','g')}
-        ${tile('Worst',m.worst_pct.toFixed(1)+'%','r')}
         ${tile('Max DD',m.max_drawdown_pct.toFixed(1)+'%','r')}
       </div>
-      <div style="margin-top:14px">${btEquityPctSVG(m.equity)}</div>
-      <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} daily bars · ${trades.length} trades · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}. <span style="color:var(--gt)">✓ saved below</span></div>`;
-    btSaveRun({sym,yrs,bars:candles.length,m});   // permanently store this run (this browser)
+      <div style="margin-top:16px"><div class="card-title" style="margin-bottom:8px">When it would have traded <span class="pill">▲ entry · ● exit</span></div>${btSignalTimelineSVG(candles,trades)}
+        <div style="font-size:11px;color:var(--ink3);margin-top:6px">Real ${sym} ${tfLbl} closes over the whole test. <span style="color:var(--gt)">▲</span> = where the rule <b>entered a long</b>; <span style="color:var(--gt)">●</span>/<span style="color:var(--rt)">●</span> = the exit (green win / red loss). This is exactly when the backtester fires.</div>
+      </div>
+      <div style="margin-top:16px">${btEquityPctSVG(m.equity)}</div>
+      <div style="font-size:12px;color:var(--ink2);margin-top:8px">${sym} · ${candles.length} ${tfLbl} bars · ${trades.length} trades · avg hold <b>${holdStr}</b> · equity compounds 1 unit/trade (gross of costs). Verdict: ${verdict}. <span style="color:var(--gt)">✓ saved below</span></div>`;
+    btSaveRun({sym,yrs:hourly?'1h':yrs,tf,bars:candles.length,m});   // permanently store this run (this browser)
     btRenderHistory();
   }catch(e){out.innerHTML='<div class="bt-empty" style="padding:16px">Data feed busy — try again in a moment.</div>';}
   finally{if(btn){btn.disabled=false;btn.textContent='▶ Run backtest';}}
@@ -5365,10 +5388,10 @@ function btSimulate(candles){
       let exit=null,reason=null;
       if(candles[i].l<=pos.stop){exit=pos.stop;reason='hard_stop';}
       else if(c[i]<s50){exit=c[i];reason='trend_break';}
-      if(exit!=null){trades.push({day:_btDayStr(pos.entryT),entry_ts:pos.entryT,entry_fill_price:+pos.entry.toFixed(2),exit_fill_price:+exit.toFixed(2),exit_ts:_btDayStr(candles[i].t),exit_reason:reason,pnl:null,pnlPct:(exit-pos.entry)/pos.entry*100,hold_minutes:(candles[i].t-pos.entryT)/60});pos=null;}
+      if(exit!=null){trades.push({day:_btDayStr(pos.entryT),entry_ts:pos.entryT,entry_fill_price:+pos.entry.toFixed(2),exit_fill_price:+exit.toFixed(2),exit_ts:_btDayStr(candles[i].t),exit_t:candles[i].t,exit_reason:reason,pnl:null,pnlPct:(exit-pos.entry)/pos.entry*100,hold_minutes:(candles[i].t-pos.entryT)/60});pos=null;}
     }
   }
-  if(pos){const last=c[n-1];trades.push({day:_btDayStr(pos.entryT),entry_ts:pos.entryT,entry_fill_price:+pos.entry.toFixed(2),exit_fill_price:+last.toFixed(2),exit_ts:_btDayStr(candles[n-1].t),exit_reason:'open (marked)',pnl:null,pnlPct:(last-pos.entry)/pos.entry*100,hold_minutes:(candles[n-1].t-pos.entryT)/60});}
+  if(pos){const last=c[n-1];trades.push({day:_btDayStr(pos.entryT),entry_ts:pos.entryT,entry_fill_price:+pos.entry.toFixed(2),exit_fill_price:+last.toFixed(2),exit_ts:_btDayStr(candles[n-1].t),exit_t:candles[n-1].t,exit_reason:'open (marked)',pnl:null,pnlPct:(last-pos.entry)/pos.entry*100,hold_minutes:(candles[n-1].t-pos.entryT)/60});}
   const rs=trades.map(t=>t.pnlPct),wins=rs.filter(r=>r>0),losses=rs.filter(r=>r<=0);
   const gW=wins.reduce((a,b)=>a+b,0),gL=Math.abs(losses.reduce((a,b)=>a+b,0));
   let eq=1,curve=[1];trades.forEach(t=>{eq*=(1+t.pnlPct/100);curve.push(eq);});
@@ -5405,8 +5428,25 @@ function btTradeBlock(t,i){
 function _btTs(d){return Math.floor(new Date((d||'').slice(0,10)+'T00:00:00Z').getTime()/1000);}
 function _btDayStr(ts){return new Date(ts*1000).toISOString().slice(0,10);}
 // Fetch real daily OHLC for an arbitrary historical window through the proxy.
-async function btFetchOHLC(sym,from,to){
-  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&period1=${from}&period2=${to}`;
+// Whole-period close line with a ▲ at every entry and a ● at every exit — shows
+// exactly WHEN the rule would have fired across the test.
+function btSignalTimelineSVG(candles,trades){
+  const c=candles.map(b=>b.c),n=c.length; if(n<2)return '';
+  const W=900,H=150,padL=8,padR=8,padT=16,padB=14;
+  const min=Math.min(...c),max=Math.max(...c),rg=Math.max(1e-6,max-min);
+  const X=i=>padL+i/(n-1)*(W-padL-padR), Y=v=>padT+(1-(v-min)/rg)*(H-padT-padB);
+  let line=''; for(let i=0;i<n;i++)line+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(c[i]).toFixed(1)+' ';
+  const idxOf=ts=>{ for(let i=0;i<n;i++){ if(candles[i].t>=ts) return i; } return n-1; };
+  let marks='';
+  for(const t of trades){ const ei=idxOf(t.entry_ts), ex=X(ei), ey=Y(c[ei]);
+    marks+=`<path d="M${ex.toFixed(1)} ${(ey+10).toFixed(1)} l-4.5 7.5 l9 0 z" fill="var(--gt)" opacity=".9"/>`;
+    const xi=idxOf(t.exit_t||_btTs(t.exit_ts)); if(xi>ei){ const win=t.pnlPct>=0; marks+=`<circle cx="${X(xi).toFixed(1)}" cy="${Y(c[xi]).toFixed(1)}" r="2.8" fill="${win?'var(--gt)':'var(--rt)'}"/>`; }
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block"><path d="${line}" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.3"/>${marks}</svg>`;
+}
+async function btFetchOHLC(sym,from,to,interval){
+  interval=interval||'1d';
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${interval}&period1=${from}&period2=${to}`;
   const data=await tryFetchRetry(url,1);
   const res=data&&data.chart&&data.chart.result&&data.chart.result[0];if(!res)return null;
   const q=res.indicators.quote[0],t=res.timestamp||[];

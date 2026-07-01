@@ -396,7 +396,7 @@ function draw(){
   //    zones — each is a trade the strategy actually took on this data. ──
   markers=[];
   for(const t of (a.trades||[])){
-    const mag=Math.min(1,Math.abs(t.pct)/8), sz=24+mag*40;
+    const mag=Math.min(1,Math.abs(t.pct)/8), sz=38+mag*58;
     if(t.i0>=start&&t.i0<nEff){ const b=a.bars[t.i0],x=X(t.i0),cy=Y(b.l)+6+sz/2,by=markerBounce(t.i0);
       ctx.globalAlpha=0.7+0.3*mag; drawMarker(bull,x,cy+by,sz); ctx.globalAlpha=1;
       markers.push({x,cy,r:Math.max(14,sz/2),trade:t,kind:'entry'}); }
