@@ -14,6 +14,11 @@
 **Wave A (fixes/upgrades):** PO3 card: explain Acc/Manip/Dist plainly + more real data · expand edge card further · compact Futures layout (less scrolling) · Matrix: more per-market info · Playbook: professional diagram + real stats · Split View: accessible from other tabs · Strength: new-trader readability · Risk Calc: make genuinely useful · Backtester: honest hold-time expectation-setting (~27d avg; no shorter edge exists yet) · Learn: refresh to current product · **ABOLISH AI Chat tab + Connect-AI footer** · deluxe nav feel both surfaces · Live: fix ⚡ Edge Finder · fastest-honest refresh cadence + "updated Xs ago" · per-marker WHY + take/skip guidance · indicator stats from generalization artifact · fix top-left logo (use owner's logo.png) · symbol search + custom watchlist.
 **Wave B (new features, architect-designed):** PRO "Trade Planner" tab (live indicator → strategy match → entry/SL/TP from real structure + artifact stats, educational framing) · "Market Structure" tab (auto FVG/liquidity-zone detection, NO trade suggestions; users define/describe OWN strategies + paper-track live with SL/TP hit detection + % P&L + history; dead Journal engine may revive for tracking).
 
+## Next (wave 3 QA observations)
+- [ ] **Matrix loading stall hardening:** under proxy backlog the tab can spin "Loading markets…" unbounded (fetchQuote failure chain >60s before nulls). Add a ~15s per-symbol deadline so paintMatrix renders honest "No data — Refresh" cards.
+- [ ] **Dead storage write:** dormant AI helpers still write `tlpro_ai_memory_v1` — remove the write or document it.
+- [ ] **App top-bar button + Legend still say "Edge Finder"** while the card says "Parameter explorer" — rename to match.
+
 ## Next (wave 3 run 1 discoveries — honesty risks in dead code)
 - [ ] **Dead alerts system:** `#moAlert` modal + `addAlertModal`/`addAlert2`/`renderAlerts` have NO callers — yet `TIER_FEATS` Plus copy still sells "alerts". Wire it up or remove it and scrub the tier copy.
 - [ ] **Dead stock-era backtest game** (`initBacktestTab`/`dealBacktest`, ~2747–2997) contains stale "Connect Claude" strings pointing at the deleted button — prune when next in the area.
