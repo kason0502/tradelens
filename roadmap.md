@@ -1,7 +1,7 @@
 # STRATA — Development Roadmap
 
 > Last updated: 2026-07-01
-> Owner: @kason0502 | Build system: Hermes Agent (autonomous)
+> Owner: @kason0502 | Build system: the Claude Code 5-agent pipeline (see CLAUDE.md)
 
 ## Vision
 Transform STRATA from a validated trading signal platform into a premium, institutional-grade futures trading ecosystem that rivals Bloomberg Terminal + TradingView + LuxAlgo — but original, AI-driven, and built for the independent trader.
@@ -172,8 +172,7 @@ Transform STRATA from a validated trading signal platform into a premium, instit
 ---
 
 ## Continuous (Always Running)
-- Hermes agents running research, code review, and QA automatically
-- Skills updated after every successful pattern
+- The 5-agent pipeline (edge-finder → critic → architect → builder → qa-test) runs research, review, and QA on every wave
 - Trading edge research (new strategies, new timeframes)
 - UI polish based on user feedback
 - Performance monitoring and optimization
