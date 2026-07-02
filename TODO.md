@@ -10,6 +10,10 @@
 - [x] **Fetch dedupe** (results.json ×2 gone; fetchLivePrice 5s memo) — was ~39 proxy hits/load.
 - [x] **Visual system:** tabular-nums + U+2212 + `.nu` units · `strataChart` (time-scaled equity — deleted both old renderers) · unified tile spec · `.ct-glyph` strata motif ×3 + layered landing dividers · app long-only stat default + shorts toggle · ≤520px bottom-dock nav (root-cause of the 267px column).
 
+## OWNER FEEDBACK BACKLOG (2026-07-01 — pipeline wave 3 in progress)
+**Wave A (fixes/upgrades):** PO3 card: explain Acc/Manip/Dist plainly + more real data · expand edge card further · compact Futures layout (less scrolling) · Matrix: more per-market info · Playbook: professional diagram + real stats · Split View: accessible from other tabs · Strength: new-trader readability · Risk Calc: make genuinely useful · Backtester: honest hold-time expectation-setting (~27d avg; no shorter edge exists yet) · Learn: refresh to current product · **ABOLISH AI Chat tab + Connect-AI footer** · deluxe nav feel both surfaces · Live: fix ⚡ Edge Finder · fastest-honest refresh cadence + "updated Xs ago" · per-marker WHY + take/skip guidance · indicator stats from generalization artifact · fix top-left logo (use owner's logo.png) · symbol search + custom watchlist.
+**Wave B (new features, architect-designed):** PRO "Trade Planner" tab (live indicator → strategy match → entry/SL/TP from real structure + artifact stats, educational framing) · "Market Structure" tab (auto FVG/liquidity-zone detection, NO trade suggestions; users define/describe OWN strategies + paper-track live with SL/TP hit detection + % P&L + history; dead Journal engine may revive for tracking).
+
 ## Next (pipeline run 2 leftovers)
 - [ ] **`btViewSaved` unguarded `${r.bars}`** (index.html ~5696) — "undefined daily bars" if a record ever lacks `bars`; add `r.bars||'—'`.
 - [ ] **serve.ps1 directory URLs** — `/trader/app/` 404s locally (only `/` maps to index.html); links use the full path so it works, but a dir→index fallback would make the documented URL valid.

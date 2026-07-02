@@ -5,6 +5,9 @@ STRATA (formerly TradeLens Pro) is a **single-file** app: everything is in `inde
 ## Living docs — READ at the start, UPDATE before you finish
 At the **start** of a session, read:
 - `DIRECTIVE.md` — the owner's Master Engineering Directive: mission, product standard ("would a serious futures trader happily pay for this?"), specialist lenses (Atlas/Orion/Athena/Nova/Sentinel/Forge/Pulse → mapped onto the agent pipeline), autonomy rules, current stack reality.
+- `ui-rules.md` — the enforceable UI law (tokens, number craft, component rules, motion rules, anti-patterns, pre-PR checklist). `DESIGN_SYSTEM.md` remains the living history; ui-rules is the snapshot to ENFORCE.
+- `roadmap.md` — the phased development roadmap (foundation → visual overhaul → AI intelligence → backtesting power → monetization → production). `TODO.md` carries the granular near-term items.
+- `agent-system.md` — how the Hermes orchestrator (external autonomous build system) and the Claude Code 5-agent pipeline divide work.
 - `PROJECT_CONTEXT.md` — what/why/status, how to run, constraints.
 - `ARCHITECTURE.md` — code structure, key functions, data flow.
 - `DESIGN_SYSTEM.md` — tokens, colors, components, conventions.
