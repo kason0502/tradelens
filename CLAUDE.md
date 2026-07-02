@@ -4,6 +4,7 @@ STRATA (formerly TradeLens Pro) is a **single-file** app: everything is in `inde
 
 ## Living docs — READ at the start, UPDATE before you finish
 At the **start** of a session, read:
+- `DIRECTIVE.md` — the owner's Master Engineering Directive: mission, product standard ("would a serious futures trader happily pay for this?"), specialist lenses (Atlas/Orion/Athena/Nova/Sentinel/Forge/Pulse → mapped onto the agent pipeline), autonomy rules, current stack reality.
 - `PROJECT_CONTEXT.md` — what/why/status, how to run, constraints.
 - `ARCHITECTURE.md` — code structure, key functions, data flow.
 - `DESIGN_SYSTEM.md` — tokens, colors, components, conventions.
