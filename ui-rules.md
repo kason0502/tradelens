@@ -181,7 +181,7 @@ The UI reflects market sentiment:
 
 ### Layered Dividers
 - 3 stacked hairlines at 6/4/2% opacity with width offsets
-- Landing sections only
+- Landing sections + app nav group labels (`.appnav-grp`)
 
 ---
 

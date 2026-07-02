@@ -175,6 +175,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .tab-pane{display:none}.tab-pane.active{display:block;animation:tabIn .34s cubic-bezier(.22,1,.36,1)}
 @keyframes tabIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.tab-pane.active{animation:none}}
+/* Staggered card entrance on tab switch — mainTab() sets --i (0–3) on the
+   first 4 cards of the activated pane; later cards have no --i → 0ms delay. */
+.tab-pane.active .card{animation:fadeUp .3s ease-out backwards;animation-delay:calc(var(--i,0)*40ms)}
+@media(prefers-reduced-motion:reduce){.tab-pane.active .card{animation:none}}
 
 /* ── TICKER ROW ── */
 .ticker-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -510,23 +514,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .fb-ta{width:100%;padding:9px 11px;border-radius:var(--rsm);border:1px solid var(--b2);background:var(--bg);color:var(--tx);font-size:12px;resize:vertical;min-height:56px;outline:none;font-family:inherit;margin-bottom:9px}
 .fb-ta:focus{border-color:var(--gr)}
 .fb-submit{width:100%;padding:9px;border-radius:var(--rsm);border:none;background:var(--gr);color:#000;font-size:12px;font-weight:800;cursor:pointer}
-
-/* ── AI CHAT ── */
-.chat-msgs{height:400px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.chat-msgs::-webkit-scrollbar{width:4px}
-.chat-msgs::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
-.bubble{max-width:88%;padding:11px 15px;border-radius:var(--rsm);font-size:13px;line-height:1.75}
-.b-user{background:var(--bd);color:var(--bt);align-self:flex-end;border-bottom-right-radius:3px}
-.b-ai{background:var(--s2);color:var(--tx);align-self:flex-start;border-bottom-left-radius:3px}
-.b-typing{background:var(--s2);color:var(--mu);align-self:flex-start;font-style:italic;font-size:12px}
-.chat-sugs{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
-.chat-sug{padding:3px 11px;border-radius:100px;border:1px solid var(--b2);background:var(--s2);color:var(--mu);font-size:10px;cursor:pointer;transition:all .15s}
-.chat-sug:hover{border-color:var(--gr);color:var(--gt)}
-.chat-inp-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--b1)}
-.chat-inp{flex:1;padding:9px 13px;border-radius:var(--rsm);border:1px solid var(--b2);background:var(--s2);color:var(--tx);font-size:13px;outline:none;resize:none;font-family:inherit;line-height:1.5}
-.chat-inp:focus{border-color:var(--gr)}
-.chat-send{padding:9px 18px;border-radius:var(--rsm);border:none;background:var(--gr);color:#000;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap;align-self:flex-end}
-.chat-send:hover{opacity:.88}
 
 /* ── PRO TRADERS ── */
 .trader-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rsm);padding:18px 20px;margin-bottom:13px;transition:all .15s}
@@ -1416,6 +1403,11 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .appnav-scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;padding:10px 12px;position:relative}
 .appnav-scroll::-webkit-scrollbar{width:0}
 .appnav-grp{font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--fa);padding:16px 12px 7px;position:relative;z-index:2}
+/* Layered-divider motif (brand: 3 stacked hairlines, 6/4/2% white) above each nav group label */
+.appnav-grp::before{content:'';display:block;height:5px;margin-bottom:8px;pointer-events:none;background:
+  linear-gradient(rgba(255,255,255,.06),rgba(255,255,255,.06)) 0 0/100% 1px no-repeat,
+  linear-gradient(rgba(255,255,255,.04),rgba(255,255,255,.04)) 0 2px/72% 1px no-repeat,
+  linear-gradient(rgba(255,255,255,.02),rgba(255,255,255,.02)) 0 4px/46% 1px no-repeat}
 /* gliding layers — sit BEHIND the items */
 .snav-glide,.snav-hover{position:absolute;left:8px;right:8px;height:40px;top:0;border-radius:13px;pointer-events:none;opacity:0;will-change:transform,height}
 .snav-glide{z-index:1;background:linear-gradient(100deg,rgba(var(--ac-rgb),.24),rgba(var(--ac-rgb),.09));border:1px solid rgba(var(--ac-rgb),.34);box-shadow:0 8px 20px -10px rgba(var(--ac-rgb),.6),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .55s cubic-bezier(.34,1.56,.5,1),height .55s cubic-bezier(.34,1.56,.5,1),opacity .3s}
@@ -1428,7 +1420,8 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .snav:hover{color:var(--ink)}
 .snav:hover svg{transform:scale(1.18) rotate(-7deg)}
 .snav.active{color:#eafff3}
-.snav.active svg{stroke:var(--act)}
+.snav.active svg{stroke:var(--act);animation:snavTick .18s ease-out}
+@keyframes snavTick{0%{transform:scale(1);opacity:.75}45%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
 /* priority tabs — bigger, bolder, with an accent rail so they read as the core spine */
 .snav-pri{padding:14px 12px;font-size:15.5px;font-weight:800;letter-spacing:-.01em}
 .snav-pri svg{width:22px;height:22px;stroke-width:2}
@@ -1440,7 +1433,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 .appnav-foot .snav:hover{background:rgba(255,255,255,.05)}
 .appnav-live{display:inline-flex;align-items:center;gap:9px;font-size:10.5px;font-weight:800;color:var(--ink3);padding:8px 12px;letter-spacing:.1em;text-transform:uppercase}
 .appnav-live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--em);box-shadow:0 0 0 0 rgba(38,194,129,.6);animation:pulse 2s infinite}
-@media(prefers-reduced-motion:reduce){.snav-glide,.snav-hover,.snav,.snav svg,.appnav-logo,.appnav-logo .logo-mark{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.snav-glide,.snav-hover,.snav,.snav svg,.appnav-logo,.appnav-logo .logo-mark{transition:none!important}.snav.active svg{animation:none}}
 
 /* ── MOVERS BANNER (app top) ── */
 .appbar{position:sticky;top:0;z-index:200;height:48px;display:flex;align-items:stretch;background:rgba(8,8,10,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);overflow:hidden}
@@ -1618,9 +1611,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
             <div class="vp-r"><span>5440</span><div class="vp-bar" style="width:18%"></div></div>
           </div>
         </div>
-        <!-- AI probability -->
+        <!-- setup probability -->
         <div class="tp">
-          <div class="tp-h"><span class="tp-lbl">AI probability</span><span class="tp-tag">example</span></div>
+          <div class="tp-h"><span class="tp-lbl">Setup probability</span><span class="tp-tag">example</span></div>
           <div class="tp-big up">73<span style="font-size:20px">%</span></div>
           <div class="tp-sub">Long setup confidence</div>
           <div class="tp-bar"><i style="width:73%"></i></div>
@@ -1749,10 +1742,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div class="lx-row-text lx-reveal r">
         <div class="lx-eyebrow">Backtesting</div>
         <h3 class="lx-h3">Rehearse the read before the money's real.</h3>
-        <p>Practice on real historical charts with zero risk. Make your call at the decision point, then watch what actually happened next — with an AI coach explaining what to learn from every trade.</p>
+        <p>Practice on real historical charts with zero risk. Make your call at the decision point, then step forward bar by bar and watch what actually happened — with the strategy's entry, stop and targets drawn on the chart.</p>
         <div class="lx-bullets">
           <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Skill, scored.</b> <span>Track accuracy by strategy, direction and timeframe.</span></div></div>
-          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Coached.</b> <span>An AI mentor walks every trade, bar by bar.</span></div></div>
+          <div class="lx-bullet"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Bar replay.</b> <span>Walk the aftermath one bar at a time and see exactly where the trade won or lost.</span></div></div>
         </div>
       </div>
     </div>
@@ -1855,7 +1848,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> 12-factor edge bias stack + PO3 zones</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Backtester · Matrix · Charts · Split View</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Relative Strength · Sessions · Risk Calc</li>
-            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> AI deep-reads &amp; setup alerts</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Full long &amp; short signals on all six markets</li>
           </ul>
           <button class="lx-btn primary" onclick="openPaywall(1)">Get Plus →</button>
         </div>
@@ -1954,29 +1947,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 </div>
 <div id="acctChip" class="acct-chip" style="display:none"></div>
 
-<div class="mo" id="moAI">
-  <div class="modal">
-    <button class="mx" onclick="closeMo('moAI')">✕</button>
-    <div class="mtitle">✨ Connect Claude AI</div>
-    <div class="msub">Unlocks AI across the whole app: market reads, live setup scanning, teaching, news digests, and performance coaching.</div>
-    <div class="ai-steps">
-      <div class="ai-step"><span class="ai-step-n">1</span> Go to <b>console.anthropic.com</b> → API Keys → Create Key</div>
-      <div class="ai-step"><span class="ai-step-n">2</span> Add a little credit under Billing (calls cost fractions of a cent)</div>
-      <div class="ai-step"><span class="ai-step-n">3</span> Paste the key below and hit <b>Save &amp; Test</b></div>
-    </div>
-    <div class="flbl">Anthropic API Key</div>
-    <input class="fi" id="aiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off"/>
-    <div style="font-size:11px;color:var(--mu);line-height:1.6;margin:-4px 0 12px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Your key stays in this browser tab only — kept in memory, never written to disk and never sent anywhere except Anthropic's API.</div>
-    <button class="mbtn" onclick="saveAIKey(true)">Save &amp; Test Connection</button>
-    <button class="mbtn sec" onclick="clearAIKey()">Clear Key</button>
-    <div id="aiKeyStatus" style="margin-top:12px;font-size:12px;text-align:center;line-height:1.6"></div>
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--b1);font-size:11px;color:var(--fa);line-height:1.7">
-      No key? Everything still works on a built-in rule-based engine — but real Claude analysis is richer, explains its reasoning, and adapts to live data.
-      <br><br><b style="color:var(--bt)">Hosting this as a public site?</b> Deploy with the included <b>/api/claude</b> proxy and your key lives on the server — visitors never need one, and this box becomes optional. See DEPLOY.md.
-    </div>
-  </div>
-</div>
-
 <!-- REUSABLE "PROOF" WINDOW — chart + reasoning behind any claim -->
 <div class="mo" id="moWhy">
   <div class="modal" style="width:840px">
@@ -2015,13 +1985,10 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
     <button class="snav" data-tab="sessions" onclick="mainTab('sessions',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="lbl">Sessions</span></button>
     <button class="snav" data-tab="backtester" onclick="mainTab('backtester',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M4 14l4-4 3 3 5-6 4 4"/><circle cx="8" cy="10" r="1"/></svg><span class="lbl">Backtester</span><span class="pill">proof</span></button>
     <button class="snav" data-tab="learn" onclick="mainTab('learn',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M7 9.5V15c0 1.1 2.2 2.5 5 2.5s5-1.4 5-2.5V9.5"/><path d="M21 7v6"/></svg><span class="lbl">Learn</span><span class="pill">visual</span></button>
-    <div class="appnav-grp">Assistant</div>
-    <button class="snav" data-tab="ai" onclick="mainTab('ai',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="lbl">AI Chat</span></button>
     <button class="snav" data-tab="feedback" onclick="mainTab('feedback',this)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7 0l-.8.8-.8-.8a5 5 0 1 0-7 7l7.8 7.8 7.8-7.8a5 5 0 0 0 0-7z"/></svg><span class="lbl">Feedback</span></button>
   </div>
   <div class="appnav-foot">
     <div class="appnav-live">Live data</div>
-    <button class="snav" id="aiKeyBtn" onclick="openMo('moAI')"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6z"/></svg><span class="lbl">Connect AI</span></button>
     <button class="snav" onclick="openMo('moAcct')"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6 6 0 0 1 11 0"/></svg><span class="lbl">Account</span></button>
   </div>
 </aside>
@@ -2041,13 +2008,6 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
 
   <!-- MAIN -->
   <div class="main-col">
-
-    <div class="glass" id="aiBanner" style="display:flex;align-items:center;gap:14px;padding:13px 18px;border-radius:14px;margin-bottom:26px">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--act)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"/></svg>
-      <div style="flex:1;font-size:13.5px;color:var(--ink2);line-height:1.5"><b style="color:var(--ink)">Connect Claude AI</b> — unlock live market reads, setup scanning and a personal performance coach. Optional; the platform works without it.</div>
-      <button class="nbtn" onclick="openMo('moAI')" style="flex-shrink:0">Connect</button>
-      <button onclick="document.getElementById('aiBanner').style.display='none'" style="flex-shrink:0;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:15px;padding:4px 6px">✕</button>
-    </div>
 
     <!-- DASHBOARD -->
     <!-- FUTURES TERMINAL — the validated trend-pullback signal, live, on ES -->
@@ -2170,56 +2130,9 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
       <div id="sessionsBody"></div>
     </div>
 
-    <!-- AI CHAT -->
-    <div class="tab-pane" id="tab-ai">
-      <div style="margin-bottom:16px">
-        <div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">AI Trading Assistant</div>
-        <div style="font-size:13px;color:var(--mu)">Ask about RSI, strategies, options, candlestick patterns, position sizing, and more. Works offline on a built-in knowledge base; connect Claude for richer, conversational answers.</div>
-      </div>
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-title">What I can explain — tap a topic</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <span class="chat-sug" onclick="askAI('rsi')">RSI</span>
-          <span class="chat-sug" onclick="askAI('bollinger')">Bollinger Bands</span>
-          <span class="chat-sug" onclick="askAI('moving averages sma')">Moving averages</span>
-          <span class="chat-sug" onclick="askAI('support')">Support &amp; resistance</span>
-          <span class="chat-sug" onclick="askAI('macd')">MACD</span>
-          <span class="chat-sug" onclick="askAI('volume')">Volume</span>
-          <span class="chat-sug" onclick="askAI('short')">Short selling</span>
-          <span class="chat-sug" onclick="askAI('puts')">Puts</span>
-          <span class="chat-sug" onclick="askAI('calls')">Calls</span>
-          <span class="chat-sug" onclick="askAI('delta')">Delta</span>
-          <span class="chat-sug" onclick="askAI('gamma')">Gamma</span>
-          <span class="chat-sug" onclick="askAI('theta')">Theta</span>
-          <span class="chat-sug" onclick="askAI('position sizing')">Position sizing</span>
-          <span class="chat-sug" onclick="askAI('risk reward')">Risk / reward</span>
-          <span class="chat-sug" onclick="askAI('0dte')">0DTE options</span>
-          <span class="chat-sug" onclick="askAI('earnings')">Earnings &amp; IV</span>
-        </div>
-        <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">Tip:</b> the dashboard already turns these concepts into a concrete entry/stop/target for any ticker — use this assistant to understand the <i>why</i> behind a setup.</div>
-      </div>
-      <div class="card" style="padding:0;overflow:hidden">
-        <div class="chat-msgs" id="chatMessages">
-          <div class="bubble b-ai">👋 Hey! I'm your AI trading assistant. Ask me about RSI, Bollinger Bands, short selling, options (puts/calls/spreads), position sizing, candlestick patterns, or any trading concept. What do you want to learn?</div>
-        </div>
-        <div class="chat-sugs">
-          <span class="chat-sug" onclick="askAI(this.textContent)">How do I read RSI?</span>
-          <span class="chat-sug" onclick="askAI(this.textContent)">What is a bear put spread?</span>
-          <span class="chat-sug" onclick="askAI(this.textContent)">How do I size positions?</span>
-          <span class="chat-sug" onclick="askAI(this.textContent)">Explain candlestick patterns</span>
-          <span class="chat-sug" onclick="askAI(this.textContent)">Best 0DTE strategies?</span>
-          <span class="chat-sug" onclick="askAI(this.textContent)">What is theta decay?</span>
-        </div>
-        <div class="chat-inp-row">
-          <textarea class="chat-inp" id="chatInput" rows="1" placeholder="Ask a trading question…"></textarea>
-          <button class="chat-send" onclick="sendChat()">Send</button>
-        </div>
-      </div>
-    </div>
-
     <!-- FEEDBACK -->
     <div class="tab-pane" id="tab-feedback">
-      <div style="margin-bottom:16px"><div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">AI Feedback Loop</div><div style="font-size:13px;color:var(--mu)">Rate signals to continuously improve the AI model's accuracy.</div></div>
+      <div style="margin-bottom:16px"><div style="font-size:24px;font-weight:900;letter-spacing:-.04em;margin-bottom:5px">Feedback Loop</div><div style="font-size:13px;color:var(--mu)">Rate signals to tune the indicator weighting behind the dashboard's calls.</div></div>
       <div class="card">
         <div class="card-title"><span class="pdot"></span>How adaptive learning works</div>
         <div class="analysis-text">Every rating you submit adjusts the indicator weighting behind the scenes. Profitable accurate calls boost RSI and trend weights; confirmed losses reduce them. Over time, the model adapts to what's actually working in current conditions.</div>
@@ -2233,7 +2146,7 @@ nav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;ba
           <div class="metric"><div class="metric-lbl">Losses</div><div class="metric-val r" id="pf-loss">0</div></div>
           <div class="metric"><div class="metric-lbl">Win Rate</div><div class="metric-val a" id="pf-wr">—</div></div>
         </div>
-        <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">How to read this:</b> these count the dashboard signals you've personally rated as wins or losses. Your win rate here trains the <i>indicator weighting</i> shown above — it's separate from the <b>AI Lab</b>, which learns on its own from historical self-tests. Together they tune what the dashboard shows you.</div>
+        <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:12px"><b style="color:var(--ink2)">How to read this:</b> these count the dashboard signals you've personally rated as wins or losses. Your win rate here trains the <i>indicator weighting</i> shown above, which tunes what the dashboard shows you.</div>
       </div>
     </div>
 
@@ -2259,13 +2172,13 @@ const PAY={
   ]
 };
 // Membership tier each app tab needs: 0 = Free · 1 = Plus ($20, whole website) · 2 = Pro ($50, + the app).
-const TAB_TIER={futures:0,learn:0,playbook:0, matrix:1,charts:1,split:1,strength:1,backtester:1,calc:1,sessions:1,ai:1,alerts:1,feedback:1};
+const TAB_TIER={futures:0,learn:0,playbook:0, matrix:1,charts:1,split:1,strength:1,backtester:1,calc:1,sessions:1,alerts:1,feedback:1};
 const TIER_FEATS=[
   ['The live Futures signal, chart &amp; trade plan','Interactive Playbook diagram','Learn academy — visual lessons'],
-  ['Everything in Free','All six futures markets','12-factor edge bias stack + PO3 cycle zones','Backtester · Matrix · Charts · Split View','Relative Strength · Sessions · Risk Calc · alerts · AI'],
+  ['Everything in Free','All six futures markets','12-factor edge bias stack + PO3 cycle zones','Backtester · Matrix · Charts · Split View','Relative Strength · Sessions · Risk Calc · alerts'],
   ['Everything in Plus','STRATA Live — the dedicated live terminal (web)','Live scanner · bar replay · Edge Finder','Saved backtests']
 ];
-const TIER_FEATURE_LABEL={po3:'The PO3 cycle zone',bias:'The edge bias stack',matrix:'The Market Matrix',charts:'Charts',split:'Split View',strength:'Relative Strength',backtester:'The Backtester',calc:'The Risk Calculator',sessions:'The Session Clock',ai:'AI Chat',alerts:'Alerts',app:'The STRATA Live app'};
+const TIER_FEATURE_LABEL={po3:'The PO3 cycle zone',bias:'The edge bias stack',matrix:'The Market Matrix',charts:'Charts',split:'Split View',strength:'Relative Strength',backtester:'The Backtester',calc:'The Risk Calculator',sessions:'The Session Clock',alerts:'Alerts',app:'The STRATA Live app'};
 let _payNeed=1;   // tier the current upsell targets
 window.addEventListener('DOMContentLoaded',()=>{try{updateAcctChip();}catch(e){}});   // payHydrate runs once, at the bottom of this script
 
@@ -2306,8 +2219,17 @@ function mainTab(name,btn){
   if(name!=='sessions')stopSessionClock();
   if(name!=='split')stopSplitTimer();
   if(sb)snavGlideTo(sb);
+  if(pane)staggerCards(pane);
   const pw=document.querySelector('.page-wrap'); if(pw)pw.scrollTop=0;
 }
+// Stagger index for the card-entrance animation: first 4 cards of a pane get
+// --i 0..3 (40ms steps); everything later has no --i and enters immediately.
+function staggerCards(pane){pane.querySelectorAll('.card').forEach((c,i)=>{if(i<4)c.style.setProperty('--i',i);});}
+// Async renderers replace card nodes (skeleton → data), wiping the inline --i,
+// so re-apply it to the active pane whenever its children change. childList-only
+// observation can't loop on the style-attribute writes above.
+new MutationObserver(()=>{const p=document.querySelector('.tab-pane.active');if(p)staggerCards(p);})
+  .observe(document.querySelector('.main-col'),{childList:true,subtree:true});
 
 // ── Premium nav interactions: gliding pill · magnetic hover · cursor glow ──
 function snavGlideTo(el){
@@ -2375,30 +2297,8 @@ function setDTE(btn){
 let weights={rsi:1,trend:1,mom:1,bb:1};
 let feedbackLog=[];
 
-// ── CLAUDE AI INTEGRATION ─────────────────────────────────────────────
+// ── CLAUDE AI INTEGRATION (dormant helpers — the chat UI was removed) ──
 let AI_KEY=null;  // held only in memory for this tab
-async function saveAIKey(test){
-  const v=document.getElementById('aiKeyInput').value.trim();
-  const st=document.getElementById('aiKeyStatus');
-  if(!v){st.innerHTML='<span style="color:var(--rt)">Enter a key first.</span>';return;}
-  if(!v.startsWith('sk-ant-')){st.innerHTML='<span style="color:var(--at)">⚠️ That doesn\'t look like an Anthropic key (should start with sk-ant-). Saving anyway…</span>';}
-  AI_KEY=v;updateAIBadge();
-  if(test){
-    st.innerHTML='<span class="ai-spin"></span> Testing connection…';
-    try{
-      const r=await callClaude('Reply with exactly: OK','ping',16);
-      st.innerHTML='<span style="color:var(--gt)">✓ Connected — Claude is live across the app. Try the ✨ buttons anywhere.</span>';
-    }catch(e){
-      st.innerHTML=`<span style="color:var(--rt)">Key saved, but the test call failed:<br>${e.message}<br><span style="color:var(--mu)">Check the key, your credit balance, and that direct browser access is allowed.</span></span>`;
-    }
-  }else{
-    st.innerHTML='<span style="color:var(--gt)">✓ Saved.</span>';
-  }
-  updateAIStatusBanner();
-}
-function clearAIKey(){AI_KEY=null;document.getElementById('aiKeyInput').value='';document.getElementById('aiKeyStatus').innerHTML='<span style="color:var(--mu)">Key cleared. Using built-in engine.</span>';updateAIBadge();updateAIStatusBanner();}
-function updateAIBadge(){const b=document.getElementById('aiKeyBtn');if(!b)return;const lbl=b.querySelector('.lbl');const on=AI_PROXY_OK||AI_KEY;if(lbl)lbl.textContent=on?'AI connected':'Connect AI';b.classList.toggle('active',!!on);}
-function updateAIStatusBanner(){const ban=document.getElementById('aiBanner');if(ban)ban.style.display=(AI_KEY||AI_PROXY_OK)?'none':'flex';}
 function aiReady(){return AI_PROXY_OK||!!AI_KEY;}
 
 // ── Deployment mode ───────────────────────────────────────────────────
@@ -2413,7 +2313,6 @@ async function probeProxy(){
     // 200 (worked) or 429 (rate-limited but present) both mean the proxy exists
     if(r.ok||r.status===429){AI_PROXY_OK=true;}
   }catch(e){AI_PROXY_OK=false;}
-  updateAIBadge();updateAIStatusBanner();
 }
 
 // Calls Claude — via the server proxy if deployed, else the in-tab key.
@@ -7860,34 +7759,7 @@ function renderTraders(filter){
   container.innerHTML=consensus+(html||`<div style="text-align:center;padding:28px;color:var(--fa);font-size:13px">No calls match this filter in the current feed.</div>`);
 }
 
-// ── AI CHAT ───────────────────────────────────────────────────────────
-const KB={
-  rsi:'RSI (Relative Strength Index) measures momentum on a 0–100 scale. Above 70 = overbought, below 30 = oversold. 50 is neutral. For swing trades: enter longs when RSI crosses above 40 from below; look for shorts when RSI fails at 60. RSI divergence — price makes new high but RSI doesn\'t — is a powerful reversal signal.',
-  bollinger:'Bollinger Bands are volatility channels 2 standard deviations above/below the 20-day SMA. Price at the upper band = extended. Lower band = oversold. %B shows where price is in the range. When bands squeeze tight (low volatility), a big breakout move is coming.',
-  sma:'Moving averages smooth price action. SMA10 > SMA20 > SMA60 = healthy uptrend. SMA20 crossing above SMA60 = golden cross (bullish). Below = death cross. Price reclaiming SMA20 after a pullback is a key long entry signal. The 200-day SMA is the big-picture trend line.',
-  short:'Going short means selling borrowed shares expecting price to fall, then buying back cheaper. Risk is theoretically unlimited if price rises. Always use a hard stop above your entry. Alternatives: buy put options (max loss = premium paid), or a bear put spread.',
-  puts:'Put options give you the right to sell a stock at the strike price. They gain value when the stock falls. Max loss = premium paid (defined risk). For bearish plays: buy ATM puts expiring 3–4 weeks out. A bear put spread reduces cost: buy higher-strike put, sell lower-strike put.',
-  calls:'Call options give you the right to buy stock at the strike price. They gain value when stock rises. Delta tells you how much the call moves per $1 stock move. Deep ITM delta ≈ 1.0. ATM ≈ 0.50. Far OTM ≈ 0.10. 0DTE calls expire same day — extreme risk.',
-  delta:'Delta: how much an option moves per $1 stock move. ATM call ≈ 0.50. Deep ITM ≈ 1.0. Far OTM ≈ 0.10. Delta also approximates the probability the option expires in the money.',
-  theta:'Theta = daily time decay. All options lose value each day, accelerating in the final 30 days before expiry. Selling options collects theta; buying options fights it. 0DTE options have the highest theta decay — they\'re worthless by 4pm.',
-  gamma:'Gamma = rate of change of delta. High gamma ATM options near expiry have rapidly changing delta — small stock moves create large P&L swings. 0DTE gamma is enormous — a 1% stock move can double or zero an ATM option.',
-  position:'Risk only 1–2% of your account per trade. Formula: (Account × 0.01) ÷ (Entry − Stop) = shares. Example: $10K × 1% = $100 risk. Entry $50, Stop $48 = $2 risk/share → 50 shares. Never size up when you\'re losing.',
-  '0dte':'0DTE options expire same day. Maximum theta decay, high gamma. Wait for a clear catalyst (Fed, CPI, earnings). Enter 30–45 min after open. Target 50–100% gain. Exit by 2pm EST. Never hold into close unless in significant profit.',
-  support:'Support = price where buying stops a decline. Resistance = where selling stops a rally. The more times a level is tested, the stronger it is. When price breaks resistance, it becomes support (polarity flip). Key S/R: prior highs/lows, round numbers, moving averages.',
-  macd:'MACD = Fast EMA (12) minus Slow EMA (26). Signal line = 9-day EMA of MACD. Histogram = MACD minus Signal. MACD crossing above Signal = bullish. Below = bearish. Zero-line crossovers are strong signals. Best in trending, not choppy markets.',
-  volume:'Volume confirms price. Rising price + rising volume = strong move. Rising price + falling volume = weak move, may reverse. Volume dry-up at resistance before a breakout = spring setup. Always compare to 20-day average volume.',
-  earnings:'IV crush: implied volatility spikes before earnings then collapses after. Buying options into earnings is expensive — you pay for the volatility. Selling straddles profits from the crush. If you buy, use spreads to reduce premium risk.',
-  risk:'R/R (Risk/Reward) = potential gain ÷ potential loss. Minimum 1:1.5 R/R. At 50% win rate with 1:2 R/R, you\'re profitable long-term. Many pros win only 40% of trades but profit because wins are 3× their losses.',
-};
-function aiResp(q){
-  const ql=q.toLowerCase();
-  for(const[k,v]of Object.entries(KB)){if(ql.includes(k.split(' ')[0])||ql.includes(k))return`**${k.charAt(0).toUpperCase()+k.slice(1)}**\n\n${v}\n\n*Ask a follow-up or try another topic.*`;}
-  if(ql.includes('bull')||ql.includes('long')||ql.includes('buy'))return`For a bullish setup: RSI above 50 and rising, price above SMA20, SMA20 above SMA60, and a pullback to support as entry. Stop below the swing low. Target the next resistance.\n\n*The dashboard generates entry/stop/TP automatically when conditions align.*`;
-  if(ql.includes('bear')||ql.includes('short')||ql.includes('sell'))return`For a bearish/short setup: RSI below 50 and falling, price below SMA20, SMA20 below SMA60. Short on bounces to SMA20 or buy put options. Cover at the next support below. Stop above breakdown level.\n\n*The dashboard shows GO SHORT with a red banner when multiple bearish signals align.*`;
-  if(ql.includes('strategy')||ql.includes('how to trade'))return`**Top strategies by timeframe:**\n\n**0DTE**: Scalp momentum breaks on catalysts. Very tight stops.\n\n**1W Swing**: Enter pullbacks to key MAs in trending stocks. Hold 2–5 days.\n\n**1M Position**: Trend follow with RSI + SMA alignment. Use DTE selector in dashboard.\n\n**6M–1Y**: Fundamentals + valuation + technical entry. Ignore noise.`;
-  if(ql.includes('stop')||ql.includes('loss'))return`Stop loss rules:\n\n• **Set before entering** — never move against you\n• **Placement**: below swing low (longs) or above swing high (shorts)\n• **Size**: 3–8% for swings, tighter for scalps\n• **Hard orders only** — mental stops don't count\n\nThe stop IS the trade. If you can't accept the stop, don't take the trade.`;
-  return`I can explain: ${Object.keys(KB).join(', ')}.\n\nTry: "How do I trade a bearish setup?" or "Explain theta decay" or "What is position sizing?"`;
-}
+// ── AI RESPONSE FORMATTING (markdown-lite → HTML for the Claude helpers) ──
 function fmtAI(t){
   if(!t)return '';
   let s=t.trim();
@@ -7908,28 +7780,6 @@ function fmtAI(t){
   s=s.replace(/\n\n+/g,'<br><br>').replace(/\n/g,'<br>');
   return s;
 }
-function askAI(q){document.getElementById('chatInput').value=q;sendChat();}
-async function sendChat(){
-  const inp=document.getElementById('chatInput');const q=inp.value.trim();if(!q)return;
-  const m=document.getElementById('chatMessages');
-  m.innerHTML+=`<div class="bubble b-user">${q}</div>`;inp.value='';
-  m.innerHTML+=`<div class="bubble b-typing" id="typing">${aiReady()?'Claude is thinking…':'Thinking…'}</div>`;m.scrollTop=m.scrollHeight;
-  let answer;
-  if(aiReady()){
-    try{
-      const ctx=lastData?('\n\nCurrent dashboard context:\n'+marketSnapshot(lastData.ticker,lastData.q,lastData.a)):'';
-      answer=await callClaude(
-        'You are an expert trading mentor inside a stock-analysis app. Teach clearly and concisely. Use plain language, short paragraphs, and concrete examples. Write conversationally — avoid headers and heavy markdown formatting; a stray bold for emphasis is fine but do not use # symbols or bullet-heavy structure unless the user asks for a list. You explain concepts and strategies; you never give personalized financial advice or guarantees, and you remind users to manage risk when relevant. Keep answers focused and practical.',
-        q+ctx, 900);
-    }catch(e){answer='⚠️ Claude call failed ('+e.message+'). Falling back to the built-in engine:\n\n'+aiResp(q);}
-  }else{
-    await new Promise(r=>setTimeout(r,400+Math.random()*300));
-    answer=aiResp(q);
-  }
-  const t=document.getElementById('typing');if(t)t.remove();
-  m.innerHTML+=`<div class="bubble b-ai">${fmtAI(answer)}</div>`;m.scrollTop=m.scrollHeight;
-}
-document.addEventListener('DOMContentLoaded',()=>{const ci=document.getElementById('chatInput');if(ci)ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});});
 
 // ── NEWS ──────────────────────────────────────────────────────────────
 const NEWS=[
@@ -8043,9 +7893,8 @@ function renderMoWl(){const el=document.getElementById('moWl');if(!el)return;el.
 window.addEventListener('resize',()=>{if(lastCanvasData){const{q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral}=lastCanvasData;setTimeout(()=>drawCanvasChart(q,entry,sl,tp1,tp2,sentiment,isShort,isNeutral),80);}if(btState&&document.getElementById('btCanvas')){setTimeout(()=>drawBacktestChart(btState.done,btState._overlay),80);}});
 
 // ── INIT ──────────────────────────────────────────────────────────────
-updateAIBadge();
-probeProxy();
 renderFutures();     // Futures is the default tab now
+{const p0=document.querySelector('.tab-pane.active');if(p0)staggerCards(p0);}   // stagger the first paint too
 initPremiumNav();    // gliding active pill, magnetic hover, cursor glow
 // Background data pollers share the same flaky CORS proxies as your live lookups,
 // so they STAND DOWN while you're analyzing a ticker (or on the landing / tab hidden),
